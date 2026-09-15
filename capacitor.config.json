@@ -1,0 +1,14 @@
+{
+  "appId": "com.routineplanner.app",
+  "appName": "روتین پلنر",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_notify",
+      "iconColor": "#146B69"
+    }
+  }
+}
