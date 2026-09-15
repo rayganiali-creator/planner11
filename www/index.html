@@ -6096,8 +6096,13 @@
                 try {
                     const id = rpNumericId(idStr);
                     await plugin.cancel({ notifications: [{ id }] });
+                    // الگوی «on: {hour,minute}, repeats:true» روی بعضی نسخه‌های اندروید قابل‌اعتماد نیست؛
+                    // به‌جاش اولین زمانِ آینده رو دقیق محاسبه می‌کنیم و با every:'day' هر روز تکرارش می‌کنیم.
+                    const now = new Date();
+                    let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+                    if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
                     await plugin.schedule({ notifications: [{ id: id, title: title, body: body,
-                        schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } }] });
+                        schedule: { at: next, allowWhileIdle: true, repeats: true, every: 'day' } }] });
                 } catch (e) {}
             }
             async function nativeCancel(idStr) {
