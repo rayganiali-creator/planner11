@@ -1375,7 +1375,7 @@
             line-height: 1.75;
             outline: none;
             resize: vertical;
-            min-height: 110px;
+            min-height: 220px;
             box-sizing: border-box;
             transition: border-color .2s, box-shadow .2s;
         }
@@ -1395,7 +1395,141 @@
         .habit-note-box .note-saved-hint.show {
             opacity: 1;
         }
-        /* --------- گالری عکس عادت --------- */
+        /* --------- آموزش اولیه (Onboarding) --------- */
+        .onboarding-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+        .onboarding-overlay.open {
+            display: flex;
+        }
+        .onboarding-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 26px 22px;
+            width: 100%;
+            max-width: 440px;
+            max-height: 88vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .onboarding-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+        .onboarding-dots span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: background .2s, transform .2s;
+        }
+        .onboarding-dots span.active {
+            background: var(--primary);
+            transform: scale(1.3);
+        }
+        .onboarding-body {
+            text-align: center;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .onboarding-body .ob-icon {
+            font-size: 46px;
+            line-height: 1;
+        }
+        .onboarding-body .ob-title {
+            font-size: calc(18px * var(--font-scale));
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .onboarding-body .ob-text {
+            font-size: calc(14.5px * var(--font-scale));
+            line-height: 1.9;
+            color: var(--text);
+        }
+        .onboarding-lang-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .onboarding-lang-btns button {
+            padding: 14px;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: calc(15px * var(--font-scale));
+            font-weight: 700;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+        }
+        .onboarding-lang-btns button:hover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+        .onboarding-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .onboarding-skip {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: calc(13px * var(--font-scale));
+            cursor: pointer;
+            padding: 8px;
+        }
+        .onboarding-back {
+            background: var(--surface-2);
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: calc(13.5px * var(--font-scale));
+            cursor: pointer;
+        }
+        .onboarding-back:disabled {
+            opacity: .35;
+            cursor: default;
+        }
+        .onboarding-next {
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: calc(13.5px * var(--font-scale));
+        }
+
+        .habit-details-toggle {
+            transition: transform .2s;
+        }
+        .habit-details-toggle.open {
+            transform: rotate(180deg);
+        }
+        .habit-details-wrap {
+            display: none;
+        }
+        .habit-details-wrap.open {
+            display: block;
+        }
         .habit-photo-box {
             width: 100%;
             margin-top: 8px;
@@ -4131,8 +4265,8 @@
                 <h3 style="text-align:center;margin-bottom:16px;font-size:calc(18px * var(--font-scale));color:var(--primary)" data-fa="🧭 انتخاب صفحه" data-en="🧭 Choose a Tab">🧭 انتخاب صفحه</h3>
                 <nav class="tabs tabs-picker-nav" id="tabsPickerNav">
                     <button data-view="habits" class="active view-tab-btn" data-fa="عادت‌ها" data-en="Habits">عادت‌ها</button>
-                    <button data-view="month" class="view-tab-btn" data-fa="ماه" data-en="Month">ماه</button>
-                    <button data-view="year" class="view-tab-btn" data-fa="سال" data-en="Year">سال</button>
+                    <button data-view="month" class="view-tab-btn" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</button>
+                    <button data-view="year" class="view-tab-btn" data-fa="ثبت سالانه" data-en="Yearly Record">ثبت سالانه</button>
                     <button data-view="library" class="view-tab-btn" data-fa="📚 کتابخونه" data-en="📚 Library">📚 کتابخونه</button>
                     <button data-view="vows" class="view-tab-btn" data-fa="عهدنامه" data-en="Vows">عهدنامه</button>
                     <button data-view="journal" class="view-tab-btn" data-fa="📓 یادداشت" data-en="📓 Journal">📓 یادداشت</button>
@@ -4150,7 +4284,7 @@
             </button>
             <button class="bottom-nav-plus" id="bottomNavPlusBtn" aria-label="انتخاب صفحه" title="انتخاب صفحه">+</button>
             <button class="bottom-nav-btn view-tab-btn" data-view="month" id="bottomNavMonthBtn">
-                <span class="bn-icon">📅</span><span class="bn-label" data-fa="ماه" data-en="Month">ماه</span>
+                <span class="bn-icon">📅</span><span class="bn-label" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</span>
             </button>
         </div>
 
@@ -4206,7 +4340,7 @@
                 <div class="period-label" style="margin-bottom:12px" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</div>
                 <div class="habit-add">
                     <input type="text" id="newHabitInput" placeholder="مطالعه، ورزش، مدیتیشن..." maxlength="40">
-                    <button class="glass-btn primary" id="addHabitBtn" data-fa="افزودن" data-en="Add">افزودن</button>
+                    <button class="glass-btn primary" id="addHabitBtn" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</button>
                 </div>
                 <div class="habit-list" id="habitList"></div>
             </div>
@@ -4649,6 +4783,11 @@
                 </div>
 
                 <div class="settings-section">
+                    <h3 data-fa="راهنمای استفاده" data-en="How to use">راهنمای استفاده</h3>
+                    <button class="glass-btn" id="replayTutorialBtn" style="width:100%" data-fa="🎓 نمایش دوباره‌ی آموزش اولیه" data-en="🎓 Show onboarding tutorial again">🎓 نمایش دوباره‌ی آموزش اولیه</button>
+                </div>
+
+                <div class="settings-section">
                     <h3 data-fa="تقویم" data-en="Calendar">تقویم</h3>
                     <div class="week-start-toggle">
                         <button data-start="0" class="active">شنبه</button>
@@ -5048,6 +5187,20 @@
         <img id="habitPhotoLightboxImg" src="" alt="">
     </div>
 
+    <div class="onboarding-overlay" id="onboardingOverlay">
+        <div class="onboarding-card">
+            <div class="onboarding-dots" id="onboardingDots"></div>
+            <div class="onboarding-body" id="onboardingBody"></div>
+            <div class="onboarding-nav">
+                <button class="onboarding-skip" id="onboardingSkipBtn" data-fa="رد شدن" data-en="Skip">رد شدن</button>
+                <div style="display:flex;gap:8px">
+                    <button class="onboarding-back" id="onboardingBackBtn" data-fa="قبلی" data-en="Back">قبلی</button>
+                    <button class="onboarding-next glass-btn primary" id="onboardingNextBtn" data-fa="بعدی" data-en="Next">بعدی</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
             "use strict";
@@ -5320,6 +5473,7 @@
                 customUrgeSuggestions: [],
                 urgeHiddenIds: [],
                 habitNotes: {},
+                onboardingDone: false,
                 calorie: { profile: null, logs: {}, burns: {}, customFoods: [], customActivities: [] },
                 challenges: []
             };
@@ -5371,6 +5525,8 @@
                     if (state.scores.coins === undefined) state.scores.coins = 0;
                     if (state.scores.lastPoints === undefined) state.scores.lastPoints = state.scores.points || 0;
                     if (!Array.isArray(state.challenges)) state.challenges = [];
+                    // کاربرهای قدیمی که از قبل نصب داشتن، نباید آموزش اولیه رو دوباره ببینن
+                    if (state.onboardingDone === undefined) state.onboardingDone = true;
 
                     // مهاجرت: رکوردهای قدیمی که هنوز هدفِ زمانِ ثبت (targetAtTime) ندارند
                     // را با هدف فعلیِ عادت «قفل» می‌کنیم تا از این به بعد با تغییر هدف عادت،
@@ -6089,16 +6245,23 @@
                     }
                 } catch (e) {}
             }
-            // یادآوری روزانه‌ی عادت، هر روز سرِ همان ساعت تکرار می‌شود (تا وقتی خودت خاموشش کنی)
-            async function nativeScheduleDaily(idStr, title, body, hh, mm) {
-                const plugin = rpLocalNotifPlugin();
-                if (!plugin) return;
-                try {
-                    const id = rpNumericId(idStr);
-                    await plugin.cancel({ notifications: [{ id }] });
-                    await plugin.schedule({ notifications: [{ id: id, title: title, body: body,
-                        schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } }] });
-                } catch (e) {}
+            // یادآوری روزانه‌ی عادت: بعد از این‌که راه‌حل‌های قبلی (تکرارشونده، دسته‌ای، ۴۵روزه)
+            // جواب ندادن، الان این تابع دقیقاً و عیناً همون تابعِ nativeScheduleOnce که برای
+            // یادآوری کارها کار می‌کنه رو صدا می‌زنه — بدون هیچ کد یا مسیر جداگانه‌ای. فقط
+            // «زمانِ بعدیِ» ریمایندر رو حساب می‌کنیم (امروز اگه نگذشته، وگرنه فردا) و می‌سپاریمش
+            // به همون تابعی که خودت تأیید کردی درست کار می‌کنه. هر بار برنامه باز بشه
+            // (nativeResyncAllReminders) دوباره «زمان بعدی» رو تازه محاسبه و دوباره ثبت می‌کنه.
+            function rpNextHabitOccurrence(hh, mm) {
+                const now = new Date();
+                let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+                if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
+                return next.getTime();
+            }
+            async function nativeScheduleDailyHabit(habitId, title, body, hh, mm) {
+                await nativeScheduleOnce('habit-' + habitId, title, body, rpNextHabitOccurrence(hh, mm));
+            }
+            async function nativeCancelDailyHabit(habitId) {
+                await nativeCancel('habit-' + habitId);
             }
             async function nativeCancel(idStr) {
                 const plugin = rpLocalNotifPlugin();
@@ -7326,6 +7489,8 @@
             // ============================================================
             // RENDER HABITS with LEVELS
             // ============================================================
+            // یادداشت و عکسِ هر عادت پیش‌فرض بسته‌ست؛ با کلیک روی فلش باز/بسته می‌شه (فقط برای همین جلسه، دخیره نمی‌شه)
+            const habitDetailsOpenSet = new Set();
             function renderHabits() {
                 const list = document.getElementById('habitList');
                 const searchTerm = document.getElementById('habitSearchInput').value.trim().toLowerCase();
@@ -7420,8 +7585,11 @@
                         '">⚡</button><button class="habit-mini-chart-btn" data-habit-charts="' + h.id +
                         '" title="' + (state.lang === 'fa' ? 'نمودار محرک، مشوق و علت موفقیت/شکست این عادت' : "This habit's trigger/incentive/success/fail charts") +
                         '"><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--primary)" stroke-width="3" opacity="0.25"/><path d="M16 2 A14 14 0 0 1 29.6 19.5 L16 16 Z" fill="var(--primary)"/><path d="M29.6 19.5 A14 14 0 0 1 9 29 L16 16 Z" fill="var(--accent)"/><path d="M9 29 A14 14 0 0 1 2.4 12.5 L16 16 Z" fill="var(--success)"/></svg></button><button class="icon-btn" data-edit="' + h.id +
-                        '">✎</button><button class="icon-btn danger" data-del="' + h.id + '">✕</button></div></div>' +
+                        '">✎</button><button class="icon-btn danger" data-del="' + h.id + '">✕</button><button class="icon-btn habit-details-toggle' +
+                        (habitDetailsOpenSet.has(h.id) ? ' open' : '') + '" data-details-toggle="' + h.id + '" title="' +
+                        (state.lang === 'fa' ? 'یادداشت و عکس این عادت' : "This habit's note and photos") + '">▾</button></div></div>' +
                         levelsHtml +
+                        '<div class="habit-details-wrap' + (habitDetailsOpenSet.has(h.id) ? ' open' : '') + '" data-details-wrap="' + h.id + '">' +
                         '<div class="habit-note-box"><textarea data-note="' + h.id + '" maxlength="1000" placeholder="' +
                         (state.lang === 'fa' ? 'یادداشت برای این عادت...' : 'Note for this habit...') + '">' +
                         ((state.habitNotes && state.habitNotes[h.id]) ? state.habitNotes[h.id].replace(/</g, '&lt;').replace(/>/g, '&gt;') : '') +
@@ -7429,9 +7597,16 @@
                         (state.lang === 'fa' ? 'ذخیره شد ✓' : 'Saved ✓') + '</div></div>' +
                         '<div class="habit-photo-box"><button type="button" class="habit-photo-addbtn" data-photo-add="' + h.id + '">📷 ' +
                         (state.lang === 'fa' ? 'افزودن عکس' : 'Add photo') + '</button>' +
-                        '<div class="habit-photo-strip" data-photo-strip="' + h.id + '"></div></div>';
+                        '<div class="habit-photo-strip" data-photo-strip="' + h.id + '"></div></div></div>';
                     list.appendChild(item);
                 });
+                list.querySelectorAll('[data-details-toggle]').forEach(b => b.addEventListener('click', function() {
+                    const hid = this.dataset.detailsToggle;
+                    const wrap = list.querySelector('[data-details-wrap="' + hid + '"]');
+                    if (habitDetailsOpenSet.has(hid)) { habitDetailsOpenSet.delete(hid); } else { habitDetailsOpenSet.add(hid); }
+                    this.classList.toggle('open');
+                    if (wrap) wrap.classList.toggle('open');
+                }));
                 list.querySelectorAll('[data-up]').forEach(b => b.addEventListener('click', () => { const idx =
                         parseInt(b.dataset.up); if (idx > 0) { [state.habits[idx - 1], state.habits[
                             idx]] = [state.habits[idx], state.habits[idx - 1]];
@@ -7453,7 +7628,7 @@
                         renderHabits() } }));
                 list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { if (confirm(
                             state.lang === 'fa' ? 'حذف؟' : 'Delete?')) { const id = b.dataset.del;
-                        nativeCancel('habit-' + id);
+                        nativeCancelDailyHabit(id);
                         state.habits = state.habits.filter(h => h.id !== id);
                         Object.keys(state.records).forEach(iso => { if (state.records[iso]) { delete state
                                     .records[iso][id]; if (!Object.keys(state.records[iso])
@@ -8479,12 +8654,12 @@
                 if (savedHabitId) {
                     if (d.reminderEnabled) {
                         const parts = (d.reminderTime || '08:00').split(':');
-                        nativeScheduleDaily('habit-' + savedHabitId,
+                        nativeScheduleDailyHabit(savedHabitId,
                             state.lang === 'fa' ? '⏰ یادآوری عادت' : '⏰ Habit Reminder',
                             (state.lang === 'fa' ? 'وقتشه: ' : 'Time for: ') + d.name,
                             parseInt(parts[0], 10) || 8, parseInt(parts[1], 10) || 0);
                     } else {
-                        nativeCancel('habit-' + savedHabitId);
+                        nativeCancelDailyHabit(savedHabitId);
                     }
                 }
                 saveState();
@@ -9570,21 +9745,55 @@
                 if (e.target === this) this.classList.remove('open');
             });
 
+            // روی اپ نیتیو (Capacitor)، دانلود مستقیم فایل (<a download>) و Web Share API کار
+            // نمی‌کنن چون WebView خام مدیریت دانلود ندارد. به‌جاش فایل رو با پلاگین Filesystem
+            // می‌نویسیم و با پلاگین Share (شیت اشتراک‌گذاری واقعی اندروید) تحویل کاربر می‌دیم
+            // تا خودش انتخاب کنه کجا ذخیره‌ش کنه (Drive، Files، ایمیل و ...).
+            async function nativeSaveBackup(jsonStr, fileName) {
+                const Filesystem = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
+                const Share = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+                if (!Filesystem) return false;
+                try {
+                    const result = await Filesystem.writeFile({
+                        path: fileName, data: jsonStr, directory: 'CACHE', encoding: 'utf8'
+                    });
+                    if (Share) {
+                        await Share.share({
+                            title: fileName,
+                            dialogTitle: state.lang === 'fa' ? 'ذخیره یا اشتراک‌گذاری فایل پشتیبان' : 'Save or share backup file',
+                            files: [result.uri]
+                        });
+                    }
+                    return true;
+                } catch (e) { return false; }
+            }
+
             document.getElementById('exportDataBtn').addEventListener('click', () => {
-                const jsonStr = createBackupJSON(),
-                    blob = new Blob([jsonStr], { type: 'application/json' }),
-                    url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
+                const jsonStr = createBackupJSON();
                 const now = new Date(),
                     dStr = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() +
                     '-' + now.getHours() + '-' + now.getMinutes();
-                a.download = 'RoutinePlanner-Backup-' + dStr + '.json';
+                const fileName = 'RoutinePlanner-Backup-' + dStr + '.json';
+                const preview = document.getElementById('jsonPreview');
+                if (isNativeApp()) {
+                    nativeSaveBackup(jsonStr, fileName).then(ok => {
+                        preview.textContent = ok ?
+                            (state.lang === 'fa' ? '✅ فایل پشتیبان آماده شد — محل ذخیره رو انتخاب کن' : '✅ Backup file ready — choose where to save it') :
+                            (state.lang === 'fa' ? '⚠️ ذخیره‌سازی ناموفق بود' : '⚠️ Saving failed');
+                        preview.classList.add('show');
+                        setTimeout(() => preview.classList.remove('show'), 3000);
+                    });
+                    return;
+                }
+                const blob = new Blob([jsonStr], { type: 'application/json' }),
+                    url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                const preview = document.getElementById('jsonPreview');
                 preview.textContent = state.lang === 'fa' ? '✅ فایل در Downloads ذخیره شد!' :
                     '✅ Saved to Downloads!';
                 preview.classList.add('show');
@@ -9592,8 +9801,12 @@
             });
 
             document.getElementById('shareDataBtn').addEventListener('click', () => {
-                const jsonStr = createBackupJSON(),
-                    blob = new Blob([jsonStr], { type: 'application/json' }),
+                const jsonStr = createBackupJSON();
+                if (isNativeApp()) {
+                    nativeSaveBackup(jsonStr, 'RoutinePlanner-Backup.json');
+                    return;
+                }
+                const blob = new Blob([jsonStr], { type: 'application/json' }),
                     file = new File([blob], 'RoutinePlanner-Backup.json', { type: 'application/json' });
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                     navigator.share({ title: 'Routine Planner Backup', text: 'Backup data', files: [file] })
@@ -11544,7 +11757,7 @@
                 (state.habits || []).forEach(h => {
                     if (h.reminderEnabled && h.reminderTime) {
                         const parts = h.reminderTime.split(':');
-                        nativeScheduleDaily('habit-' + h.id,
+                        nativeScheduleDailyHabit(h.id,
                             state.lang === 'fa' ? '⏰ یادآوری عادت' : '⏰ Habit Reminder',
                             (state.lang === 'fa' ? 'وقتشه: ' : 'Time for: ') + h.name,
                             parseInt(parts[0], 10) || 8, parseInt(parts[1], 10) || 0);
@@ -11558,6 +11771,109 @@
             updateProfileUI();
             bindCalorieEvents();
             renderCalorie();
+
+            // ============================================================
+            // آموزش اولیه (Onboarding): برای کاربری که تازه نصب کرده، اول زبان رو می‌پرسیم،
+            // بعد یه دور سریع همه‌ی بخش‌های برنامه رو نشونش می‌دیم. از تنظیمات هم قابل تکرار است.
+            // ============================================================
+            const ONBOARDING_SLIDES = [
+                { icon: '👋', titleFa: 'خوش اومدی!', titleEn: 'Welcome!',
+                    textFa: 'بیا با هم یه دور سریع همه‌ی بخش‌های برنامه رو ببینیم تا گیج نشی.',
+                    textEn: "Let's take a quick tour of the app so you don't get lost." },
+                { icon: '🎯', titleFa: 'تب عادت‌ها', titleEn: 'Habits tab',
+                    textFa: 'اینجا عادت‌های روزانه‌ات رو اضافه می‌کنی و هر روز باهاشون تیک می‌زنی. با فلش کوچیک کنار هر عادت می‌تونی یادداشت و عکس براش ثبت کنی.',
+                    textEn: 'Add your daily habits here and check them off each day. Tap the small arrow next to a habit to add notes and photos for it.' },
+                { icon: '📅', titleFa: 'ثبت ماهانه و سالانه', titleEn: 'Monthly & yearly record',
+                    textFa: 'توی این تب‌ها یه تقویم کامل از وضعیت موفق/ناموفق هر عادت رو می‌بینی.',
+                    textEn: 'These tabs show a full calendar of your success/fail record for each habit.' },
+                { icon: '✅', titleFa: 'لیست کارها', titleEn: 'To-Do list',
+                    textFa: 'اینجا می‌تونی برای کارهات زمان دقیق تعیین کنی و سرِ همون لحظه نوتیفیکیشن واقعی بگیری.',
+                    textEn: 'Set an exact time for your tasks here and get a real notification exactly then.' },
+                { icon: '📊', titleFa: 'محرک‌ها و علت‌ها', titleEn: 'Triggers & reasons',
+                    textFa: 'کنار هر عادت، آیکون نمودار محرک، مشوق و علت موفقیت/شکست رو نشون می‌ده تا بفهمی چی باعث موفقیت یا شکستت می‌شه.',
+                    textEn: "The chart icon next to each habit shows your triggers, incentives, and success/fail reasons — to help you see what's driving you." },
+                { icon: '⚙️', titleFa: 'تنظیمات', titleEn: 'Settings',
+                    textFa: 'از تنظیمات می‌تونی رنگ، تم تاریک/روشن، زبان، ریمایندرها و خیلی چیزای دیگه رو شخصی‌سازی کنی.',
+                    textEn: 'From Settings you can customize colors, light/dark theme, language, reminders, and much more.' },
+                { icon: '🎉', titleFa: 'همینه!', titleEn: "That's it!",
+                    textFa: 'هر وقت خواستی دوباره این آموزش رو ببینی، از تنظیمات دکمه‌ی «نمایش دوباره‌ی آموزش اولیه» رو بزن.',
+                    textEn: 'Whenever you want to see this tutorial again, tap "Show onboarding tutorial again" in Settings.' }
+            ];
+            let obStep = 0;
+            let obSkipLangStep = false;
+            function obTotalSteps() { return obSkipLangStep ? ONBOARDING_SLIDES.length : ONBOARDING_SLIDES.length + 1; }
+            function obLangStepIndex() { return 0; } // فقط وقتی obSkipLangStep=false معتبره
+            function renderOnboardingStep() {
+                const body = document.getElementById('onboardingBody');
+                const dots = document.getElementById('onboardingDots');
+                const backBtn = document.getElementById('onboardingBackBtn');
+                const nextBtn = document.getElementById('onboardingNextBtn');
+                const total = obTotalSteps();
+
+                dots.innerHTML = '';
+                for (let i = 0; i < total; i++) {
+                    const d = document.createElement('span');
+                    if (i === obStep) d.classList.add('active');
+                    dots.appendChild(d);
+                }
+
+                const isLangStep = !obSkipLangStep && obStep === 0;
+                if (isLangStep) {
+                    body.innerHTML =
+                        '<div class="ob-icon">🌐</div>' +
+                        '<div class="ob-title">فارسی یا English؟</div>' +
+                        '<div class="ob-text">زبان مورد نظرت رو انتخاب کن</div>' +
+                        '<div class="onboarding-lang-btns">' +
+                        '<button id="obLangFa">🇮🇷 فارسی</button>' +
+                        '<button id="obLangEn">🇬🇧 English</button>' +
+                        '</div>';
+                    document.getElementById('obLangFa').addEventListener('click', () => {
+                        state.lang = 'fa'; saveState(); applyLang(); renderAll(); obStep++; renderOnboardingStep();
+                    });
+                    document.getElementById('obLangEn').addEventListener('click', () => {
+                        state.lang = 'en'; saveState(); applyLang(); renderAll(); obStep++; renderOnboardingStep();
+                    });
+                } else {
+                    const slideIdx = obSkipLangStep ? obStep : obStep - 1;
+                    const s = ONBOARDING_SLIDES[slideIdx];
+                    body.innerHTML =
+                        '<div class="ob-icon">' + s.icon + '</div>' +
+                        '<div class="ob-title">' + (state.lang === 'fa' ? s.titleFa : s.titleEn) + '</div>' +
+                        '<div class="ob-text">' + (state.lang === 'fa' ? s.textFa : s.textEn) + '</div>';
+                }
+
+                backBtn.disabled = (obStep === 0);
+                nextBtn.textContent = (obStep === total - 1) ?
+                    (state.lang === 'fa' ? 'شروع کن' : 'Get started') :
+                    (state.lang === 'fa' ? 'بعدی' : 'Next');
+                document.getElementById('onboardingSkipBtn').textContent = state.lang === 'fa' ? 'رد شدن' : 'Skip';
+                // روی مرحله‌ی انتخاب زبان، دکمه‌ی بعدی رو مخفی کن چون خودِ دکمه‌های زبان می‌رن مرحله‌ی بعد
+                nextBtn.style.visibility = isLangStep ? 'hidden' : 'visible';
+            }
+            function closeOnboarding() {
+                document.getElementById('onboardingOverlay').classList.remove('open');
+                state.onboardingDone = true;
+                saveState();
+            }
+            function openOnboarding(skipLangStep) {
+                obSkipLangStep = !!skipLangStep;
+                obStep = 0;
+                renderOnboardingStep();
+                document.getElementById('onboardingOverlay').classList.add('open');
+            }
+            document.getElementById('onboardingNextBtn').addEventListener('click', () => {
+                if (obStep >= obTotalSteps() - 1) { closeOnboarding(); return; }
+                obStep++;
+                renderOnboardingStep();
+            });
+            document.getElementById('onboardingBackBtn').addEventListener('click', () => {
+                if (obStep === 0) return;
+                obStep--;
+                renderOnboardingStep();
+            });
+            document.getElementById('onboardingSkipBtn').addEventListener('click', closeOnboarding);
+            document.getElementById('replayTutorialBtn').addEventListener('click', () => openOnboarding(true));
+            if (!state.onboardingDone) openOnboarding(false);
             renderAll();
 
             let resizeTimer;
