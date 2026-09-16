@@ -886,7 +886,9 @@
         .profile-dropdown {
             position: absolute;
             top: calc(100% + 10px);
-            right: 0;
+            left: 0;
+            right: auto;
+            max-width: calc(100vw - 32px);
             background: var(--surface);
             border: 1px solid var(--glass-border);
             border-radius: 18px;
@@ -1046,8 +1048,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 18px;
-            padding: 8px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+            gap: 10px;
+            padding: 8px 14px calc(10px + env(safe-area-inset-bottom, 0px));
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -1055,7 +1057,7 @@
             box-shadow: 0 -6px 24px rgba(43, 33, 24, .09);
         }
         .bottom-nav-btn {
-            flex: 0 1 110px;
+            flex: 0 1 90px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -1064,7 +1066,7 @@
             background: transparent;
             color: var(--text-muted);
             font-family: inherit;
-            padding: 6px 10px;
+            padding: 6px 6px;
             border-radius: 14px;
             cursor: pointer;
             transition: background .2s var(--ease), color .2s var(--ease);
@@ -1395,6 +1397,60 @@
         .habit-note-box .note-saved-hint.show {
             opacity: 1;
         }
+        /* --------- کارت‌های خلاصه‌ی داشبورد --------- */
+        .dash-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .dash-progress-row:last-child {
+            border-bottom: none;
+        }
+        .dash-progress-name {
+            flex: 0 0 auto;
+            max-width: 38%;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dash-progress-bar {
+            flex: 1 1 auto;
+            height: 8px;
+            border-radius: 6px;
+            background: var(--border);
+            overflow: hidden;
+        }
+        .dash-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 6px;
+            transition: width .3s;
+        }
+        .dash-progress-pct {
+            flex: 0 0 auto;
+            min-width: 38px;
+            text-align: left;
+            font-size: calc(12px * var(--font-scale));
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+        .dash-activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .dash-activity-item {
+            font-size: calc(13px * var(--font-scale));
+            color: var(--text);
+            background: var(--glass-bg);
+            border-radius: 10px;
+            padding: 8px 12px;
+        }
         /* --------- آموزش اولیه (Onboarding) --------- */
         .onboarding-overlay {
             position: fixed;
@@ -1705,8 +1761,13 @@
             cursor: pointer;
             color: var(--text-muted);
             font-size: calc(16px * var(--font-scale));
-            padding: 6px 8px;
-            border-radius: 8px;
+            padding: 8px;
+            min-width: 40px;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
             transition: all .15s
         }
         .icon-btn:hover {
@@ -4144,8 +4205,8 @@
            HABIT MINI CHARTS ICON + POPUP
         ============================================================ */
         .habit-mini-chart-btn {
-            width: 28px;
-            height: 28px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: none;
             background: var(--primary-soft);
@@ -4153,7 +4214,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            padding: 4px;
+            padding: 8px;
             flex-shrink: 0;
         }
         .habit-mini-chart-btn svg { width: 100%; height: 100%; display: block; }
@@ -4264,6 +4325,7 @@
             <div class="modal tabs-picker-modal">
                 <h3 style="text-align:center;margin-bottom:16px;font-size:calc(18px * var(--font-scale));color:var(--primary)" data-fa="🧭 انتخاب صفحه" data-en="🧭 Choose a Tab">🧭 انتخاب صفحه</h3>
                 <nav class="tabs tabs-picker-nav" id="tabsPickerNav">
+                    <button data-view="dashboard" class="view-tab-btn" data-fa="🏠 خانه" data-en="🏠 Home">🏠 خانه</button>
                     <button data-view="habits" class="active view-tab-btn" data-fa="عادت‌ها" data-en="Habits">عادت‌ها</button>
                     <button data-view="month" class="view-tab-btn" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</button>
                     <button data-view="year" class="view-tab-btn" data-fa="ثبت سالانه" data-en="Yearly Record">ثبت سالانه</button>
@@ -4279,12 +4341,18 @@
         </div>
 
         <div class="bottom-nav">
-            <button class="bottom-nav-btn view-tab-btn active" data-view="habits" id="bottomNavHabitsBtn">
+            <button class="bottom-nav-btn view-tab-btn active" data-view="dashboard" id="bottomNavDashboardBtn">
+                <span class="bn-icon">🏠</span><span class="bn-label" data-fa="خانه" data-en="Home">خانه</span>
+            </button>
+            <button class="bottom-nav-btn view-tab-btn" data-view="habits" id="bottomNavHabitsBtn">
                 <span class="bn-icon">🎯</span><span class="bn-label" data-fa="عادت‌ها" data-en="Habits">عادت‌ها</span>
             </button>
             <button class="bottom-nav-plus" id="bottomNavPlusBtn" aria-label="انتخاب صفحه" title="انتخاب صفحه">+</button>
             <button class="bottom-nav-btn view-tab-btn" data-view="month" id="bottomNavMonthBtn">
                 <span class="bn-icon">📅</span><span class="bn-label" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</span>
+            </button>
+            <button class="bottom-nav-btn view-tab-btn" data-view="todo" id="bottomNavTodoBtn">
+                <span class="bn-icon">✅</span><span class="bn-label" data-fa="کارها" data-en="To-Do">کارها</span>
             </button>
         </div>
 
@@ -4322,7 +4390,7 @@
             </div>
         </section>
 
-        <section class="view active" id="view-habits">
+        <section class="view active" id="view-dashboard">
             <div class="card">
                 <div class="period-label" style="margin-bottom:12px" data-fa="دستاوردها" data-en="Achievements">دستاوردها</div>
                 <div class="summary-today" id="todaySummary"></div>
@@ -4332,17 +4400,20 @@
                     <span style="margin-right:auto;font-size:calc(12px * var(--font-scale));color:var(--text-muted)" id="streakLabel">پیاپی: ۰</span>
                 </div>
             </div>
+
+            <!-- ===== خلاصه پیشرفت عادت‌ها ===== -->
             <div class="card">
-                <div class="search-box">
-                    <input type="text" id="habitSearchInput" placeholder="جستجوی عادت..." maxlength="40">
-                    <button class="glass-btn primary" id="habitSearchBtn" data-fa="جستجو" data-en="Search">جستجو</button>
+                <div class="period-label" style="margin-bottom:12px" data-fa="🎯 پیشرفت عادت‌ها" data-en="🎯 Habits Progress">🎯 پیشرفت عادت‌ها</div>
+                <div id="dashboardHabitsProgress"></div>
+            </div>
+
+            <!-- ===== خلاصه پیشرفت چالش‌ها ===== -->
+            <div class="card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div class="period-label" style="margin-bottom:0" data-fa="🔥 پیشرفت چالش‌ها" data-en="🔥 Challenges Progress">🔥 پیشرفت چالش‌ها</div>
+                    <button type="button" class="glass-btn" id="dashboardOpenChallengesBtn" style="padding:6px 12px;font-size:calc(12px * var(--font-scale))" data-fa="مشاهده همه" data-en="View all">مشاهده همه</button>
                 </div>
-                <div class="period-label" style="margin-bottom:12px" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</div>
-                <div class="habit-add">
-                    <input type="text" id="newHabitInput" placeholder="مطالعه، ورزش، مدیتیشن..." maxlength="40">
-                    <button class="glass-btn primary" id="addHabitBtn" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</button>
-                </div>
-                <div class="habit-list" id="habitList"></div>
+                <div id="dashboardChallengesProgress"></div>
             </div>
 
             <!-- ===== نمودار پیشرفت (قبلاً تب جدا) ===== -->
@@ -4374,6 +4445,27 @@
                         <div id="weeklyReportText" style="font-size:13px;color:var(--text-muted)"></div>
                     </div>
                 </div>
+            </div>
+
+            <!-- ===== خلاصه فعالیت‌های مهم اخیر ===== -->
+            <div class="card">
+                <div class="period-label" style="margin-bottom:12px" data-fa="🕓 فعالیت‌های اخیر" data-en="🕓 Recent Activity">🕓 فعالیت‌های اخیر</div>
+                <div id="dashboardRecentActivity"></div>
+            </div>
+        </section>
+
+        <section class="view" id="view-habits">
+            <div class="card">
+                <div class="search-box">
+                    <input type="text" id="habitSearchInput" placeholder="جستجوی عادت..." maxlength="40">
+                    <button class="glass-btn primary" id="habitSearchBtn" data-fa="جستجو" data-en="Search">جستجو</button>
+                </div>
+                <div class="period-label" style="margin-bottom:12px" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</div>
+                <div class="habit-add">
+                    <input type="text" id="newHabitInput" placeholder="مطالعه، ورزش، مدیتیشن..." maxlength="40">
+                    <button class="glass-btn primary" id="addHabitBtn" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</button>
+                </div>
+                <div class="habit-list" id="habitList"></div>
             </div>
 
             <!-- ===== محرک‌ها و مشوق‌ها — حالا فقط از داخل آیکون 📊 نمودار هر عادت در دسترس است ===== -->
@@ -7792,6 +7884,107 @@
             }
 
             // ============================================================
+            // DASHBOARD EXTRAS: خلاصه‌ی پیشرفت عادت‌ها/چالش‌ها + فعالیت‌های اخیر
+            // ============================================================
+            function renderDashboardExtras() {
+                const habitsWrap = document.getElementById('dashboardHabitsProgress');
+                if (habitsWrap) {
+                    if (!state.habits.length) {
+                        habitsWrap.innerHTML = '<div class="empty-state">' +
+                            (state.lang === 'fa' ? 'هنوز عادتی اضافه نکردی.' : "You haven't added any habits yet.") + '</div>';
+                    } else {
+                        const today = startOfDay(new Date());
+                        habitsWrap.innerHTML = state.habits.map(h => {
+                            let total = 0, succ = 0;
+                            let d = new Date(h.createdAt);
+                            while (d <= today) {
+                                const iso = dateToISO(d);
+                                if (habitAppliesOnISO(h, iso)) {
+                                    const r = habitSuccessOnISO(h, iso);
+                                    if (r !== null) { total++; if (r === true) succ++; }
+                                }
+                                d = addDays(d, 1);
+                            }
+                            const pct = total > 0 ? Math.round((succ / total) * 100) : 0;
+                            const pctText = state.lang === 'fa' ? toPersianDigits(pct) : String(pct);
+                            return '<div class="dash-progress-row">' +
+                                '<div class="dash-progress-name">' + escHtml(h.name) + '</div>' +
+                                '<div class="dash-progress-bar"><div class="dash-progress-fill" style="width:' + pct + '%"></div></div>' +
+                                '<div class="dash-progress-pct">' + pctText + '%</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+                }
+
+                const chWrap = document.getElementById('dashboardChallengesProgress');
+                if (chWrap) {
+                    const active = (state.challenges || []).filter(c => c.status === 'active' || c.status === 'pending_review')
+                        .sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+                    if (!active.length) {
+                        chWrap.innerHTML = '<div class="empty-state">' +
+                            (state.lang === 'fa' ? 'چالش فعالی نداری.' : 'No active challenges.') + '</div>';
+                    } else {
+                        chWrap.innerHTML = active.map(c => {
+                            let pct = 0, metaText = '';
+                            if (c.kind === 'count') {
+                                pct = Math.min(100, Math.round((c.progressCount / c.targetCount) * 100));
+                                metaText = state.lang === 'fa' ?
+                                    (toPersianDigits(c.progressCount) + ' از ' + toPersianDigits(c.targetCount) + ' ' + c.unit) :
+                                    (c.progressCount + ' / ' + c.targetCount + ' ' + c.unit);
+                            } else {
+                                const remain = c.deadlineAt - Date.now();
+                                const totalDur = c.deadlineAt - c.createdAt;
+                                pct = totalDur > 0 ? Math.max(0, Math.min(100, Math.round((1 - remain / totalDur) * 100))) : 0;
+                                metaText = formatCountdown(remain);
+                            }
+                            return '<div class="dash-progress-row">' +
+                                '<div class="dash-progress-name">' + c.icon + ' ' + escHtml(c.name) + '</div>' +
+                                '<div class="dash-progress-bar"><div class="dash-progress-fill" style="width:' + pct + '%"></div></div>' +
+                                '<div class="dash-progress-pct" style="min-width:auto;font-size:calc(11px * var(--font-scale))">' + metaText + '</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+                }
+
+                const actWrap = document.getElementById('dashboardRecentActivity');
+                if (actWrap) {
+                    const events = [];
+                    const today = startOfDay(new Date());
+                    for (let i = 0; i < 3; i++) {
+                        const d = addDays(today, -i);
+                        const iso = dateToISO(d);
+                        state.habits.forEach(h => {
+                            if (!habitAppliesOnISO(h, iso)) return;
+                            const r = habitSuccessOnISO(h, iso);
+                            if (r === null) return;
+                            const dayWord = i === 0 ? (state.lang === 'fa' ? ' (امروز)' : ' (today)') :
+                                i === 1 ? (state.lang === 'fa' ? ' (دیروز)' : ' (yesterday)') : '';
+                            events.push({ time: d.getTime() + (r ? 1 : 0), text: (r ? '✅ ' : '❌ ') + h.name + dayWord });
+                        });
+                    }
+                    (state.challenges || []).filter(c => c.status === 'success' || c.status === 'failed')
+                        .sort((a, b) => (b.completedAt || b.createdAt) - (a.completedAt || a.createdAt))
+                        .slice(0, 3).forEach(c => {
+                            events.push({
+                                time: c.completedAt || c.createdAt,
+                                text: (c.status === 'success' ? '🏆 ' : '⚠️ ') + c.name + (state.lang === 'fa' ?
+                                    (c.status === 'success' ? ' با موفقیت تموم شد' : ' ناموفق بود') :
+                                    (c.status === 'success' ? ' completed' : ' failed'))
+                            });
+                        });
+                    events.sort((a, b) => b.time - a.time);
+                    const top = events.slice(0, 8);
+                    if (!top.length) {
+                        actWrap.innerHTML = '<div class="empty-state">' +
+                            (state.lang === 'fa' ? 'هنوز فعالیتی ثبت نشده.' : 'No activity yet.') + '</div>';
+                    } else {
+                        actWrap.innerHTML = '<div class="dash-activity-list">' +
+                            top.map(e => '<div class="dash-activity-item">' + e.text + '</div>').join('') + '</div>';
+                    }
+                }
+            }
+
+            // ============================================================
             // HELPERS for habits rendering
             // ============================================================
             function priorityClass(p) { return p === 'gold' ? 'priority-gold' : p === 'green' ? 'priority-green' : p ===
@@ -9433,8 +9626,9 @@
                 if (isActive('view-library')) renderLibrary();
                 if (isActive('view-calorie')) renderCalorie();
                 renderDashboard();
+                renderDashboardExtras();
                 updateProfileUI();
-                if (isActive('view-habits')) {
+                if (isActive('view-dashboard')) {
                     setTimeout(renderChart, 50);
                 }
                 if (isActive('view-habits')) {
@@ -9709,12 +9903,19 @@
                 renderReasonsCharts();
             });
 
+            let currentViewName = 'dashboard';
             function switchToView(viewName) {
+                currentViewName = viewName;
                 document.querySelectorAll('.view-tab-btn').forEach(x => x.classList.remove('active'));
                 document.querySelectorAll('section.view').forEach(v => v.classList.remove('active'));
                 document.querySelectorAll('.view-tab-btn[data-view="' + viewName + '"]').forEach(x => x.classList.add('active'));
                 const viewEl = document.getElementById('view-' + viewName);
                 if (viewEl) viewEl.classList.add('active');
+                if (viewName === 'dashboard') {
+                    renderDashboard();
+                    renderDashboardExtras();
+                    setTimeout(renderChart, 50);
+                }
                 if (viewName === 'habits') {
                     renderHabits();
                     setTimeout(renderChart, 50);
@@ -9734,6 +9935,47 @@
             document.querySelectorAll('.view-tab-btn').forEach(b => b.addEventListener('click', () => {
                 switchToView(b.dataset.view);
             }));
+
+            // ============================================================
+            // دکمه‌ی فیزیکی Back اندروید: رفتار استاندارد —
+            // اول هر مودال/پنل بازی رو می‌بنده، بعد اگه توی صفحه‌ی اصلی نیستیم می‌بره صفحه‌ی
+            // اصلی، و اگه از قبل توی صفحه‌ی اصلی هستیم از اپ خارج می‌شه.
+            // نکته: HOME_VIEW فعلاً 'habits' است؛ وقتی تب Dashboard واقعی اضافه بشه، این مقدار
+            // باید به 'dashboard' تغییر کنه.
+            // ============================================================
+            const HOME_VIEW = 'dashboard';
+            function rpHandleAndroidBack() {
+                const onboardingOverlay = document.getElementById('onboardingOverlay');
+                if (onboardingOverlay && onboardingOverlay.classList.contains('open')) {
+                    document.getElementById('onboardingSkipBtn').click();
+                    return;
+                }
+                const openModals = document.querySelectorAll('.modal-backdrop.open');
+                if (openModals.length) {
+                    openModals.forEach(m => m.classList.remove('open'));
+                    return;
+                }
+                const profileDropdown = document.getElementById('profileDropdown');
+                if (profileDropdown && profileDropdown.classList.contains('open')) {
+                    profileDropdown.classList.remove('open');
+                    return;
+                }
+                const lightbox = document.getElementById('habitPhotoLightbox');
+                if (lightbox && lightbox.classList.contains('open')) {
+                    lightbox.classList.remove('open');
+                    return;
+                }
+                if (currentViewName !== HOME_VIEW) {
+                    switchToView(HOME_VIEW);
+                    return;
+                }
+                const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+                if (AppPlugin) AppPlugin.exitApp();
+            }
+            if (isNativeApp()) {
+                const AppPlugin = window.Capacitor.Plugins.App;
+                if (AppPlugin) AppPlugin.addListener('backButton', rpHandleAndroidBack);
+            }
 
             document.getElementById('bottomNavPlusBtn').addEventListener('click', () => {
                 document.getElementById('tabsPickerBackdrop').classList.add('open');
@@ -11780,6 +12022,9 @@
                 { icon: '👋', titleFa: 'خوش اومدی!', titleEn: 'Welcome!',
                     textFa: 'بیا با هم یه دور سریع همه‌ی بخش‌های برنامه رو ببینیم تا گیج نشی.',
                     textEn: "Let's take a quick tour of the app so you don't get lost." },
+                { icon: '🏠', titleFa: 'خانه (داشبورد)', titleEn: 'Home (Dashboard)',
+                    textFa: 'همیشه اول همین صفحه باز می‌شه: خلاصه‌ی پیشرفت کلی، پایبندی، پیاپی، پیشرفت عادت‌ها و چالش‌ها، نمودار رشد و فعالیت‌های اخیرت رو یک‌جا می‌بینی.',
+                    textEn: 'This is always the first screen: your overall progress, adherence, streak, habits & challenges progress, growth chart, and recent activity — all in one place.' },
                 { icon: '🎯', titleFa: 'تب عادت‌ها', titleEn: 'Habits tab',
                     textFa: 'اینجا عادت‌های روزانه‌ات رو اضافه می‌کنی و هر روز باهاشون تیک می‌زنی. با فلش کوچیک کنار هر عادت می‌تونی یادداشت و عکس براش ثبت کنی.',
                     textEn: 'Add your daily habits here and check them off each day. Tap the small arrow next to a habit to add notes and photos for it.' },
@@ -12157,6 +12402,8 @@
             document.getElementById('checkinNoBtn').addEventListener('click', () => resolveChallengeCheckin(false));
 
             document.getElementById('challengeFloatBtn').addEventListener('click', () => openChallengeModal());
+            const dashOpenChBtn = document.getElementById('dashboardOpenChallengesBtn');
+            if (dashOpenChBtn) dashOpenChBtn.addEventListener('click', () => openChallengeModal('active'));
             document.getElementById('challengeModalCloseBtn').addEventListener('click', () => {
                 document.getElementById('challengeModalBackdrop').classList.remove('open');
             });
