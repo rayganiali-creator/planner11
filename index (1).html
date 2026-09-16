@@ -6101,23 +6101,23 @@
                 const plugin = rpLocalNotifPlugin();
                 if (!plugin) return;
                 try {
-                    const cancelIds = [];
+                    // ابتدا هر ۴۵ اسلاتِ قبلی این عادت را لغو کن (یکی‌یکی، بدون دسته‌بندی)
                     for (let i = 0; i < RP_HABIT_REMINDER_DAYS; i++) {
-                        cancelIds.push({ id: rpNumericId('habit-' + habitId + '-d' + i) });
+                        try { await plugin.cancel({ notifications: [{ id: rpNumericId('habit-' + habitId + '-d' + i) }] }); } catch (e2) {}
                     }
-                    await plugin.cancel({ notifications: cancelIds });
                     const now = new Date();
-                    const notifications = [];
                     for (let i = 0; i < RP_HABIT_REMINDER_DAYS; i++) {
                         const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, hh, mm, 0, 0);
                         if (d.getTime() <= now.getTime()) continue;
-                        notifications.push({
-                            id: rpNumericId('habit-' + habitId + '-d' + i),
-                            title: title, body: body,
-                            schedule: { at: d, allowWhileIdle: true }
-                        });
+                        // دقیقاً مثل یادآوری کارها: هر نوتیف با یک فراخوانیِ جداگانه‌ی schedule ثبت می‌شود
+                        try {
+                            await plugin.schedule({ notifications: [{
+                                id: rpNumericId('habit-' + habitId + '-d' + i),
+                                title: title, body: body,
+                                schedule: { at: d, allowWhileIdle: true }
+                            }] });
+                        } catch (e3) {}
                     }
-                    if (notifications.length) await plugin.schedule({ notifications: notifications });
                 } catch (e) {}
             }
             async function nativeCancelDailyHabit(habitId) {
