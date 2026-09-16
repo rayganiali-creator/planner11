@@ -6089,47 +6089,23 @@
                     }
                 } catch (e) {}
             }
-            // یادآوری روزانه‌ی عادت: به‌جای تکیه بر مکانیزم «تکرارشونده»ی اندروید (که طبق تشخیص
-            // خودت غیرقابل‌اعتماد بود و فقط وقتی با یک آلارم دیگه هم‌زمان می‌شد کار می‌کرد -
-            // یعنی اندروید داشت این آلارم تکرارشونده رو «غیردقیق» در نظر می‌گرفت و با آلارم‌های
-            // دیگه دسته‌بندی/به‌تأخیر می‌نداخت)، حالا برای ۴۵ روز آینده، هر روز رو به‌صورت
-            // یک آلارم دقیق و مجزا (دقیقاً مثل یادآوری کارها که خودت تأیید کردی درست کار می‌کنه)
-            // از قبل زمان‌بندی می‌کنیم. هر بار که برنامه باز بشه (nativeResyncAllReminders)
-            // دوباره ۴۵ روز رو از امروز پر می‌کنیم تا هیچ‌وقت تموم نشه.
-            const RP_HABIT_REMINDER_DAYS = 45;
+            // یادآوری روزانه‌ی عادت: بعد از این‌که راه‌حل‌های قبلی (تکرارشونده، دسته‌ای، ۴۵روزه)
+            // جواب ندادن، الان این تابع دقیقاً و عیناً همون تابعِ nativeScheduleOnce که برای
+            // یادآوری کارها کار می‌کنه رو صدا می‌زنه — بدون هیچ کد یا مسیر جداگانه‌ای. فقط
+            // «زمانِ بعدیِ» ریمایندر رو حساب می‌کنیم (امروز اگه نگذشته، وگرنه فردا) و می‌سپاریمش
+            // به همون تابعی که خودت تأیید کردی درست کار می‌کنه. هر بار برنامه باز بشه
+            // (nativeResyncAllReminders) دوباره «زمان بعدی» رو تازه محاسبه و دوباره ثبت می‌کنه.
+            function rpNextHabitOccurrence(hh, mm) {
+                const now = new Date();
+                let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+                if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
+                return next.getTime();
+            }
             async function nativeScheduleDailyHabit(habitId, title, body, hh, mm) {
-                const plugin = rpLocalNotifPlugin();
-                if (!plugin) return;
-                try {
-                    // ابتدا هر ۴۵ اسلاتِ قبلی این عادت را لغو کن (یکی‌یکی، بدون دسته‌بندی)
-                    for (let i = 0; i < RP_HABIT_REMINDER_DAYS; i++) {
-                        try { await plugin.cancel({ notifications: [{ id: rpNumericId('habit-' + habitId + '-d' + i) }] }); } catch (e2) {}
-                    }
-                    const now = new Date();
-                    for (let i = 0; i < RP_HABIT_REMINDER_DAYS; i++) {
-                        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, hh, mm, 0, 0);
-                        if (d.getTime() <= now.getTime()) continue;
-                        // دقیقاً مثل یادآوری کارها: هر نوتیف با یک فراخوانیِ جداگانه‌ی schedule ثبت می‌شود
-                        try {
-                            await plugin.schedule({ notifications: [{
-                                id: rpNumericId('habit-' + habitId + '-d' + i),
-                                title: title, body: body,
-                                schedule: { at: d, allowWhileIdle: true }
-                            }] });
-                        } catch (e3) {}
-                    }
-                } catch (e) {}
+                await nativeScheduleOnce('habit-' + habitId, title, body, rpNextHabitOccurrence(hh, mm));
             }
             async function nativeCancelDailyHabit(habitId) {
-                const plugin = rpLocalNotifPlugin();
-                if (!plugin) return;
-                try {
-                    const cancelIds = [];
-                    for (let i = 0; i < RP_HABIT_REMINDER_DAYS; i++) {
-                        cancelIds.push({ id: rpNumericId('habit-' + habitId + '-d' + i) });
-                    }
-                    await plugin.cancel({ notifications: cancelIds });
-                } catch (e) {}
+                await nativeCancel('habit-' + habitId);
             }
             async function nativeCancel(idStr) {
                 const plugin = rpLocalNotifPlugin();
