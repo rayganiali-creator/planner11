@@ -1755,6 +1755,26 @@
             background: #FFEBEE;
             color: var(--priority-red)
         }
+        .help-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            min-width: 26px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text-muted);
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .help-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
         .icon-btn {
             background: transparent;
             border: none;
@@ -2680,13 +2700,14 @@
         }
         .challenge-card .cc-actions button {
             flex: 1;
-            padding: 7px 8px;
+            min-height: 44px;
+            padding: 10px 8px;
             border-radius: 10px;
             border: 1px solid var(--border);
             background: var(--surface);
             color: var(--text);
             font-family: inherit;
-            font-size: calc(11.5px * var(--font-scale));
+            font-size: calc(12.5px * var(--font-scale));
             font-weight: 700;
             cursor: pointer;
         }
@@ -4361,7 +4382,10 @@
                 <div class="row-between">
                     <button class="glass-btn nav-btn" id="monthPrev">›</button>
                     <div style="text-align:center">
-                        <div class="period-label" id="monthLabel">—</div>
+                        <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                            <div class="period-label" id="monthLabel">—</div>
+                            <button type="button" class="help-btn" data-help="calendar">؟</button>
+                        </div>
                         <div class="period-sub" id="monthSubLabel">—</div>
                     </div>
                     <button class="glass-btn nav-btn" id="monthNext">‹</button>
@@ -4381,7 +4405,10 @@
                 <div class="row-between">
                     <button class="glass-btn nav-btn" id="yearPrev">›</button>
                     <div style="text-align:center">
-                        <div class="period-label" id="yearLabel">—</div>
+                        <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                            <div class="period-label" id="yearLabel">—</div>
+                            <button type="button" class="help-btn" data-help="calendar">؟</button>
+                        </div>
                         <div class="period-sub"><span data-fa="نمای کلی سال" data-en="Year Overview">نمای کلی سال</span></div>
                     </div>
                     <button class="glass-btn nav-btn" id="yearNext">‹</button>
@@ -4419,7 +4446,10 @@
             <!-- ===== نمودار پیشرفت (قبلاً تب جدا) ===== -->
             <div class="card">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                    <div class="period-label" style="margin-bottom:0" data-fa="📈 نمودار پیشرفت" data-en="📈 Progress Chart">📈 نمودار پیشرفت</div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <div class="period-label" style="margin-bottom:0" data-fa="📈 نمودار پیشرفت" data-en="📈 Progress Chart">📈 نمودار پیشرفت</div>
+                        <button type="button" class="help-btn" data-help="progress">؟</button>
+                    </div>
                     <button type="button" class="collapsible-toggle-btn" id="progressCollapseToggle">
                         <span data-fa="باز/بسته" data-en="Toggle">نمایش</span><span class="chev">▾</span>
                     </button>
@@ -4460,7 +4490,10 @@
                     <input type="text" id="habitSearchInput" placeholder="جستجوی عادت..." maxlength="40">
                     <button class="glass-btn primary" id="habitSearchBtn" data-fa="جستجو" data-en="Search">جستجو</button>
                 </div>
-                <div class="period-label" style="margin-bottom:12px" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div class="period-label" style="margin-bottom:0" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</div>
+                    <button type="button" class="help-btn" data-help="habits">؟</button>
+                </div>
                 <div class="habit-add">
                     <input type="text" id="newHabitInput" placeholder="مطالعه، ورزش، مدیتیشن..." maxlength="40">
                     <button class="glass-btn primary" id="addHabitBtn" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</button>
@@ -4617,7 +4650,10 @@
 
         <section class="view" id="view-calorie">
             <div class="card" id="calSetupCard">
-                <h3 style="text-align:center;margin-bottom:14px;font-size:calc(18px * var(--font-scale));color:var(--primary)" data-fa="🔥 کالری‌شمار" data-en="🔥 Calorie Counter">🔥 کالری‌شمار</h3>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px">
+                    <h3 style="text-align:center;margin-bottom:0;font-size:calc(18px * var(--font-scale));color:var(--primary)" data-fa="🔥 کالری‌شمار" data-en="🔥 Calorie Counter">🔥 کالری‌شمار</h3>
+                    <button type="button" class="help-btn" data-help="calories">؟</button>
+                </div>
                 <p class="field-hint" style="margin-top:-6px;margin-bottom:12px" data-fa="برای محاسبه‌ی میزان کالری مجاز روزانه، اطلاعات زیر رو وارد کن." data-en="Enter the info below to calculate your daily calorie allowance.">برای محاسبه‌ی میزان کالری مجاز روزانه، اطلاعات زیر رو وارد کن.</p>
                 <div class="cal-setup-grid">
                     <div>
@@ -5198,7 +5234,7 @@
 
     <div class="modal-backdrop" id="challengeModalBackdrop">
         <div class="modal challenge-modal">
-            <div class="modal-title">🔥 <span data-fa="چالش‌ها" data-en="Challenges">چالش‌ها</span></div>
+            <div class="modal-title">🔥 <span data-fa="چالش‌ها" data-en="Challenges">چالش‌ها</span> <button type="button" class="help-btn" data-help="challenge">؟</button></div>
             <nav class="tabs challenge-tabs">
                 <button class="active" data-ctab="create" data-fa="➕ چالش جدید" data-en="➕ New">➕ چالش جدید</button>
                 <button data-ctab="active" data-fa="⏳ فعال" data-en="⏳ Active">⏳ فعال</button>
@@ -5210,8 +5246,9 @@
                 <div class="gender-toggle" id="challengeKindToggle">
                     <button type="button" data-kind="count" data-fa="🔢 شمارشی" data-en="🔢 Count">🔢 شمارشی</button>
                     <button type="button" data-kind="timed" data-fa="⏱ زمان‌دار" data-en="⏱ Timed">⏱ زمان‌دار</button>
+                    <button type="button" data-kind="both" data-fa="🎯 ترکیبی" data-en="🎯 Combined">🎯 ترکیبی</button>
                 </div>
-                <p class="field-hint" data-fa="شمارشی: یه هدف عددی داری (مثلاً ۵۰ شنا). زمان‌دار: یه مهلت داری و سر اتمامش ازت می‌پرسیم انجامش دادی یا نه." data-en="Count: you have a numeric target. Timed: you have a deadline; we'll ask if you did it when time's up.">شمارشی: یه هدف عددی داری (مثلاً ۵۰ شنا). زمان‌دار: یه مهلت داری و سر اتمامش ازت می‌پرسیم انجامش دادی یا نه.</p>
+                <p class="field-hint" data-fa="شمارشی: فقط یه هدف عددی داری. زمان‌دار: فقط یه مهلت داری. ترکیبی: هم باید تا یه مهلتِ مشخص، هم به یه هدف عددی برسی (مثلاً ۵۰ شنا تا ۲ ساعت دیگه)." data-en="Count: only a numeric target. Timed: only a deadline. Combined: reach a numeric target by a deadline (e.g. 50 push-ups within 2 hours).">شمارشی: فقط یه هدف عددی داری. زمان‌دار: فقط یه مهلت داری. ترکیبی: هم باید تا یه مهلتِ مشخص، هم به یه هدف عددی برسی (مثلاً ۵۰ شنا تا ۲ ساعت دیگه).</p>
 
                 <div class="field-label" data-fa="نماد چالش" data-en="Icon">نماد چالش</div>
                 <div class="emoji-picker" id="challengeEmojiPicker"></div>
@@ -5228,16 +5265,41 @@
                 </div>
 
                 <div id="challengeTimedFields" style="display:none">
-                    <div class="field-label" data-fa="مدت زمان مهلت" data-en="Deadline duration">مدت زمان مهلت</div>
-                    <div class="habit-goal-input">
-                        <input type="number" id="challengeDurationField" min="1" max="9999" value="2">
-                        <select id="challengeDurationUnitField">
-                            <option value="minutes" data-fa="دقیقه" data-en="minutes">دقیقه</option>
-                            <option value="hours" data-fa="ساعت" data-en="hours" selected>ساعت</option>
-                            <option value="days" data-fa="روز" data-en="days">روز</option>
-                        </select>
+                    <div class="field-label" data-fa="مهلت رو چطور تعیین می‌کنی؟" data-en="How do you want to set the deadline?">مهلت رو چطور تعیین می‌کنی؟</div>
+                    <div class="gender-toggle" id="challengeDeadlineModeToggle">
+                        <button type="button" data-mode="duration" class="active" data-fa="⏳ مدت زمان" data-en="⏳ Duration">⏳ مدت زمان</button>
+                        <button type="button" data-mode="exact" data-fa="📅 تاریخ و ساعت دقیق" data-en="📅 Exact date/time">📅 تاریخ و ساعت دقیق</button>
+                    </div>
+
+                    <div id="challengeDurationWrap">
+                        <div class="field-label" data-fa="مدت زمان مهلت" data-en="Deadline duration">مدت زمان مهلت</div>
+                        <div class="habit-goal-input">
+                            <input type="number" id="challengeDurationField" min="1" max="9999" value="2">
+                            <select id="challengeDurationUnitField">
+                                <option value="minutes" data-fa="دقیقه" data-en="minutes">دقیقه</option>
+                                <option value="hours" data-fa="ساعت" data-en="hours" selected>ساعت</option>
+                                <option value="days" data-fa="روز" data-en="days">روز</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="challengeExactWrap" style="display:none">
+                        <div class="field-label" data-fa="تاریخ و ساعت دقیق مهلت" data-en="Exact deadline date/time">تاریخ و ساعت دقیق مهلت</div>
+                        <input type="datetime-local" id="challengeExactDeadlineField" class="name-input">
+                    </div>
+
+                    <label class="todo-reminder-toggle" style="margin-top:10px">
+                        <input type="checkbox" id="challengeReminderEnabled">
+                        <span data-fa="🔔 یادآوری تکرارشونده هم می‌خوام" data-en="🔔 I also want a recurring reminder">🔔 یادآوری تکرارشونده هم می‌خوام</span>
+                    </label>
+                    <div id="challengeReminderIntervalWrap" style="display:none;margin-top:8px">
+                        <div class="field-label" data-fa="هر چند ساعت یک‌بار یادآوری بشه؟" data-en="Remind me every how many hours?">هر چند ساعت یک‌بار یادآوری بشه؟</div>
+                        <div class="habit-goal-input">
+                            <input type="number" id="challengeReminderIntervalField" min="1" max="72" value="2">
+                            <span data-fa="ساعت" data-en="hours">ساعت</span>
+                        </div>
                     </div>
                 </div>
+
 
                 <div class="field-label" data-fa="🪙 جایزه سکه" data-en="🪙 Coin reward">🪙 جایزه سکه</div>
                 <div class="habit-goal-input">
@@ -5277,6 +5339,14 @@
     <div class="habit-photo-lightbox" id="habitPhotoLightbox">
         <button class="habit-photo-lightbox-close" id="habitPhotoLightboxClose">✕</button>
         <img id="habitPhotoLightboxImg" src="" alt="">
+    </div>
+
+    <div class="modal-backdrop" id="helpModalBackdrop">
+        <div class="modal" style="max-width:420px">
+            <h3 id="helpModalTitle">❓</h3>
+            <div id="helpModalBody" style="font-size:calc(13.5px * var(--font-scale));line-height:2;color:var(--text)"></div>
+            <button class="modal-close" id="helpModalCloseBtn" data-fa="بستن" data-en="Close">بستن</button>
+        </div>
     </div>
 
     <div class="onboarding-overlay" id="onboardingOverlay">
@@ -6359,6 +6429,39 @@
                 const plugin = rpLocalNotifPlugin();
                 if (!plugin) return;
                 try { await plugin.cancel({ notifications: [{ id: rpNumericId(idStr) }] }); } catch (e) {}
+            }
+
+            // یادآوری چالش‌های زمان‌دار/ترکیبی: یک آلارم دقیق سرِ مهلت + (اختیاری) چند آلارم دقیقِ
+            // تکرارشونده تا قبل از مهلت. عیناً همون تابع nativeScheduleOnce که برای کارها و عادت‌ها
+            // امتحانش کردیم و درست کار می‌کنه رو صدا می‌زنیم — هیچ مسیر جدیدی نمی‌سازیم.
+            const CHALLENGE_MAX_REMINDER_SLOTS = 60;
+            async function nativeScheduleChallengeNotifications(ch) {
+                if (!(ch.kind === 'timed' || ch.kind === 'both')) return;
+                if (!ch.deadlineAt) return;
+                await nativeScheduleOnce('challenge-deadline-' + ch.id,
+                    state.lang === 'fa' ? '⏰ مهلت چالش تموم شد' : '⏰ Challenge deadline reached',
+                    (state.lang === 'fa' ? 'زمان چالش «' + ch.name + '» تموم شد! انجامش دادی؟' :
+                        'Time is up for "' + ch.name + '"! Did you do it?'),
+                    ch.deadlineAt);
+                if (ch.reminderIntervalHours) {
+                    const intervalMs = ch.reminderIntervalHours * 3600000;
+                    let t = Date.now() + intervalMs;
+                    let idx = 0;
+                    while (t < ch.deadlineAt && idx < CHALLENGE_MAX_REMINDER_SLOTS) {
+                        await nativeScheduleOnce('challenge-reminder-' + ch.id + '-r' + idx,
+                            state.lang === 'fa' ? '🔥 یادآوری چالش' : '🔥 Challenge reminder',
+                            (state.lang === 'fa' ? 'یادت نره: «' + ch.name + '»' : "Don't forget: " + ch.name),
+                            t);
+                        t += intervalMs;
+                        idx++;
+                    }
+                }
+            }
+            async function nativeCancelChallengeNotifications(chId) {
+                await nativeCancel('challenge-deadline-' + chId);
+                for (let i = 0; i < CHALLENGE_MAX_REMINDER_SLOTS; i++) {
+                    await nativeCancel('challenge-reminder-' + chId + '-r' + i);
+                }
             }
 
             // ============================================================
@@ -7926,11 +8029,14 @@
                     } else {
                         chWrap.innerHTML = active.map(c => {
                             let pct = 0, metaText = '';
-                            if (c.kind === 'count') {
+                            if (c.kind === 'count' || c.kind === 'both') {
                                 pct = Math.min(100, Math.round((c.progressCount / c.targetCount) * 100));
                                 metaText = state.lang === 'fa' ?
                                     (toPersianDigits(c.progressCount) + ' از ' + toPersianDigits(c.targetCount) + ' ' + c.unit) :
                                     (c.progressCount + ' / ' + c.targetCount + ' ' + c.unit);
+                                if (c.kind === 'both' && c.deadlineAt) {
+                                    metaText += ' · ' + formatCountdown(c.deadlineAt - Date.now());
+                                }
                             } else {
                                 const remain = c.deadlineAt - Date.now();
                                 const totalDur = c.deadlineAt - c.createdAt;
@@ -12005,6 +12111,11 @@
                             parseInt(parts[0], 10) || 8, parseInt(parts[1], 10) || 0);
                     }
                 });
+                (state.challenges || []).forEach(c => {
+                    if ((c.status === 'active') && (c.kind === 'timed' || c.kind === 'both') && c.deadlineAt > now) {
+                        nativeScheduleChallengeNotifications(c);
+                    }
+                });
             }
             nativeResyncAllReminders();
             applyFontSize();
@@ -12018,6 +12129,58 @@
             // آموزش اولیه (Onboarding): برای کاربری که تازه نصب کرده، اول زبان رو می‌پرسیم،
             // بعد یه دور سریع همه‌ی بخش‌های برنامه رو نشونش می‌دیم. از تنظیمات هم قابل تکرار است.
             // ============================================================
+            // ============================================================
+            // راهنمای هر بخش (Help): با دکمه‌ی ❓ کنار هر بخش قابل مشاهده و در هر لحظه قابل تکرار
+            // ============================================================
+            const HELP_CONTENT = {
+                habits: {
+                    icon: '🎯',
+                    titleFa: 'راهنمای عادت‌ها', titleEn: 'Habits guide',
+                    textFa: 'با دکمه‌ی «افزودن عادت جدید» یک عادت تازه بساز. هر روز روی هر عادت تیک بزن (✓ موفق یا ✗ ناموفق). با فلش کوچیک کنار هر عادت می‌تونی یادداشت و عکس براش ثبت کنی. آیکون 📊 نمودارهای محرک، مشوق و علت موفقیت/شکست رو نشون می‌ده و از همون‌جا هم می‌تونی علت یا محرک ثبت کنی. آیکون ⚡ هم مستقیم همون نمودارها رو باز می‌کنه.',
+                    textEn: 'Use "Add New Habit" to create a habit. Tap ✓/✗ each day. The small arrow next to a habit lets you add notes and photos. The 📊 icon shows trigger/incentive/reason charts, where you can also add reasons directly. The ⚡ icon opens the same charts.'
+                },
+                challenge: {
+                    icon: '🔥',
+                    titleFa: 'راهنمای چالش‌ها', titleEn: 'Challenges guide',
+                    textFa: 'چالش یعنی یک هدف کوتاه‌مدت. «شمارشی»: فقط یک هدف عددی داری (مثلاً ۵۰ بار). «زمان‌دار»: فقط یک مهلت داری و سر رسیدنش ازت می‌پرسیم انجامش دادی یا نه. «ترکیبی»: هم عدد هم مهلت با هم. برای مهلت می‌تونی مدت زمان (مثلاً ۲ ساعت دیگه) یا تاریخ و ساعت دقیق انتخاب کنی، و می‌تونی یادآوری تکرارشونده (مثلاً هر ۲ ساعت) هم روشن کنی تا نوتیف واقعی بگیری.',
+                    textEn: 'A challenge is a short-term goal. "Count": a numeric target. "Timed": a deadline; we ask if you did it when time is up. "Combined": both together. For the deadline you can pick a duration or an exact date/time, and enable a recurring reminder to get real notifications.'
+                },
+                calendar: {
+                    icon: '📅',
+                    titleFa: 'راهنمای ثبت ماهانه/سالانه', titleEn: 'Monthly/yearly record guide',
+                    textFa: 'این تقویم وضعیت موفق/ناموفق هر روزِ هر عادت رو نشون می‌ده. سبز یعنی موفق، قرمز یعنی ناموفق، خاکستری یعنی هنوز ثبت نکردی. روی هر روز بزن تا وضعیتش رو ثبت یا تغییر بدی.',
+                    textEn: 'This calendar shows success/fail per day per habit. Green = success, red = fail, grey = not recorded yet. Tap a day to set or change its status.'
+                },
+                calories: {
+                    icon: '🔥',
+                    titleFa: 'راهنمای کالری‌شمار', titleEn: 'Calorie counter guide',
+                    textFa: 'اول وزن، قد، سن و سطح فعالیتت رو وارد کن تا کالری مجاز روزانه‌ات محاسبه بشه. بعد هر چیزی که می‌خوری رو با کالری‌ش ثبت کن تا ببینی چقدر تا هدفت مونده.',
+                    textEn: 'First enter your weight, height, age, and activity level to calculate your daily calorie allowance. Then log what you eat to see how much is left toward your goal.'
+                },
+                progress: {
+                    icon: '📈',
+                    titleFa: 'راهنمای نمودار پیشرفت', titleEn: 'Progress chart guide',
+                    textFa: 'این نمودار روند موفقیتت رو هفتگی، ماهانه یا سالانه نشون می‌ده. پایین نمودار هم میانگین موفقیت، پیاپی (Streak) روزهای موفق، و تعداد عادت‌هات رو می‌بینی. با دکمه‌ی «نمایش» می‌تونی این کارت رو جمع/باز کنی.',
+                    textEn: 'This chart shows your success trend weekly, monthly, or yearly. Below it you see your average success rate, current streak, and number of habits. Use the toggle button to collapse/expand this card.'
+                }
+            };
+            function openHelpModal(key) {
+                const h = HELP_CONTENT[key];
+                if (!h) return;
+                document.getElementById('helpModalTitle').textContent = h.icon + ' ' + (state.lang === 'fa' ? h.titleFa : h.titleEn);
+                document.getElementById('helpModalBody').textContent = state.lang === 'fa' ? h.textFa : h.textEn;
+                document.getElementById('helpModalBackdrop').classList.add('open');
+            }
+            document.querySelectorAll('[data-help]').forEach(b => {
+                b.addEventListener('click', () => openHelpModal(b.dataset.help));
+            });
+            document.getElementById('helpModalCloseBtn').addEventListener('click', () => {
+                document.getElementById('helpModalBackdrop').classList.remove('open');
+            });
+            document.getElementById('helpModalBackdrop').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
+
             const ONBOARDING_SLIDES = [
                 { icon: '👋', titleFa: 'خوش اومدی!', titleEn: 'Welcome!',
                     textFa: 'بیا با هم یه دور سریع همه‌ی بخش‌های برنامه رو ببینیم تا گیج نشی.',
@@ -12142,6 +12305,7 @@
             // ============================================================
             const CHALLENGE_EMOJIS = ['🔥','💪','🏃','📚','🧘','🚭','💧','🥗','😴','🎯','✍️','🧹','🎨','💰','🚴','🧊'];
             let challengeSelectedKind = 'count';
+            let challengeSelectedDeadlineMode = 'duration';
             let challengeSelectedEmoji = CHALLENGE_EMOJIS[0];
             let challengeCheckinQueue = [];
 
@@ -12191,9 +12355,17 @@
                         picker.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
                     });
                 });
-                document.getElementById('challengeCountFields').style.display = challengeSelectedKind === 'count' ? 'block' : 'none';
-                document.getElementById('challengeTimedFields').style.display = challengeSelectedKind === 'timed' ? 'block' : 'none';
+                const showCount = (challengeSelectedKind === 'count' || challengeSelectedKind === 'both');
+                const showTimed = (challengeSelectedKind === 'timed' || challengeSelectedKind === 'both');
+                document.getElementById('challengeCountFields').style.display = showCount ? 'block' : 'none';
+                document.getElementById('challengeTimedFields').style.display = showTimed ? 'block' : 'none';
                 document.querySelectorAll('#challengeKindToggle button').forEach(b => b.classList.toggle('active', b.dataset.kind === challengeSelectedKind));
+                const mode = challengeSelectedDeadlineMode;
+                document.getElementById('challengeDurationWrap').style.display = mode === 'duration' ? 'block' : 'none';
+                document.getElementById('challengeExactWrap').style.display = mode === 'exact' ? 'block' : 'none';
+                document.querySelectorAll('#challengeDeadlineModeToggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+                document.getElementById('challengeReminderIntervalWrap').style.display =
+                    document.getElementById('challengeReminderEnabled').checked ? 'block' : 'none';
             }
 
             document.getElementById('challengeKindToggle').querySelectorAll('button').forEach(b => {
@@ -12202,6 +12374,13 @@
                     renderChallengeCreateForm();
                 });
             });
+            document.getElementById('challengeDeadlineModeToggle').querySelectorAll('button').forEach(b => {
+                b.addEventListener('click', () => {
+                    challengeSelectedDeadlineMode = b.dataset.mode;
+                    renderChallengeCreateForm();
+                });
+            });
+            document.getElementById('challengeReminderEnabled').addEventListener('change', renderChallengeCreateForm);
 
             function createChallengeFromForm() {
                 const name = document.getElementById('challengeNameField').value.trim();
@@ -12217,20 +12396,39 @@
                     rewardCoins, rewardText, createdAt: now, status: 'active',
                     completedAt: null
                 };
-                if (challengeSelectedKind === 'count') {
+                const needsCount = (challengeSelectedKind === 'count' || challengeSelectedKind === 'both');
+                const needsTimed = (challengeSelectedKind === 'timed' || challengeSelectedKind === 'both');
+                if (needsCount) {
                     ch.targetCount = Math.max(1, parseInt(document.getElementById('challengeTargetField').value, 10) || 1);
                     ch.unit = document.getElementById('challengeUnitField').value.trim() || (state.lang === 'fa' ? 'بار' : 'x');
                     ch.progressCount = 0;
-                } else {
-                    const durVal = Math.max(1, parseInt(document.getElementById('challengeDurationField').value, 10) || 1);
-                    const durUnit = document.getElementById('challengeDurationUnitField').value;
-                    ch.durationValue = durVal;
-                    ch.durationUnit = durUnit;
-                    const msMap = { minutes: 60000, hours: 3600000, days: 86400000 };
-                    ch.deadlineAt = now + durVal * msMap[durUnit];
+                }
+                if (needsTimed) {
+                    if (challengeSelectedDeadlineMode === 'exact') {
+                        const v = document.getElementById('challengeExactDeadlineField').value;
+                        const parsed = v ? new Date(v).getTime() : NaN;
+                        if (!v || isNaN(parsed) || parsed <= now) {
+                            showToast(state.lang === 'fa' ? 'یه تاریخ و ساعت معتبر و در آینده انتخاب کن' : 'Pick a valid future date/time');
+                            return;
+                        }
+                        ch.deadlineAt = parsed;
+                        ch.durationValue = null;
+                        ch.durationUnit = null;
+                    } else {
+                        const durVal = Math.max(1, parseInt(document.getElementById('challengeDurationField').value, 10) || 1);
+                        const durUnit = document.getElementById('challengeDurationUnitField').value;
+                        ch.durationValue = durVal;
+                        ch.durationUnit = durUnit;
+                        const msMap = { minutes: 60000, hours: 3600000, days: 86400000 };
+                        ch.deadlineAt = now + durVal * msMap[durUnit];
+                    }
+                    const reminderOn = document.getElementById('challengeReminderEnabled').checked;
+                    ch.reminderIntervalHours = reminderOn ?
+                        Math.max(1, Math.min(72, parseInt(document.getElementById('challengeReminderIntervalField').value, 10) || 2)) : null;
                 }
                 state.challenges.push(ch);
                 saveState();
+                nativeScheduleChallengeNotifications(ch);
                 document.getElementById('challengeNameField').value = '';
                 document.getElementById('challengeRewardTextField').value = '';
                 showToast((state.lang === 'fa' ? '🔥 چالش «' + name + '» ثبت شد!' : '🔥 Challenge "' + name + '" started!'));
@@ -12262,21 +12460,28 @@
                 }
                 list.innerHTML = items.map(c => {
                     let body = '';
-                    if (c.kind === 'count') {
+                    const isCountish = (c.kind === 'count' || c.kind === 'both');
+                    if (isCountish) {
                         const pct = Math.min(100, Math.round((c.progressCount / c.targetCount) * 100));
                         body = '<div class="cc-meta">' + (state.lang === 'fa' ?
                             (toPersianDigits(c.progressCount) + ' از ' + toPersianDigits(c.targetCount) + ' ' + c.unit) :
                             (c.progressCount + ' / ' + c.targetCount + ' ' + c.unit)) + '</div>' +
-                            '<div class="cc-progress-bar"><div class="cc-progress-fill" style="width:' + pct + '%"></div></div>' +
-                            '<div class="cc-actions">' +
+                            '<div class="cc-progress-bar"><div class="cc-progress-fill" style="width:' + pct + '%"></div></div>';
+                        if (c.kind === 'both' && c.deadlineAt) {
+                            body += '<div class="cc-meta cc-countdown" data-cc-countdown="' + c.id + '">' +
+                                formatCountdown(c.deadlineAt - Date.now()) + '</div>';
+                        }
+                        body += '<div class="cc-actions">' +
                             '<button class="cc-plus" data-cc-plus="' + c.id + '">+1</button>' +
                             '<button class="cc-done" data-cc-finish="' + c.id + '">' + (state.lang === 'fa' ? '✓ تمومش کن' : '✓ Finish') + '</button>' +
                             '<button class="cc-cancel" data-cc-cancel="' + c.id + '">' + (state.lang === 'fa' ? 'لغو' : 'Cancel') + '</button>' +
                             '</div>';
                     } else {
                         const remain = c.deadlineAt - Date.now();
-                        body = '<div class="cc-meta">' + (state.lang === 'fa' ? 'مهلت: ' : 'Deadline: ') +
-                            formatDurationFa(c.durationValue, c.durationUnit) + '</div>' +
+                        const deadlineLine = c.durationValue ?
+                            ((state.lang === 'fa' ? 'مهلت: ' : 'Deadline: ') + formatDurationFa(c.durationValue, c.durationUnit)) :
+                            ((state.lang === 'fa' ? 'مهلت: ' : 'Deadline: ') + new Date(c.deadlineAt).toLocaleString(state.lang === 'fa' ? 'fa-IR' : 'en-US'));
+                        body = '<div class="cc-meta">' + deadlineLine + '</div>' +
                             '<div class="cc-meta cc-countdown" data-cc-countdown="' + c.id + '">' + formatCountdown(remain) + '</div>' +
                             '<div class="cc-actions">' +
                             '<button class="cc-cancel" data-cc-cancel="' + c.id + '">' + (state.lang === 'fa' ? 'لغو' : 'Cancel') + '</button>' +
@@ -12331,6 +12536,7 @@
                     c.status = 'success';
                     c.completedAt = Date.now();
                     saveState();
+                    nativeCancelChallengeNotifications(c.id);
                     awardChallenge(c);
                 } else {
                     saveState();
@@ -12344,6 +12550,7 @@
                 c.progressCount = c.targetCount;
                 c.status = 'success';
                 c.completedAt = Date.now();
+                nativeCancelChallengeNotifications(c.id);
                 saveState();
                 awardChallenge(c);
                 renderActiveChallenges();
@@ -12354,6 +12561,7 @@
                 if (!c) return;
                 c.status = 'cancelled';
                 c.completedAt = Date.now();
+                nativeCancelChallengeNotifications(c.id);
                 saveState();
                 renderActiveChallenges();
             }
@@ -12361,7 +12569,7 @@
             function checkChallengeDeadlines() {
                 let changed = false;
                 state.challenges.forEach(c => {
-                    if (c.kind === 'timed' && c.status === 'active' && Date.now() >= c.deadlineAt) {
+                    if ((c.kind === 'timed' || c.kind === 'both') && c.status === 'active' && Date.now() >= c.deadlineAt) {
                         c.status = 'pending_review';
                         changed = true;
                         if (!challengeCheckinQueue.includes(c.id)) challengeCheckinQueue.push(c.id);
@@ -12390,6 +12598,7 @@
                 if (c) {
                     c.status = success ? 'success' : 'failed';
                     c.completedAt = Date.now();
+                    nativeCancelChallengeNotifications(c.id);
                     saveState();
                     if (success) awardChallenge(c);
                     else showToast(state.lang === 'fa' ? 'اشکالی نداره، دفعه بعد! 💪' : 'No worries, next time! 💪');
