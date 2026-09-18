@@ -626,11 +626,11 @@
         }
         @keyframes celebratePop {
             0% {
-                transform: translateX(-50%) translateY(40px) scale(0.8);
+                transform: translateX(-50%) translateY(-40px) scale(0.8);
                 opacity: 0;
             }
             50% {
-                transform: translateX(-50%) translateY(-4px) scale(1.05);
+                transform: translateX(-50%) translateY(4px) scale(1.05);
                 opacity: 1;
             }
             100% {
@@ -886,7 +886,9 @@
         .profile-dropdown {
             position: absolute;
             top: calc(100% + 10px);
-            right: 0;
+            left: 0;
+            right: auto;
+            max-width: calc(100vw - 32px);
             background: var(--surface);
             border: 1px solid var(--glass-border);
             border-radius: 18px;
@@ -1029,13 +1031,43 @@
             color: #fff;
             box-shadow: 0 4px 12px rgba(20, 107, 105, .3);
         }
+        /* منوی انتخاب صفحه (زیر دکمه +): شبکه‌ی مرتب از مستطیل‌های شفاف */
         .tabs-picker-nav {
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             overflow-x: visible;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            padding: 2px;
         }
         .tabs-picker-nav button {
-            flex: 1 1 30%;
-            padding: 12px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 54px;
+            padding: 12px 10px;
+            white-space: normal;
+            line-height: 1.5;
+            font-size: calc(15px * var(--font-scale));
+            font-weight: 700;
+            color: var(--text);
+            background: var(--glass-bg);
+            border: 1.5px solid var(--glass-border);
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(43, 33, 24, .06);
+        }
+        .tabs-picker-nav button:active {
+            transform: scale(.97);
+        }
+        .tabs-picker-nav button.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            border-color: var(--primary);
+            color: #fff;
         }
         .bottom-nav {
             position: fixed;
@@ -1046,8 +1078,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 18px;
-            padding: 8px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+            gap: 10px;
+            padding: 8px 14px calc(10px + env(safe-area-inset-bottom, 0px));
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -1055,7 +1087,7 @@
             box-shadow: 0 -6px 24px rgba(43, 33, 24, .09);
         }
         .bottom-nav-btn {
-            flex: 0 1 110px;
+            flex: 0 1 90px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -1064,7 +1096,7 @@
             background: transparent;
             color: var(--text-muted);
             font-family: inherit;
-            padding: 6px 10px;
+            padding: 6px 6px;
             border-radius: 14px;
             cursor: pointer;
             transition: background .2s var(--ease), color .2s var(--ease);
@@ -1395,6 +1427,60 @@
         .habit-note-box .note-saved-hint.show {
             opacity: 1;
         }
+        /* --------- کارت‌های خلاصه‌ی داشبورد --------- */
+        .dash-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .dash-progress-row:last-child {
+            border-bottom: none;
+        }
+        .dash-progress-name {
+            flex: 0 0 auto;
+            max-width: 38%;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dash-progress-bar {
+            flex: 1 1 auto;
+            height: 8px;
+            border-radius: 6px;
+            background: var(--border);
+            overflow: hidden;
+        }
+        .dash-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 6px;
+            transition: width .3s;
+        }
+        .dash-progress-pct {
+            flex: 0 0 auto;
+            min-width: 38px;
+            text-align: left;
+            font-size: calc(12px * var(--font-scale));
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+        .dash-activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .dash-activity-item {
+            font-size: calc(13px * var(--font-scale));
+            color: var(--text);
+            background: var(--glass-bg);
+            border-radius: 10px;
+            padding: 8px 12px;
+        }
         /* --------- آموزش اولیه (Onboarding) --------- */
         .onboarding-overlay {
             position: fixed;
@@ -1699,14 +1785,39 @@
             background: #FFEBEE;
             color: var(--priority-red)
         }
+        .help-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            min-width: 26px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text-muted);
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .help-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
         .icon-btn {
             background: transparent;
             border: none;
             cursor: pointer;
             color: var(--text-muted);
             font-size: calc(16px * var(--font-scale));
-            padding: 6px 8px;
-            border-radius: 8px;
+            padding: 8px;
+            min-width: 40px;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
             transition: all .15s
         }
         .icon-btn:hover {
@@ -2201,11 +2312,12 @@
 
         .urge-float-btn {
             position: fixed;
-            bottom: 88px;
-            right: 22px;
+            /* بالاتر از نوار پایین قرار می‌گیرد تا زیر دکمه‌های ناوبری گم نشود */
+            bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+            right: 18px;
             z-index: 500;
-            width: 46px;
-            height: 46px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             border: none;
             cursor: pointer;
@@ -2237,7 +2349,7 @@
         .urge-float-btn:active {
             transform: scale(.95);
         }
-        .challenge-float-btn span { font-size: 20px; line-height: 1; }
+        .challenge-float-btn span { font-size: 16px; line-height: 1; }
         @keyframes urgePulse {
             0%, 100% {
                 transform: scale(1);
@@ -2619,13 +2731,14 @@
         }
         .challenge-card .cc-actions button {
             flex: 1;
-            padding: 7px 8px;
+            min-height: 44px;
+            padding: 10px 8px;
             border-radius: 10px;
             border: 1px solid var(--border);
             background: var(--surface);
             color: var(--text);
             font-family: inherit;
-            font-size: calc(11.5px * var(--font-scale));
+            font-size: calc(12.5px * var(--font-scale));
             font-weight: 700;
             cursor: pointer;
         }
@@ -2960,9 +3073,10 @@
         }
         .toast {
             position: fixed;
-            bottom: 24px;
+            /* پیام‌ها از بالای صفحه میان تا هیچ‌وقت زیر نوار پایین یا بیرون صفحه نیفتن */
+            top: calc(14px + env(safe-area-inset-top, 0px));
             left: 50%;
-            transform: translateX(-50%) translateY(20px);
+            transform: translateX(-50%) translateY(-20px);
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: #fff;
             padding: 16px 22px;
@@ -2970,7 +3084,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
             font-weight: 700;
             font-size: calc(14px * var(--font-scale));
-            z-index: 200;
+            z-index: 9000;
             opacity: 0;
             transition: all .35s;
             text-align: center;
@@ -4144,8 +4258,8 @@
            HABIT MINI CHARTS ICON + POPUP
         ============================================================ */
         .habit-mini-chart-btn {
-            width: 28px;
-            height: 28px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: none;
             background: var(--primary-soft);
@@ -4153,7 +4267,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            padding: 4px;
+            padding: 8px;
             flex-shrink: 0;
         }
         .habit-mini-chart-btn svg { width: 100%; height: 100%; display: block; }
@@ -4264,14 +4378,15 @@
             <div class="modal tabs-picker-modal">
                 <h3 style="text-align:center;margin-bottom:16px;font-size:calc(18px * var(--font-scale));color:var(--primary)" data-fa="🧭 انتخاب صفحه" data-en="🧭 Choose a Tab">🧭 انتخاب صفحه</h3>
                 <nav class="tabs tabs-picker-nav" id="tabsPickerNav">
+                    <button data-view="dashboard" class="view-tab-btn" data-fa="🏠 خانه" data-en="🏠 Home">🏠 خانه</button>
                     <button data-view="habits" class="active view-tab-btn" data-fa="عادت‌ها" data-en="Habits">عادت‌ها</button>
                     <button data-view="month" class="view-tab-btn" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</button>
                     <button data-view="year" class="view-tab-btn" data-fa="ثبت سالانه" data-en="Yearly Record">ثبت سالانه</button>
-                    <button data-view="library" class="view-tab-btn" data-fa="📚 کتابخونه" data-en="📚 Library">📚 کتابخونه</button>
+                    <button data-view="library" class="view-tab-btn" data-fa="📚 کتابخونه" data-en="📚 Library" data-premium-locked="true">📚 کتابخونه</button>
                     <button data-view="vows" class="view-tab-btn" data-fa="عهدنامه" data-en="Vows">عهدنامه</button>
                     <button data-view="journal" class="view-tab-btn" data-fa="📓 یادداشت" data-en="📓 Journal">📓 یادداشت</button>
-                    <button data-view="todo" class="view-tab-btn" data-fa="✅ لیست کارها" data-en="✅ To-Do">✅ لیست کارها</button>
-                    <button data-view="calorie" class="view-tab-btn" data-fa="🔥 کالری‌شمار" data-en="🔥 Calories">🔥 کالری‌شمار</button>
+                    <button data-view="todo" class="view-tab-btn" data-fa="✅ لیست کارها" data-en="✅ To-Do" data-premium-locked="true">✅ لیست کارها</button>
+                    <button data-view="calorie" class="view-tab-btn" data-fa="🔥 کالری‌شمار" data-en="🔥 Calories" data-premium-locked="true">🔥 کالری‌شمار</button>
                     <button data-view="settings" class="view-tab-btn" data-fa="⚙ تنظیمات" data-en="⚙ Settings">⚙ تنظیمات</button>
                 </nav>
                 <button class="modal-close" id="tabsPickerCloseBtn" data-fa="بستن" data-en="Close">بستن</button>
@@ -4279,12 +4394,18 @@
         </div>
 
         <div class="bottom-nav">
-            <button class="bottom-nav-btn view-tab-btn active" data-view="habits" id="bottomNavHabitsBtn">
+            <button class="bottom-nav-btn view-tab-btn active" data-view="dashboard" id="bottomNavDashboardBtn">
+                <span class="bn-icon">🏠</span><span class="bn-label" data-fa="خانه" data-en="Home">خانه</span>
+            </button>
+            <button class="bottom-nav-btn view-tab-btn" data-view="habits" id="bottomNavHabitsBtn">
                 <span class="bn-icon">🎯</span><span class="bn-label" data-fa="عادت‌ها" data-en="Habits">عادت‌ها</span>
             </button>
             <button class="bottom-nav-plus" id="bottomNavPlusBtn" aria-label="انتخاب صفحه" title="انتخاب صفحه">+</button>
             <button class="bottom-nav-btn view-tab-btn" data-view="month" id="bottomNavMonthBtn">
                 <span class="bn-icon">📅</span><span class="bn-label" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</span>
+            </button>
+            <button class="bottom-nav-btn view-tab-btn" data-view="todo" id="bottomNavTodoBtn" data-premium-locked="true">
+                <span class="bn-icon">✅</span><span class="bn-label" data-fa="کارها" data-en="To-Do">کارها</span>
             </button>
         </div>
 
@@ -4293,7 +4414,10 @@
                 <div class="row-between">
                     <button class="glass-btn nav-btn" id="monthPrev">›</button>
                     <div style="text-align:center">
-                        <div class="period-label" id="monthLabel">—</div>
+                        <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                            <div class="period-label" id="monthLabel">—</div>
+                            <button type="button" class="help-btn" data-help="calendar">؟</button>
+                        </div>
                         <div class="period-sub" id="monthSubLabel">—</div>
                     </div>
                     <button class="glass-btn nav-btn" id="monthNext">‹</button>
@@ -4313,7 +4437,10 @@
                 <div class="row-between">
                     <button class="glass-btn nav-btn" id="yearPrev">›</button>
                     <div style="text-align:center">
-                        <div class="period-label" id="yearLabel">—</div>
+                        <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                            <div class="period-label" id="yearLabel">—</div>
+                            <button type="button" class="help-btn" data-help="calendar">؟</button>
+                        </div>
                         <div class="period-sub"><span data-fa="نمای کلی سال" data-en="Year Overview">نمای کلی سال</span></div>
                     </div>
                     <button class="glass-btn nav-btn" id="yearNext">‹</button>
@@ -4322,7 +4449,7 @@
             </div>
         </section>
 
-        <section class="view active" id="view-habits">
+        <section class="view active" id="view-dashboard">
             <div class="card">
                 <div class="period-label" style="margin-bottom:12px" data-fa="دستاوردها" data-en="Achievements">دستاوردها</div>
                 <div class="summary-today" id="todaySummary"></div>
@@ -4332,23 +4459,29 @@
                     <span style="margin-right:auto;font-size:calc(12px * var(--font-scale));color:var(--text-muted)" id="streakLabel">پیاپی: ۰</span>
                 </div>
             </div>
+
+            <!-- ===== خلاصه پیشرفت عادت‌ها ===== -->
             <div class="card">
-                <div class="search-box">
-                    <input type="text" id="habitSearchInput" placeholder="جستجوی عادت..." maxlength="40">
-                    <button class="glass-btn primary" id="habitSearchBtn" data-fa="جستجو" data-en="Search">جستجو</button>
+                <div class="period-label" style="margin-bottom:12px" data-fa="🎯 پیشرفت عادت‌ها" data-en="🎯 Habits Progress">🎯 پیشرفت عادت‌ها</div>
+                <div id="dashboardHabitsProgress"></div>
+            </div>
+
+            <!-- ===== خلاصه پیشرفت چالش‌ها ===== -->
+            <div class="card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div class="period-label" style="margin-bottom:0" data-fa="🔥 پیشرفت چالش‌ها" data-en="🔥 Challenges Progress">🔥 پیشرفت چالش‌ها</div>
+                    <button type="button" class="glass-btn" id="dashboardOpenChallengesBtn" style="padding:6px 12px;font-size:calc(12px * var(--font-scale))" data-fa="مشاهده همه" data-en="View all">مشاهده همه</button>
                 </div>
-                <div class="period-label" style="margin-bottom:12px" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</div>
-                <div class="habit-add">
-                    <input type="text" id="newHabitInput" placeholder="مطالعه، ورزش، مدیتیشن..." maxlength="40">
-                    <button class="glass-btn primary" id="addHabitBtn" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</button>
-                </div>
-                <div class="habit-list" id="habitList"></div>
+                <div id="dashboardChallengesProgress"></div>
             </div>
 
             <!-- ===== نمودار پیشرفت (قبلاً تب جدا) ===== -->
             <div class="card">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                    <div class="period-label" style="margin-bottom:0" data-fa="📈 نمودار پیشرفت" data-en="📈 Progress Chart">📈 نمودار پیشرفت</div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <div class="period-label" style="margin-bottom:0" data-fa="📈 نمودار پیشرفت" data-en="📈 Progress Chart">📈 نمودار پیشرفت</div>
+                        <button type="button" class="help-btn" data-help="progress">؟</button>
+                    </div>
                     <button type="button" class="collapsible-toggle-btn" id="progressCollapseToggle">
                         <span data-fa="باز/بسته" data-en="Toggle">نمایش</span><span class="chev">▾</span>
                     </button>
@@ -4374,6 +4507,30 @@
                         <div id="weeklyReportText" style="font-size:13px;color:var(--text-muted)"></div>
                     </div>
                 </div>
+            </div>
+
+            <!-- ===== خلاصه فعالیت‌های مهم اخیر ===== -->
+            <div class="card">
+                <div class="period-label" style="margin-bottom:12px" data-fa="🕓 فعالیت‌های اخیر" data-en="🕓 Recent Activity">🕓 فعالیت‌های اخیر</div>
+                <div id="dashboardRecentActivity"></div>
+            </div>
+        </section>
+
+        <section class="view" id="view-habits">
+            <div class="card">
+                <div class="search-box">
+                    <input type="text" id="habitSearchInput" placeholder="جستجوی عادت..." maxlength="40">
+                    <button class="glass-btn primary" id="habitSearchBtn" data-fa="جستجو" data-en="Search">جستجو</button>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div class="period-label" style="margin-bottom:0" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</div>
+                    <button type="button" class="help-btn" data-help="habits">؟</button>
+                </div>
+                <div class="habit-add">
+                    <input type="text" id="newHabitInput" placeholder="مطالعه، ورزش، مدیتیشن..." maxlength="40">
+                    <button class="glass-btn primary" id="addHabitBtn" data-fa="افزودن عادت جدید" data-en="Add New Habit">افزودن عادت جدید</button>
+                </div>
+                <div class="habit-list" id="habitList"></div>
             </div>
 
             <!-- ===== محرک‌ها و مشوق‌ها — حالا فقط از داخل آیکون 📊 نمودار هر عادت در دسترس است ===== -->
@@ -4525,7 +4682,10 @@
 
         <section class="view" id="view-calorie">
             <div class="card" id="calSetupCard">
-                <h3 style="text-align:center;margin-bottom:14px;font-size:calc(18px * var(--font-scale));color:var(--primary)" data-fa="🔥 کالری‌شمار" data-en="🔥 Calorie Counter">🔥 کالری‌شمار</h3>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px">
+                    <h3 style="text-align:center;margin-bottom:0;font-size:calc(18px * var(--font-scale));color:var(--primary)" data-fa="🔥 کالری‌شمار" data-en="🔥 Calorie Counter">🔥 کالری‌شمار</h3>
+                    <button type="button" class="help-btn" data-help="calories">؟</button>
+                </div>
                 <p class="field-hint" style="margin-top:-6px;margin-bottom:12px" data-fa="برای محاسبه‌ی میزان کالری مجاز روزانه، اطلاعات زیر رو وارد کن." data-en="Enter the info below to calculate your daily calorie allowance.">برای محاسبه‌ی میزان کالری مجاز روزانه، اطلاعات زیر رو وارد کن.</p>
                 <div class="cal-setup-grid">
                     <div>
@@ -5106,7 +5266,7 @@
 
     <div class="modal-backdrop" id="challengeModalBackdrop">
         <div class="modal challenge-modal">
-            <div class="modal-title">🔥 <span data-fa="چالش‌ها" data-en="Challenges">چالش‌ها</span></div>
+            <div class="modal-title">🔥 <span data-fa="چالش‌ها" data-en="Challenges">چالش‌ها</span> <button type="button" class="help-btn" data-help="challenge">؟</button></div>
             <nav class="tabs challenge-tabs">
                 <button class="active" data-ctab="create" data-fa="➕ چالش جدید" data-en="➕ New">➕ چالش جدید</button>
                 <button data-ctab="active" data-fa="⏳ فعال" data-en="⏳ Active">⏳ فعال</button>
@@ -5118,8 +5278,9 @@
                 <div class="gender-toggle" id="challengeKindToggle">
                     <button type="button" data-kind="count" data-fa="🔢 شمارشی" data-en="🔢 Count">🔢 شمارشی</button>
                     <button type="button" data-kind="timed" data-fa="⏱ زمان‌دار" data-en="⏱ Timed">⏱ زمان‌دار</button>
+                    <button type="button" data-kind="both" data-fa="🎯 ترکیبی" data-en="🎯 Combined">🎯 ترکیبی</button>
                 </div>
-                <p class="field-hint" data-fa="شمارشی: یه هدف عددی داری (مثلاً ۵۰ شنا). زمان‌دار: یه مهلت داری و سر اتمامش ازت می‌پرسیم انجامش دادی یا نه." data-en="Count: you have a numeric target. Timed: you have a deadline; we'll ask if you did it when time's up.">شمارشی: یه هدف عددی داری (مثلاً ۵۰ شنا). زمان‌دار: یه مهلت داری و سر اتمامش ازت می‌پرسیم انجامش دادی یا نه.</p>
+                <p class="field-hint" data-fa="شمارشی: فقط یه هدف عددی داری. زمان‌دار: فقط یه مهلت داری. ترکیبی: هم باید تا یه مهلتِ مشخص، هم به یه هدف عددی برسی (مثلاً ۵۰ شنا تا ۲ ساعت دیگه)." data-en="Count: only a numeric target. Timed: only a deadline. Combined: reach a numeric target by a deadline (e.g. 50 push-ups within 2 hours).">شمارشی: فقط یه هدف عددی داری. زمان‌دار: فقط یه مهلت داری. ترکیبی: هم باید تا یه مهلتِ مشخص، هم به یه هدف عددی برسی (مثلاً ۵۰ شنا تا ۲ ساعت دیگه).</p>
 
                 <div class="field-label" data-fa="نماد چالش" data-en="Icon">نماد چالش</div>
                 <div class="emoji-picker" id="challengeEmojiPicker"></div>
@@ -5136,16 +5297,41 @@
                 </div>
 
                 <div id="challengeTimedFields" style="display:none">
-                    <div class="field-label" data-fa="مدت زمان مهلت" data-en="Deadline duration">مدت زمان مهلت</div>
-                    <div class="habit-goal-input">
-                        <input type="number" id="challengeDurationField" min="1" max="9999" value="2">
-                        <select id="challengeDurationUnitField">
-                            <option value="minutes" data-fa="دقیقه" data-en="minutes">دقیقه</option>
-                            <option value="hours" data-fa="ساعت" data-en="hours" selected>ساعت</option>
-                            <option value="days" data-fa="روز" data-en="days">روز</option>
-                        </select>
+                    <div class="field-label" data-fa="مهلت رو چطور تعیین می‌کنی؟" data-en="How do you want to set the deadline?">مهلت رو چطور تعیین می‌کنی؟</div>
+                    <div class="gender-toggle" id="challengeDeadlineModeToggle">
+                        <button type="button" data-mode="duration" class="active" data-fa="⏳ مدت زمان" data-en="⏳ Duration">⏳ مدت زمان</button>
+                        <button type="button" data-mode="exact" data-fa="📅 تاریخ و ساعت دقیق" data-en="📅 Exact date/time">📅 تاریخ و ساعت دقیق</button>
+                    </div>
+
+                    <div id="challengeDurationWrap">
+                        <div class="field-label" data-fa="مدت زمان مهلت" data-en="Deadline duration">مدت زمان مهلت</div>
+                        <div class="habit-goal-input">
+                            <input type="number" id="challengeDurationField" min="1" max="9999" value="2">
+                            <select id="challengeDurationUnitField">
+                                <option value="minutes" data-fa="دقیقه" data-en="minutes">دقیقه</option>
+                                <option value="hours" data-fa="ساعت" data-en="hours" selected>ساعت</option>
+                                <option value="days" data-fa="روز" data-en="days">روز</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="challengeExactWrap" style="display:none">
+                        <div class="field-label" data-fa="تاریخ و ساعت دقیق مهلت" data-en="Exact deadline date/time">تاریخ و ساعت دقیق مهلت</div>
+                        <input type="datetime-local" id="challengeExactDeadlineField" class="name-input">
+                    </div>
+
+                    <label class="todo-reminder-toggle" style="margin-top:10px">
+                        <input type="checkbox" id="challengeReminderEnabled">
+                        <span data-fa="🔔 یادآوری تکرارشونده هم می‌خوام" data-en="🔔 I also want a recurring reminder">🔔 یادآوری تکرارشونده هم می‌خوام</span>
+                    </label>
+                    <div id="challengeReminderIntervalWrap" style="display:none;margin-top:8px">
+                        <div class="field-label" data-fa="هر چند ساعت یک‌بار یادآوری بشه؟" data-en="Remind me every how many hours?">هر چند ساعت یک‌بار یادآوری بشه؟</div>
+                        <div class="habit-goal-input">
+                            <input type="number" id="challengeReminderIntervalField" min="1" max="72" value="2">
+                            <span data-fa="ساعت" data-en="hours">ساعت</span>
+                        </div>
                     </div>
                 </div>
+
 
                 <div class="field-label" data-fa="🪙 جایزه سکه" data-en="🪙 Coin reward">🪙 جایزه سکه</div>
                 <div class="habit-goal-input">
@@ -5185,6 +5371,24 @@
     <div class="habit-photo-lightbox" id="habitPhotoLightbox">
         <button class="habit-photo-lightbox-close" id="habitPhotoLightboxClose">✕</button>
         <img id="habitPhotoLightboxImg" src="" alt="">
+    </div>
+
+    <div class="modal-backdrop" id="helpModalBackdrop">
+        <div class="modal" style="max-width:420px">
+            <h3 id="helpModalTitle">❓</h3>
+            <div id="helpModalBody" style="font-size:calc(13.5px * var(--font-scale));line-height:2;color:var(--text)"></div>
+            <button class="modal-close" id="helpModalCloseBtn" data-fa="بستن" data-en="Close">بستن</button>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="premiumPaywallBackdrop">
+        <div class="modal" style="max-width:420px;text-align:center">
+            <div style="font-size:44px;margin-bottom:6px">🔒</div>
+            <h3 data-fa="این بخش، ویژه‌ی نسخه‌ی کامله" data-en="This section is part of the full version">این بخش، ویژه‌ی نسخه‌ی کامله</h3>
+            <p id="premiumPaywallBody" style="font-size:calc(13.5px * var(--font-scale));line-height:2;color:var(--text-muted);margin:10px 0 18px"></p>
+            <button class="btn-confirm" id="premiumPurchaseBtn" style="width:100%;margin-bottom:10px" data-fa="🔓 خرید نسخه‌ی کامل" data-en="🔓 Unlock Full Version">🔓 خرید نسخه‌ی کامل</button>
+            <button class="modal-close" id="premiumPaywallCloseBtn" data-fa="بعداً" data-en="Later">بعداً</button>
+        </div>
     </div>
 
     <div class="onboarding-overlay" id="onboardingOverlay">
@@ -5474,6 +5678,7 @@
                 urgeHiddenIds: [],
                 habitNotes: {},
                 onboardingDone: false,
+                isPremium: false,
                 calorie: { profile: null, logs: {}, burns: {}, customFoods: [], customActivities: [] },
                 challenges: []
             };
@@ -6267,6 +6472,39 @@
                 const plugin = rpLocalNotifPlugin();
                 if (!plugin) return;
                 try { await plugin.cancel({ notifications: [{ id: rpNumericId(idStr) }] }); } catch (e) {}
+            }
+
+            // یادآوری چالش‌های زمان‌دار/ترکیبی: یک آلارم دقیق سرِ مهلت + (اختیاری) چند آلارم دقیقِ
+            // تکرارشونده تا قبل از مهلت. عیناً همون تابع nativeScheduleOnce که برای کارها و عادت‌ها
+            // امتحانش کردیم و درست کار می‌کنه رو صدا می‌زنیم — هیچ مسیر جدیدی نمی‌سازیم.
+            const CHALLENGE_MAX_REMINDER_SLOTS = 60;
+            async function nativeScheduleChallengeNotifications(ch) {
+                if (!(ch.kind === 'timed' || ch.kind === 'both')) return;
+                if (!ch.deadlineAt) return;
+                await nativeScheduleOnce('challenge-deadline-' + ch.id,
+                    state.lang === 'fa' ? '⏰ مهلت چالش تموم شد' : '⏰ Challenge deadline reached',
+                    (state.lang === 'fa' ? 'زمان چالش «' + ch.name + '» تموم شد! انجامش دادی؟' :
+                        'Time is up for "' + ch.name + '"! Did you do it?'),
+                    ch.deadlineAt);
+                if (ch.reminderIntervalHours) {
+                    const intervalMs = ch.reminderIntervalHours * 3600000;
+                    let t = Date.now() + intervalMs;
+                    let idx = 0;
+                    while (t < ch.deadlineAt && idx < CHALLENGE_MAX_REMINDER_SLOTS) {
+                        await nativeScheduleOnce('challenge-reminder-' + ch.id + '-r' + idx,
+                            state.lang === 'fa' ? '🔥 یادآوری چالش' : '🔥 Challenge reminder',
+                            (state.lang === 'fa' ? 'یادت نره: «' + ch.name + '»' : "Don't forget: " + ch.name),
+                            t);
+                        t += intervalMs;
+                        idx++;
+                    }
+                }
+            }
+            async function nativeCancelChallengeNotifications(chId) {
+                await nativeCancel('challenge-deadline-' + chId);
+                for (let i = 0; i < CHALLENGE_MAX_REMINDER_SLOTS; i++) {
+                    await nativeCancel('challenge-reminder-' + chId + '-r' + i);
+                }
             }
 
             // ============================================================
@@ -7184,6 +7422,7 @@
                 document.querySelectorAll('[data-fa-title][data-en-title]').forEach(el => {
                     el.title = lang === 'fa' ? el.dataset.faTitle : el.dataset.enTitle;
                 });
+                applyPremiumLockUI();
                 updateTriggerUI();
                 const todoInput = document.getElementById('todoInput');
                 if (todoInput) {
@@ -7789,6 +8028,110 @@
                 document.getElementById('pStatPoints').textContent = state.lang === 'fa' ? toPersianDigits(state
                     .scores.coins || 0) : String(state.scores.coins || 0);
                 saveState();
+            }
+
+            // ============================================================
+            // DASHBOARD EXTRAS: خلاصه‌ی پیشرفت عادت‌ها/چالش‌ها + فعالیت‌های اخیر
+            // ============================================================
+            function renderDashboardExtras() {
+                const habitsWrap = document.getElementById('dashboardHabitsProgress');
+                if (habitsWrap) {
+                    if (!state.habits.length) {
+                        habitsWrap.innerHTML = '<div class="empty-state">' +
+                            (state.lang === 'fa' ? 'هنوز عادتی اضافه نکردی.' : "You haven't added any habits yet.") + '</div>';
+                    } else {
+                        const today = startOfDay(new Date());
+                        habitsWrap.innerHTML = state.habits.map(h => {
+                            let total = 0, succ = 0;
+                            let d = new Date(h.createdAt);
+                            while (d <= today) {
+                                const iso = dateToISO(d);
+                                if (habitAppliesOnISO(h, iso)) {
+                                    const r = habitSuccessOnISO(h, iso);
+                                    if (r !== null) { total++; if (r === true) succ++; }
+                                }
+                                d = addDays(d, 1);
+                            }
+                            const pct = total > 0 ? Math.round((succ / total) * 100) : 0;
+                            const pctText = state.lang === 'fa' ? toPersianDigits(pct) : String(pct);
+                            return '<div class="dash-progress-row">' +
+                                '<div class="dash-progress-name">' + escHtml(h.name) + '</div>' +
+                                '<div class="dash-progress-bar"><div class="dash-progress-fill" style="width:' + pct + '%"></div></div>' +
+                                '<div class="dash-progress-pct">' + pctText + '%</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+                }
+
+                const chWrap = document.getElementById('dashboardChallengesProgress');
+                if (chWrap) {
+                    const active = (state.challenges || []).filter(c => c.status === 'active' || c.status === 'pending_review')
+                        .sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+                    if (!active.length) {
+                        chWrap.innerHTML = '<div class="empty-state">' +
+                            (state.lang === 'fa' ? 'چالش فعالی نداری.' : 'No active challenges.') + '</div>';
+                    } else {
+                        chWrap.innerHTML = active.map(c => {
+                            let pct = 0, metaText = '';
+                            if (c.kind === 'count' || c.kind === 'both') {
+                                pct = Math.min(100, Math.round((c.progressCount / c.targetCount) * 100));
+                                metaText = state.lang === 'fa' ?
+                                    (toPersianDigits(c.progressCount) + ' از ' + toPersianDigits(c.targetCount) + ' ' + c.unit) :
+                                    (c.progressCount + ' / ' + c.targetCount + ' ' + c.unit);
+                                if (c.kind === 'both' && c.deadlineAt) {
+                                    metaText += ' · ' + formatCountdown(c.deadlineAt - Date.now());
+                                }
+                            } else {
+                                const remain = c.deadlineAt - Date.now();
+                                const totalDur = c.deadlineAt - c.createdAt;
+                                pct = totalDur > 0 ? Math.max(0, Math.min(100, Math.round((1 - remain / totalDur) * 100))) : 0;
+                                metaText = formatCountdown(remain);
+                            }
+                            return '<div class="dash-progress-row">' +
+                                '<div class="dash-progress-name">' + c.icon + ' ' + escHtml(c.name) + '</div>' +
+                                '<div class="dash-progress-bar"><div class="dash-progress-fill" style="width:' + pct + '%"></div></div>' +
+                                '<div class="dash-progress-pct" style="min-width:auto;font-size:calc(11px * var(--font-scale))">' + metaText + '</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+                }
+
+                const actWrap = document.getElementById('dashboardRecentActivity');
+                if (actWrap) {
+                    const events = [];
+                    const today = startOfDay(new Date());
+                    for (let i = 0; i < 3; i++) {
+                        const d = addDays(today, -i);
+                        const iso = dateToISO(d);
+                        state.habits.forEach(h => {
+                            if (!habitAppliesOnISO(h, iso)) return;
+                            const r = habitSuccessOnISO(h, iso);
+                            if (r === null) return;
+                            const dayWord = i === 0 ? (state.lang === 'fa' ? ' (امروز)' : ' (today)') :
+                                i === 1 ? (state.lang === 'fa' ? ' (دیروز)' : ' (yesterday)') : '';
+                            events.push({ time: d.getTime() + (r ? 1 : 0), text: (r ? '✅ ' : '❌ ') + h.name + dayWord });
+                        });
+                    }
+                    (state.challenges || []).filter(c => c.status === 'success' || c.status === 'failed')
+                        .sort((a, b) => (b.completedAt || b.createdAt) - (a.completedAt || a.createdAt))
+                        .slice(0, 3).forEach(c => {
+                            events.push({
+                                time: c.completedAt || c.createdAt,
+                                text: (c.status === 'success' ? '🏆 ' : '⚠️ ') + c.name + (state.lang === 'fa' ?
+                                    (c.status === 'success' ? ' با موفقیت تموم شد' : ' ناموفق بود') :
+                                    (c.status === 'success' ? ' completed' : ' failed'))
+                            });
+                        });
+                    events.sort((a, b) => b.time - a.time);
+                    const top = events.slice(0, 8);
+                    if (!top.length) {
+                        actWrap.innerHTML = '<div class="empty-state">' +
+                            (state.lang === 'fa' ? 'هنوز فعالیتی ثبت نشده.' : 'No activity yet.') + '</div>';
+                    } else {
+                        actWrap.innerHTML = '<div class="dash-activity-list">' +
+                            top.map(e => '<div class="dash-activity-item">' + e.text + '</div>').join('') + '</div>';
+                    }
+                }
             }
 
             // ============================================================
@@ -9433,8 +9776,9 @@
                 if (isActive('view-library')) renderLibrary();
                 if (isActive('view-calorie')) renderCalorie();
                 renderDashboard();
+                renderDashboardExtras();
                 updateProfileUI();
-                if (isActive('view-habits')) {
+                if (isActive('view-dashboard')) {
                     setTimeout(renderChart, 50);
                 }
                 if (isActive('view-habits')) {
@@ -9709,12 +10053,24 @@
                 renderReasonsCharts();
             });
 
+            let currentViewName = 'dashboard';
+            const LOCKED_VIEWS = ['todo', 'calorie', 'library'];
             function switchToView(viewName) {
+                if (LOCKED_VIEWS.includes(viewName) && !state.isPremium) {
+                    openPremiumPaywall(viewName);
+                    return;
+                }
+                currentViewName = viewName;
                 document.querySelectorAll('.view-tab-btn').forEach(x => x.classList.remove('active'));
                 document.querySelectorAll('section.view').forEach(v => v.classList.remove('active'));
                 document.querySelectorAll('.view-tab-btn[data-view="' + viewName + '"]').forEach(x => x.classList.add('active'));
                 const viewEl = document.getElementById('view-' + viewName);
                 if (viewEl) viewEl.classList.add('active');
+                if (viewName === 'dashboard') {
+                    renderDashboard();
+                    renderDashboardExtras();
+                    setTimeout(renderChart, 50);
+                }
                 if (viewName === 'habits') {
                     renderHabits();
                     setTimeout(renderChart, 50);
@@ -9734,6 +10090,47 @@
             document.querySelectorAll('.view-tab-btn').forEach(b => b.addEventListener('click', () => {
                 switchToView(b.dataset.view);
             }));
+
+            // ============================================================
+            // دکمه‌ی فیزیکی Back اندروید: رفتار استاندارد —
+            // اول هر مودال/پنل بازی رو می‌بنده، بعد اگه توی صفحه‌ی اصلی نیستیم می‌بره صفحه‌ی
+            // اصلی، و اگه از قبل توی صفحه‌ی اصلی هستیم از اپ خارج می‌شه.
+            // نکته: HOME_VIEW فعلاً 'habits' است؛ وقتی تب Dashboard واقعی اضافه بشه، این مقدار
+            // باید به 'dashboard' تغییر کنه.
+            // ============================================================
+            const HOME_VIEW = 'dashboard';
+            function rpHandleAndroidBack() {
+                const onboardingOverlay = document.getElementById('onboardingOverlay');
+                if (onboardingOverlay && onboardingOverlay.classList.contains('open')) {
+                    document.getElementById('onboardingSkipBtn').click();
+                    return;
+                }
+                const openModals = document.querySelectorAll('.modal-backdrop.open');
+                if (openModals.length) {
+                    openModals.forEach(m => m.classList.remove('open'));
+                    return;
+                }
+                const profileDropdown = document.getElementById('profileDropdown');
+                if (profileDropdown && profileDropdown.classList.contains('open')) {
+                    profileDropdown.classList.remove('open');
+                    return;
+                }
+                const lightbox = document.getElementById('habitPhotoLightbox');
+                if (lightbox && lightbox.classList.contains('open')) {
+                    lightbox.classList.remove('open');
+                    return;
+                }
+                if (currentViewName !== HOME_VIEW) {
+                    switchToView(HOME_VIEW);
+                    return;
+                }
+                const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+                if (AppPlugin) AppPlugin.exitApp();
+            }
+            if (isNativeApp()) {
+                const AppPlugin = window.Capacitor.Plugins.App;
+                if (AppPlugin) AppPlugin.addListener('backButton', rpHandleAndroidBack);
+            }
 
             document.getElementById('bottomNavPlusBtn').addEventListener('click', () => {
                 document.getElementById('tabsPickerBackdrop').classList.add('open');
@@ -9968,29 +10365,31 @@
             // ============================================================
             // دیتابیس غذاها: k = کالری به‌ازای ۱۰۰ گرم، p = وزن تقریبی هر «عدد» به گرم (اختیاری)
             const FOOD_DB = [
-                // --- غذاهای اصلی ایرانی: خورشت‌ها ---
+                // k   = کالری هر ۱۰۰ گرم
+                // p   = وزن تقریبی هر عدد (گرم)
+                // kpp = کالری هر واحد سروینگ (وقتی وزن گرمی‌اش معلوم نیست)
+                // pu  = اسم فارسی همان واحد سروینگ (لیوان، سیخ، کف دست، ...)
                 { n: "قورمه سبزی", k: 120 },
                 { n: "قیمه", k: 150 },
-                { n: "قیمه نثار", k: 160 },
+                { n: "قیمه نثار", k: 333.3, kpp: 50, pu: "قاشق غذاخوری" },
                 { n: "فسنجان", k: 180 },
-                { n: "خورشت کرفس", k: 90 },
+                { n: "خورشت کرفس", k: 260, kpp: 39, pu: "قاشق غذاخوری" },
                 { n: "خورشت بادمجان", k: 110 },
-                { n: "خورشت آلو اسفناج", k: 100 },
+                { n: "خورشت آلو اسفناج", k: 246.7, kpp: 37, pu: "قاشق غذاخوری" },
                 { n: "خورشت کدو", k: 90 },
-                { n: "خورشت به", k: 105 },
+                { n: "خورشت به", k: 293.3, kpp: 44, pu: "قاشق غذاخوری" },
                 { n: "خورشت هویج", k: 130 },
                 { n: "خورشت گوجه", k: 100 },
-                { n: "خوراک لوبیا سبز", k: 95 },
-                { n: "میرزا قاسمی", k: 140 },
-                { n: "کشک بادمجان", k: 160 },
+                { n: "خوراک لوبیا سبز", k: 178.5, kpp: 357, pu: "لیوان" },
+                { n: "میرزا قاسمی", k: 186.7, kpp: 28, pu: "قاشق غذاخوری" },
+                { n: "کشک بادمجان", k: 240, kpp: 36, pu: "قاشق غذاخوری" },
                 { n: "خوراک لوبیا", k: 150 },
-                { n: "بورانی اسفناج", k: 95 },
+                { n: "بورانی اسفناج", k: 60, kpp: 9, pu: "قاشق غذاخوری" },
                 { n: "بورانی کدو", k: 90 },
-                // --- کباب و غذاهای گوشتی ---
                 { n: "جوجه کباب بدون پوست", k: 165 },
                 { n: "جوجه کباب با پوست", k: 220 },
-                { n: "کباب کوبیده", k: 250 },
-                { n: "کباب برگ", k: 200 },
+                { n: "کباب کوبیده", kpp: 202, pu: "سیخ" },
+                { n: "کباب برگ", kpp: 360, pu: "سیخ" },
                 { n: "کباب بختیاری", k: 220 },
                 { n: "کباب چنجه", k: 210 },
                 { n: "جگر کباب", k: 195 },
@@ -9998,27 +10397,25 @@
                 { n: "ماهی کباب‌شده", k: 180 },
                 { n: "ماهی سرخ‌شده", k: 230 },
                 { n: "میگو سرخ‌شده", k: 200 },
-                { n: "کتلت", k: 250 },
+                { n: "کتلت", kpp: 210, pu: "کف دست" },
                 { n: "کوفته تبریزی", k: 210 },
                 { n: "کوکو سبزی", k: 180 },
-                { n: "کوکو سیب‌زمینی", k: 200 },
-                { n: "دلمه برگ مو", k: 150 },
+                { n: "کوکو سیب‌زمینی", kpp: 161, pu: "کف دست" },
+                { n: "دلمه برگ مو", kpp: 66, pu: "عدد متوسط" },
                 { n: "دلمه فلفل", k: 120 },
                 { n: "دلمه بادمجان", k: 130 },
                 { n: "شنیسل مرغ", k: 260 },
                 { n: "جوجه سوخاری", k: 260 },
-                // --- آش و سوپ ---
                 { n: "آش رشته", k: 90 },
-                { n: "آش دوغ", k: 70 },
-                { n: "آش جو", k: 75 },
+                { n: "آش دوغ", k: 136, kpp: 272, pu: "لیوان" },
+                { n: "آش جو", k: 104.5, kpp: 209, pu: "لیوان" },
                 { n: "آش انار", k: 80 },
-                { n: "سوپ جو", k: 60 },
+                { n: "سوپ جو", k: 70, kpp: 140, pu: "لیوان" },
                 { n: "سوپ مرغ", k: 55 },
                 { n: "سوپ جودوسر", k: 65 },
                 { n: "حلیم", k: 150 },
-                { n: "حلیم بادمجان", k: 100 },
+                { n: "حلیم بادمجان", k: 226.7, kpp: 34, pu: "قاشق غذاخوری" },
                 { n: "آبگوشت (دیزی)", k: 130 },
-                // --- پلوها و غذاهای برنجی ---
                 { n: "چلو (برنج سفید)", k: 200 },
                 { n: "باقلا پلو", k: 180 },
                 { n: "زرشک پلو", k: 190 },
@@ -10032,45 +10429,41 @@
                 { n: "تهچین مرغ", k: 240 },
                 { n: "بریانی", k: 230 },
                 { n: "مجدره", k: 160 },
-                { n: "شیر برنج", k: 130 },
+                { n: "شیر برنج", k: 124.5, kpp: 249, pu: "لیوان" },
                 { n: "حلوا آردی", k: 450 },
-                // --- نان‌ها ---
                 { n: "نان سنگک", k: 260, p: 180 },
                 { n: "نان بربری", k: 270, p: 250 },
                 { n: "نان لواش", k: 300, p: 40 },
-                { n: "نان تافتون", k: 280, p: 100 },
+                { n: "نان تافتون", kpp: 42, pu: "کف دست" },
                 { n: "نان باگت", k: 270, p: 30 },
-                { n: "نان تست", k: 265, p: 25 },
-                { n: "نان جو", k: 250, p: 25 },
+                { n: "نان تست", kpp: 75, pu: "قطعه" },
+                { n: "نان جو", kpp: 57, pu: "کف دست" },
                 { n: "نان بربری با کنجد", k: 275, p: 250 },
                 { n: "نان همبرگر", k: 280, p: 60 },
-                // --- غلات، حبوبات و ماکارونی (پخته) ---
                 { n: "برنج سفید پخته", k: 130 },
                 { n: "برنج قهوه‌ای پخته", k: 110 },
                 { n: "ماکارونی پخته", k: 155 },
                 { n: "عدس پخته", k: 116 },
-                { n: "لوبیا قرمز پخته", k: 127 },
-                { n: "لوبیا چیتی پخته", k: 130 },
+                { n: "لوبیا قرمز پخته", k: 112, kpp: 224, pu: "لیوان" },
+                { n: "لوبیا چیتی پخته", k: 143 },
                 { n: "نخود پخته", k: 164 },
                 { n: "جو پرک پخته (اوت‌میل)", k: 68 },
                 { n: "کینوا پخته", k: 120 },
                 { n: "بلغور گندم پخته", k: 112 },
-                // --- لبنیات ---
                 { n: "شیر کامل", k: 61 },
                 { n: "شیر کم‌چرب", k: 42 },
                 { n: "ماست ساده", k: 59 },
-                { n: "ماست پرچرب", k: 88 },
-                { n: "ماست یونانی", k: 97 },
+                { n: "ماست پرچرب", k: 117.5, kpp: 235, pu: "لیوان" },
+                { n: "ماست یونانی", k: 73.3, kpp: 11, pu: "قاشق غذاخوری" },
                 { n: "دوغ", k: 35 },
                 { n: "پنیر سفید ایرانی", k: 260 },
                 { n: "پنیر پیتزا (موزارلا)", k: 280 },
-                { n: "پنیر خامه‌ای", k: 320 },
+                { n: "پنیر خامه‌ای", k: 333.3, kpp: 50, pu: "قاشق غذاخوری" },
                 { n: "کره", k: 717 },
                 { n: "خامه", k: 340 },
                 { n: "بستنی وانیلی", k: 207 },
                 { n: "بستنی سنتی زعفرانی", k: 230 },
                 { n: "کشک", k: 130 },
-                // --- تخم‌مرغ و پروتئین ---
                 { n: "تخم‌مرغ آب‌پز", k: 155, p: 50 },
                 { n: "تخم‌مرغ نیمرو (با روغن)", k: 196, p: 55 },
                 { n: "املت", k: 190 },
@@ -10083,20 +10476,19 @@
                 { n: "ماهی تن کنسروی", k: 132 },
                 { n: "میگو پخته", k: 99 },
                 { n: "سوسیس", k: 300 },
-                { n: "کالباس", k: 250 },
+                { n: "کالباس", k: 353 },
                 { n: "همبرگر گوشت خام", k: 260 },
-                // --- میوه‌ها ---
                 { n: "سیب", k: 52, p: 150 },
-                { n: "موز", k: 89, p: 120 },
-                { n: "پرتقال", k: 47, p: 180 },
-                { n: "نارنگی", k: 53, p: 100 },
+                { n: "موز", kpp: 89, pu: "عدد" },
+                { n: "پرتقال", kpp: 65, pu: "عدد" },
+                { n: "نارنگی", kpp: 40, pu: "عدد" },
                 { n: "انگور", k: 69 },
-                { n: "هندوانه", k: 30 },
-                { n: "خربزه", k: 34 },
-                { n: "طالبی", k: 34 },
+                { n: "هندوانه", k: 22.5, kpp: 45, pu: "لیوان" },
+                { n: "خربزه", k: 30, kpp: 60, pu: "لیوان" },
+                { n: "طالبی", k: 34, kpp: 68, pu: "لیوان" },
                 { n: "گلابی", k: 57, p: 140 },
-                { n: "هلو", k: 39, p: 100 },
-                { n: "شلیل", k: 44, p: 100 },
+                { n: "هلو", kpp: 58, pu: "عدد" },
+                { n: "شلیل", kpp: 62, pu: "عدد" },
                 { n: "آلبالو", k: 50 },
                 { n: "گیلاس", k: 63 },
                 { n: "انار", k: 83, p: 300 },
@@ -10107,35 +10499,33 @@
                 { n: "توت‌فرنگی", k: 32 },
                 { n: "زردآلو", k: 48, p: 35 },
                 { n: "گریپ‌فروت", k: 42, p: 200 },
-                { n: "لیمو شیرین", k: 30, p: 90 },
-                { n: "خرما", k: 282, p: 8 },
+                { n: "لیمو شیرین", kpp: 40, pu: "عدد" },
+                { n: "خرما", kpp: 22, pu: "عدد" },
                 { n: "انجیر تازه", k: 74, p: 50 },
-                { n: "انجیر خشک", k: 249, p: 15 },
-                { n: "کشمش", k: 299 },
+                { n: "انجیر خشک", kpp: 20, pu: "عدد" },
+                { n: "کشمش", kpp: 1, pu: "عدد" },
                 { n: "زردآلو خشک", k: 241 },
                 { n: "آلو خشک (پرون)", k: 240 },
                 { n: "توت خشک", k: 340 },
                 { n: "هلو خشک", k: 239 },
-                // --- سبزیجات ---
-                { n: "گوجه‌فرنگی", k: 18, p: 100 },
+                { n: "گوجه‌فرنگی", kpp: 23, pu: "عدد" },
                 { n: "خیار", k: 15, p: 150 },
                 { n: "کاهو", k: 15 },
                 { n: "اسفناج خام", k: 23 },
                 { n: "هویج", k: 41, p: 60 },
                 { n: "سیب‌زمینی پخته", k: 87, p: 150 },
-                { n: "پیاز", k: 40, p: 100 },
+                { n: "پیاز", kpp: 44, pu: "عدد" },
                 { n: "فلفل دلمه‌ای", k: 31, p: 120 },
                 { n: "کدو سبز", k: 17 },
-                { n: "بادمجان خام", k: 25 },
+                { n: "بادمجان خام", kpp: 9, pu: "عدد" },
                 { n: "قارچ", k: 22 },
                 { n: "کلم سفید", k: 25 },
                 { n: "کلم بروکلی", k: 34 },
                 { n: "ذرت شیرین پخته", k: 96 },
-                { n: "لوبیا سبز پخته", k: 31 },
+                { n: "لوبیا سبز پخته", k: 21.5, kpp: 43, pu: "لیوان" },
                 { n: "کرفس", k: 16 },
-                { n: "تربچه", k: 16 },
+                { n: "تربچه", kpp: 0, pu: "عدد" },
                 { n: "چغندر پخته", k: 44 },
-                // --- مغزها و دانه‌ها ---
                 { n: "بادام", k: 579 },
                 { n: "گردو", k: 654 },
                 { n: "پسته", k: 560 },
@@ -10145,7 +10535,6 @@
                 { n: "تخمه آفتابگردان", k: 584 },
                 { n: "تخمه کدو", k: 559 },
                 { n: "کره بادام‌زمینی", k: 588 },
-                // --- تنقلات ایرانی و شیرینی‌جات ---
                 { n: "آجیل مخلوط شور", k: 600 },
                 { n: "آجیل مشکل‌گشا", k: 590 },
                 { n: "چیپس سیب‌زمینی", k: 536 },
@@ -10162,7 +10551,7 @@
                 { n: "شیرینی خشک نخودچی", k: 460 },
                 { n: "شیرینی دانمارکی", k: 420 },
                 { n: "زولبیا و بامیه", k: 400 },
-                { n: "نبات", k: 380 },
+                { n: "نبات", k: 395 },
                 { n: "آبنبات", k: 390 },
                 { n: "شکلات تخته‌ای شیری", k: 546 },
                 { n: "شکلات تلخ", k: 550 },
@@ -10173,12 +10562,11 @@
                 { n: "مربا", k: 278 },
                 { n: "لواشک", k: 260 },
                 { n: "تخمه هندوانه", k: 557 },
-                { n: "کیک شکلاتی", k: 389 },
+                { n: "کیک شکلاتی", k: 345 },
                 { n: "دونات", k: 452 },
                 { n: "کروسان", k: 406 },
                 { n: "چیز کیک", k: 321 },
                 { n: "بستنی چوبی شکلاتی", k: 270 },
-                // --- فست‌فود ---
                 { n: "پیتزا مخلوط", k: 266, p: 120 },
                 { n: "سیب‌زمینی سرخ‌کرده", k: 312 },
                 { n: "همبرگر ساده", k: 295, p: 150 },
@@ -10190,7 +10578,6 @@
                 { n: "سوخاری مرغ (فست‌فود)", k: 260 },
                 { n: "ساندویچ کالباس", k: 280, p: 200 },
                 { n: "ناگت مرغ", k: 296 },
-                // --- نوشیدنی‌ها ---
                 { n: "نوشابه گازدار", k: 42 },
                 { n: "نوشابه رژیمی", k: 1 },
                 { n: "آب‌میوه صنعتی", k: 45 },
@@ -10203,11 +10590,7 @@
                 { n: "شیرکاکائو", k: 83 },
                 { n: "قهوه با شیر و شکر", k: 55 },
                 { n: "انرژی‌زا (انرژی‌درینک)", k: 45 },
-
-                // ================================================================
-                // --- غذاهای بیشتر ایرانی (منطقه‌ای و خانگی) ---
-                // ================================================================
-                { n: "قیمه بادمجان", k: 165 },
+                { n: "قیمه بادمجان", k: 293.3, kpp: 44, pu: "قاشق غذاخوری" },
                 { n: "خورش آلو مسما", k: 115 },
                 { n: "خورش قیسی", k: 120 },
                 { n: "خورش انار و کدو", k: 110 },
@@ -10249,16 +10632,11 @@
                 { n: "پشمک", k: 380 },
                 { n: "باقلوای یزدی", k: 470 },
                 { n: "رانگینک", k: 440 },
-                { n: "ارده", k: 595 },
-                { n: "شیره انگور", k: 290 },
-                { n: "شیره خرما", k: 280 },
+                { n: "ارده", k: 480, kpp: 24, pu: "قاشق چایخوری" },
+                { n: "شیره انگور", k: 280, kpp: 14, pu: "قاشق چایخوری" },
+                { n: "شیره خرما", k: 220, kpp: 11, pu: "قاشق چایخوری" },
                 { n: "ترشی مخلوط", k: 35 },
                 { n: "لیته بادمجان", k: 100 },
-
-                // ================================================================
-                // --- غذاهای بین‌المللی (خارجی) ---
-                // ================================================================
-                // ایتالیایی
                 { n: "پاستا بولونیز", k: 155 },
                 { n: "پاستا آلفردو", k: 195 },
                 { n: "پاستا کاربونارا", k: 200 },
@@ -10272,7 +10650,6 @@
                 { n: "نیوکی", k: 130 },
                 { n: "بروشتا", k: 180 },
                 { n: "کالزونه", k: 270, p: 200 },
-                // فرانسوی
                 { n: "کروسان کره‌ای", k: 406, p: 60 },
                 { n: "باگت فرانسوی", k: 270, p: 30 },
                 { n: "کیش لورن", k: 260 },
@@ -10280,7 +10657,6 @@
                 { n: "کرم بروله", k: 300 },
                 { n: "راتاتویی", k: 70 },
                 { n: "اسکارگو", k: 190 },
-                // اسپانیایی و مدیترانه‌ای
                 { n: "پائیا", k: 170 },
                 { n: "تاپاس مخلوط", k: 200 },
                 { n: "خوراک ماهی مدیترانه‌ای", k: 150 },
@@ -10288,19 +10664,17 @@
                 { n: "سالاد یونانی", k: 90 },
                 { n: "تزاتزیکی", k: 75 },
                 { n: "هوموس", k: 166 },
-                { n: "فلافل", k: 333, p: 20 },
+                { n: "فلافل", kpp: 58, pu: "عدد" },
                 { n: "بابا غنوش", k: 90 },
                 { n: "تبوله", k: 65 },
                 { n: "کوسکوس", k: 112 },
                 { n: "دلمه برگ مو یونانی", k: 160 },
                 { n: "پیتا برد", k: 275, p: 60 },
-                // خاورمیانه
                 { n: "شاورما گوشت خاورمیانه‌ای", k: 250, p: 300 },
                 { n: "کباب ترکی", k: 230 },
                 { n: "منسف", k: 210 },
                 { n: "کبه", k: 260 },
                 { n: "مجدره عدس", k: 155 },
-                // آمریکایی
                 { n: "همبرگر آمریکایی با پنیر", k: 310, p: 180 },
                 { n: "هات‌داگ آمریکایی", k: 290, p: 100 },
                 { n: "مک‌اند‌چیز", k: 195 },
@@ -10315,7 +10689,6 @@
                 { n: "پای سیب آمریکایی", k: 265 },
                 { n: "کورن داگ", k: 260, p: 100 },
                 { n: "سالاد سزار با مرغ", k: 145 },
-                // مکزیکی
                 { n: "تاکو گوشت", k: 210, p: 80 },
                 { n: "بوریتو مرغ", k: 215, p: 250 },
                 { n: "کساديلا پنیر", k: 280, p: 150 },
@@ -10324,7 +10697,6 @@
                 { n: "انچیلادا", k: 195 },
                 { n: "فاهیتا مرغ", k: 180 },
                 { n: "سالسا", k: 36 },
-                // آسیای شرقی و جنوب شرقی
                 { n: "سوشی رول کالیفرنیا", k: 145, p: 30 },
                 { n: "ساشیمی سالمون", k: 140 },
                 { n: "رامن مرغ", k: 110 },
@@ -10345,7 +10717,6 @@
                 { n: "بولگوگی", k: 195 },
                 { n: "کیمچی", k: 23 },
                 { n: "پکینگ داک", k: 337 },
-                // هندی
                 { n: "کاری مرغ هندی", k: 165 },
                 { n: "باتر چیکن", k: 210 },
                 { n: "بریانی مرغ هندی", k: 200 },
@@ -10356,10 +10727,6 @@
                 { n: "رایتا", k: 60 },
                 { n: "لسی", k: 65 },
                 { n: "گولاب جامون", k: 320 },
-
-                // ================================================================
-                // --- تنقلات و لبنیات برند واقعی ایرانی ---
-                // ================================================================
                 { n: "چیپس سیب‌زمینی نمکی چی‌توز", k: 540, p: 60 },
                 { n: "چیپس سیب‌زمینی نمکی مزمز", k: 530, p: 60 },
                 { n: "پفک نمکی چی‌توز", k: 560, p: 45 },
@@ -10396,10 +10763,6 @@
                 { n: "مربای آلبالو برند مهرام", k: 250, p: 30 },
                 { n: "چای سیاه برند گلستان (دم‌کرده)", k: 1 },
                 { n: "کافی‌میکس برند گلستان", k: 400, p: 18 },
-
-                // ================================================================
-                // --- تنقلات و نوشیدنی‌های برند بین‌المللی واقعی ---
-                // ================================================================
                 { n: "چیپس پرینگلز اورجینال", k: 536, p: 40 },
                 { n: "چیپس دوریتوس", k: 498, p: 55 },
                 { n: "چیپس لیز اورجینال", k: 536, p: 45 },
@@ -10432,15 +10795,247 @@
                 { n: "ماءالشعیر هی‌دی", k: 38, p: 330 },
                 { n: "ماست دانون", k: 62, p: 100 },
                 { n: "پنیر گودا برند سولیکو", k: 356, p: 100 },
-
-                // ================================================================
-                // --- فست‌فود برندهای بین‌المللی (میانگین تقریبی) ---
-                // ================================================================
                 { n: "همبرگر مک‌دونالدز (بیگ‌مک)", k: 257, p: 215 },
                 { n: "سیب‌زمینی سرخ‌کرده مک‌دونالدز", k: 312, p: 115 },
                 { n: "مرغ سوخاری کنتاکی (KFC)", k: 280, p: 150 },
                 { n: "پیتزا پپرونی دومینوز (یک برش)", k: 285, p: 110 },
                 { n: "ساب‌وی ساندویچ مرغ", k: 200, p: 230 },
+                { n: "آجیل بدون پوست", k: 620 },
+                { n: "آلبالو خشک", k: 175, kpp: 350, pu: "لیوان" },
+                { n: "مربای آلبالو", k: 240, kpp: 12, pu: "قاشق چایخوری" },
+                { n: "شیره انجیر", k: 260, kpp: 13, pu: "قاشق چایخوری" },
+                { n: "بادام زمینی", kpp: 7, pu: "عدد" },
+                { n: "حریره بادام", k: 466.7, kpp: 70, pu: "قاشق غذاخوری" },
+                { n: "برنج آبکش بدون روغن", k: 140, kpp: 21, pu: "قاشق غذاخوری" },
+                { n: "برنج آبکش با روغن", k: 180, kpp: 27, pu: "قاشق غذاخوری" },
+                { n: "پلو کته با روغن", k: 166.7, kpp: 25, pu: "قاشق غذاخوری" },
+                { n: "پلوکته بدون روغن", k: 100, kpp: 15, pu: "قاشق غذاخوری" },
+                { n: "بستنی پاستوریزه وانیلی", k: 92, kpp: 184, pu: "لیوان" },
+                { n: "به", kpp: 52, pu: "عدد" },
+                { n: "بیسکوییت ساده پتی‌بور", kpp: 27, pu: "عدد" },
+                { n: "بیسکویت ساقه طلایی", kpp: 58, pu: "عدد" },
+                { n: "بیسکوییت ترد نمکی", kpp: 16, pu: "عدد" },
+                { n: "آب پرتقال", k: 54.5, kpp: 109, pu: "لیوان" },
+                { n: "پودر پسته", k: 393.3, kpp: 59, pu: "قاشق غذاخوری" },
+                { n: "تخمه کدو با پوست", k: 293.3, kpp: 44, pu: "قاشق غذاخوری" },
+                { n: "تخمه کدو بدون پوست", k: 566.7, kpp: 85, pu: "قاشق غذاخوری" },
+                { n: "زرده تخم‌مرغ آبپز", kpp: 61, pu: "عدد" },
+                { n: "سفیده تخم‌مرغ آبپز", kpp: 17, pu: "عدد" },
+                { n: "تخم مرغ آب‌پز", kpp: 77, pu: "عدد" },
+                { n: "تخم مرغ عسلی", kpp: 77, pu: "عدد" },
+                { n: "نیمرو با یک قاشق مرباخوری روغن", kpp: 104, pu: "عدد" },
+                { n: "املت گوجه‌فرنگی", k: 180, kpp: 27, pu: "قاشق غذاخوری" },
+                { n: "املت با رب گوجه فرنگی", k: 180, kpp: 27, pu: "قاشق غذاخوری" },
+                { n: "تخمه هندوانه با پوست", k: 253.3, kpp: 38, pu: "قاشق غذاخوری" },
+                { n: "تخمه هندوانه بدون پوست", k: 353.3, kpp: 53, pu: "قاشق غذاخوری" },
+                { n: "ترب سفید", kpp: 9, pu: "عدد" },
+                { n: "جگر گوسفند کبابی", kpp: 110, pu: "سیخ" },
+                { n: "جغوربغور", k: 120, kpp: 240, pu: "لیوان" },
+                { n: "جغوربغور با جگر سفید", k: 258.5, kpp: 517, pu: "لیوان" },
+                { n: "سس مایونز", k: 793.3, kpp: 119, pu: "قاشق غذاخوری" },
+                { n: "چای ماچا", k: 0, kpp: 0, pu: "لیوان" },
+                { n: "چغندر پخته (لبو)", k: 37, kpp: 74, pu: "لیوان" },
+                { n: "چغندر خام", k: 35, kpp: 70, pu: "لیوان" },
+                { n: "خرما خارک", kpp: 8, pu: "عدد" },
+                { n: "خرما کبکاب", kpp: 22, pu: "عدد" },
+                { n: "روغن زیتون", k: 793.3, kpp: 119, pu: "قاشق غذاخوری" },
+                { n: "روغن نباتی مایع و جامد", k: 820, kpp: 123, pu: "قاشق غذاخوری" },
+                { n: "ریحان", k: 2, kpp: 4, pu: "لیوان" },
+                { n: "ریواس خردشده", k: 12.5, kpp: 25, pu: "لیوان" },
+                { n: "زبان گوساله خام", k: 131 },
+                { n: "زبان گوساله پخته", k: 202 },
+                { n: "زبان گوسفند خام", k: 222 },
+                { n: "زبان گوسفند پخته", k: 275 },
+                { n: "زردآلوی تازه", kpp: 16, pu: "عدد" },
+                { n: "برگه زردآلو", kpp: 7, pu: "عدد" },
+                { n: "کمپوت زردآلو", k: 58, kpp: 116, pu: "لیوان" },
+                { n: "قیمه سیب‌زمینی", k: 293.3, kpp: 44, pu: "قاشق غذاخوری" },
+                { n: "سوپ گوجه‌فرنگی", k: 19.5, kpp: 39, pu: "لیوان" },
+                { n: "سوپ سبزیجات", k: 57.5, kpp: 115, pu: "لیوان" },
+                { n: "سوسیس خرد شده", k: 207.5, kpp: 415, pu: "لیوان" },
+                { n: "آجیل سویا", k: 173.3, kpp: 26, pu: "قاشق غذاخوری" },
+                { n: "میوه سیب با پوست", kpp: 80, pu: "عدد" },
+                { n: "شیرینی خشک", kpp: 225, pu: "عدد" },
+                { n: "شیرینی تر", kpp: 264, pu: "عدد" },
+                { n: "نان خامه‌ای", kpp: 256, pu: "عدد" },
+                { n: "شلغم", k: 17, kpp: 34, pu: "لیوان" },
+                { n: "عدسی", k: 121.5, kpp: 243, pu: "لیوان" },
+                { n: "عدس", k: 353, kpp: 706, pu: "لیوان" },
+                { n: "عناب خشک", kpp: 5, pu: "عدد" },
+                { n: "فرنی", k: 212.5, kpp: 425, pu: "لیوان" },
+                { n: "فلفل سبز", kpp: 0, pu: "عدد" },
+                { n: "قارچ خام", k: 11, kpp: 22, pu: "لیوان" },
+                { n: "کدو حلوایی پخته", k: 20 },
+                { n: "کدوسبز پخته خرد شده", k: 13.5, kpp: 27, pu: "لیوان" },
+                { n: "کره گیاهی", k: 673.3, kpp: 101, pu: "قاشق غذاخوری" },
+                { n: "کره گاوی", kpp: 101, pu: "قوطی کبریت" },
+                { n: "کشک خشک", kpp: 34, pu: "عدد" },
+                { n: "کیک یزدی متوسط", kpp: 121, pu: "عدد" },
+                { n: "حموص", k: 240, kpp: 36, pu: "قاشق غذاخوری" },
+                { n: "گریپ فروت", kpp: 81, pu: "عدد" },
+                { n: "گشنیز تازه خرد شده", k: 10, kpp: 20, pu: "لیوان" },
+                { n: "نودل", k: 110, kpp: 220, pu: "لیوان" },
+                { n: "گوشت کوبیده", k: 25, kpp: 50, pu: "لیوان" },
+                { n: "تن ماهی با روغن", k: 460, kpp: 69, pu: "قاشق غذاخوری" },
+                { n: "تن ماهی با روغن گرفته شده", k: 260, kpp: 39, pu: "قاشق غذاخوری" },
+                { n: "سینه مرغ خام", k: 120 },
+                { n: "لیمو ترش", kpp: 8, pu: "عدد" },
+                { n: "ماست کم چرب", k: 70.5, kpp: 141, pu: "لیوان" },
+                { n: "ماست چکیده", k: 113.3, kpp: 17, pu: "قاشق غذاخوری" },
+                { n: "ماکارونی با سس گوشت چرخ‌کرده", k: 168, kpp: 336, pu: "لیوان" },
+                { n: "سالاد ماکارونی", k: 162, kpp: 324, pu: "لیوان" },
+                { n: "مغز گردو", kpp: 29, pu: "عدد" },
+                { n: "میگو سوخاری", kpp: 26, pu: "عدد" },
+                { n: "پودر نارگیل", k: 226.7, kpp: 34, pu: "قاشق غذاخوری" },
+                { n: "شیرینی نارگیلی", kpp: 125, pu: "عدد" },
+                { n: "نارنج", kpp: 39, pu: "عدد" },
+                { n: "نخود پخته با نمک", k: 131, kpp: 262, pu: "لیوان" },
+                { n: "نخود فرنگی پخته", k: 52, kpp: 104, pu: "لیوان" },
+                { n: "نوشمک", kpp: 46, pu: "عدد" },
+                { n: "ماهی قزل‌آلا خام", k: 148 },
+                { n: "آناناس خردشده", k: 41, kpp: 82, pu: "لیوان" },
+                { n: "کمپوت آناناس", kpp: 31, pu: "حلقه" },
+                { n: "آب آناناس", k: 75, kpp: 150, pu: "لیوان" },
+                { n: "آب آلوئه‌ورا", k: 18.5, kpp: 37, pu: "لیوان" },
+                { n: "آب نارگیل", k: 19, kpp: 38, pu: "لیوان" },
+                { n: "آلو بخارا", kpp: 22, pu: "عدد" },
+                { n: "انار کوچک", kpp: 207, pu: "عدد" },
+                { n: "آب انار", k: 67.5, kpp: 135, pu: "لیوان" },
+                { n: "باقالا پخته", k: 110, kpp: 220, pu: "لیوان" },
+                { n: "باقلای سبز", k: 69, kpp: 138, pu: "لیوان" },
+                { n: "باقلای خشک", k: 141, kpp: 282, pu: "لیوان" },
+                { n: "بامیه سبز", kpp: 1, pu: "عدد" },
+                { n: "برگ چغندر", k: 15.5, kpp: 31, pu: "لیوان" },
+                { n: "برنج قهوه‌ای پخته بدون روغن", kpp: 99, pu: "کفگیر" },
+                { n: "پنیر سفید", kpp: 75, pu: "قوطی کبریت" },
+                { n: "پنیر پیتزا", k: 226.7, kpp: 34, pu: "قاشق غذاخوری" },
+                { n: "پولکی ساده", kpp: 4, pu: "عدد" },
+                { n: "پولکی کنجدی", kpp: 8, pu: "عدد" },
+                { n: "پیتزا چیکن", k: 287 },
+                { n: "بامیه (شیرینی)", kpp: 77, pu: "عدد" },
+                { n: "تره", k: 4.5, kpp: 9, pu: "لیوان" },
+                { n: "آدامس", kpp: 10, pu: "عدد" },
+                { n: "تمبر هندی", kpp: 139, pu: "بسته" },
+                { n: "تمشک", k: 31.5, kpp: 63, pu: "لیوان" },
+                { n: "توت سفید خشک", k: 240, kpp: 36, pu: "قاشق غذاخوری" },
+                { n: "توت فرنگی", kpp: 5, pu: "عدد" },
+                { n: "حلوا", k: 400, kpp: 60, pu: "قاشق غذاخوری" },
+                { n: "حلیم گندم", k: 187, kpp: 374, pu: "لیوان" },
+                { n: "خامه سفت", k: 340, kpp: 51, pu: "قاشق غذاخوری" },
+                { n: "خامه شل", k: 140, kpp: 7, pu: "قاشق چایخوری" },
+                { n: "خاویار", k: 280, kpp: 42, pu: "قاشق غذاخوری" },
+                { n: "آب خربزه", k: 40, kpp: 80, pu: "لیوان" },
+                { n: "سس خردل", k: 206.7, kpp: 31, pu: "قاشق غذاخوری" },
+                { n: "دل گوسفند کبابی", kpp: 92, pu: "سیخ" },
+                { n: "دل مرغ", k: 62, kpp: 124, pu: "لیوان" },
+                { n: "آرد ذرت", k: 236.5, kpp: 473, pu: "لیوان" },
+                { n: "دانه ذرت پخته", k: 69, kpp: 138, pu: "لیوان" },
+                { n: "رطب", kpp: 22, pu: "عدد" },
+                { n: "زیتون سبز", kpp: 5, pu: "عدد" },
+                { n: "زیتون سیاه", kpp: 4, pu: "عدد" },
+                { n: "ژله آماده شده", k: 86.7, kpp: 13, pu: "قاشق غذاخوری" },
+                { n: "ساندویچ مرغ", kpp: 473, pu: "عدد" },
+                { n: "ساندویچ همبرگر", kpp: 501, pu: "عدد" },
+                { n: "سرکه انگور", k: 13.3, kpp: 2, pu: "قاشق غذاخوری" },
+                { n: "سمنو", k: 362, kpp: 724, pu: "لیوان" },
+                { n: "سنجد", kpp: 2, pu: "عدد" },
+                { n: "سنگدان مرغ", kpp: 37, pu: "عدد" },
+                { n: "سیب‌ زمینی آب‌پز", kpp: 74, pu: "عدد" },
+                { n: "سیب زمینی سرخ کرده", kpp: 9, pu: "خلال" },
+                { n: "آب سیب", k: 57, kpp: 114, pu: "لیوان" },
+                { n: "کمپوت سیب", k: 79.5, kpp: 159, pu: "لیوان" },
+                { n: "سیر", kpp: 2, pu: "حبه" },
+                { n: "سیرابی", k: 100, kpp: 200, pu: "لیوان" },
+                { n: "شاهی", k: 5.5, kpp: 11, pu: "لیوان" },
+                { n: "شربت آلبالو", k: 60, kpp: 120, pu: "لیوان" },
+                { n: "شربت پرتقال", k: 60.5, kpp: 121, pu: "لیوان" },
+                { n: "شربت افرا", k: 346.7, kpp: 52, pu: "قاشق غذاخوری" },
+                { n: "شیر کاکائو", k: 100, kpp: 200, pu: "لیوان" },
+                { n: "شیر بز", k: 84, kpp: 168, pu: "لیوان" },
+                { n: "شیر خشک", k: 346.7, kpp: 52, pu: "قاشق غذاخوری" },
+                { n: "شیر گاو کم‌چرب", k: 55, kpp: 110, pu: "لیوان" },
+                { n: "شیر گاو پرچرب", k: 75, kpp: 150, pu: "لیوان" },
+                { n: "شیر سویا", k: 31, kpp: 62, pu: "لیوان" },
+                { n: "صدف دریایی", k: 280, kpp: 42, pu: "قاشق غذاخوری" },
+                { n: "آب طالبی بدون شکر", k: 40, kpp: 80, pu: "لیوان" },
+                { n: "جوانه عدس", k: 31.5, kpp: 63, pu: "لیوان" },
+                { n: "قلوه گوسفند", kpp: 60, pu: "عدد" },
+                { n: "قند", kpp: 11, pu: "حبه" },
+                { n: "قهوه تلخ", k: 0, kpp: 0, pu: "لیوان" },
+                { n: "هات چاکلت", k: 102, kpp: 204, pu: "لیوان" },
+                { n: "کاهو خرد شده", k: 3.5, kpp: 7, pu: "لیوان" },
+                { n: "کاهو فرانسوی خردشده", k: 5.5, kpp: 11, pu: "لیوان" },
+                { n: "کلم بروکلی خردشده", k: 15, kpp: 30, pu: "لیوان" },
+                { n: "کلم بروکسل", k: 18.5, kpp: 37, pu: "لیوان" },
+                { n: "کلم قرمز (بنفش) خردشده", k: 13.5, kpp: 27, pu: "لیوان" },
+                { n: "کله پاچه", k: 533.3, kpp: 80, pu: "قاشق غذاخوری" },
+                { n: "کمپوت گیلاس", k: 83, kpp: 166, pu: "لیوان" },
+                { n: "کنجد", k: 400, kpp: 60, pu: "قاشق غذاخوری" },
+                { n: "کیک مرغ", k: 180 },
+                { n: "پنکیک", kpp: 114, pu: "عدد" },
+                { n: "گوجه سبز", kpp: 7, pu: "عدد" },
+                { n: "آب گوجه فرنگی", k: 20.5, kpp: 41, pu: "لیوان" },
+                { n: "سس کچاب", k: 100, kpp: 15, pu: "قاشق غذاخوری" },
+                { n: "گوشت شتر", kpp: 29, pu: "قوطی کبریت" },
+                { n: "گوشت گوساله", kpp: 150, pu: "قطعه" },
+                { n: "لوبیا چشم بلبلی پخته با آب نمک", k: 57.5, kpp: 115, pu: "لیوان" },
+                { n: "لوبیا سفید پخته", k: 127, kpp: 254, pu: "لیوان" },
+                { n: "آب لیمو ترش", k: 26.5, kpp: 53, pu: "لیوان" },
+                { n: "مربای گل سرخ", k: 280, kpp: 14, pu: "قاشق چایخوری" },
+                { n: "مربای انجیر", k: 240, kpp: 12, pu: "قاشق چایخوری" },
+                { n: "مربای تمشک", k: 320, kpp: 16, pu: "قاشق چایخوری" },
+                { n: "مربای سیب", k: 140, kpp: 7, pu: "قاشق چایخوری" },
+                { n: "مربای بالنگ", k: 240, kpp: 12, pu: "قاشق چایخوری" },
+                { n: "مربای به", k: 260, kpp: 13, pu: "قاشق چایخوری" },
+                { n: "مربای هویج", k: 260, kpp: 13, pu: "قاشق چایخوری" },
+                { n: "ران مرغ خام بدون پوست", kpp: 288, pu: "عدد" },
+                { n: "مغز کله‌پاچه", k: 480, kpp: 72, pu: "قاشق غذاخوری" },
+                { n: "مغز تخمه آفتابگردان", k: 280, kpp: 42, pu: "قاشق غذاخوری" },
+                { n: "مغز فندق", kpp: 8, pu: "عدد" },
+                { n: "نان خشک", kpp: 35, pu: "کف دست" },
+                { n: "نان روغنی", kpp: 95, pu: "کف دست" },
+                { n: "نان باگت کوچک", kpp: 150, pu: "عدد" },
+                { n: "نان باگت بزرگ", kpp: 225, pu: "عدد" },
+                { n: "نان برنجی", kpp: 32, pu: "عدد" },
+                { n: "نان سوخاری", kpp: 41, pu: "عدد" },
+                { n: "نان گندم محلی", kpp: 33, pu: "کف دست" },
+                { n: "کمپوت هلو", k: 54, kpp: 108, pu: "لیوان" },
+                { n: "آب هندوانه", k: 35, kpp: 70, pu: "لیوان" },
+                { n: "هویج زرد/زردک", kpp: 25, pu: "عدد" },
+                { n: "هویج متوسط", kpp: 22, pu: "عدد" },
+                { n: "توت سفید تازه", k: 30, kpp: 60, pu: "لیوان" },
+                { n: "پیراشکی شکلاتی", kpp: 407, pu: "عدد" },
+                { n: "پیراشکی مرغ", kpp: 105, pu: "عدد" },
+                { n: "پیراشکی گوشت", kpp: 112, pu: "عدد" },
+                { n: "پیراشکی با کرم", kpp: 268, pu: "عدد" },
+                { n: "پیراشکی سبزیجات", kpp: 80, pu: "عدد" },
+                { n: "سمبوسه سیب‌زمینی", kpp: 390, pu: "عدد" },
+                { n: "سالاد الویه", k: 333.3, kpp: 50, pu: "قاشق غذاخوری" },
+                { n: "مویز", kpp: 1, pu: "عدد" },
+                { n: "کلوچه", kpp: 300, pu: "عدد" },
+                { n: "کلوچه خرمایی", kpp: 180, pu: "عدد" },
+                { n: "کلوچه فومن", kpp: 470, pu: "عدد" },
+                { n: "کوکی", kpp: 40, pu: "عدد" },
+                { n: "ذرت مکزیکی", k: 426.7, kpp: 64, pu: "قاشق غذاخوری" },
+                { n: "شیره توت", k: 260, kpp: 13, pu: "قاشق چایخوری" },
+                { n: "سه شیره", k: 260, kpp: 13, pu: "قاشق چایخوری" },
+                { n: "گل کلم خردشده", k: 13, kpp: 26, pu: "لیوان" },
+                { n: "کوکوسبزی", kpp: 168, pu: "کف دست" },
+                { n: "پودر قهوه فوری", kpp: 44, pu: "ساشه" },
+                { n: "دلستر لیمویی", k: 31, kpp: 62, pu: "لیوان" },
+                { n: "خورشت آلو با مرغ", k: 293.3, kpp: 44, pu: "قاشق غذاخوری" },
+                { n: "خورشت آلو با گوشت", k: 320, kpp: 48, pu: "قاشق غذاخوری" },
+                { n: "هویج پلو با مرغ", k: 320, kpp: 48, pu: "قاشق غذاخوری" },
+                { n: "باقلاقاتق", k: 273.3, kpp: 41, pu: "قاشق غذاخوری" },
+                { n: "هویج پلو بدون گوشت", k: 253.3, kpp: 38, pu: "قاشق غذاخوری" },
+                { n: "هویج پلو با گوشت", k: 353.3, kpp: 53, pu: "قاشق غذاخوری" },
+                { n: "خورشت کرفس بامرغ", k: 233.3, kpp: 35, pu: "قاشق غذاخوری" },
+                { n: "خورشت کرفس بدون گوشت", k: 200, kpp: 30, pu: "قاشق غذاخوری" },
+                { n: "خورشت فسنجان با مرغ", k: 386.7, kpp: 58, pu: "قاشق غذاخوری" },
+                { n: "خورشت فسنجان با گوشت", k: 400, kpp: 60, pu: "قاشق غذاخوری" },
+                { n: "خورشت فسنجان بدون گوشت", k: 340, kpp: 51, pu: "قاشق غذاخوری" },
+                { n: "خورشت بامیه با مرغ", k: 160, kpp: 24, pu: "قاشق غذاخوری" },
+                { n: "خورشت بامیه بدون گوشت", k: 160, kpp: 24, pu: "قاشق غذاخوری" },
             ];
 
             // واحدهای اندازه‌گیری عمومی (بر اساس گرم معادل)
@@ -11043,36 +11638,55 @@
 
             function calUnitsForFood(food) {
                 if (!food) return CAL_UNITS.filter(u => u.id !== "piece");
-                if (food.p || food.kpp) return CAL_UNITS;
-                return CAL_UNITS.filter(u => u.id !== "piece");
+                // واحد سروینگ اختصاصی خود غذا (لیوان، سیخ، کف دست، قاشق غذاخوری و ...)
+                const srv = food.pu ? [{ id: "srv", label: food.pu, grams: null }] : [];
+                const hasKpp = (food.kpp != null);
+                const hasK = (food.k != null);
+                // اگر کالری هر ۱۰۰ گرم معلوم نباشه، فقط همون واحد سروینگ قابل انتخابه
+                // (شرط روی null هست نه صفر، تا غذاهای صفرکالری هم درست کار کنن)
+                if (hasKpp && !hasK && srv.length) return srv;
+                const base = (food.p || hasKpp) ? CAL_UNITS : CAL_UNITS.filter(u => u.id !== "piece");
+                return srv.concat(base);
             }
 
             function calGramsFor(food, unitId, qty) {
                 const q = parseFloat(qty) || 0;
+                if (unitId === "srv") return 0; // وزن گرمی این واحد معلوم نیست
                 if (unitId === "piece") return q * (food.p || 0);
                 const u = CAL_UNITS.find(x => x.id === unitId);
                 return q * (u ? u.grams : 1);
             }
 
-            // برخی غذاهای دستی فقط «کالری هر عدد» دارند و وزن گرمی هر عدد را نمی‌دانیم (food.kpp)
+            // برخی غذاها فقط «کالری هر واحد سروینگ» دارند و وزن گرمی‌شان معلوم نیست (food.kpp)
             function calKcalForQty(food, unitId, qty) {
                 const q = parseFloat(qty) || 0;
-                if (unitId === "piece" && !food.p && food.kpp) {
+                if (unitId === "srv" && food.kpp != null) {
+                    return q * food.kpp;
+                }
+                if (unitId === "piece" && !food.p && food.kpp != null) {
                     return q * food.kpp;
                 }
                 const grams = calGramsFor(food, unitId, q);
-                return calKcalFor(food, grams);
+                const val = calKcalFor(food, grams);
+                return isFinite(val) ? val : 0; // هیچ‌وقت NaN به رابط کاربری نره
             }
 
             function calKcalFor(food, grams) {
-                return (grams / 100) * food.k;
+                const per100 = (food && food.k != null) ? food.k : 0;
+                return (grams / 100) * per100;
             }
 
             function renderCalUnitSelect() {
                 const sel = document.getElementById("calUnitSelect");
                 const units = calUnitsForFood(calSelectedFood);
                 sel.innerHTML = units.map(u => {
-                    let label = state.lang === "fa" ? u.label : u.id;
+                    let label = (u.id === "srv" || state.lang === "fa") ? u.label : u.id;
+                    // واحد سروینگ اختصاصی غذا: کالری هر واحد کنارش نشون داده می‌شه
+                    if (u.id === "srv" && calSelectedFood && calSelectedFood.kpp) {
+                        label += state.lang === "fa" ?
+                            (" (" + calFmtNum(calSelectedFood.kpp) + " کالری)") :
+                            (" (" + calFmtNum(calSelectedFood.kpp) + " kcal)");
+                    }
                     // برای واحد «عدد»، وزن تقریبی هر عدد (مثلاً وزن هر بسته/عدد محصول برند) کنار گزینه نمایش داده می‌شود
                     if (u.id === "piece" && calSelectedFood && calSelectedFood.p) {
                         label += state.lang === "fa" ?
@@ -11110,9 +11724,10 @@
                     return;
                 }
                 box.innerHTML = results.map((f, i) => {
+                    const srvName = f.pu || (state.lang === 'fa' ? 'عدد' : 'piece');
                     const kcalLabel = (f.k != null) ?
                         (calFmtNum(f.k) + (state.lang === 'fa' ? ' کالری/۱۰۰گ' : ' kcal/100g')) :
-                        (calFmtNum(f.kpp) + (state.lang === 'fa' ? ' کالری/عدد' : ' kcal/piece'));
+                        (calFmtNum(f.kpp) + ' ' + (state.lang === 'fa' ? ('کالری/' + srvName) : ('kcal/' + srvName)));
                     return '<div class="cal-suggest-item" data-idx="' + i + '"><span>' + escHtml(f.n) +
                         '</span><span class="cs-kcal">' + kcalLabel + '</span></div>';
                 }).join("");
@@ -11131,6 +11746,14 @@
                 document.getElementById("calSelectedFoodLabel").textContent =
                     (state.lang === "fa" ? "انتخاب‌شده: " : "Selected: ") + food.n;
                 renderCalUnitSelect();
+                // اگر واحد پیش‌فرض «سروینگ» باشه (مثلاً یک لیوان/یک سیخ)، مقدار پیش‌فرض ۱ منطقی‌تره تا ۱۰۰
+                const firstUnit = document.getElementById("calUnitSelect").value;
+                const qtyEl = document.getElementById("calQtyInput");
+                if (firstUnit === "srv" || firstUnit === "piece") {
+                    if (parseFloat(qtyEl.value) === 100 || !qtyEl.value) qtyEl.value = 1;
+                } else if (!qtyEl.value) {
+                    qtyEl.value = 100;
+                }
                 updateCalPreview();
             }
 
@@ -11147,6 +11770,7 @@
                 const unit = document.getElementById("calUnitSelect").value;
                 const grams = calGramsFor(calSelectedFood, unit, qty);
                 const kcal = calKcalForQty(calSelectedFood, unit, qty);
+                const unitObjSel = calUnitsForFood(calSelectedFood).find(u => u.id === unit);
                 const iso = calTodayIso();
                 if (!state.calorie.logs[iso]) state.calorie.logs[iso] = [];
                 state.calorie.logs[iso].push({
@@ -11154,6 +11778,7 @@
                     name: calSelectedFood.n,
                     qty: qty,
                     unitId: unit,
+                    unitLabel: unitObjSel ? unitObjSel.label : unit,
                     grams: grams,
                     kcal: kcal,
                     ts: Date.now()
@@ -11505,9 +12130,11 @@
                             (state.lang === "fa" ? "ثبت دستی" : "Manual entry");
                     } else {
                         const unit = CAL_UNITS.find(u => u.id === e.unitId);
-                        const unitLabel = state.lang === "fa" ? (unit ? unit.label : e.unitId) : e.unitId;
+                        const unitLabel = e.unitLabel ||
+                            (state.lang === "fa" ? (unit ? unit.label : e.unitId) : e.unitId);
+                        // وزن گرمی برای واحدهای سروینگ (سیخ، کف دست، ...) معلوم نیست، پس نشون داده نمی‌شه
                         metaText = calFmtNum(e.qty) + " " + unitLabel +
-                            " (" + calFmtNum(e.grams) + (state.lang === "fa" ? " گرم" : " g") + ")";
+                            (e.grams > 0 ? (" (" + calFmtNum(e.grams) + (state.lang === "fa" ? " گرم" : " g") + ")") : "");
                     }
                     return '<div class="cal-log-item"><div class="cl-info"><div class="cl-name">' +
                         escHtml(e.name) + '</div><div class="cl-meta">' + metaText + "</div></div>" +
@@ -11763,8 +12390,14 @@
                             parseInt(parts[0], 10) || 8, parseInt(parts[1], 10) || 0);
                     }
                 });
+                (state.challenges || []).forEach(c => {
+                    if ((c.status === 'active') && (c.kind === 'timed' || c.kind === 'both') && c.deadlineAt > now) {
+                        nativeScheduleChallengeNotifications(c);
+                    }
+                });
             }
             nativeResyncAllReminders();
+            if (isNativeApp() && !state.isPremium) restorePurchases();
             applyFontSize();
             applyLevelColors();
             applyLang();
@@ -11776,10 +12409,186 @@
             // آموزش اولیه (Onboarding): برای کاربری که تازه نصب کرده، اول زبان رو می‌پرسیم،
             // بعد یه دور سریع همه‌ی بخش‌های برنامه رو نشونش می‌دیم. از تنظیمات هم قابل تکرار است.
             // ============================================================
+            // ============================================================
+            // راهنمای هر بخش (Help): با دکمه‌ی ❓ کنار هر بخش قابل مشاهده و در هر لحظه قابل تکرار
+            // ============================================================
+            // ============================================================
+            // پریمیوم / خرید درون‌برنامه‌ای: قفل‌کردن لیست‌کارها، کالری‌شمار و کتابخونه
+            // تا وقتی خرید انجام نشده. تأیید واقعی خرید بعداً از طریق یک Worker
+            // سرورلس روی Cloudflare انجام می‌شود (این تابع فعلاً یک قلاب/Hook آماده
+            // است تا وقتی پلاگین نیتیو کافه‌بازار وصل شود، همین‌جا تکمیلش کنیم).
+            // ============================================================
+            const PREMIUM_FEATURE_NAMES = {
+                todo: { fa: 'لیست کارها', en: 'To-Do List' },
+                calorie: { fa: 'کالری‌شمار', en: 'Calorie Counter' },
+                library: { fa: 'کتابخونه', en: 'Library' }
+            };
+            function openPremiumPaywall(viewName) {
+                const f = PREMIUM_FEATURE_NAMES[viewName];
+                const body = document.getElementById('premiumPaywallBody');
+                if (f) {
+                    body.textContent = state.lang === 'fa' ?
+                        ('برای استفاده از «' + f.fa + '» و همه‌ی امکانات دیگه‌ی نسخه‌ی کامل، باید یک‌بار خریدش کنی.') :
+                        ('To use "' + f.en + '" and everything else in the full version, you need to purchase it once.');
+                } else {
+                    body.textContent = state.lang === 'fa' ? 'برای استفاده از این بخش، باید نسخه‌ی کامل رو بخری.' :
+                        'You need the full version to use this section.';
+                }
+                document.getElementById('premiumPaywallBackdrop').classList.add('open');
+            }
+            function applyPremiumLockUI() {
+                document.querySelectorAll('[data-premium-locked]').forEach(btn => {
+                    const labelEl = btn.querySelector('.bn-label') || btn;
+                    if (!state.isPremium && !labelEl.textContent.includes('🔒')) {
+                        labelEl.textContent = '🔒 ' + labelEl.textContent;
+                    }
+                });
+            }
+            // این تابع فعلاً یک Placeholder است: بعد از وصل‌شدن پلاگین نیتیو کافه‌بازار،
+            // اینجا فرایند واقعی خرید (باز کردن صفحه‌ی پرداخت کافه‌بازار + تأیید خرید از
+            // طریق Worker سرورلس) جایگزین می‌شود.
+            // ============================================================
+            // این دو مقدار رو وقتی محصول واقعی رو توی پنل کافه‌بازار ساختی و
+            // Worker سرورلس رو دیپلوی کردی، اینجا پر کن:
+            // ============================================================
+            const PREMIUM_PRODUCT_ID = 'premium_unlock'; // دقیقاً همین SKU رو توی پنل کافه‌بازار بساز
+            const PREMIUM_VERIFY_WORKER_URL = ''; // مثلاً: 'https://routine-planner-verify.یوزرنیمت.workers.dev'
+
+            function bazaarBillingPlugin() {
+                return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BazaarBilling) || null;
+            }
+
+            async function purchasePremium() {
+                if (!isNativeApp()) {
+                    showToast(state.lang === 'fa' ?
+                        'خرید فقط از داخل اپ نصب‌شده از کافه‌بازار امکان‌پذیره.' :
+                        'Purchase is only available from the app installed via Cafe Bazaar.', 3000);
+                    return;
+                }
+                const plugin = bazaarBillingPlugin();
+                if (!plugin) {
+                    showToast(state.lang === 'fa' ? 'پلاگین خرید در دسترس نیست.' : 'Billing plugin unavailable.', 3000);
+                    return;
+                }
+                if (!PREMIUM_VERIFY_WORKER_URL) {
+                    showToast(state.lang === 'fa' ?
+                        'هنوز آدرس سرور تأیید خرید تنظیم نشده (PREMIUM_VERIFY_WORKER_URL).' :
+                        'Verify server URL not configured yet (PREMIUM_VERIFY_WORKER_URL).', 3500);
+                    return;
+                }
+                try {
+                    await plugin.connect();
+                    const purchase = await plugin.purchase({ productId: PREMIUM_PRODUCT_ID });
+                    showToast(state.lang === 'fa' ? 'در حال تأیید خرید...' : 'Verifying purchase...', 2000);
+                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: purchase.productId, purchaseToken: purchase.purchaseToken })
+                    });
+                    const data = await res.json();
+                    if (data.valid) {
+                        state.isPremium = true;
+                        state.premiumPurchaseToken = purchase.purchaseToken;
+                        saveState();
+                        applyPremiumLockUI();
+                        document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+                        showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
+                    } else {
+                        showToast(state.lang === 'fa' ? 'تأیید خرید ناموفق بود.' : 'Purchase verification failed.', 3000);
+                    }
+                } catch (e) {
+                    if (e && e.message !== 'cancelled') {
+                        showToast(state.lang === 'fa' ? 'خرید انجام نشد: ' + (e.message || '') : 'Purchase failed: ' + (e.message || ''), 3000);
+                    }
+                }
+            }
+            // اگر قبلاً خرید انجام شده (مثلاً روی گوشی دیگه)، با این تابع می‌تونه بازیابیش کنه
+            async function restorePurchases() {
+                const plugin = bazaarBillingPlugin();
+                if (!plugin || !PREMIUM_VERIFY_WORKER_URL) return;
+                try {
+                    await plugin.connect();
+                    const result = await plugin.getPurchasedProducts();
+                    const owned = (result.products || []).find(p => p.productId === PREMIUM_PRODUCT_ID);
+                    if (!owned) return;
+                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: owned.productId, purchaseToken: owned.purchaseToken })
+                    });
+                    const data = await res.json();
+                    if (data.valid) {
+                        state.isPremium = true;
+                        state.premiumPurchaseToken = owned.purchaseToken;
+                        saveState();
+                        applyPremiumLockUI();
+                    }
+                } catch (e) {}
+            }
+            document.getElementById('premiumPurchaseBtn').addEventListener('click', purchasePremium);
+            document.getElementById('premiumPaywallCloseBtn').addEventListener('click', () => {
+                document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+            });
+            document.getElementById('premiumPaywallBackdrop').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
+
+            const HELP_CONTENT = {
+                habits: {
+                    icon: '🎯',
+                    titleFa: 'راهنمای عادت‌ها', titleEn: 'Habits guide',
+                    textFa: 'با دکمه‌ی «افزودن عادت جدید» یک عادت تازه بساز. هر روز روی هر عادت تیک بزن (✓ موفق یا ✗ ناموفق). با فلش کوچیک کنار هر عادت می‌تونی یادداشت و عکس براش ثبت کنی. آیکون 📊 نمودارهای محرک، مشوق و علت موفقیت/شکست رو نشون می‌ده و از همون‌جا هم می‌تونی علت یا محرک ثبت کنی. آیکون ⚡ هم مستقیم همون نمودارها رو باز می‌کنه.',
+                    textEn: 'Use "Add New Habit" to create a habit. Tap ✓/✗ each day. The small arrow next to a habit lets you add notes and photos. The 📊 icon shows trigger/incentive/reason charts, where you can also add reasons directly. The ⚡ icon opens the same charts.'
+                },
+                challenge: {
+                    icon: '🔥',
+                    titleFa: 'راهنمای چالش‌ها', titleEn: 'Challenges guide',
+                    textFa: 'چالش یعنی یک هدف کوتاه‌مدت. «شمارشی»: فقط یک هدف عددی داری (مثلاً ۵۰ بار). «زمان‌دار»: فقط یک مهلت داری و سر رسیدنش ازت می‌پرسیم انجامش دادی یا نه. «ترکیبی»: هم عدد هم مهلت با هم. برای مهلت می‌تونی مدت زمان (مثلاً ۲ ساعت دیگه) یا تاریخ و ساعت دقیق انتخاب کنی، و می‌تونی یادآوری تکرارشونده (مثلاً هر ۲ ساعت) هم روشن کنی تا نوتیف واقعی بگیری.',
+                    textEn: 'A challenge is a short-term goal. "Count": a numeric target. "Timed": a deadline; we ask if you did it when time is up. "Combined": both together. For the deadline you can pick a duration or an exact date/time, and enable a recurring reminder to get real notifications.'
+                },
+                calendar: {
+                    icon: '📅',
+                    titleFa: 'راهنمای ثبت ماهانه/سالانه', titleEn: 'Monthly/yearly record guide',
+                    textFa: 'این تقویم وضعیت موفق/ناموفق هر روزِ هر عادت رو نشون می‌ده. سبز یعنی موفق، قرمز یعنی ناموفق، خاکستری یعنی هنوز ثبت نکردی. روی هر روز بزن تا وضعیتش رو ثبت یا تغییر بدی.',
+                    textEn: 'This calendar shows success/fail per day per habit. Green = success, red = fail, grey = not recorded yet. Tap a day to set or change its status.'
+                },
+                calories: {
+                    icon: '🔥',
+                    titleFa: 'راهنمای کالری‌شمار', titleEn: 'Calorie counter guide',
+                    textFa: 'اول وزن، قد، سن و سطح فعالیتت رو وارد کن تا کالری مجاز روزانه‌ات محاسبه بشه. بعد هر چیزی که می‌خوری رو با کالری‌ش ثبت کن تا ببینی چقدر تا هدفت مونده.',
+                    textEn: 'First enter your weight, height, age, and activity level to calculate your daily calorie allowance. Then log what you eat to see how much is left toward your goal.'
+                },
+                progress: {
+                    icon: '📈',
+                    titleFa: 'راهنمای نمودار پیشرفت', titleEn: 'Progress chart guide',
+                    textFa: 'این نمودار روند موفقیتت رو هفتگی، ماهانه یا سالانه نشون می‌ده. پایین نمودار هم میانگین موفقیت، پیاپی (Streak) روزهای موفق، و تعداد عادت‌هات رو می‌بینی. با دکمه‌ی «نمایش» می‌تونی این کارت رو جمع/باز کنی.',
+                    textEn: 'This chart shows your success trend weekly, monthly, or yearly. Below it you see your average success rate, current streak, and number of habits. Use the toggle button to collapse/expand this card.'
+                }
+            };
+            function openHelpModal(key) {
+                const h = HELP_CONTENT[key];
+                if (!h) return;
+                document.getElementById('helpModalTitle').textContent = h.icon + ' ' + (state.lang === 'fa' ? h.titleFa : h.titleEn);
+                document.getElementById('helpModalBody').textContent = state.lang === 'fa' ? h.textFa : h.textEn;
+                document.getElementById('helpModalBackdrop').classList.add('open');
+            }
+            document.querySelectorAll('[data-help]').forEach(b => {
+                b.addEventListener('click', () => openHelpModal(b.dataset.help));
+            });
+            document.getElementById('helpModalCloseBtn').addEventListener('click', () => {
+                document.getElementById('helpModalBackdrop').classList.remove('open');
+            });
+            document.getElementById('helpModalBackdrop').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
+
             const ONBOARDING_SLIDES = [
                 { icon: '👋', titleFa: 'خوش اومدی!', titleEn: 'Welcome!',
                     textFa: 'بیا با هم یه دور سریع همه‌ی بخش‌های برنامه رو ببینیم تا گیج نشی.',
                     textEn: "Let's take a quick tour of the app so you don't get lost." },
+                { icon: '🏠', titleFa: 'خانه (داشبورد)', titleEn: 'Home (Dashboard)',
+                    textFa: 'همیشه اول همین صفحه باز می‌شه: خلاصه‌ی پیشرفت کلی، پایبندی، پیاپی، پیشرفت عادت‌ها و چالش‌ها، نمودار رشد و فعالیت‌های اخیرت رو یک‌جا می‌بینی.',
+                    textEn: 'This is always the first screen: your overall progress, adherence, streak, habits & challenges progress, growth chart, and recent activity — all in one place.' },
                 { icon: '🎯', titleFa: 'تب عادت‌ها', titleEn: 'Habits tab',
                     textFa: 'اینجا عادت‌های روزانه‌ات رو اضافه می‌کنی و هر روز باهاشون تیک می‌زنی. با فلش کوچیک کنار هر عادت می‌تونی یادداشت و عکس براش ثبت کنی.',
                     textEn: 'Add your daily habits here and check them off each day. Tap the small arrow next to a habit to add notes and photos for it.' },
@@ -11897,6 +12706,7 @@
             // ============================================================
             const CHALLENGE_EMOJIS = ['🔥','💪','🏃','📚','🧘','🚭','💧','🥗','😴','🎯','✍️','🧹','🎨','💰','🚴','🧊'];
             let challengeSelectedKind = 'count';
+            let challengeSelectedDeadlineMode = 'duration';
             let challengeSelectedEmoji = CHALLENGE_EMOJIS[0];
             let challengeCheckinQueue = [];
 
@@ -11946,9 +12756,17 @@
                         picker.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
                     });
                 });
-                document.getElementById('challengeCountFields').style.display = challengeSelectedKind === 'count' ? 'block' : 'none';
-                document.getElementById('challengeTimedFields').style.display = challengeSelectedKind === 'timed' ? 'block' : 'none';
+                const showCount = (challengeSelectedKind === 'count' || challengeSelectedKind === 'both');
+                const showTimed = (challengeSelectedKind === 'timed' || challengeSelectedKind === 'both');
+                document.getElementById('challengeCountFields').style.display = showCount ? 'block' : 'none';
+                document.getElementById('challengeTimedFields').style.display = showTimed ? 'block' : 'none';
                 document.querySelectorAll('#challengeKindToggle button').forEach(b => b.classList.toggle('active', b.dataset.kind === challengeSelectedKind));
+                const mode = challengeSelectedDeadlineMode;
+                document.getElementById('challengeDurationWrap').style.display = mode === 'duration' ? 'block' : 'none';
+                document.getElementById('challengeExactWrap').style.display = mode === 'exact' ? 'block' : 'none';
+                document.querySelectorAll('#challengeDeadlineModeToggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+                document.getElementById('challengeReminderIntervalWrap').style.display =
+                    document.getElementById('challengeReminderEnabled').checked ? 'block' : 'none';
             }
 
             document.getElementById('challengeKindToggle').querySelectorAll('button').forEach(b => {
@@ -11957,6 +12775,13 @@
                     renderChallengeCreateForm();
                 });
             });
+            document.getElementById('challengeDeadlineModeToggle').querySelectorAll('button').forEach(b => {
+                b.addEventListener('click', () => {
+                    challengeSelectedDeadlineMode = b.dataset.mode;
+                    renderChallengeCreateForm();
+                });
+            });
+            document.getElementById('challengeReminderEnabled').addEventListener('change', renderChallengeCreateForm);
 
             function createChallengeFromForm() {
                 const name = document.getElementById('challengeNameField').value.trim();
@@ -11972,20 +12797,39 @@
                     rewardCoins, rewardText, createdAt: now, status: 'active',
                     completedAt: null
                 };
-                if (challengeSelectedKind === 'count') {
+                const needsCount = (challengeSelectedKind === 'count' || challengeSelectedKind === 'both');
+                const needsTimed = (challengeSelectedKind === 'timed' || challengeSelectedKind === 'both');
+                if (needsCount) {
                     ch.targetCount = Math.max(1, parseInt(document.getElementById('challengeTargetField').value, 10) || 1);
                     ch.unit = document.getElementById('challengeUnitField').value.trim() || (state.lang === 'fa' ? 'بار' : 'x');
                     ch.progressCount = 0;
-                } else {
-                    const durVal = Math.max(1, parseInt(document.getElementById('challengeDurationField').value, 10) || 1);
-                    const durUnit = document.getElementById('challengeDurationUnitField').value;
-                    ch.durationValue = durVal;
-                    ch.durationUnit = durUnit;
-                    const msMap = { minutes: 60000, hours: 3600000, days: 86400000 };
-                    ch.deadlineAt = now + durVal * msMap[durUnit];
+                }
+                if (needsTimed) {
+                    if (challengeSelectedDeadlineMode === 'exact') {
+                        const v = document.getElementById('challengeExactDeadlineField').value;
+                        const parsed = v ? new Date(v).getTime() : NaN;
+                        if (!v || isNaN(parsed) || parsed <= now) {
+                            showToast(state.lang === 'fa' ? 'یه تاریخ و ساعت معتبر و در آینده انتخاب کن' : 'Pick a valid future date/time');
+                            return;
+                        }
+                        ch.deadlineAt = parsed;
+                        ch.durationValue = null;
+                        ch.durationUnit = null;
+                    } else {
+                        const durVal = Math.max(1, parseInt(document.getElementById('challengeDurationField').value, 10) || 1);
+                        const durUnit = document.getElementById('challengeDurationUnitField').value;
+                        ch.durationValue = durVal;
+                        ch.durationUnit = durUnit;
+                        const msMap = { minutes: 60000, hours: 3600000, days: 86400000 };
+                        ch.deadlineAt = now + durVal * msMap[durUnit];
+                    }
+                    const reminderOn = document.getElementById('challengeReminderEnabled').checked;
+                    ch.reminderIntervalHours = reminderOn ?
+                        Math.max(1, Math.min(72, parseInt(document.getElementById('challengeReminderIntervalField').value, 10) || 2)) : null;
                 }
                 state.challenges.push(ch);
                 saveState();
+                nativeScheduleChallengeNotifications(ch);
                 document.getElementById('challengeNameField').value = '';
                 document.getElementById('challengeRewardTextField').value = '';
                 showToast((state.lang === 'fa' ? '🔥 چالش «' + name + '» ثبت شد!' : '🔥 Challenge "' + name + '" started!'));
@@ -12017,21 +12861,28 @@
                 }
                 list.innerHTML = items.map(c => {
                     let body = '';
-                    if (c.kind === 'count') {
+                    const isCountish = (c.kind === 'count' || c.kind === 'both');
+                    if (isCountish) {
                         const pct = Math.min(100, Math.round((c.progressCount / c.targetCount) * 100));
                         body = '<div class="cc-meta">' + (state.lang === 'fa' ?
                             (toPersianDigits(c.progressCount) + ' از ' + toPersianDigits(c.targetCount) + ' ' + c.unit) :
                             (c.progressCount + ' / ' + c.targetCount + ' ' + c.unit)) + '</div>' +
-                            '<div class="cc-progress-bar"><div class="cc-progress-fill" style="width:' + pct + '%"></div></div>' +
-                            '<div class="cc-actions">' +
+                            '<div class="cc-progress-bar"><div class="cc-progress-fill" style="width:' + pct + '%"></div></div>';
+                        if (c.kind === 'both' && c.deadlineAt) {
+                            body += '<div class="cc-meta cc-countdown" data-cc-countdown="' + c.id + '">' +
+                                formatCountdown(c.deadlineAt - Date.now()) + '</div>';
+                        }
+                        body += '<div class="cc-actions">' +
                             '<button class="cc-plus" data-cc-plus="' + c.id + '">+1</button>' +
                             '<button class="cc-done" data-cc-finish="' + c.id + '">' + (state.lang === 'fa' ? '✓ تمومش کن' : '✓ Finish') + '</button>' +
                             '<button class="cc-cancel" data-cc-cancel="' + c.id + '">' + (state.lang === 'fa' ? 'لغو' : 'Cancel') + '</button>' +
                             '</div>';
                     } else {
                         const remain = c.deadlineAt - Date.now();
-                        body = '<div class="cc-meta">' + (state.lang === 'fa' ? 'مهلت: ' : 'Deadline: ') +
-                            formatDurationFa(c.durationValue, c.durationUnit) + '</div>' +
+                        const deadlineLine = c.durationValue ?
+                            ((state.lang === 'fa' ? 'مهلت: ' : 'Deadline: ') + formatDurationFa(c.durationValue, c.durationUnit)) :
+                            ((state.lang === 'fa' ? 'مهلت: ' : 'Deadline: ') + new Date(c.deadlineAt).toLocaleString(state.lang === 'fa' ? 'fa-IR' : 'en-US'));
+                        body = '<div class="cc-meta">' + deadlineLine + '</div>' +
                             '<div class="cc-meta cc-countdown" data-cc-countdown="' + c.id + '">' + formatCountdown(remain) + '</div>' +
                             '<div class="cc-actions">' +
                             '<button class="cc-cancel" data-cc-cancel="' + c.id + '">' + (state.lang === 'fa' ? 'لغو' : 'Cancel') + '</button>' +
@@ -12086,6 +12937,7 @@
                     c.status = 'success';
                     c.completedAt = Date.now();
                     saveState();
+                    nativeCancelChallengeNotifications(c.id);
                     awardChallenge(c);
                 } else {
                     saveState();
@@ -12099,6 +12951,7 @@
                 c.progressCount = c.targetCount;
                 c.status = 'success';
                 c.completedAt = Date.now();
+                nativeCancelChallengeNotifications(c.id);
                 saveState();
                 awardChallenge(c);
                 renderActiveChallenges();
@@ -12109,6 +12962,7 @@
                 if (!c) return;
                 c.status = 'cancelled';
                 c.completedAt = Date.now();
+                nativeCancelChallengeNotifications(c.id);
                 saveState();
                 renderActiveChallenges();
             }
@@ -12116,10 +12970,20 @@
             function checkChallengeDeadlines() {
                 let changed = false;
                 state.challenges.forEach(c => {
-                    if (c.kind === 'timed' && c.status === 'active' && Date.now() >= c.deadlineAt) {
+                    if ((c.kind === 'timed' || c.kind === 'both') && c.status === 'active' && Date.now() >= c.deadlineAt) {
                         c.status = 'pending_review';
                         changed = true;
                         if (!challengeCheckinQueue.includes(c.id)) challengeCheckinQueue.push(c.id);
+                        // نوتیفیکیشن سررسید چالش، دقیقاً به سبک یادآور عادت‌ها/کارها
+                        const chTitle = state.lang === 'fa' ? '⏰ مهلت چالش تموم شد' : '⏰ Challenge deadline reached';
+                        const chBody = state.lang === 'fa' ?
+                            ('زمان چالش «' + c.name + '» تموم شد! انجامش دادی؟') :
+                            ('Time for "' + c.name + '" is up! Did you complete it?');
+                        if (window.Notification && Notification.permission === 'granted') {
+                            showAppNotification(chTitle, { body: chBody, tag: 'challenge-deadline-' + c.id });
+                        }
+                        showToast('⏰ ' + chBody, 4500);
+                        if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch (e) {} }
                     }
                 });
                 if (changed) saveState();
@@ -12145,6 +13009,7 @@
                 if (c) {
                     c.status = success ? 'success' : 'failed';
                     c.completedAt = Date.now();
+                    nativeCancelChallengeNotifications(c.id);
                     saveState();
                     if (success) awardChallenge(c);
                     else showToast(state.lang === 'fa' ? 'اشکالی نداره، دفعه بعد! 💪' : 'No worries, next time! 💪');
@@ -12157,6 +13022,8 @@
             document.getElementById('checkinNoBtn').addEventListener('click', () => resolveChallengeCheckin(false));
 
             document.getElementById('challengeFloatBtn').addEventListener('click', () => openChallengeModal());
+            const dashOpenChBtn = document.getElementById('dashboardOpenChallengesBtn');
+            if (dashOpenChBtn) dashOpenChBtn.addEventListener('click', () => openChallengeModal('active'));
             document.getElementById('challengeModalCloseBtn').addEventListener('click', () => {
                 document.getElementById('challengeModalBackdrop').classList.remove('open');
             });

@@ -4382,11 +4382,11 @@
                     <button data-view="habits" class="active view-tab-btn" data-fa="عادت‌ها" data-en="Habits">عادت‌ها</button>
                     <button data-view="month" class="view-tab-btn" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</button>
                     <button data-view="year" class="view-tab-btn" data-fa="ثبت سالانه" data-en="Yearly Record">ثبت سالانه</button>
-                    <button data-view="library" class="view-tab-btn" data-fa="📚 کتابخونه" data-en="📚 Library">📚 کتابخونه</button>
+                    <button data-view="library" class="view-tab-btn" data-fa="📚 کتابخونه" data-en="📚 Library" data-premium-locked="true">📚 کتابخونه</button>
                     <button data-view="vows" class="view-tab-btn" data-fa="عهدنامه" data-en="Vows">عهدنامه</button>
                     <button data-view="journal" class="view-tab-btn" data-fa="📓 یادداشت" data-en="📓 Journal">📓 یادداشت</button>
-                    <button data-view="todo" class="view-tab-btn" data-fa="✅ لیست کارها" data-en="✅ To-Do">✅ لیست کارها</button>
-                    <button data-view="calorie" class="view-tab-btn" data-fa="🔥 کالری‌شمار" data-en="🔥 Calories">🔥 کالری‌شمار</button>
+                    <button data-view="todo" class="view-tab-btn" data-fa="✅ لیست کارها" data-en="✅ To-Do" data-premium-locked="true">✅ لیست کارها</button>
+                    <button data-view="calorie" class="view-tab-btn" data-fa="🔥 کالری‌شمار" data-en="🔥 Calories" data-premium-locked="true">🔥 کالری‌شمار</button>
                     <button data-view="settings" class="view-tab-btn" data-fa="⚙ تنظیمات" data-en="⚙ Settings">⚙ تنظیمات</button>
                 </nav>
                 <button class="modal-close" id="tabsPickerCloseBtn" data-fa="بستن" data-en="Close">بستن</button>
@@ -4404,7 +4404,7 @@
             <button class="bottom-nav-btn view-tab-btn" data-view="month" id="bottomNavMonthBtn">
                 <span class="bn-icon">📅</span><span class="bn-label" data-fa="ثبت ماهانه" data-en="Monthly Record">ثبت ماهانه</span>
             </button>
-            <button class="bottom-nav-btn view-tab-btn" data-view="todo" id="bottomNavTodoBtn">
+            <button class="bottom-nav-btn view-tab-btn" data-view="todo" id="bottomNavTodoBtn" data-premium-locked="true">
                 <span class="bn-icon">✅</span><span class="bn-label" data-fa="کارها" data-en="To-Do">کارها</span>
             </button>
         </div>
@@ -5381,6 +5381,16 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="premiumPaywallBackdrop">
+        <div class="modal" style="max-width:420px;text-align:center">
+            <div style="font-size:44px;margin-bottom:6px">🔒</div>
+            <h3 data-fa="این بخش، ویژه‌ی نسخه‌ی کامله" data-en="This section is part of the full version">این بخش، ویژه‌ی نسخه‌ی کامله</h3>
+            <p id="premiumPaywallBody" style="font-size:calc(13.5px * var(--font-scale));line-height:2;color:var(--text-muted);margin:10px 0 18px"></p>
+            <button class="btn-confirm" id="premiumPurchaseBtn" style="width:100%;margin-bottom:10px" data-fa="🔓 خرید نسخه‌ی کامل" data-en="🔓 Unlock Full Version">🔓 خرید نسخه‌ی کامل</button>
+            <button class="modal-close" id="premiumPaywallCloseBtn" data-fa="بعداً" data-en="Later">بعداً</button>
+        </div>
+    </div>
+
     <div class="onboarding-overlay" id="onboardingOverlay">
         <div class="onboarding-card">
             <div class="onboarding-dots" id="onboardingDots"></div>
@@ -5668,6 +5678,7 @@
                 urgeHiddenIds: [],
                 habitNotes: {},
                 onboardingDone: false,
+                isPremium: false,
                 calorie: { profile: null, logs: {}, burns: {}, customFoods: [], customActivities: [] },
                 challenges: []
             };
@@ -7411,6 +7422,7 @@
                 document.querySelectorAll('[data-fa-title][data-en-title]').forEach(el => {
                     el.title = lang === 'fa' ? el.dataset.faTitle : el.dataset.enTitle;
                 });
+                applyPremiumLockUI();
                 updateTriggerUI();
                 const todoInput = document.getElementById('todoInput');
                 if (todoInput) {
@@ -10042,7 +10054,12 @@
             });
 
             let currentViewName = 'dashboard';
+            const LOCKED_VIEWS = ['todo', 'calorie', 'library'];
             function switchToView(viewName) {
+                if (LOCKED_VIEWS.includes(viewName) && !state.isPremium) {
+                    openPremiumPaywall(viewName);
+                    return;
+                }
                 currentViewName = viewName;
                 document.querySelectorAll('.view-tab-btn').forEach(x => x.classList.remove('active'));
                 document.querySelectorAll('section.view').forEach(v => v.classList.remove('active'));
@@ -12380,6 +12397,7 @@
                 });
             }
             nativeResyncAllReminders();
+            if (isNativeApp() && !state.isPremium) restorePurchases();
             applyFontSize();
             applyLevelColors();
             applyLang();
@@ -12394,6 +12412,127 @@
             // ============================================================
             // راهنمای هر بخش (Help): با دکمه‌ی ❓ کنار هر بخش قابل مشاهده و در هر لحظه قابل تکرار
             // ============================================================
+            // ============================================================
+            // پریمیوم / خرید درون‌برنامه‌ای: قفل‌کردن لیست‌کارها، کالری‌شمار و کتابخونه
+            // تا وقتی خرید انجام نشده. تأیید واقعی خرید بعداً از طریق یک Worker
+            // سرورلس روی Cloudflare انجام می‌شود (این تابع فعلاً یک قلاب/Hook آماده
+            // است تا وقتی پلاگین نیتیو کافه‌بازار وصل شود، همین‌جا تکمیلش کنیم).
+            // ============================================================
+            const PREMIUM_FEATURE_NAMES = {
+                todo: { fa: 'لیست کارها', en: 'To-Do List' },
+                calorie: { fa: 'کالری‌شمار', en: 'Calorie Counter' },
+                library: { fa: 'کتابخونه', en: 'Library' }
+            };
+            function openPremiumPaywall(viewName) {
+                const f = PREMIUM_FEATURE_NAMES[viewName];
+                const body = document.getElementById('premiumPaywallBody');
+                if (f) {
+                    body.textContent = state.lang === 'fa' ?
+                        ('برای استفاده از «' + f.fa + '» و همه‌ی امکانات دیگه‌ی نسخه‌ی کامل، باید یک‌بار خریدش کنی.') :
+                        ('To use "' + f.en + '" and everything else in the full version, you need to purchase it once.');
+                } else {
+                    body.textContent = state.lang === 'fa' ? 'برای استفاده از این بخش، باید نسخه‌ی کامل رو بخری.' :
+                        'You need the full version to use this section.';
+                }
+                document.getElementById('premiumPaywallBackdrop').classList.add('open');
+            }
+            function applyPremiumLockUI() {
+                document.querySelectorAll('[data-premium-locked]').forEach(btn => {
+                    const labelEl = btn.querySelector('.bn-label') || btn;
+                    if (!state.isPremium && !labelEl.textContent.includes('🔒')) {
+                        labelEl.textContent = '🔒 ' + labelEl.textContent;
+                    }
+                });
+            }
+            // این تابع فعلاً یک Placeholder است: بعد از وصل‌شدن پلاگین نیتیو کافه‌بازار،
+            // اینجا فرایند واقعی خرید (باز کردن صفحه‌ی پرداخت کافه‌بازار + تأیید خرید از
+            // طریق Worker سرورلس) جایگزین می‌شود.
+            // ============================================================
+            // این دو مقدار رو وقتی محصول واقعی رو توی پنل کافه‌بازار ساختی و
+            // Worker سرورلس رو دیپلوی کردی، اینجا پر کن:
+            // ============================================================
+            const PREMIUM_PRODUCT_ID = 'premium_unlock'; // دقیقاً همین SKU رو توی پنل کافه‌بازار بساز
+            const PREMIUM_VERIFY_WORKER_URL = 'https://routine-planner-verify.rayganiali.workers.dev'; // مثلاً: 'https://routine-planner-verify.یوزرنیمت.workers.dev'
+
+            function bazaarBillingPlugin() {
+                return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BazaarBilling) || null;
+            }
+
+            async function purchasePremium() {
+                if (!isNativeApp()) {
+                    showToast(state.lang === 'fa' ?
+                        'خرید فقط از داخل اپ نصب‌شده از کافه‌بازار امکان‌پذیره.' :
+                        'Purchase is only available from the app installed via Cafe Bazaar.', 3000);
+                    return;
+                }
+                const plugin = bazaarBillingPlugin();
+                if (!plugin) {
+                    showToast(state.lang === 'fa' ? 'پلاگین خرید در دسترس نیست.' : 'Billing plugin unavailable.', 3000);
+                    return;
+                }
+                if (!PREMIUM_VERIFY_WORKER_URL) {
+                    showToast(state.lang === 'fa' ?
+                        'هنوز آدرس سرور تأیید خرید تنظیم نشده (PREMIUM_VERIFY_WORKER_URL).' :
+                        'Verify server URL not configured yet (PREMIUM_VERIFY_WORKER_URL).', 3500);
+                    return;
+                }
+                try {
+                    await plugin.connect();
+                    const purchase = await plugin.purchase({ productId: PREMIUM_PRODUCT_ID });
+                    showToast(state.lang === 'fa' ? 'در حال تأیید خرید...' : 'Verifying purchase...', 2000);
+                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: purchase.productId, purchaseToken: purchase.purchaseToken })
+                    });
+                    const data = await res.json();
+                    if (data.valid) {
+                        state.isPremium = true;
+                        state.premiumPurchaseToken = purchase.purchaseToken;
+                        saveState();
+                        applyPremiumLockUI();
+                        document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+                        showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
+                    } else {
+                        showToast(state.lang === 'fa' ? 'تأیید خرید ناموفق بود.' : 'Purchase verification failed.', 3000);
+                    }
+                } catch (e) {
+                    if (e && e.message !== 'cancelled') {
+                        showToast(state.lang === 'fa' ? 'خرید انجام نشد: ' + (e.message || '') : 'Purchase failed: ' + (e.message || ''), 3000);
+                    }
+                }
+            }
+            // اگر قبلاً خرید انجام شده (مثلاً روی گوشی دیگه)، با این تابع می‌تونه بازیابیش کنه
+            async function restorePurchases() {
+                const plugin = bazaarBillingPlugin();
+                if (!plugin || !PREMIUM_VERIFY_WORKER_URL) return;
+                try {
+                    await plugin.connect();
+                    const result = await plugin.getPurchasedProducts();
+                    const owned = (result.products || []).find(p => p.productId === PREMIUM_PRODUCT_ID);
+                    if (!owned) return;
+                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: owned.productId, purchaseToken: owned.purchaseToken })
+                    });
+                    const data = await res.json();
+                    if (data.valid) {
+                        state.isPremium = true;
+                        state.premiumPurchaseToken = owned.purchaseToken;
+                        saveState();
+                        applyPremiumLockUI();
+                    }
+                } catch (e) {}
+            }
+            document.getElementById('premiumPurchaseBtn').addEventListener('click', purchasePremium);
+            document.getElementById('premiumPaywallCloseBtn').addEventListener('click', () => {
+                document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+            });
+            document.getElementById('premiumPaywallBackdrop').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
+
             const HELP_CONTENT = {
                 habits: {
                     icon: '🎯',

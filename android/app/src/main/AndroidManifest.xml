@@ -46,4 +46,13 @@
     <!-- برای این‌که بعد از روشن‌شدن دوباره‌ی گوشی، یادآوری‌های زمان‌بندی‌شده از بین نروند -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- روی اندروید ۱۱ به بالا، بدون این بخش اپ نمی‌تونه ببینه کافه‌بازار نصبه یا نه
+         و اتصال به سرویس پرداخت درون‌برنامه‌ای (Poolakey) با خطا مواجه می‌شه. -->
+    <queries>
+        <package android:name="com.farsitel.bazaar" />
+        <intent>
+            <action android:name="ir.cafebazaar.pardakht.InAppBillingService.BIND" />
+        </intent>
+    </queries>
 </manifest>
