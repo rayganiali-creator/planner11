@@ -50,8 +50,7 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
     // --------- پرداخت درون‌برنامه‌ای کافه‌بازار ---------
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "ir.cafebazaar:poolakey:1.6.1"
-}
+implementation "com.github.cafebazaar.Poolakey:poolakey:2.2.0"}
 
 apply from: 'capacitor.build.gradle'
 
