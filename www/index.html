@@ -5383,11 +5383,17 @@
 
     <div class="modal-backdrop" id="premiumPaywallBackdrop">
         <div class="modal" style="max-width:420px;text-align:center">
-            <div style="font-size:44px;margin-bottom:6px">🔒</div>
+            <div style="font-size:44px;margin-bottom:6px;cursor:pointer;user-select:none" id="premiumLockIcon">🔒</div>
             <h3 data-fa="این بخش، ویژه‌ی نسخه‌ی کامله" data-en="This section is part of the full version">این بخش، ویژه‌ی نسخه‌ی کامله</h3>
             <p id="premiumPaywallBody" style="font-size:calc(13.5px * var(--font-scale));line-height:2;color:var(--text-muted);margin:10px 0 18px"></p>
             <button class="btn-confirm" id="premiumPurchaseBtn" style="width:100%;margin-bottom:10px" data-fa="🔓 خرید نسخه‌ی کامل" data-en="🔓 Unlock Full Version">🔓 خرید نسخه‌ی کامل</button>
             <button class="modal-close" id="premiumPaywallCloseBtn" data-fa="بعداً" data-en="Later">بعداً</button>
+            <div id="premiumCodeRow" style="display:none;margin-top:14px;gap:8px;flex-direction:column">
+                <input type="text" id="premiumCodeInput" autocomplete="off" autocapitalize="off" spellcheck="false"
+                    style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-size:calc(13px * var(--font-scale));text-align:center"
+                    data-fa-placeholder="کد رو وارد کن" data-en-placeholder="Enter code" placeholder="کد رو وارد کن">
+                <button class="glass-btn" id="premiumCodeSubmitBtn" data-fa="تأیید کد" data-en="Submit code">تأیید کد</button>
+            </div>
         </div>
     </div>
 
@@ -12441,6 +12447,8 @@
                     const labelEl = btn.querySelector('.bn-label') || btn;
                     if (!state.isPremium && !labelEl.textContent.includes('🔒')) {
                         labelEl.textContent = '🔒 ' + labelEl.textContent;
+                    } else if (state.isPremium && labelEl.textContent.includes('🔒')) {
+                        labelEl.textContent = labelEl.textContent.replace('🔒 ', '').replace('🔒', '');
                     }
                 });
             }
@@ -12531,6 +12539,80 @@
             });
             document.getElementById('premiumPaywallBackdrop').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('open');
+            });
+
+            // ============================================================
+            // باز کردن دستی نسخه‌ی کامل با یه کد مخفی (برای تست خودت، بدون خرید واقعی)
+            // هیچ دکمه یا متنی این قابلیت رو لو نمی‌ده؛ فقط با ۷ بار ضربه‌ی سریع
+            // روی آیکون 🔒 بالای همین پنجره، کادر وارد کردن کد ظاهر می‌شه.
+            //
+            // برخلاف نسخه‌ی قبلی، خودِ کد اینجا به‌صورت متن ساده نوشته نشده؛ فقط
+            // هش (SHA-256 نمک‌دار) اون ذخیره شده، پس با دیدن سورس کد هم کد واقعی
+            // به‌سادگی قابل خوندن نیست. همچنین بعد از چند بار کد اشتباه، چند ثانیه
+            // قفل موقت می‌خوره تا حدس زدن پشت‌سرهم عملاً بی‌فایده باشه.
+            // ============================================================
+            const PREMIUM_UNLOCK_SALT = 'routineplanner-salt-9f3';
+            const PREMIUM_UNLOCK_HASH = '93b059bdfe8555bbd80de6c4dba97fc081229d2e52714bbcdf99a8c741419a64';
+            // کد واقعی همینه: rp-2612-golden — برای عوض کردنش، مقدار جدید رو جای
+            // "کد-جدیدت" توی این خط بذار، اجراش کن (کنسول مرورگر یا هر جای دیگه)،
+            // و رشته‌ای که چاپ می‌شه رو جایگزین PREMIUM_UNLOCK_HASH بالا کن:
+            //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('routineplanner-salt-9f3' + 'کد-جدیدت')).then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
+            let premiumTapCount = 0;
+            let premiumTapTimer = null;
+            document.getElementById('premiumLockIcon').addEventListener('click', function() {
+                premiumTapCount++;
+                clearTimeout(premiumTapTimer);
+                premiumTapTimer = setTimeout(() => { premiumTapCount = 0; }, 2500);
+                if (premiumTapCount >= 7) {
+                    premiumTapCount = 0;
+                    document.getElementById('premiumCodeRow').style.display = 'flex';
+                    document.getElementById('premiumCodeInput').focus();
+                }
+            });
+            let premiumUnlockAttempts = 0;
+            let premiumUnlockLockedUntil = 0;
+            async function sha256Hex(text) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+            async function tryPremiumUnlockCode() {
+                const input = document.getElementById('premiumCodeInput');
+                const now = Date.now();
+                if (now < premiumUnlockLockedUntil) {
+                    const secsLeft = Math.ceil((premiumUnlockLockedUntil - now) / 1000);
+                    input.value = '';
+                    showToast(state.lang === 'fa' ?
+                        ('⏳ چند بار اشتباه زدی؛ ' + secsLeft + ' ثانیه‌ی دیگه دوباره امتحان کن') :
+                        ('⏳ Too many attempts; try again in ' + secsLeft + 's'), 2500);
+                    return;
+                }
+                const val = (input.value || '').trim();
+                const hash = await sha256Hex(PREMIUM_UNLOCK_SALT + val);
+                if (val && hash === PREMIUM_UNLOCK_HASH) {
+                    premiumUnlockAttempts = 0;
+                    state.isPremium = true;
+                    saveState();
+                    applyPremiumLockUI();
+                    document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+                    input.value = '';
+                    document.getElementById('premiumCodeRow').style.display = 'none';
+                    showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
+                } else {
+                    premiumUnlockAttempts++;
+                    input.value = '';
+                    input.placeholder = state.lang === 'fa' ? 'کد اشتباهه' : 'Wrong code';
+                    if (premiumUnlockAttempts >= 5) {
+                        premiumUnlockLockedUntil = now + 30000; // ۳۰ ثانیه قفل موقت بعد از ۵ بار اشتباه
+                        premiumUnlockAttempts = 0;
+                        showToast(state.lang === 'fa' ? '⏳ به‌خاطر تلاش زیاد، ۳۰ ثانیه قفل شد' : '⏳ Locked for 30s after too many attempts', 2800);
+                    } else {
+                        showToast(state.lang === 'fa' ? '❌ کد درست نیست' : '❌ Incorrect code', 2000);
+                    }
+                }
+            }
+            document.getElementById('premiumCodeSubmitBtn').addEventListener('click', tryPremiumUnlockCode);
+            document.getElementById('premiumCodeInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') tryPremiumUnlockCode();
             });
 
             const HELP_CONTENT = {
