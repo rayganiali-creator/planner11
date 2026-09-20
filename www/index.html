@@ -5178,6 +5178,13 @@
                 <label data-fa="پاداش تمام کردن کتاب" data-en="Reward for Finishing">پاداش تمام کردن کتاب</label>
                 <input type="text" id="bookRewardInput" maxlength="150" placeholder="مثلاً: یک ساعت بازی، خرید یک چیز خاص...">
             </div>
+            <div class="book-form-field">
+                <label data-fa="عکس‌های کتاب" data-en="Book Photos">عکس‌های کتاب</label>
+                <div class="habit-photo-box">
+                    <button type="button" class="habit-photo-addbtn" id="bookPhotoAddBtn" data-fa="📷 افزودن عکس" data-en="📷 Add Photo">📷 افزودن عکس</button>
+                    <div class="habit-photo-strip" id="bookPhotoStrip"></div>
+                </div>
+            </div>
             <div class="modal-actions" style="display:flex;gap:8px;">
                 <button class="glass-btn primary" id="saveBookBtn" style="flex:1" data-fa="✅ ثبت" data-en="✅ Save">✅ ثبت</button>
                 <button class="glass-btn" id="cancelBookBtn" style="flex:1" data-fa="انصراف" data-en="Cancel">انصراف</button>
@@ -5263,6 +5270,7 @@
     </div>
 
     <input type="file" id="habitPhotoFileInput" accept="image/*" multiple style="display:none">
+    <input type="file" id="bookPhotoFileInput" accept="image/*" multiple style="display:none">
 
     <div class="modal-backdrop" id="challengeModalBackdrop">
         <div class="modal challenge-modal">
@@ -5394,6 +5402,48 @@
                     data-fa-placeholder="کد رو وارد کن" data-en-placeholder="Enter code" placeholder="کد رو وارد کن">
                 <button class="glass-btn" id="premiumCodeSubmitBtn" data-fa="تأیید کد" data-en="Submit code">تأیید کد</button>
             </div>
+
+            <!-- ===== ورود/ثبت‌نام حساب کاربری (برای بازیابی نسخه‌ی کامل روی گوشی جدید) ===== -->
+            <div style="margin-top:16px;border-top:1px solid var(--glass-border);padding-top:14px">
+                <button type="button" class="modal-close" id="accountToggleLink" style="text-decoration:underline;background:none"
+                    data-fa="قبلاً خریدی؟ وارد حساب شو" data-en="Already purchased? Sign in">قبلاً خریدی؟ وارد حساب شو</button>
+                <div id="accountPanel" style="display:none;margin-top:12px;text-align:right">
+                    <div class="library-filter-tabs" id="accountTabs" style="margin-bottom:10px">
+                        <button type="button" data-atab="login" class="active" data-fa="ورود" data-en="Sign in">ورود</button>
+                        <button type="button" data-atab="register" data-fa="ثبت‌نام" data-en="Register">ثبت‌نام</button>
+                        <button type="button" data-atab="recover" data-fa="بازیابی با کد" data-en="Recover with code">بازیابی با کد</button>
+                    </div>
+
+                    <div id="accountPane-login" class="account-pane">
+                        <div class="cal-gender-toggle" id="loginModeToggle" style="margin-bottom:8px">
+                            <button type="button" data-mode="email" class="active" data-fa="ایمیل" data-en="Email">ایمیل</button>
+                            <button type="button" data-mode="username" data-fa="یوزرنیم" data-en="Username">یوزرنیم</button>
+                        </div>
+                        <input type="text" id="loginIdentifierInput" class="name-input" autocomplete="off" placeholder="ایمیل یا یوزرنیم" style="margin-bottom:8px">
+                        <input type="password" id="loginPasswordInput" class="name-input" autocomplete="off" placeholder="رمز عبور" style="margin-bottom:8px">
+                        <button class="glass-btn primary" id="loginSubmitBtn" style="width:100%" data-fa="ورود" data-en="Sign in">ورود</button>
+                    </div>
+
+                    <div id="accountPane-register" class="account-pane" style="display:none">
+                        <div class="cal-gender-toggle" id="registerModeToggle" style="margin-bottom:8px">
+                            <button type="button" data-mode="email" class="active" data-fa="ایمیل" data-en="Email">ایمیل</button>
+                            <button type="button" data-mode="username" data-fa="یوزرنیم" data-en="Username">یوزرنیم</button>
+                        </div>
+                        <input type="text" id="registerIdentifierInput" class="name-input" autocomplete="off" placeholder="ایمیل یا یوزرنیم" style="margin-bottom:8px">
+                        <input type="password" id="registerPasswordInput" class="name-input" autocomplete="off" placeholder="رمز عبور (حداقل ۶ کاراکتر)" style="margin-bottom:8px">
+                        <button class="glass-btn primary" id="registerSubmitBtn" style="width:100%" data-fa="ساخت حساب" data-en="Create account">ساخت حساب</button>
+                        <p class="field-hint" style="margin-top:8px" data-fa="بعد از ساخت حساب، یه کد بازیابی بهت نشون داده می‌شه — حتماً جایی ذخیره‌ش کن." data-en="After creating your account you'll get a recovery code — be sure to save it.">بعد از ساخت حساب، یه کد بازیابی بهت نشون داده می‌شه — حتماً جایی ذخیره‌ش کن.</p>
+                    </div>
+
+                    <div id="accountPane-recover" class="account-pane" style="display:none">
+                        <textarea id="recoveryCodeInput" placeholder="کد بازیابی رو اینجا پیست کن" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border-radius:10px;border:1.5px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-size:calc(12.5px * var(--font-scale));margin-bottom:8px"></textarea>
+                        <button class="glass-btn primary" id="recoverySubmitBtn" style="width:100%" data-fa="بازیابی" data-en="Recover">بازیابی</button>
+                        <p class="field-hint" style="margin-top:8px" data-fa="این روش حتی بدون اینترنت هم کار می‌کند." data-en="This works even without internet.">این روش حتی بدون اینترنت هم کار می‌کند.</p>
+                    </div>
+
+                    <div id="accountMsg" style="margin-top:8px;font-size:calc(12.5px * var(--font-scale));min-height:1em"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -5455,18 +5505,23 @@
             // ============================================================
             const HABIT_PHOTOS_DB = 'routinePlannerPhotos';
             const HABIT_PHOTOS_STORE = 'photos';
+            const BOOK_PHOTOS_STORE = 'bookPhotos';
             let _photosDbPromise = null;
 
             function openPhotosDb() {
                 if (_photosDbPromise) return _photosDbPromise;
                 _photosDbPromise = new Promise((resolve, reject) => {
                     if (!window.indexedDB) { reject(new Error('indexedDB not supported')); return; }
-                    const req = indexedDB.open(HABIT_PHOTOS_DB, 1);
+                    const req = indexedDB.open(HABIT_PHOTOS_DB, 2);
                     req.onupgradeneeded = () => {
                         const db = req.result;
                         if (!db.objectStoreNames.contains(HABIT_PHOTOS_STORE)) {
                             const store = db.createObjectStore(HABIT_PHOTOS_STORE, { keyPath: 'id' });
                             store.createIndex('habitId', 'habitId', { unique: false });
+                        }
+                        if (!db.objectStoreNames.contains(BOOK_PHOTOS_STORE)) {
+                            const bstore = db.createObjectStore(BOOK_PHOTOS_STORE, { keyPath: 'id' });
+                            bstore.createIndex('bookId', 'bookId', { unique: false });
                         }
                     };
                     req.onsuccess = () => resolve(req.result);
@@ -5506,6 +5561,37 @@
 
             function habitPhotosDeleteAllForHabit(habitId) {
                 return habitPhotosGet(habitId).then(list => Promise.all(list.map(p => habitPhotoDelete(p.id))));
+            }
+
+            // --------- همان الگو، برای عکس‌های کتاب‌های کتابخونه ---------
+            function bookPhotoAdd(bookId, dataUrl) {
+                return openPhotosDb().then(db => new Promise((resolve, reject) => {
+                    const id = 'bp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+                    const tx = db.transaction(BOOK_PHOTOS_STORE, 'readwrite');
+                    tx.objectStore(BOOK_PHOTOS_STORE).put({ id, bookId, dataUrl, ts: Date.now() });
+                    tx.oncomplete = () => resolve(id);
+                    tx.onerror = () => reject(tx.error);
+                }));
+            }
+            function bookPhotosGet(bookId) {
+                return openPhotosDb().then(db => new Promise((resolve, reject) => {
+                    const tx = db.transaction(BOOK_PHOTOS_STORE, 'readonly');
+                    const idx = tx.objectStore(BOOK_PHOTOS_STORE).index('bookId');
+                    const req = idx.getAll(IDBKeyRange.only(bookId));
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => reject(req.error);
+                }));
+            }
+            function bookPhotoDelete(photoId) {
+                return openPhotosDb().then(db => new Promise((resolve, reject) => {
+                    const tx = db.transaction(BOOK_PHOTOS_STORE, 'readwrite');
+                    tx.objectStore(BOOK_PHOTOS_STORE).delete(photoId);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                }));
+            }
+            function bookPhotosDeleteAllForBook(bookId) {
+                return bookPhotosGet(bookId).then(list => Promise.all(list.map(p => bookPhotoDelete(p.id))));
             }
 
             // فشرده‌سازی عکس قبل از ذخیره تا سبک و سریع بماند
@@ -5685,6 +5771,7 @@
                 habitNotes: {},
                 onboardingDone: false,
                 isPremium: false,
+                accountToken: null,
                 calorie: { profile: null, logs: {}, burns: {}, customFoods: [], customActivities: [] },
                 challenges: []
             };
@@ -6719,6 +6806,7 @@
             // ============================================================
             let libraryFilter = 'all';
             let editingBookId = null;
+            let bookModalIsNew = false;
             let logPagesBookId = null;
 
             function getLibraryLevelNum(completedCount) {
@@ -6835,6 +6923,7 @@
                             '</div><div class="b-author">' + (b.author ? escHtml(b.author) : '') +
                             '</div></div>' + badge + '</div>' +
                             summaryHtml +
+                            '<div class="habit-photo-strip" data-bcard-photo="' + b.id + '" style="display:none"></div>' +
                             '<div class="book-progress-row">' +
                             '<div class="book-progress-label"><span>' + (state.lang === 'fa' ?
                                 (toPersianDigits(b.pagesRead || 0) + ' از ' + toPersianDigits(b
@@ -6859,6 +6948,7 @@
                                 '<div class="bh-row">' + (state.lang === 'fa' ?
                                     'هنوز ثبتی نشده' : 'No entries yet') + '</div>') + '</div>';
                         list.appendChild(item);
+                        renderBookCardPhotoStrip(item.querySelector('[data-bcard-photo="' + b.id + '"]'), b.id);
                     });
                 }
 
@@ -6885,7 +6975,8 @@
             }
 
             function openAddBookModal() {
-                editingBookId = null;
+                editingBookId = uid(); // شناسه رو از همین الان می‌سازیم تا بشه قبل از ثبت نهایی هم عکس اضافه کرد
+                bookModalIsNew = true;
                 document.getElementById('bookModalTitle').textContent = state.lang === 'fa' ?
                     '📚 افزودن کتاب' : '📚 Add Book';
                 document.getElementById('bookTitleInput').value = '';
@@ -6893,6 +6984,7 @@
                 document.getElementById('bookSummaryInput').value = '';
                 document.getElementById('bookPagesInput').value = '';
                 document.getElementById('bookRewardInput').value = '';
+                renderBookPhotoStrip(editingBookId);
                 document.getElementById('addBookModalBackdrop').classList.add('open');
             }
 
@@ -6900,6 +6992,7 @@
                 const b = state.books.find(x => x.id === id);
                 if (!b) return;
                 editingBookId = id;
+                bookModalIsNew = false;
                 document.getElementById('bookModalTitle').textContent = state.lang === 'fa' ?
                     '✏️ ویرایش کتاب' : '✏️ Edit Book';
                 document.getElementById('bookTitleInput').value = b.title || '';
@@ -6907,12 +7000,18 @@
                 document.getElementById('bookSummaryInput').value = b.summary || '';
                 document.getElementById('bookPagesInput').value = b.totalPages || '';
                 document.getElementById('bookRewardInput').value = b.reward || '';
+                renderBookPhotoStrip(editingBookId);
                 document.getElementById('addBookModalBackdrop').classList.add('open');
             }
 
             function closeAddBookModal() {
                 document.getElementById('addBookModalBackdrop').classList.remove('open');
+                // اگه داشت کتاب جدید می‌ساخت ولی بدون ثبت انصراف داد، عکس‌های یتیمِ همون پیش‌نویس رو پاک می‌کنیم
+                if (bookModalIsNew && editingBookId) {
+                    bookPhotosDeleteAllForBook(editingBookId).catch(() => {});
+                }
                 editingBookId = null;
+                bookModalIsNew = false;
             }
 
             function saveBookFromModal() {
@@ -6933,7 +7032,7 @@
                     return;
                 }
 
-                if (editingBookId) {
+                if (!bookModalIsNew) {
                     const b = state.books.find(x => x.id === editingBookId);
                     if (b) {
                         b.title = title;
@@ -6950,7 +7049,7 @@
                     }
                 } else {
                     state.books.push({
-                        id: uid(),
+                        id: editingBookId,
                         title: title,
                         author: author,
                         summary: summary,
@@ -6964,6 +7063,7 @@
                     });
                 }
                 saveState();
+                bookModalIsNew = false; // دیگه پیش‌نویس نیست، پس بستنِ مودال عکس‌ها رو پاک نکنه
                 closeAddBookModal();
                 renderLibrary();
                 showToast(state.lang === 'fa' ? '✅ کتاب ثبت شد' : '✅ Book saved');
@@ -6971,6 +7071,7 @@
 
             function deleteBook(id) {
                 state.books = state.books.filter(b => b.id !== id);
+                bookPhotosDeleteAllForBook(id).catch(() => {});
                 saveState();
                 renderLibrary();
             }
@@ -7982,9 +8083,83 @@
                 }
             })();
 
-            // ============================================================
-            // DASHBOARD
-            // ============================================================
+            // --------- گالری عکس کتاب‌ها (داخل مودال افزودن/ویرایش کتاب) ---------
+            function renderBookPhotoStrip(bookId) {
+                const strip = document.getElementById('bookPhotoStrip');
+                if (!strip) return;
+                bookPhotosGet(bookId).then(photos => {
+                    const stripNow = document.getElementById('bookPhotoStrip');
+                    if (!stripNow) return;
+                    stripNow.innerHTML = photos.map(p =>
+                        '<div class="habit-photo-thumb" data-bphoto-id="' + p.id + '"><img src="' + p.dataUrl +
+                        '" loading="lazy" alt=""><button type="button" class="habit-photo-del" data-bphoto-del="' +
+                        p.id + '">✕</button></div>'
+                    ).join('');
+                    stripNow.querySelectorAll('[data-bphoto-id]').forEach(thumb => {
+                        thumb.querySelector('img').addEventListener('click', () => {
+                            openHabitPhotoLightbox(thumb.querySelector('img').src);
+                        });
+                    });
+                    stripNow.querySelectorAll('[data-bphoto-del]').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            bookPhotoDelete(btn.dataset.bphotoDel).then(() => renderBookPhotoStrip(bookId));
+                        });
+                    });
+                }).catch(() => {});
+            }
+
+            // --------- نوار کوچک عکس‌ها روی کارتِ هر کتاب توی لیست کتابخونه ---------
+            function renderBookCardPhotoStrip(el, bookId) {
+                bookPhotosGet(bookId).then(photos => {
+                    if (!photos.length) { el.style.display = 'none'; return; }
+                    el.style.display = '';
+                    el.innerHTML = photos.map(p =>
+                        '<div class="habit-photo-thumb"><img src="' + p.dataUrl + '" loading="lazy" alt=""></div>'
+                    ).join('');
+                    el.querySelectorAll('img').forEach(img => {
+                        img.addEventListener('click', () => openHabitPhotoLightbox(img.src));
+                    });
+                }).catch(() => {});
+            }
+
+            (function initBookPhotoGlobalHandlers() {
+                const addBtn = document.getElementById('bookPhotoAddBtn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        if (!editingBookId) return;
+                        const fileInput = document.getElementById('bookPhotoFileInput');
+                        fileInput.value = '';
+                        fileInput.dataset.forBook = editingBookId;
+                        fileInput.click();
+                    });
+                }
+                const fileInput = document.getElementById('bookPhotoFileInput');
+                if (fileInput) {
+                    fileInput.addEventListener('change', function() {
+                        const bookId = this.dataset.forBook;
+                        const files = Array.from(this.files || []);
+                        if (!bookId || !files.length) return;
+                        const strip = document.getElementById('bookPhotoStrip');
+                        const loadingThumbs = files.map(() => {
+                            const d = document.createElement('div');
+                            d.className = 'habit-photo-thumb loading';
+                            d.textContent = '⏳';
+                            if (strip) strip.appendChild(d);
+                            return d;
+                        });
+                        Promise.all(files.map(f => compressImageFile(f, 1280, .72)
+                            .then(dataUrl => bookPhotoAdd(bookId, dataUrl))
+                            .catch(() => null)
+                        )).then(() => {
+                            loadingThumbs.forEach(d => d.remove());
+                            renderBookPhotoStrip(bookId);
+                        });
+                    });
+                }
+            })();
+
+
             function renderDashboard() {
                 const today = dateToISO(startOfDay(new Date()));
                 const permStats = dayStats(today, h => h.permanent !== false);
@@ -7995,21 +8170,33 @@
                     html += '<div class="empty-state">' + (state.lang === 'fa' ? 'هیچ عادتی برای امروز فعال نیست.' :
                         'No active habits for today.') + '</div>';
                 } else {
-                    if (permStats.total > 0) { const pct = Math.round((permStats.success / permStats.total) *
-                            100);
-                        html += '<div class="item"><span>' + (state.lang === 'fa' ? 'عادت‌های دائمی' :
-                            'Permanent habits') + '</span><span>' + permStats.success + '/' + permStats
-                            .total + ' — ' + pct + '%</span></div>'; }
+                    // عادت‌های دائمی: هدف مشخص و پایانی ندارن، پس به‌جای «X از Y — درصد» که یعنی یه
+                    // هدف باید کامل بشه، همین امروز چندتا انجام شده رو با پیاپی (streak) نشون می‌دیم —
+                    // نه یه درصدی که با گذشت زمان به ۱۰۰ نمی‌رسه و آدم رو کمال‌گرا و ناامید می‌کنه.
+                    if (permStats.total > 0) {
+                        const streakNum2 = computePermanentStreak();
+                        const doneTxt = state.lang === 'fa' ? toPersianDigits(permStats.success) : permStats.success;
+                        const totalTxt = state.lang === 'fa' ? toPersianDigits(permStats.total) : permStats.total;
+                        const streakTxt = state.lang === 'fa' ? toPersianDigits(streakNum2) : streakNum2;
+                        html += '<div class="item"><span>' + (state.lang === 'fa' ? 'عادت‌های دائمی (امروز)' :
+                            'Permanent habits (today)') + '</span><span>' + doneTxt + '/' + totalTxt +
+                            (streakNum2 > 0 ? ('  🔥' + streakTxt) : '') + '</span></div>';
+                    }
+                    // عادت‌های مدت‌دار واقعاً یه هدف و پایان مشخص دارن، پس «X از Y — درصد» اینجا معنی داره
                     if (limStats.total > 0) { const pct = Math.round((limStats.success / limStats.total) *
                             100);
                         html += '<div class="item"><span>' + (state.lang === 'fa' ? 'عادت‌های مدت‌دار' :
                             'Limited habits') + '</span><span>' + limStats.success + '/' + limStats.total +
                             ' — ' + pct + '%</span></div>'; }
-                    const totalAll = permStats.total + limStats.total,
-                        successAll = permStats.success + limStats.success;
-                    const pctAll = totalAll ? Math.round((successAll / totalAll) * 100) : 0;
-                    html += '<div class="item"><span>' + (state.lang === 'fa' ? 'درصد تکمیل کل' :
-                        'Overall completion') + '</span><span><b>' + pctAll + '%</b></span></div>';
+                    // «درصد تکمیل کل» فقط وقتی نشون داده می‌شه که عادت مدت‌دار (هدف‌دار) هم وجود داشته باشه؛
+                    // اگه فقط عادت دائمی داری، این عدد بی‌معنیه و حذف می‌شه.
+                    if (limStats.total > 0) {
+                        const totalAll = permStats.total + limStats.total,
+                            successAll = permStats.success + limStats.success;
+                        const pctAll = totalAll ? Math.round((successAll / totalAll) * 100) : 0;
+                        html += '<div class="item"><span>' + (state.lang === 'fa' ? 'درصد تکمیل کل' :
+                            'Overall completion') + '</span><span><b>' + pctAll + '%</b></span></div>';
+                    }
                 }
                 summary.innerHTML = html;
 
@@ -8048,8 +8235,19 @@
                     } else {
                         const today = startOfDay(new Date());
                         habitsWrap.innerHTML = state.habits.map(h => {
+                            const isPermanent = h.permanent !== false;
                             let total = 0, succ = 0;
-                            let d = new Date(h.createdAt);
+                            let d;
+                            if (isPermanent) {
+                                // عادت‌های دائمی هدف/پایان مشخصی ندارن؛ اگه درصد رو از روز ساختِ عادت حساب کنیم،
+                                // یه لغزش قدیمی برای همیشه سقف عدد رو پایین نگه می‌داره و آدمِ کمال‌گرا رو ناامید می‌کنه.
+                                // برای همین فقط ۳۰ روز اخیر رو حساب می‌کنیم — یه بازه‌ی تازه که واقعاً نشون‌دهنده‌ی
+                                // وضعیتِ الانشه، نه گذشته‌ی دور.
+                                const windowStart = addDays(today, -29);
+                                d = new Date(h.createdAt) > windowStart ? new Date(h.createdAt) : windowStart;
+                            } else {
+                                d = new Date(h.createdAt);
+                            }
                             while (d <= today) {
                                 const iso = dateToISO(d);
                                 if (habitAppliesOnISO(h, iso)) {
@@ -8060,10 +8258,16 @@
                             }
                             const pct = total > 0 ? Math.round((succ / total) * 100) : 0;
                             const pctText = state.lang === 'fa' ? toPersianDigits(pct) : String(pct);
+                            const habitStreak = isPermanent ? computeHabitStreak(h) : 0;
+                            const streakBadge = (isPermanent && habitStreak > 0) ?
+                                (' <span style="color:var(--accent)">🔥' + (state.lang === 'fa' ? toPersianDigits(habitStreak) : habitStreak) + '</span>') : '';
+                            const nameSuffix = isPermanent ?
+                                (' <span style="font-size:calc(10px * var(--font-scale));color:var(--text-muted);font-weight:normal">' +
+                                    (state.lang === 'fa' ? '(۳۰ روز اخیر)' : '(last 30 days)') + '</span>') : '';
                             return '<div class="dash-progress-row">' +
-                                '<div class="dash-progress-name">' + escHtml(h.name) + '</div>' +
+                                '<div class="dash-progress-name">' + escHtml(h.name) + nameSuffix + '</div>' +
                                 '<div class="dash-progress-bar"><div class="dash-progress-fill" style="width:' + pct + '%"></div></div>' +
-                                '<div class="dash-progress-pct">' + pctText + '%</div>' +
+                                '<div class="dash-progress-pct">' + pctText + '%' + streakBadge + '</div>' +
                                 '</div>';
                         }).join('');
                     }
@@ -9518,6 +9722,28 @@
                     }
                     // امروز هنوز به‌طور کامل ثبت نشده (بعضی عادت‌ها هنوز بدون وضعیت‌اند)؛
                     // این نباید باعث صفر شدن پیاپیِ روزهای قبل بشه، پس امروز را نادیده می‌گیریم و به دیروز می‌رویم.
+                    if (iso === todayISO) { d = addDays(d, -1);
+                        continue;
+                    }
+                    break;
+                }
+                return streak;
+            }
+
+            // پیاپیِ مخصوصِ فقط عادت‌های دائمی (بدون احتساب عادت‌های مدت‌دار/هدف‌دار)،
+            // برای کارت «وضعیت امروز» که فقط عادت‌های دائمی رو با پیاپی نشون می‌ده
+            function computePermanentStreak() {
+                let streak = 0,
+                    d = startOfDay(new Date());
+                const todayISO = dateToISO(d);
+                while (true) {
+                    const iso = dateToISO(d);
+                    const s = dayStats(iso, h => h.permanent !== false);
+                    if (s.total === 0 || s.fail > 0) break;
+                    if (s.success === s.total) { streak++;
+                        d = addDays(d, -1);
+                        continue;
+                    }
                     if (iso === todayISO) { d = addDays(d, -1);
                         continue;
                     }
@@ -12614,6 +12840,190 @@
             document.getElementById('premiumCodeInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') tryPremiumUnlockCode();
             });
+
+            // ============================================================
+            // حساب کاربری + توکن پریمیوم قابل‌تأیید آفلاین
+            // ============================================================
+            const ACCOUNT_WORKER_BASE = 'https://routine-planner-verify.rayganiali.workers.dev';
+            const PREMIUM_PUBLIC_JWK = {
+                "kty": "EC", "crv": "P-256",
+                "x": "OPbGeZZ91H7yzMXFm-Bv-zXlnm3HUgWfqLTcf21F_gs",
+                "y": "FqLRitINzyPTfhdQFFzt0Pp9m7eQnxYjnzgiPcCc_FY"
+            };
+
+            function b64urlToBytesClient(str) {
+                str = str.replace(/-/g, '+').replace(/_/g, '/');
+                while (str.length % 4) str += '=';
+                const bin = atob(str);
+                const out = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+                return out;
+            }
+
+            // توکن رو کاملاً آفلاین تأیید می‌کنه؛ به هیچ سروری وصل نمی‌شه
+            async function verifyPremiumTokenOffline(token) {
+                try {
+                    const parts = (token || '').trim().split('.');
+                    if (parts.length !== 3) return null;
+                    const [h, p, s] = parts;
+                    const key = await crypto.subtle.importKey('jwk', PREMIUM_PUBLIC_JWK, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+                    const data = new TextEncoder().encode(h + '.' + p);
+                    const sig = b64urlToBytesClient(s);
+                    const valid = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, sig, data);
+                    if (!valid) return null;
+                    return JSON.parse(atob(p.replace(/-/g, '+').replace(/_/g, '/')));
+                } catch (e) { return null; }
+            }
+
+            // موقع بالا اومدن اپ، اگه یه توکن حساب ذخیره‌شده داریم، آفلاین تأییدش کن
+            async function applyStoredAccountToken() {
+                if (!state.accountToken) return;
+                const payload = await verifyPremiumTokenOffline(state.accountToken);
+                if (payload && payload.prem) {
+                    state.isPremium = true;
+                    applyPremiumLockUI();
+                }
+            }
+            applyStoredAccountToken();
+
+            async function callAccountApi(path, body) {
+                const res = await fetch(ACCOUNT_WORKER_BASE + path, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json().catch(() => ({}));
+                return { ok: res.ok, data };
+            }
+
+            function setAccountMsg(text, isError) {
+                const el = document.getElementById('accountMsg');
+                if (!el) return;
+                el.textContent = text;
+                el.style.color = isError ? 'var(--fail)' : 'var(--success)';
+            }
+
+            function onAccountTokenReceived(token) {
+                state.accountToken = token;
+                saveState();
+                verifyPremiumTokenOffline(token).then(payload => {
+                    if (payload && payload.prem) {
+                        state.isPremium = true;
+                        applyPremiumLockUI();
+                        setAccountMsg(state.lang === 'fa' ? '✅ وارد شدی و نسخه‌ی کامل فعاله' : '✅ Signed in — full version active', false);
+                        setTimeout(() => document.getElementById('premiumPaywallBackdrop').classList.remove('open'), 1200);
+                    } else {
+                        setAccountMsg(state.lang === 'fa' ? 'وارد حساب شدی؛ هنوز خریدی ثبت نشده.' : "Signed in; no purchase on file yet.", false);
+                    }
+                });
+            }
+
+            (function initAccountPanel() {
+                const toggleLink = document.getElementById('accountToggleLink');
+                const panel = document.getElementById('accountPanel');
+                if (toggleLink && panel) {
+                    toggleLink.addEventListener('click', () => {
+                        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+                    });
+                }
+
+                document.querySelectorAll('#accountTabs [data-atab]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('#accountTabs [data-atab]').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        ['login', 'register', 'recover'].forEach(name => {
+                            document.getElementById('accountPane-' + name).style.display = (name === this.dataset.atab) ? 'block' : 'none';
+                        });
+                        setAccountMsg('', false);
+                    });
+                });
+
+                let loginMode = 'email', registerMode = 'email';
+                document.querySelectorAll('#loginModeToggle [data-mode]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('#loginModeToggle [data-mode]').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        loginMode = this.dataset.mode;
+                    });
+                });
+                document.querySelectorAll('#registerModeToggle [data-mode]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('#registerModeToggle [data-mode]').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        registerMode = this.dataset.mode;
+                    });
+                });
+
+                const loginBtn = document.getElementById('loginSubmitBtn');
+                if (loginBtn) loginBtn.addEventListener('click', async () => {
+                    const identifier = document.getElementById('loginIdentifierInput').value.trim();
+                    const password = document.getElementById('loginPasswordInput').value;
+                    if (!identifier || !password) {
+                        setAccountMsg(state.lang === 'fa' ? 'همه‌ی فیلدها رو پر کن' : 'Fill in all fields', true);
+                        return;
+                    }
+                    loginBtn.disabled = true;
+                    const { ok, data } = await callAccountApi('/account/login', { mode: loginMode, identifier, password })
+                        .catch(() => ({ ok: false, data: {} }));
+                    loginBtn.disabled = false;
+                    if (ok && data.token) {
+                        onAccountTokenReceived(data.token);
+                    } else {
+                        setAccountMsg(data.error || (state.lang === 'fa' ? '❌ ورود ناموفق بود' : '❌ Sign-in failed'), true);
+                    }
+                });
+
+                const registerBtn = document.getElementById('registerSubmitBtn');
+                if (registerBtn) registerBtn.addEventListener('click', async () => {
+                    const identifier = document.getElementById('registerIdentifierInput').value.trim();
+                    const password = document.getElementById('registerPasswordInput').value;
+                    if (!identifier || password.length < 6) {
+                        setAccountMsg(state.lang === 'fa' ? 'رمز حداقل ۶ کاراکتر باشه' : 'Password must be at least 6 characters', true);
+                        return;
+                    }
+                    registerBtn.disabled = true;
+                    const { ok, data } = await callAccountApi('/account/register', { mode: registerMode, identifier, password })
+                        .catch(() => ({ ok: false, data: {} }));
+                    registerBtn.disabled = false;
+                    if (ok && data.token) {
+                        state.accountToken = data.token;
+                        saveState();
+                        // کد بازیابی رو نشون می‌دیم تا کاربر حتماً جایی ذخیره‌ش کنه
+                        document.getElementById('recoveryCodeInput').value = data.recoveryCode || data.token;
+                        document.querySelectorAll('#accountTabs [data-atab]').forEach(b => b.classList.remove('active'));
+                        document.querySelector('#accountTabs [data-atab="recover"]').classList.add('active');
+                        document.getElementById('accountPane-login').style.display = 'none';
+                        document.getElementById('accountPane-register').style.display = 'none';
+                        document.getElementById('accountPane-recover').style.display = 'block';
+                        setAccountMsg(state.lang === 'fa' ?
+                            '✅ حساب ساخته شد! کدی که پایین اومد رو یه‌جای امن ذخیره کن.' :
+                            '✅ Account created! Save the code below somewhere safe.', false);
+                    } else {
+                        setAccountMsg(data.error || (state.lang === 'fa' ? '❌ ثبت‌نام ناموفق بود' : '❌ Registration failed'), true);
+                    }
+                });
+
+                const recoverBtn = document.getElementById('recoverySubmitBtn');
+                if (recoverBtn) recoverBtn.addEventListener('click', async () => {
+                    const token = document.getElementById('recoveryCodeInput').value.trim();
+                    if (!token) return;
+                    const payload = await verifyPremiumTokenOffline(token);
+                    if (payload) {
+                        state.accountToken = token;
+                        saveState();
+                        if (payload.prem) {
+                            state.isPremium = true;
+                            applyPremiumLockUI();
+                            setAccountMsg(state.lang === 'fa' ? '✅ بازیابی شد و نسخه‌ی کامل فعاله' : '✅ Recovered — full version active', false);
+                            setTimeout(() => document.getElementById('premiumPaywallBackdrop').classList.remove('open'), 1200);
+                        } else {
+                            setAccountMsg(state.lang === 'fa' ? 'کد معتبره ولی خریدی روش ثبت نیست.' : 'Code is valid but has no purchase on it.', false);
+                        }
+                    } else {
+                        setAccountMsg(state.lang === 'fa' ? '❌ کد نامعتبره' : '❌ Invalid code', true);
+                    }
+                });
+            })();
 
             const HELP_CONTENT = {
                 habits: {
