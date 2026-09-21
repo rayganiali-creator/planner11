@@ -1663,6 +1663,17 @@
             object-fit: cover;
             display: block;
         }
+        .book-photo-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(28px, 9vw, 42px);
+            color: var(--text-muted);
+            background: var(--glass-bg);
+            border-style: dashed;
+            cursor: default;
+            opacity: .65;
+        }
         .habit-photo-thumb .habit-photo-del {
             position: absolute;
             top: 4px;
@@ -2133,7 +2144,12 @@
             width: 90%;
             max-width: 460px;
             max-height: 85vh;
+            max-height: 85dvh;
+            /* dvh ارتفاعِ واقعیِ در دسترس رو حساب می‌کنه (وقتی کیبورد گوشی بازه هم درست کار می‌کنه)؛
+               مرورگرهایی که dvh رو نمی‌شناسن همون خط بالا (vh) رو استفاده می‌کنن. */
+            box-sizing: border-box;
             overflow-y: auto;
+            overscroll-behavior: contain;
             box-shadow: 0 20px 60px rgba(0, 0, 0, .3)
         }
         .modal h3 {
@@ -2196,15 +2212,18 @@
         }
         .modal-close {
             width: 100%;
-            margin-top: 16px;
-            padding: 12px;
+            margin: 16px -24px -24px -24px;
+            width: calc(100% + 48px);
+            padding: 12px 24px calc(12px + env(safe-area-inset-bottom, 0px));
             border: none;
-            border-radius: 14px;
+            border-radius: 0 0 20px 20px;
             background: var(--surface-2);
             color: var(--text);
             font-family: inherit;
             font-weight: 700;
-            cursor: pointer
+            cursor: pointer;
+            position: sticky;
+            bottom: -24px;
         }
         .future-note {
             background: var(--primary-soft);
@@ -2870,7 +2889,12 @@
         .modal-actions {
             display: flex;
             gap: 8px;
-            margin-top: 18px
+            margin: 18px -24px -24px -24px;
+            padding: 12px 24px calc(12px + env(safe-area-inset-bottom, 0px));
+            position: sticky;
+            bottom: -24px;
+            background: var(--surface);
+            border-top: 1px solid var(--glass-border);
         }
         .modal-actions button {
             flex: 1;
@@ -3521,6 +3545,25 @@
             font-size: calc(11px * var(--font-scale));
             color: var(--text-muted);
             margin-top: 2px;
+        }
+        .todo-item .t-repeat {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: calc(11px * var(--font-scale));
+            color: var(--primary);
+            margin-top: 2px;
+            margin-right: 8px;
+        }
+        .todo-repeat-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        #todoRepeatToggleBtn {
+            white-space: nowrap;
         }
         .todo-item.overdue .t-due {
             color: var(--fail);
@@ -4670,8 +4713,20 @@
                 <div class="todo-add">
                     <input type="text" id="todoInput" placeholder="کار جدید..." maxlength="100">
                     <input type="datetime-local" id="todoDueInput" class="todo-due-input">
+                    <button type="button" class="glass-btn" id="todoRepeatToggleBtn" data-fa="🔁 تکرار: بدون تکرار" data-en="🔁 Repeat: None">🔁 تکرار: بدون تکرار</button>
                     <button class="glass-btn primary" id="todoAddBtn" data-fa="➕ افزودن" data-en="➕ Add">➕ افزودن</button>
                     <button class="glass-btn" id="todoClearDoneBtn" data-fa="🗑 حذف انجام‌شده‌ها" data-en="🗑 Clear Done">🗑 حذف انجام‌شده‌ها</button>
+                </div>
+                <div class="todo-repeat-panel" id="todoRepeatPanel" style="display:none">
+                    <div class="gender-toggle" id="todoRepeatModeToggle">
+                        <button type="button" data-rmode="none" class="active" data-fa="بدون تکرار" data-en="No repeat">بدون تکرار</button>
+                        <button type="button" data-rmode="daily" data-fa="همه‌روزه" data-en="Daily">همه‌روزه</button>
+                        <button type="button" data-rmode="custom" data-fa="روزهای خاص" data-en="Custom days">روزهای خاص</button>
+                    </div>
+                    <div class="weekday-select-wrap" id="todoWeekdaySelectWrap" style="display:none">
+                        <div class="weekday-selector" id="todoWeekdaySelector"></div>
+                    </div>
+                    <p class="field-hint" data-fa="اگه تکرار رو فعال کنی، این کار فقط توی روزهای انتخاب‌شده نشون داده می‌شه و بعد از هر بار انجام، برای دفعه‌ی بعد دوباره فعال می‌شه." data-en="If you enable repeat, this task only shows on the selected days and re-activates each time it recurs.">اگه تکرار رو فعال کنی، این کار فقط توی روزهای انتخاب‌شده نشون داده می‌شه و بعد از هر بار انجام، برای دفعه‌ی بعد دوباره فعال می‌شه.</p>
                 </div>
                 <div class="todo-reminder-bar" id="todoReminderBar">
                     <span class="todo-reminder-hint" id="todoReminderHint" data-fa="🔔 با تعیین زمان برای هر کار، سرِ همان لحظه یک نوتیفیکیشن واقعی دریافت می‌کنی (لازم است یک‌بار اجازه‌ی نوتیفیکیشن را بدهی)." data-en="🔔 Set a time for a task and you'll get a real notification exactly then (notification permission required once).">🔔 با تعیین زمان برای هر کار، سرِ همان لحظه یک نوتیفیکیشن واقعی دریافت می‌کنی (لازم است یک‌بار اجازه‌ی نوتیفیکیشن را بدهی).</span>
@@ -4945,6 +5000,7 @@
                 <div class="settings-section">
                     <h3 data-fa="راهنمای استفاده" data-en="How to use">راهنمای استفاده</h3>
                     <button class="glass-btn" id="replayTutorialBtn" style="width:100%" data-fa="🎓 نمایش دوباره‌ی آموزش اولیه" data-en="🎓 Show onboarding tutorial again">🎓 نمایش دوباره‌ی آموزش اولیه</button>
+                    <button class="glass-btn" id="viewTermsBtn" style="width:100%;margin-top:8px" data-fa="📜 قوانین و شرایط استفاده" data-en="📜 Terms of Use">📜 قوانین و شرایط استفاده</button>
                 </div>
 
                 <div class="settings-section">
@@ -5087,6 +5143,29 @@
             <div class="modal-actions">
                 <button class="btn-cancel" id="habitModalCancel" data-fa="انصراف" data-en="Cancel">انصراف</button>
                 <button class="btn-confirm" id="habitModalConfirm" data-fa="ثبت" data-en="Save">ثبت</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="todoEditModalBackdrop">
+        <div class="modal">
+            <h3 data-fa="ویرایش کار" data-en="Edit Task">ویرایش کار</h3>
+            <div class="field-label" data-fa="عنوان" data-en="Title">عنوان</div>
+            <input type="text" id="todoEditTitleField" class="name-input" maxlength="100">
+            <div class="field-label" data-fa="زمان یادآوری (اختیاری)" data-en="Reminder time (optional)">زمان یادآوری (اختیاری)</div>
+            <input type="datetime-local" id="todoEditDueField" class="name-input">
+            <div class="field-label" data-fa="تکرار" data-en="Repeat">تکرار</div>
+            <div class="gender-toggle" id="todoEditRepeatModeToggle">
+                <button type="button" data-rmode="none" data-fa="بدون تکرار" data-en="No repeat">بدون تکرار</button>
+                <button type="button" data-rmode="daily" data-fa="همه‌روزه" data-en="Daily">همه‌روزه</button>
+                <button type="button" data-rmode="custom" data-fa="روزهای خاص" data-en="Custom days">روزهای خاص</button>
+            </div>
+            <div class="weekday-select-wrap" id="todoEditWeekdaySelectWrap" style="display:none">
+                <div class="weekday-selector" id="todoEditWeekdaySelector"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="todoEditCancelBtn" data-fa="انصراف" data-en="Cancel">انصراف</button>
+                <button class="btn-confirm" id="todoEditSaveBtn" data-fa="ذخیره" data-en="Save">ذخیره</button>
             </div>
         </div>
     </div>
@@ -5350,7 +5429,7 @@
                 <div class="field-label" data-fa="🎁 جایزه اضافه (اختیاری)" data-en="🎁 Extra reward (optional)">🎁 جایزه اضافه (اختیاری)</div>
                 <input type="text" id="challengeRewardTextField" class="name-input" maxlength="80" placeholder="مثلاً: یه بستنی برای خودم بخرم">
 
-                <button class="rm-save" id="challengeCreateBtn" style="width:100%;margin-top:14px" data-fa="🔥 ثبت چالش" data-en="🔥 Start Challenge">🔥 ثبت چالش</button>
+                <button class="rm-save" id="challengeCreateBtn" style="width:100%;margin:14px -24px -24px -24px;width:calc(100% + 48px);padding:14px 24px calc(14px + env(safe-area-inset-bottom, 0px));border-radius:0 0 16px 16px;position:sticky;bottom:-24px;background:var(--primary);color:#fff;border:none;font-weight:700;cursor:pointer" data-fa="🔥 ثبت چالش" data-en="🔥 Start Challenge">🔥 ثبت چالش</button>
             </div>
 
             <div id="challengeTabActive" style="display:none">
@@ -5402,48 +5481,20 @@
                     data-fa-placeholder="کد رو وارد کن" data-en-placeholder="Enter code" placeholder="کد رو وارد کن">
                 <button class="glass-btn" id="premiumCodeSubmitBtn" data-fa="تأیید کد" data-en="Submit code">تأیید کد</button>
             </div>
+        </div>
+    </div>
 
-            <!-- ===== ورود/ثبت‌نام حساب کاربری (برای بازیابی نسخه‌ی کامل روی گوشی جدید) ===== -->
-            <div style="margin-top:16px;border-top:1px solid var(--glass-border);padding-top:14px">
-                <button type="button" class="modal-close" id="accountToggleLink" style="text-decoration:underline;background:none"
-                    data-fa="قبلاً خریدی؟ وارد حساب شو" data-en="Already purchased? Sign in">قبلاً خریدی؟ وارد حساب شو</button>
-                <div id="accountPanel" style="display:none;margin-top:12px;text-align:right">
-                    <div class="library-filter-tabs" id="accountTabs" style="margin-bottom:10px">
-                        <button type="button" data-atab="login" class="active" data-fa="ورود" data-en="Sign in">ورود</button>
-                        <button type="button" data-atab="register" data-fa="ثبت‌نام" data-en="Register">ثبت‌نام</button>
-                        <button type="button" data-atab="recover" data-fa="بازیابی با کد" data-en="Recover with code">بازیابی با کد</button>
-                    </div>
-
-                    <div id="accountPane-login" class="account-pane">
-                        <div class="cal-gender-toggle" id="loginModeToggle" style="margin-bottom:8px">
-                            <button type="button" data-mode="email" class="active" data-fa="ایمیل" data-en="Email">ایمیل</button>
-                            <button type="button" data-mode="username" data-fa="یوزرنیم" data-en="Username">یوزرنیم</button>
-                        </div>
-                        <input type="text" id="loginIdentifierInput" class="name-input" autocomplete="off" placeholder="ایمیل یا یوزرنیم" style="margin-bottom:8px">
-                        <input type="password" id="loginPasswordInput" class="name-input" autocomplete="off" placeholder="رمز عبور" style="margin-bottom:8px">
-                        <button class="glass-btn primary" id="loginSubmitBtn" style="width:100%" data-fa="ورود" data-en="Sign in">ورود</button>
-                    </div>
-
-                    <div id="accountPane-register" class="account-pane" style="display:none">
-                        <div class="cal-gender-toggle" id="registerModeToggle" style="margin-bottom:8px">
-                            <button type="button" data-mode="email" class="active" data-fa="ایمیل" data-en="Email">ایمیل</button>
-                            <button type="button" data-mode="username" data-fa="یوزرنیم" data-en="Username">یوزرنیم</button>
-                        </div>
-                        <input type="text" id="registerIdentifierInput" class="name-input" autocomplete="off" placeholder="ایمیل یا یوزرنیم" style="margin-bottom:8px">
-                        <input type="password" id="registerPasswordInput" class="name-input" autocomplete="off" placeholder="رمز عبور (حداقل ۶ کاراکتر)" style="margin-bottom:8px">
-                        <button class="glass-btn primary" id="registerSubmitBtn" style="width:100%" data-fa="ساخت حساب" data-en="Create account">ساخت حساب</button>
-                        <p class="field-hint" style="margin-top:8px" data-fa="بعد از ساخت حساب، یه کد بازیابی بهت نشون داده می‌شه — حتماً جایی ذخیره‌ش کن." data-en="After creating your account you'll get a recovery code — be sure to save it.">بعد از ساخت حساب، یه کد بازیابی بهت نشون داده می‌شه — حتماً جایی ذخیره‌ش کن.</p>
-                    </div>
-
-                    <div id="accountPane-recover" class="account-pane" style="display:none">
-                        <textarea id="recoveryCodeInput" placeholder="کد بازیابی رو اینجا پیست کن" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border-radius:10px;border:1.5px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-size:calc(12.5px * var(--font-scale));margin-bottom:8px"></textarea>
-                        <button class="glass-btn primary" id="recoverySubmitBtn" style="width:100%" data-fa="بازیابی" data-en="Recover">بازیابی</button>
-                        <p class="field-hint" style="margin-top:8px" data-fa="این روش حتی بدون اینترنت هم کار می‌کند." data-en="This works even without internet.">این روش حتی بدون اینترنت هم کار می‌کند.</p>
-                    </div>
-
-                    <div id="accountMsg" style="margin-top:8px;font-size:calc(12.5px * var(--font-scale));min-height:1em"></div>
-                </div>
-            </div>
+    <div class="onboarding-overlay" id="termsOverlay">
+        <div class="onboarding-card" style="max-height:86vh">
+            <div class="ob-icon" style="font-size:32px">📜</div>
+            <div class="ob-title" data-fa="قوانین و شرایط استفاده" data-en="Terms of Use">قوانین و شرایط استفاده</div>
+            <div id="termsBodyText" style="max-height:44vh;overflow-y:auto;text-align:right;font-size:calc(12.5px * var(--font-scale));line-height:2.1;color:var(--text);padding:6px 2px;margin:8px 0;border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border)"></div>
+            <label id="termsCheckboxRow" style="display:flex;align-items:flex-start;gap:8px;margin:12px 0;text-align:right;cursor:pointer">
+                <input type="checkbox" id="termsAcceptCheckbox" style="margin-top:3px;flex-shrink:0">
+                <span style="font-size:calc(12.5px * var(--font-scale))" data-fa="با استفاده از نرم‌افزار، قوانین و شرایط استفاده را می‌پذیرم." data-en="By using this app, I accept the Terms of Use.">با استفاده از نرم‌افزار، قوانین و شرایط استفاده را می‌پذیرم.</span>
+            </label>
+            <button class="glass-btn primary" id="termsAcceptBtn" style="width:100%" disabled data-fa="قوانین را می‌پذیرم" data-en="I accept the terms">قوانین را می‌پذیرم</button>
+            <button class="modal-close" id="termsCloseViewBtn" style="width:100%;margin-top:8px;display:none" data-fa="بستن" data-en="Close">بستن</button>
         </div>
     </div>
 
@@ -5593,6 +5644,18 @@
             function bookPhotosDeleteAllForBook(bookId) {
                 return bookPhotosGet(bookId).then(list => Promise.all(list.map(p => bookPhotoDelete(p.id))));
             }
+            // بازیابیِ عکس‌های کتاب از یک فایل پشتیبان (که توش به‌صورت base64 ذخیره شدن)
+            async function restoreBookPhotosFromBackup(map) {
+                try {
+                    for (const bookId of Object.keys(map)) {
+                        await bookPhotosDeleteAllForBook(bookId);
+                        for (const dataUrl of map[bookId]) {
+                            await bookPhotoAdd(bookId, dataUrl);
+                        }
+                    }
+                    renderLibrary();
+                } catch (e) {}
+            }
 
             // فشرده‌سازی عکس قبل از ذخیره تا سبک و سریع بماند
             function compressImageFile(file, maxDim, quality) {
@@ -5736,6 +5799,57 @@
             // STATE
             // ============================================================
             const STORAGE_KEY = "alshadow-v14-level-colors";
+            // شماره‌ی نسخه‌ی قوانین: هر وقت متن قوانین به‌طور قابل‌توجهی عوض بشه، این عدد رو
+            // بالا ببر — چون کاربرهایی که نسخه‌ی قبلی رو پذیرفته بودن، دوباره باید تأیید کنن.
+            const TERMS_VERSION = 1;
+            const TERMS_TEXT_FA = `با نصب و استفاده از این نرم‌افزار، شرایط زیر را می‌پذیرید:
+
+۱. ماهیت نرم‌افزار
+این برنامه به‌صورت «همان‌گونه که هست» و بدون هیچ ضمانتی، صریح یا ضمنی، درباره‌ی عملکرد بی‌نقص، نبود خطا، یا تناسب آن با یک هدف خاص ارائه می‌شود.
+
+۲. داده‌های شما
+تمام اطلاعاتی که وارد می‌کنید (عادت‌ها، کارها، یادداشت‌ها، عکس‌ها و غیره) روی همان دستگاه شما ذخیره می‌شود. مسئولیت نگه‌داری، پشتیبان‌گیری (Backup) و بازیابی این اطلاعات کاملاً با شماست. حذف برنامه، تعویض یا گم‌شدن دستگاه، خرابی حافظه، یا هر اتفاق دیگری که بدون پشتیبان‌گیری منجر به از دست رفتن اطلاعات شود، مسئولیتی متوجه توسعه‌دهنده نمی‌کند.
+
+۳. تغییر و به‌روزرسانی
+توسعه‌دهنده این حق را برای خود محفوظ می‌دارد که در هر زمان، بدون اطلاع قبلی، امکانات، ظاهر، عملکرد یا در دسترس‌بودن هر بخش از برنامه را تغییر دهد، محدود کند یا متوقف کند.
+
+۴. محدودیت مسئولیت
+استفاده از این برنامه به مسئولیت شخصی شماست. توسعه‌دهنده، تا حدی که قوانین قابل‌اجرا اجازه می‌دهند، هیچ مسئولیتی در قبال خسارات مستقیم یا غیرمستقیم، از جمله از دست رفتن داده، زمان یا فرصت، ناشی از استفاده یا عدم امکان استفاده از این برنامه نمی‌پذیرد.
+
+۵. تغییرات این قوانین
+این قوانین ممکن است در آینده به‌روزرسانی شود. در صورت تغییرات مهم، نسخه‌ی جدید دوباره برای پذیرش به شما نمایش داده خواهد شد.`;
+            const TERMS_TEXT_EN = `By installing and using this app, you agree to the following:
+
+1. Nature of the software
+This app is provided "as is," with no warranty, express or implied, regarding flawless operation, absence of bugs, or fitness for a particular purpose.
+
+2. Your data
+Everything you enter (habits, tasks, notes, photos, etc.) is stored on your own device. Keeping, backing up, and restoring this data is entirely your responsibility. Uninstalling the app, losing or replacing your device, storage failure, or any other event that results in data loss without a backup is not the developer's responsibility.
+
+3. Changes and updates
+The developer reserves the right to change, limit, or discontinue any feature, appearance, functionality, or availability of the app at any time, without prior notice.
+
+4. Limitation of liability
+Use of this app is at your own risk. To the extent permitted by applicable law, the developer accepts no liability for direct or indirect damages, including loss of data, time, or opportunity, arising from the use or inability to use this app.
+
+5. Changes to these terms
+These terms may be updated in the future. If a significant change is made, the new version will be shown to you again for acceptance.`;
+            // این‌ها زودتر از بقیه تعریف می‌شن (نه پایین‌تر، کنار خودِ UI کد مخفی) چون
+            // recomputeTrustedPremiumFlag همین پایین‌تر، هنگام لود اولیه‌ی state هم صدا
+            // زده می‌شه و باید این مقادیر از قبل آماده باشن.
+            const PREMIUM_UNLOCK_SALT = 'routineplanner-salt-9f3';
+            const PREMIUM_UNLOCK_HASH = '93b059bdfe8555bbd80de6c4dba97fc081229d2e52714bbcdf99a8c741419a64';
+            // این مقدار فقط یک نشانه‌ی داخلیه (نه رمز جدید) که از خودِ هش بالا مشتق می‌شه؛
+            // به‌جای یک true/false ساده که هرکسی می‌تونه توی localStorage بسازه، وضعیت مالک
+            // این مقدارِ خاص رو لازم داره که فقط بعد از عبور واقعی از چک هش قابل‌تولیده.
+            const RP_OWNER_MARK_VALUE = PREMIUM_UNLOCK_HASH.slice(0, 12) + '-ok';
+            // پریمیوم همیشه از این تابع دوباره محاسبه می‌شه، نه از مقدار خامِ ذخیره‌شده —
+            // یعنی دستکاری مستقیمِ isPremium توی داده‌ی ذخیره‌شده به‌تنهایی بی‌اثره.
+            function recomputeTrustedPremiumFlag() {
+                const bazaarOk = !!(state.proCache && state.proCache.isPro === true && state.proCache.purchaseToken);
+                const ownerOk = state.__rpOwnerMark === RP_OWNER_MARK_VALUE;
+                state.isPremium = bazaarOk || ownerOk;
+            }
             let pointsCacheMap = null; // perf cache: invalidated in saveState()
             let state = {
                 theme: "light",
@@ -5771,7 +5885,9 @@
                 habitNotes: {},
                 onboardingDone: false,
                 isPremium: false,
-                accountToken: null,
+                proCache: null,
+                termsAcceptedVersion: null,
+                termsAcceptedAt: null,
                 calorie: { profile: null, logs: {}, burns: {}, customFoods: [], customActivities: [] },
                 challenges: []
             };
@@ -5780,6 +5896,11 @@
                 if (raw) {
                     const p = JSON.parse(raw);
                     state = Object.assign(state, p);
+                    // امنیتی: isPremiumِ خام و ذخیره‌شده هیچ‌وقت مستقیم قابل‌اعتماد نیست؛
+                    // همیشه از منابع واقعی (proCache معتبر Bazaar یا نشانه‌ی مالک) دوباره
+                    // محاسبه می‌شه. این یعنی دستکاری مستقیم isPremium توی داده‌ی ذخیره‌شده
+                    // بی‌اثره — همین‌جا بازنویسی می‌شه.
+                    recomputeTrustedPremiumFlag();
                     if (!state.journal) state.journal = [];
                     if (!state.todos) state.todos = [];
                     if (!state.books) state.books = [];
@@ -6387,7 +6508,7 @@
             // ============================================================
             // TO-DO LIST
             // ============================================================
-            function addTodo(title, dueAt) {
+            function addTodo(title, dueAt, repeatMode, repeatDays) {
                 if (!title.trim()) return null;
                 const todo = {
                     id: todoUid(),
@@ -6395,12 +6516,63 @@
                     done: false,
                     createdAt: Date.now(),
                     dueAt: dueAt || null, // timestamp (ms) - زمانی که کار باید انجام شود
-                    notified: false // آیا هشدار درون‌برنامه‌ای برای آن ارسال شده
+                    notified: false, // آیا هشدار درون‌برنامه‌ای برای آن ارسال شده
+                    // تکرار: 'none' (بدون تکرار، رفتار قدیمی)، 'daily' (همه‌روزه)، 'custom' (روزهای خاص هفته)
+                    repeatMode: repeatMode || 'none',
+                    repeatDays: (repeatMode === 'custom' && Array.isArray(repeatDays)) ? repeatDays.slice() : [],
+                    lastActiveResetDate: null
                 };
                 state.todos.push(todo);
                 saveState();
                 renderTodos();
                 return todo;
+            }
+
+            // ============================================================
+            // تکرار کارها (Todo Repeat): آیا کار امروز فعاله، و زمان بعدیِ یادآوریش کِیه
+            // ============================================================
+            function todoAppliesToday(t) {
+                if (!t.repeatMode || t.repeatMode === 'none') return true; // رفتار قدیمی: همیشه نشون داده می‌شه
+                if (t.repeatMode === 'daily') return true;
+                if (t.repeatMode === 'custom') {
+                    const jsDay = new Date().getDay(), persianIdx = (jsDay + 1) % 7;
+                    return Array.isArray(t.repeatDays) && t.repeatDays.includes(persianIdx);
+                }
+                return true;
+            }
+            // برای کارهای تکرارشونده، هر روزی که نوبتشون می‌رسه، وضعیت «انجام‌شده»ی روزِ قبل
+            // پاک می‌شه تا دوباره قابل‌انجام باشن (دقیقاً مثل یک یادآوریِ روزانه‌ی تازه).
+            function resetRepeatingTodosIfNeeded() {
+                const todayIso = dateToISO(startOfDay(new Date()));
+                let changed = false;
+                (state.todos || []).forEach(t => {
+                    if (!t.repeatMode || t.repeatMode === 'none') return;
+                    if (t.lastActiveResetDate !== todayIso) {
+                        if (t.done) { t.done = false; changed = true; }
+                        t.lastActiveResetDate = todayIso;
+                        changed = true;
+                    }
+                });
+                if (changed) saveState();
+            }
+            // برای کار بدون تکرار: همون dueAt قبلی (رفتار قدیمی). برای کار تکرارشونده: نزدیک‌ترین
+            // زمانِ آینده‌ای که هم با روزهای انتخاب‌شده جور دربیاد، هم بر پایه‌ی همون ساعتِ تعیین‌شده باشه.
+            function computeNextTodoOccurrence(t) {
+                if (!t.dueAt) return null;
+                if (!t.repeatMode || t.repeatMode === 'none') return t.dueAt > Date.now() ? t.dueAt : null;
+                const due = new Date(t.dueAt);
+                const hh = due.getHours(), mm = due.getMinutes();
+                const now = new Date();
+                for (let i = 0; i < 8; i++) {
+                    const cand = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, hh, mm, 0, 0);
+                    if (cand.getTime() <= now.getTime()) continue;
+                    if (t.repeatMode === 'daily') return cand.getTime();
+                    if (t.repeatMode === 'custom') {
+                        const jsDay = cand.getDay(), persianIdx = (jsDay + 1) % 7;
+                        if (Array.isArray(t.repeatDays) && t.repeatDays.includes(persianIdx)) return cand.getTime();
+                    }
+                }
+                return null;
             }
 
             function toggleTodo(id) {
@@ -6624,11 +6796,12 @@
                 const now = Date.now();
                 const items = [];
                 (state.todos || []).forEach(function(t) {
-                    if (!t.done && t.dueAt && t.dueAt >= now - 3600000) {
+                    const nextAt = computeNextTodoOccurrence(t);
+                    if (!t.done && nextAt && nextAt >= now - 3600000) {
                         items.push({
                             id: 'todo-' + t.id,
                             title: state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due',
-                            body: t.title, dueAt: t.dueAt, tag: 'todo-' + t.id
+                            body: t.title, dueAt: nextAt, tag: 'todo-' + t.id
                         });
                     }
                 });
@@ -6737,8 +6910,9 @@
             }
 
             function renderTodos() {
+                resetRepeatingTodosIfNeeded();
                 const list = document.getElementById('todoList');
-                const todos = state.todos || [];
+                const todos = (state.todos || []).filter(todoAppliesToday);
                 const sorted = [...todos].sort((a, b) => {
                     if (a.done !== b.done) return a.done ? 1 : -1;
                     return b.createdAt - a.createdAt;
@@ -6746,8 +6920,8 @@
 
                 if (!sorted.length) {
                     list.innerHTML = '<div class="todo-empty">' + (state.lang === 'fa' ?
-                        'هیچ کاری ثبت نشده. یک کار جدید اضافه کن! ✅' :
-                        'No tasks. Add a new one! ✅') + '</div>';
+                        'هیچ کاری برای امروز نیست. یک کار جدید اضافه کن! ✅' :
+                        'No tasks for today. Add a new one! ✅') + '</div>';
                 } else {
                     list.innerHTML = '';
                     const now = Date.now();
@@ -6761,13 +6935,18 @@
                         item.className = 'todo-item' + stateClass;
                         const dueHtml = t.dueAt ?
                             '<div class="t-due">⏰ ' + escHtml(formatDueLabel(t.dueAt)) + '</div>' : '';
+                        const repeatHtml = (t.repeatMode && t.repeatMode !== 'none') ?
+                            '<div class="t-repeat">🔁 ' + escHtml(todoRepeatSummary(t)) + '</div>' : '';
                         const alarmBtn = t.dueAt ? ('<button class="t-alarm-btn" data-talarm="' + t.id +
                             '" title="' + (state.lang === 'fa' ? 'ساخت هشدار واقعی (تقویم)' :
                                 'Create real alarm (calendar)') + '">⏰</button>') : '';
                         item.innerHTML =
-                            '<div class="t-info"><div class="t-title">' + escHtml(t.title) + '</div>' + dueHtml +
+                            '<div class="t-info"><div class="t-title">' + escHtml(t.title) + '</div>' + dueHtml + repeatHtml +
                             '</div>' +
-                            '<div class="t-actions">' + alarmBtn + '<button class="t-done-btn" data-td="' + t
+                            '<div class="t-actions">' + alarmBtn +
+                            '<button class="t-edit-btn" data-tedit="' + t.id + '" title="' +
+                            (state.lang === 'fa' ? 'ویرایش' : 'Edit') + '">✏️</button>' +
+                            '<button class="t-done-btn" data-td="' + t
                             .id + '" title="' + (state.lang === 'fa' ? 'انجام شد' : 'Done') +
                             '">' + (t.done ? '↩️' : '✅') +
                             '</button><button class="t-del-btn" data-tdel="' + t.id +
@@ -6799,6 +6978,16 @@
                     const todo = state.todos.find(x => x.id === this.dataset.talarm);
                     if (todo) addRealAlarm(todo);
                 }));
+                list.querySelectorAll('[data-tedit]').forEach(b => b.addEventListener('click', function() {
+                    openTodoEditModal(this.dataset.tedit);
+                }));
+            }
+            function todoRepeatSummary(t) {
+                if (!t.repeatMode || t.repeatMode === 'none') return '';
+                if (t.repeatMode === 'daily') return state.lang === 'fa' ? 'همه‌روزه' : 'Daily';
+                const names = state.lang === 'fa' ? PERSIAN_WEEKDAYS_SHORT : EN_WEEKDAYS_SHORT;
+                const days = (t.repeatDays || []).slice().sort((a, b) => a - b).map(i => names[i]);
+                return days.length ? days.join('، ') : (state.lang === 'fa' ? 'روزهای خاص' : 'Custom days');
             }
 
             // ============================================================
@@ -8111,9 +8300,14 @@
 
             // --------- نوار کوچک عکس‌ها روی کارتِ هر کتاب توی لیست کتابخونه ---------
             function renderBookCardPhotoStrip(el, bookId) {
+                if (!el) return;
                 bookPhotosGet(bookId).then(photos => {
-                    if (!photos.length) { el.style.display = 'none'; return; }
                     el.style.display = '';
+                    if (!photos.length) {
+                        // بدون عکس: یک Placeholder ساده و هماهنگ با ظاهر اپ به‌جای خالی‌گذاشتن جا
+                        el.innerHTML = '<div class="habit-photo-thumb book-photo-placeholder">📕</div>';
+                        return;
+                    }
                     el.innerHTML = photos.map(p =>
                         '<div class="habit-photo-thumb"><img src="' + p.dataUrl + '" loading="lazy" alt=""></div>'
                     ).join('');
@@ -9925,11 +10119,23 @@
                 return { success: sS, fail: fS };
             }
 
-            function createBackupJSON() {
-                return JSON.stringify({ version: '2.8', exportedAt: new Date().toISOString(),
+            async function createBackupJSON() {
+                // عکس‌های کتاب‌ها توی IndexedDBان، نه توی state معمولی؛ برای این‌که پشتیبان
+                // واقعاً کامل باشه (طبق درخواست)، این‌جا هم جمعشون می‌کنیم و توی همون JSON
+                // به‌صورت base64 embed می‌کنیم.
+                let bookPhotosBackup = {};
+                try {
+                    for (const b of (state.books || [])) {
+                        const photos = await bookPhotosGet(b.id);
+                        if (photos && photos.length) {
+                            bookPhotosBackup[b.id] = photos.map(p => p.dataUrl);
+                        }
+                    }
+                } catch (e) {}
+                return JSON.stringify({ version: '2.9', exportedAt: new Date().toISOString(),
                     appName: 'روتین پلنر', data: { habits: state.habits, records: state
                         .records, vows: state.vows, journal: state.journal, todos: state
-                        .todos, books: state.books, scores: state.scores, theme: state.theme, lang: state
+                        .todos, books: state.books, bookPhotos: bookPhotosBackup, scores: state.scores, theme: state.theme, lang: state
                         .lang, bgColor: state.bgColor, accentTheme: state.accentTheme,
                         weekStart: state.weekStart, showHolidays: state.showHolidays,
                         calendarType: state.calendarType, fontSize: state.fontSize,
@@ -10142,6 +10348,55 @@
                 renderVows(); });
 
             // ===== TODO LIST EVENTS =====
+            function buildGenericWeekdaySelector(containerEl, selectedArr, onToggle) {
+                const names = state.lang === 'fa' ? PERSIAN_WEEKDAYS_SHORT : EN_WEEKDAYS_SHORT;
+                containerEl.innerHTML = '';
+                names.forEach((n, i) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = n;
+                    btn.dataset.day = i;
+                    if (selectedArr.includes(i)) btn.classList.add('active');
+                    btn.addEventListener('click', () => {
+                        const idx = selectedArr.indexOf(i);
+                        if (idx > -1) selectedArr.splice(idx, 1); else selectedArr.push(i);
+                        btn.classList.toggle('active');
+                        if (onToggle) onToggle();
+                    });
+                    containerEl.appendChild(btn);
+                });
+            }
+
+            // ---- ردیف افزودن کار جدید: تکرار اختیاری ----
+            let todoAddRepeatMode = 'none';
+            let todoAddRepeatDays = [];
+            function updateTodoRepeatToggleLabel() {
+                const btn = document.getElementById('todoRepeatToggleBtn');
+                let label;
+                if (todoAddRepeatMode === 'none') label = state.lang === 'fa' ? 'بدون تکرار' : 'None';
+                else if (todoAddRepeatMode === 'daily') label = state.lang === 'fa' ? 'همه‌روزه' : 'Daily';
+                else {
+                    const names = state.lang === 'fa' ? PERSIAN_WEEKDAYS_SHORT : EN_WEEKDAYS_SHORT;
+                    label = todoAddRepeatDays.length ?
+                        todoAddRepeatDays.slice().sort((a, b) => a - b).map(i => names[i]).join('،') :
+                        (state.lang === 'fa' ? 'روزهای خاص' : 'Custom');
+                }
+                btn.textContent = '🔁 ' + (state.lang === 'fa' ? 'تکرار: ' : 'Repeat: ') + label;
+            }
+            document.getElementById('todoRepeatToggleBtn').addEventListener('click', function() {
+                const panel = document.getElementById('todoRepeatPanel');
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            });
+            document.querySelectorAll('#todoRepeatModeToggle button').forEach(b => {
+                b.addEventListener('click', function() {
+                    todoAddRepeatMode = this.dataset.rmode;
+                    document.querySelectorAll('#todoRepeatModeToggle button').forEach(x => x.classList.toggle('active', x === this));
+                    document.getElementById('todoWeekdaySelectWrap').style.display = todoAddRepeatMode === 'custom' ? 'block' : 'none';
+                    updateTodoRepeatToggleLabel();
+                });
+            });
+            buildGenericWeekdaySelector(document.getElementById('todoWeekdaySelector'), todoAddRepeatDays, updateTodoRepeatToggleLabel);
+
             document.getElementById('todoAddBtn').addEventListener('click', function() {
                 const title = document.getElementById('todoInput').value.trim();
                 if (!title) { showToast(state.lang === 'fa' ? 'لطفاً عنوان کار را وارد کن' :
@@ -10153,19 +10408,83 @@
                     if (!isNaN(parsed.getTime())) dueAt = parsed.getTime();
                 }
                 if (dueAt) ensureNotifyPermission();
-                const newTodo = addTodo(title, dueAt);
+                const newTodo = addTodo(title, dueAt, todoAddRepeatMode, todoAddRepeatDays);
                 if (dueAt && newTodo) {
-                    const bodyText = newTodo.title;
-                    nativeScheduleOnce('todo-' + newTodo.id,
-                        state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due',
-                        bodyText, dueAt);
+                    const nextAt = computeNextTodoOccurrence(newTodo);
+                    if (nextAt) {
+                        nativeScheduleOnce('todo-' + newTodo.id,
+                            state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due',
+                            newTodo.title, nextAt);
+                    }
                 }
                 document.getElementById('todoInput').value = '';
                 if (dueInput) dueInput.value = '';
+                // تنظیمات تکرار رو برای کار بعدی هم نگه می‌داریم چون معمولاً کارهای پشت‌سرهم
+                // یک الگو دارن؛ اگه خواست عوضش کنه، خودش دوباره از پنل تغییرش می‌ده.
                 showToast(state.lang === 'fa' ? '✅ کار اضافه شد' : '✅ Task added', 1500);
             });
             document.getElementById('todoInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') { document.getElementById('todoAddBtn').click(); }
+            });
+
+            // ---- ویرایش کار: عنوان، زمان، و الگوی تکرار ----
+            let todoEditingId = null;
+            let todoEditRepeatMode = 'none';
+            let todoEditRepeatDays = [];
+            function openTodoEditModal(id) {
+                const t = state.todos.find(x => x.id === id);
+                if (!t) return;
+                todoEditingId = id;
+                todoEditRepeatMode = t.repeatMode || 'none';
+                todoEditRepeatDays = (t.repeatDays || []).slice();
+                document.getElementById('todoEditTitleField').value = t.title;
+                // datetime-local باید به وقت محلی باشه نه UTC؛ تبدیل درست:
+                if (t.dueAt) {
+                    const d = new Date(t.dueAt);
+                    const pad = n => String(n).padStart(2, '0');
+                    document.getElementById('todoEditDueField').value =
+                        d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' +
+                        pad(d.getHours()) + ':' + pad(d.getMinutes());
+                } else {
+                    document.getElementById('todoEditDueField').value = '';
+                }
+                document.querySelectorAll('#todoEditRepeatModeToggle button').forEach(b =>
+                    b.classList.toggle('active', b.dataset.rmode === todoEditRepeatMode));
+                document.getElementById('todoEditWeekdaySelectWrap').style.display = todoEditRepeatMode === 'custom' ? 'block' : 'none';
+                buildGenericWeekdaySelector(document.getElementById('todoEditWeekdaySelector'), todoEditRepeatDays, null);
+                document.getElementById('todoEditModalBackdrop').classList.add('open');
+            }
+            document.querySelectorAll('#todoEditRepeatModeToggle button').forEach(b => {
+                b.addEventListener('click', function() {
+                    todoEditRepeatMode = this.dataset.rmode;
+                    document.querySelectorAll('#todoEditRepeatModeToggle button').forEach(x => x.classList.toggle('active', x === this));
+                    document.getElementById('todoEditWeekdaySelectWrap').style.display = todoEditRepeatMode === 'custom' ? 'block' : 'none';
+                });
+            });
+            document.getElementById('todoEditCancelBtn').addEventListener('click', function() {
+                document.getElementById('todoEditModalBackdrop').classList.remove('open');
+            });
+            document.getElementById('todoEditSaveBtn').addEventListener('click', function() {
+                const t = state.todos.find(x => x.id === todoEditingId);
+                if (!t) return;
+                const newTitle = document.getElementById('todoEditTitleField').value.trim();
+                if (!newTitle) { showToast(state.lang === 'fa' ? 'عنوان نمی‌تونه خالی باشه' : 'Title cannot be empty', 2000); return; }
+                t.title = newTitle;
+                const dueVal = document.getElementById('todoEditDueField').value;
+                t.dueAt = dueVal ? new Date(dueVal).getTime() : null;
+                t.repeatMode = todoEditRepeatMode;
+                t.repeatDays = todoEditRepeatMode === 'custom' ? todoEditRepeatDays.slice() : [];
+                saveState();
+                nativeCancel('todo-' + t.id);
+                const nextAt = computeNextTodoOccurrence(t);
+                if (!t.done && nextAt) {
+                    ensureNotifyPermission();
+                    nativeScheduleOnce('todo-' + t.id,
+                        state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due', t.title, nextAt);
+                }
+                document.getElementById('todoEditModalBackdrop').classList.remove('open');
+                renderTodos();
+                showToast(state.lang === 'fa' ? '✅ ذخیره شد' : '✅ Saved', 1500);
             });
             // به‌محض این‌که کاربر برای یک کار زمانی تعیین می‌کند، اجازه‌ی نوتیفیکیشن گرفته می‌شود
             // (نه بعد از یک تیک جداگانه)؛ چون یادآوری‌ها حالا همیشه و خودکار فعال هستند.
@@ -10397,8 +10716,8 @@
                 } catch (e) { return false; }
             }
 
-            document.getElementById('exportDataBtn').addEventListener('click', () => {
-                const jsonStr = createBackupJSON();
+            document.getElementById('exportDataBtn').addEventListener('click', async () => {
+                const jsonStr = await createBackupJSON();
                 const now = new Date(),
                     dStr = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() +
                     '-' + now.getHours() + '-' + now.getMinutes();
@@ -10429,8 +10748,8 @@
                 setTimeout(() => preview.classList.remove('show'), 3000);
             });
 
-            document.getElementById('shareDataBtn').addEventListener('click', () => {
-                const jsonStr = createBackupJSON();
+            document.getElementById('shareDataBtn').addEventListener('click', async () => {
+                const jsonStr = await createBackupJSON();
                 if (isNativeApp()) {
                     nativeSaveBackup(jsonStr, 'RoutinePlanner-Backup.json');
                     return;
@@ -10505,6 +10824,7 @@
                         if (backup.data.urgeHiddenIds) state.urgeHiddenIds = backup.data
                             .urgeHiddenIds;
                         if (backup.data.books) state.books = backup.data.books;
+                        if (backup.data.bookPhotos) restoreBookPhotosFromBackup(backup.data.bookPhotos);
                         saveState();
                         applyTheme();
                         applyBgTheme();
@@ -12608,9 +12928,10 @@
                 ensureNotifyPermission();
                 const now = Date.now();
                 (state.todos || []).forEach(t => {
-                    if (!t.done && t.dueAt && t.dueAt > now) {
+                    const nextAt = computeNextTodoOccurrence(t);
+                    if (!t.done && nextAt) {
                         nativeScheduleOnce('todo-' + t.id,
-                            state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due', t.title, t.dueAt);
+                            state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due', t.title, nextAt);
                     }
                 });
                 (state.habits || []).forEach(h => {
@@ -12629,7 +12950,7 @@
                 });
             }
             nativeResyncAllReminders();
-            if (isNativeApp() && !state.isPremium) restorePurchases();
+            if (isNativeApp()) restorePurchases();
             applyFontSize();
             applyLevelColors();
             applyLang();
@@ -12682,14 +13003,32 @@
             // اینجا فرایند واقعی خرید (باز کردن صفحه‌ی پرداخت کافه‌بازار + تأیید خرید از
             // طریق Worker سرورلس) جایگزین می‌شود.
             // ============================================================
-            // این دو مقدار رو وقتی محصول واقعی رو توی پنل کافه‌بازار ساختی و
-            // Worker سرورلس رو دیپلوی کردی، اینجا پر کن:
-            // ============================================================
             const PREMIUM_PRODUCT_ID = 'premium_unlock'; // دقیقاً همین SKU رو توی پنل کافه‌بازار بساز
-            const PREMIUM_VERIFY_WORKER_URL = 'https://routine-planner-verify.rayganiali.workers.dev'; // مثلاً: 'https://routine-planner-verify.یوزرنیمت.workers.dev'
 
             function bazaarBillingPlugin() {
                 return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BazaarBilling) || null;
+            }
+
+            // ============================================================
+            // منبع اصلیِ حقیقتِ پریمیوم: خودِ Poolakey/کافه‌بازار — نه Local Storage،
+            // نه هیچ سروری. state.proCache فقط یک «کش آخرین وضعیت معتبر» است، نه منبع اصلی.
+            // اگر آفلاین یا خطای اتصال باشیم، هیچ تغییری در وضعیت فعلی داده نمی‌شود (isPro
+            // قبلی همچنان معتبر می‌ماند)؛ فقط وقتی خودِ Bazaar/Poolakey با موفقیت جواب بده
+            // (چه «داری» چه «نداری») کش به‌روز می‌شود.
+            // نکته‌ی مهم: این تابع هیچ‌وقت پریمیومی که از راه دیگری (مثل کد مخفی مالک) فعال
+            // شده را خاموش نمی‌کند — فقط زمانی state.isPremium را false می‌کند که پیش از این
+            // خودِ Bazaar/Poolakey آن را true کرده بوده و الان دیگر خریدی نمی‌بیند (مثلاً استرداد).
+            // ============================================================
+            function applyProStatusFromBazaar(isPro, productId, purchaseToken) {
+                state.proCache = {
+                    isPro: isPro,
+                    checkedAt: Date.now(),
+                    productId: productId || null,
+                    purchaseToken: purchaseToken || null
+                };
+                recomputeTrustedPremiumFlag();
+                saveState();
+                applyPremiumLockUI();
             }
 
             async function purchasePremium() {
@@ -12704,60 +13043,39 @@
                     showToast(state.lang === 'fa' ? 'پلاگین خرید در دسترس نیست.' : 'Billing plugin unavailable.', 3000);
                     return;
                 }
-                if (!PREMIUM_VERIFY_WORKER_URL) {
-                    showToast(state.lang === 'fa' ?
-                        'هنوز آدرس سرور تأیید خرید تنظیم نشده (PREMIUM_VERIFY_WORKER_URL).' :
-                        'Verify server URL not configured yet (PREMIUM_VERIFY_WORKER_URL).', 3500);
-                    return;
-                }
                 try {
                     await plugin.connect();
+                    // منبع اصلی اعتبار پریمیوم، همین جواب موفقِ Poolakey (purchaseSucceed) است —
+                    // خودِ کافه‌بازار خرید رو تأیید کرده؛ به هیچ سرور واسطه‌ای نیاز نیست.
                     const purchase = await plugin.purchase({ productId: PREMIUM_PRODUCT_ID });
-                    showToast(state.lang === 'fa' ? 'در حال تأیید خرید...' : 'Verifying purchase...', 2000);
-                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId: purchase.productId, purchaseToken: purchase.purchaseToken })
-                    });
-                    const data = await res.json();
-                    if (data.valid) {
-                        state.isPremium = true;
-                        state.premiumPurchaseToken = purchase.purchaseToken;
-                        saveState();
-                        applyPremiumLockUI();
-                        document.getElementById('premiumPaywallBackdrop').classList.remove('open');
-                        showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
-                    } else {
-                        showToast(state.lang === 'fa' ? 'تأیید خرید ناموفق بود.' : 'Purchase verification failed.', 3000);
-                    }
+                    applyProStatusFromBazaar(true, purchase.productId, purchase.purchaseToken);
+                    document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+                    showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
                 } catch (e) {
                     if (e && e.message !== 'cancelled') {
                         showToast(state.lang === 'fa' ? 'خرید انجام نشد: ' + (e.message || '') : 'Purchase failed: ' + (e.message || ''), 3000);
                     }
                 }
             }
-            // اگر قبلاً خرید انجام شده (مثلاً روی گوشی دیگه)، با این تابع می‌تونه بازیابیش کنه
+            // بازیابیِ خرید: هم موقع بالا اومدن اپ صدا زده می‌شه، هم هر وقت لازم باشه (مثلاً بعد
+            // از نصب مجدد روی گوشیِ جدید). همیشه از طریق خودِ Poolakey/کافه‌بازار چک می‌کنه، نه سرور.
             async function restorePurchases() {
                 const plugin = bazaarBillingPlugin();
-                if (!plugin || !PREMIUM_VERIFY_WORKER_URL) return;
+                if (!plugin) return;
                 try {
                     await plugin.connect();
                     const result = await plugin.getPurchasedProducts();
                     const owned = (result.products || []).find(p => p.productId === PREMIUM_PRODUCT_ID);
-                    if (!owned) return;
-                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId: owned.productId, purchaseToken: owned.purchaseToken })
-                    });
-                    const data = await res.json();
-                    if (data.valid) {
-                        state.isPremium = true;
-                        state.premiumPurchaseToken = owned.purchaseToken;
-                        saveState();
-                        applyPremiumLockUI();
+                    if (owned) {
+                        applyProStatusFromBazaar(true, owned.productId, owned.purchaseToken);
+                    } else {
+                        // این پاسخِ رسمیِ Bazaar/Poolakeyه (نه خطای اتصال) که می‌گه خریدی نیست
+                        applyProStatusFromBazaar(false, null, null);
                     }
-                } catch (e) {}
+                } catch (e) {
+                    // آفلاین یا خطای اتصال به کافه‌بازار/Poolakey: هیچ تغییری نمی‌دیم، وضعیت
+                    // معتبر قبلی (state.isPremium فعلی) دست‌نخورده باقی می‌مونه.
+                }
             }
             document.getElementById('premiumPurchaseBtn').addEventListener('click', purchasePremium);
             document.getElementById('premiumPaywallCloseBtn').addEventListener('click', () => {
@@ -12776,13 +13094,9 @@
             // هش (SHA-256 نمک‌دار) اون ذخیره شده، پس با دیدن سورس کد هم کد واقعی
             // به‌سادگی قابل خوندن نیست. همچنین بعد از چند بار کد اشتباه، چند ثانیه
             // قفل موقت می‌خوره تا حدس زدن پشت‌سرهم عملاً بی‌فایده باشه.
+            // (PREMIUM_UNLOCK_SALT / PREMIUM_UNLOCK_HASH / RP_OWNER_MARK_VALUE بالای
+            // فایل، کنار STORAGE_KEY، تعریف شدن تا موقع لود اولیه‌ی state هم در دسترس باشن.)
             // ============================================================
-            const PREMIUM_UNLOCK_SALT = 'routineplanner-salt-9f3';
-            const PREMIUM_UNLOCK_HASH = '93b059bdfe8555bbd80de6c4dba97fc081229d2e52714bbcdf99a8c741419a64';
-            // کد واقعی همینه: rp-2612-golden — برای عوض کردنش، مقدار جدید رو جای
-            // "کد-جدیدت" توی این خط بذار، اجراش کن (کنسول مرورگر یا هر جای دیگه)،
-            // و رشته‌ای که چاپ می‌شه رو جایگزین PREMIUM_UNLOCK_HASH بالا کن:
-            //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('routineplanner-salt-9f3' + 'کد-جدیدت')).then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
             let premiumTapCount = 0;
             let premiumTapTimer = null;
             document.getElementById('premiumLockIcon').addEventListener('click', function() {
@@ -12816,7 +13130,8 @@
                 const hash = await sha256Hex(PREMIUM_UNLOCK_SALT + val);
                 if (val && hash === PREMIUM_UNLOCK_HASH) {
                     premiumUnlockAttempts = 0;
-                    state.isPremium = true;
+                    state.__rpOwnerMark = RP_OWNER_MARK_VALUE;
+                    recomputeTrustedPremiumFlag();
                     saveState();
                     applyPremiumLockUI();
                     document.getElementById('premiumPaywallBackdrop').classList.remove('open');
@@ -12841,189 +13156,6 @@
                 if (e.key === 'Enter') tryPremiumUnlockCode();
             });
 
-            // ============================================================
-            // حساب کاربری + توکن پریمیوم قابل‌تأیید آفلاین
-            // ============================================================
-            const ACCOUNT_WORKER_BASE = 'https://routine-planner-verify.rayganiali.workers.dev';
-            const PREMIUM_PUBLIC_JWK = {
-                "kty": "EC", "crv": "P-256",
-                "x": "OPbGeZZ91H7yzMXFm-Bv-zXlnm3HUgWfqLTcf21F_gs",
-                "y": "FqLRitINzyPTfhdQFFzt0Pp9m7eQnxYjnzgiPcCc_FY"
-            };
-
-            function b64urlToBytesClient(str) {
-                str = str.replace(/-/g, '+').replace(/_/g, '/');
-                while (str.length % 4) str += '=';
-                const bin = atob(str);
-                const out = new Uint8Array(bin.length);
-                for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-                return out;
-            }
-
-            // توکن رو کاملاً آفلاین تأیید می‌کنه؛ به هیچ سروری وصل نمی‌شه
-            async function verifyPremiumTokenOffline(token) {
-                try {
-                    const parts = (token || '').trim().split('.');
-                    if (parts.length !== 3) return null;
-                    const [h, p, s] = parts;
-                    const key = await crypto.subtle.importKey('jwk', PREMIUM_PUBLIC_JWK, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
-                    const data = new TextEncoder().encode(h + '.' + p);
-                    const sig = b64urlToBytesClient(s);
-                    const valid = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, key, sig, data);
-                    if (!valid) return null;
-                    return JSON.parse(atob(p.replace(/-/g, '+').replace(/_/g, '/')));
-                } catch (e) { return null; }
-            }
-
-            // موقع بالا اومدن اپ، اگه یه توکن حساب ذخیره‌شده داریم، آفلاین تأییدش کن
-            async function applyStoredAccountToken() {
-                if (!state.accountToken) return;
-                const payload = await verifyPremiumTokenOffline(state.accountToken);
-                if (payload && payload.prem) {
-                    state.isPremium = true;
-                    applyPremiumLockUI();
-                }
-            }
-            applyStoredAccountToken();
-
-            async function callAccountApi(path, body) {
-                const res = await fetch(ACCOUNT_WORKER_BASE + path, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json().catch(() => ({}));
-                return { ok: res.ok, data };
-            }
-
-            function setAccountMsg(text, isError) {
-                const el = document.getElementById('accountMsg');
-                if (!el) return;
-                el.textContent = text;
-                el.style.color = isError ? 'var(--fail)' : 'var(--success)';
-            }
-
-            function onAccountTokenReceived(token) {
-                state.accountToken = token;
-                saveState();
-                verifyPremiumTokenOffline(token).then(payload => {
-                    if (payload && payload.prem) {
-                        state.isPremium = true;
-                        applyPremiumLockUI();
-                        setAccountMsg(state.lang === 'fa' ? '✅ وارد شدی و نسخه‌ی کامل فعاله' : '✅ Signed in — full version active', false);
-                        setTimeout(() => document.getElementById('premiumPaywallBackdrop').classList.remove('open'), 1200);
-                    } else {
-                        setAccountMsg(state.lang === 'fa' ? 'وارد حساب شدی؛ هنوز خریدی ثبت نشده.' : "Signed in; no purchase on file yet.", false);
-                    }
-                });
-            }
-
-            (function initAccountPanel() {
-                const toggleLink = document.getElementById('accountToggleLink');
-                const panel = document.getElementById('accountPanel');
-                if (toggleLink && panel) {
-                    toggleLink.addEventListener('click', () => {
-                        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-                    });
-                }
-
-                document.querySelectorAll('#accountTabs [data-atab]').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('#accountTabs [data-atab]').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        ['login', 'register', 'recover'].forEach(name => {
-                            document.getElementById('accountPane-' + name).style.display = (name === this.dataset.atab) ? 'block' : 'none';
-                        });
-                        setAccountMsg('', false);
-                    });
-                });
-
-                let loginMode = 'email', registerMode = 'email';
-                document.querySelectorAll('#loginModeToggle [data-mode]').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('#loginModeToggle [data-mode]').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        loginMode = this.dataset.mode;
-                    });
-                });
-                document.querySelectorAll('#registerModeToggle [data-mode]').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('#registerModeToggle [data-mode]').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        registerMode = this.dataset.mode;
-                    });
-                });
-
-                const loginBtn = document.getElementById('loginSubmitBtn');
-                if (loginBtn) loginBtn.addEventListener('click', async () => {
-                    const identifier = document.getElementById('loginIdentifierInput').value.trim();
-                    const password = document.getElementById('loginPasswordInput').value;
-                    if (!identifier || !password) {
-                        setAccountMsg(state.lang === 'fa' ? 'همه‌ی فیلدها رو پر کن' : 'Fill in all fields', true);
-                        return;
-                    }
-                    loginBtn.disabled = true;
-                    const { ok, data } = await callAccountApi('/account/login', { mode: loginMode, identifier, password })
-                        .catch(() => ({ ok: false, data: {} }));
-                    loginBtn.disabled = false;
-                    if (ok && data.token) {
-                        onAccountTokenReceived(data.token);
-                    } else {
-                        setAccountMsg(data.error || (state.lang === 'fa' ? '❌ ورود ناموفق بود' : '❌ Sign-in failed'), true);
-                    }
-                });
-
-                const registerBtn = document.getElementById('registerSubmitBtn');
-                if (registerBtn) registerBtn.addEventListener('click', async () => {
-                    const identifier = document.getElementById('registerIdentifierInput').value.trim();
-                    const password = document.getElementById('registerPasswordInput').value;
-                    if (!identifier || password.length < 6) {
-                        setAccountMsg(state.lang === 'fa' ? 'رمز حداقل ۶ کاراکتر باشه' : 'Password must be at least 6 characters', true);
-                        return;
-                    }
-                    registerBtn.disabled = true;
-                    const { ok, data } = await callAccountApi('/account/register', { mode: registerMode, identifier, password })
-                        .catch(() => ({ ok: false, data: {} }));
-                    registerBtn.disabled = false;
-                    if (ok && data.token) {
-                        state.accountToken = data.token;
-                        saveState();
-                        // کد بازیابی رو نشون می‌دیم تا کاربر حتماً جایی ذخیره‌ش کنه
-                        document.getElementById('recoveryCodeInput').value = data.recoveryCode || data.token;
-                        document.querySelectorAll('#accountTabs [data-atab]').forEach(b => b.classList.remove('active'));
-                        document.querySelector('#accountTabs [data-atab="recover"]').classList.add('active');
-                        document.getElementById('accountPane-login').style.display = 'none';
-                        document.getElementById('accountPane-register').style.display = 'none';
-                        document.getElementById('accountPane-recover').style.display = 'block';
-                        setAccountMsg(state.lang === 'fa' ?
-                            '✅ حساب ساخته شد! کدی که پایین اومد رو یه‌جای امن ذخیره کن.' :
-                            '✅ Account created! Save the code below somewhere safe.', false);
-                    } else {
-                        setAccountMsg(data.error || (state.lang === 'fa' ? '❌ ثبت‌نام ناموفق بود' : '❌ Registration failed'), true);
-                    }
-                });
-
-                const recoverBtn = document.getElementById('recoverySubmitBtn');
-                if (recoverBtn) recoverBtn.addEventListener('click', async () => {
-                    const token = document.getElementById('recoveryCodeInput').value.trim();
-                    if (!token) return;
-                    const payload = await verifyPremiumTokenOffline(token);
-                    if (payload) {
-                        state.accountToken = token;
-                        saveState();
-                        if (payload.prem) {
-                            state.isPremium = true;
-                            applyPremiumLockUI();
-                            setAccountMsg(state.lang === 'fa' ? '✅ بازیابی شد و نسخه‌ی کامل فعاله' : '✅ Recovered — full version active', false);
-                            setTimeout(() => document.getElementById('premiumPaywallBackdrop').classList.remove('open'), 1200);
-                        } else {
-                            setAccountMsg(state.lang === 'fa' ? 'کد معتبره ولی خریدی روش ثبت نیست.' : 'Code is valid but has no purchase on it.', false);
-                        }
-                    } else {
-                        setAccountMsg(state.lang === 'fa' ? '❌ کد نامعتبره' : '❌ Invalid code', true);
-                    }
-                });
-            })();
 
             const HELP_CONTENT = {
                 habits: {
@@ -13174,8 +13306,55 @@
             });
             document.getElementById('onboardingSkipBtn').addEventListener('click', closeOnboarding);
             document.getElementById('replayTutorialBtn').addEventListener('click', () => openOnboarding(true));
-            if (!state.onboardingDone) openOnboarding(false);
-            renderAll();
+
+            // ============================================================
+            // قوانین و شرایط استفاده: قبل از هر چیز دیگه‌ای (حتی قبل از انتخاب زبان و
+            // آموزش اولیه) باید یک‌بار به‌صراحت پذیرفته بشه؛ در تنظیمات هم همیشه قابل
+            // مشاهده‌ی دوباره‌ست. نسخه‌ی پذیرفته‌شده و تاریخش ذخیره می‌شه تا اگه بعداً متن
+            // قوانین عوض شد، دوباره درخواست پذیرش بشه.
+            // ============================================================
+            function renderTermsText() {
+                document.getElementById('termsBodyText').textContent = state.lang === 'fa' ? TERMS_TEXT_FA : TERMS_TEXT_EN;
+            }
+            function openTermsOverlay(isViewOnly) {
+                renderTermsText();
+                document.getElementById('termsCheckboxRow').style.display = isViewOnly ? 'none' : 'flex';
+                document.getElementById('termsAcceptBtn').style.display = isViewOnly ? 'none' : 'block';
+                document.getElementById('termsCloseViewBtn').style.display = isViewOnly ? 'block' : 'none';
+                document.getElementById('termsAcceptCheckbox').checked = false;
+                document.getElementById('termsAcceptBtn').disabled = true;
+                document.getElementById('termsOverlay').classList.add('open');
+            }
+            function needsTermsAcceptance() {
+                return state.termsAcceptedVersion !== TERMS_VERSION;
+            }
+            function proceedAfterTerms() {
+                if (!state.onboardingDone) openOnboarding(false);
+                renderAll();
+            }
+            document.getElementById('termsAcceptCheckbox').addEventListener('change', function() {
+                document.getElementById('termsAcceptBtn').disabled = !this.checked;
+            });
+            document.getElementById('termsAcceptBtn').addEventListener('click', function() {
+                if (document.getElementById('termsAcceptBtn').disabled) return;
+                state.termsAcceptedVersion = TERMS_VERSION;
+                state.termsAcceptedAt = Date.now();
+                saveState();
+                document.getElementById('termsOverlay').classList.remove('open');
+                proceedAfterTerms();
+            });
+            document.getElementById('termsCloseViewBtn').addEventListener('click', function() {
+                document.getElementById('termsOverlay').classList.remove('open');
+            });
+            document.getElementById('viewTermsBtn').addEventListener('click', function() {
+                openTermsOverlay(true);
+            });
+
+            if (needsTermsAcceptance()) {
+                openTermsOverlay(false);
+            } else {
+                proceedAfterTerms();
+            }
 
             let resizeTimer;
             window.addEventListener('resize', () => {
