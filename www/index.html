@@ -617,7 +617,7 @@
             font-size: calc(11px * var(--font-scale));
             font-weight: 600;
             cursor: pointer;
-            transition: all .15s;
+            transition: transform 0.15s var(--ease), opacity 0.15s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
             white-space: nowrap;
         }
         .pattern-btn.active,
@@ -800,12 +800,17 @@
             justify-content: center;
             gap: 4px
         }
-        .glass-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 34px rgba(31, 38, 135, .16);
+        /* هاور فقط روی دستگاه‌هایی که واقعاً موس دارن؛ روی موبایل :hover بعد از لمس «گیر می‌کرد»
+           و دکمه بالا می‌موند (حس پرش/لگ). */
+        @media (hover: hover) and (pointer: fine) {
+            .glass-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 14px 34px rgba(31, 38, 135, .16);
+            }
         }
         .glass-btn:active {
-            transform: scale(.95)
+            transform: scale(.96);
+            box-shadow: 0 2px 8px rgba(31, 38, 135, .12);
         }
         .glass-btn.primary {
             background: rgba(20, 107, 105, .2);
@@ -833,9 +838,9 @@
             width: 44px;
             height: 44px;
             flex-shrink: 0;
-            background: conic-gradient(from 45deg, var(--primary) 0 25%, var(--accent) 25% 50%, var(--primary-2) 50% 75%, var(--accent) 75% 100%);
+            background: #0B1B58 url("icons/icon-96.png") center / cover no-repeat;
             border-radius: 14px;
-            box-shadow: 0 6px 16px rgba(20, 107, 105, .28);
+            box-shadow: 0 6px 16px rgba(11, 27, 88, .3);
         }
         .brand h1 {
             font-size: calc(18px * var(--font-scale));
@@ -845,7 +850,22 @@
         .clock {
             font-size: calc(12px * var(--font-scale));
             color: var(--text-muted);
-            margin-top: 2px
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* برند می‌تونه جمع بشه تا دکمه‌های سمت راست هدر (UPGRADE/تم/منو) هیچ‌وقت هل داده نشن */
+        header { gap: 8px; }
+        .brand { min-width: 0; flex: 1 1 auto; }
+        .brand > div { min-width: 0; }
+        .header-right { flex-shrink: 0; }
+        @media (max-width: 400px) {
+            .brand .mark { width: 38px; height: 38px; border-radius: 12px; }
+            .brand h1 { font-size: calc(16px * var(--font-scale)); }
+            .clock { font-size: calc(10.5px * var(--font-scale)); }
+            .upgrade-btn-header { padding: 7px 10px; font-size: calc(10.5px * var(--font-scale)); }
+            .header-right { gap: 6px; }
         }
 
         .header-right {
@@ -867,7 +887,7 @@
             justify-content: center;
             font-size: calc(20px * var(--font-scale));
             color: var(--text);
-            transition: all .2s;
+            transition: transform 0.2s var(--ease), opacity 0.2s var(--ease), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
             box-shadow: var(--glass-shadow);
             position: relative;
             padding: 0;
@@ -890,7 +910,7 @@
             height: 2.5px;
             background: var(--text);
             border-radius: 2px;
-            transition: all .25s;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease), background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
         }
         .profile-btn .hamburger span:nth-child(2) {
             width: 16px;
@@ -1238,15 +1258,53 @@
             background: var(--tile-bg);
             border: 1px solid var(--glass-border);
             box-shadow: 0 4px 16px rgba(20, 15, 10, .1), inset 0 1px 0 rgba(255, 255, 255, .5);
-            transition: transform .2s, box-shadow .2s;
+            transition: transform .15s var(--ease), box-shadow .15s var(--ease);
             overflow: hidden;
             clip-path: var(--tile-clip, none);
+            /* isolation + background-clip: رنگ پس‌زمینه دقیقاً داخل گوشه‌های گرد می‌مونه، حتی
+               وقتی کاشی (موقع لمس) transform می‌گیره — رفع باگ شناخته‌شده‌ی Chromium/WebView که
+               در اون گوشه‌های گردِ overflow:hidden حین ترکیب لایه‌ها درست بریده نمی‌شن */
+            isolation: isolate;
+            backface-visibility: hidden;
         }
-        .tile:hover {
-            transform: translateY(-2px) scale(1.02)
+        /* :hover فقط برای موس — روی موبایل بعد از لمس گیر می‌کرد و کاشیِ تازه ثبت‌شده
+           بزرگ‌تر (scale 1.02) و جابه‌جا می‌موند، یعنی از قاب و ردیف خودش بیرون می‌زد */
+        @media (hover: hover) and (pointer: fine) {
+            .tile:hover {
+                transform: translateY(-2px) scale(1.02)
+            }
         }
         .tile:active {
             transform: scale(.95)
+        }
+        /* کاشیِ ثبت‌شده (سبز/قرمز/ترکیبی): رنگ باید دقیقاً تا لبه‌ی قاب بیاد. حاشیه‌ی سفیدِ
+           نیمه‌شفافِ کاشی‌های خالی، روی رنگ به‌صورت یک حلقه‌ی روشن دیده می‌شد و رنگ رو
+           «کوچک‌تر از قاب» نشون می‌داد. */
+        .tile.is-marked {
+            border-color: transparent !important;
+            background-clip: border-box !important;
+            /* پیش‌فرضِ مرورگر: تصویرِ پس‌زمینه نسبت به padding-box چیده و تکرار می‌شه؛ یعنی در
+               نوار ۱px حاشیه، یک باریکه از رنگِ سمتِ مقابل (سبز روی قرمز یا برعکس) دیده می‌شد. */
+            background-origin: border-box !important;
+            background-repeat: no-repeat !important;
+            box-shadow: 0 3px 10px rgba(20, 15, 10, .14), inset 0 1px 0 rgba(255, 255, 255, .25);
+        }
+        .tile.is-marked .inner,
+        html[data-theme="dark"] .tile.is-marked .inner {
+            background: rgba(255, 255, 255, .14);
+            border-color: rgba(255, 255, 255, .28);
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+        }
+        /* عدد جمعه‌ها روی کاشی قرمز، قرمز روی قرمز و ناخوانا بود */
+        .tile.is-marked.holiday .inner { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+        .tile.is-marked .corner { background: rgba(255, 255, 255, .55); opacity: .7; }
+        /* وقتی وضعیت یک کاشی (سبز/قرمز) تازه عوض شده، یک پاپ کوتاه و نرم */
+        .tile.tile-changed { animation: rpTilePop .28s var(--ease); }
+        @keyframes rpTilePop {
+            0% { transform: scale(.9); opacity: .6; }
+            60% { transform: scale(1.03); opacity: 1; }
+            100% { transform: none; }
         }
         .tile .inner {
             width: 70%;
@@ -1262,7 +1320,7 @@
             color: var(--text);
             text-shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 0 2px rgba(255, 255, 255, .5);
             clip-path: var(--tile-clip, none);
-            transition: all .2s;
+            transition: transform 0.2s var(--ease), opacity 0.2s var(--ease), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
         }
         html[data-theme="dark"] .tile .inner {
             background: rgba(10, 16, 15, .22);
@@ -1290,21 +1348,28 @@
             opacity: .6
         }
         .tile .corner:nth-child(2) {
-            top: 4px;
-            right: 4px
+            top: 6px;
+            right: 6px
         }
         .tile .corner:nth-child(3) {
-            top: 4px;
-            left: 4px
+            top: 6px;
+            left: 6px
         }
         .tile .corner:nth-child(4) {
-            bottom: 4px;
-            right: 4px
+            bottom: 6px;
+            right: 6px
         }
         .tile .corner:nth-child(5) {
-            bottom: 4px;
-            left: 4px
+            bottom: 6px;
+            left: 6px
         }
+        /* نقطه‌های تزئینی گوشه در شکل‌های دایره/ستاره/قلب/... درست روی لبه‌ی بریده‌شده می‌افتادن
+           و به‌صورت تکه‌های نیمه‌بریده از قاب کاشی بیرون‌زده دیده می‌شدن. */
+        .tile-shape-round .tile .corner:nth-child(2) { top: 18%; right: 18%; }
+        .tile-shape-round .tile .corner:nth-child(3) { top: 18%; left: 18%; }
+        .tile-shape-round .tile .corner:nth-child(4) { bottom: 18%; right: 18%; }
+        .tile-shape-round .tile .corner:nth-child(5) { bottom: 18%; left: 18%; }
+        body[class*="tile-shape-"]:not(.tile-shape-round):not(.tile-shape-square) .tile .corner { display: none; }
         .month-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -1992,7 +2057,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 10px;
-            transition: all .15s
+            transition: transform 0.15s var(--ease), opacity 0.15s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s
         }
         .icon-btn:hover {
             background: rgba(0, 0, 0, .08)
@@ -2028,7 +2093,7 @@
             font-size: calc(12px * var(--font-scale));
             font-weight: 700;
             cursor: pointer;
-            transition: all .15s;
+            transition: transform 0.15s var(--ease), opacity 0.15s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
             display: flex;
             align-items: center;
             justify-content: center
@@ -2224,7 +2289,7 @@
             border-radius: 12px;
             border: 3px solid transparent;
             cursor: pointer;
-            transition: all .2s;
+            transition: transform 0.2s var(--ease), opacity 0.2s var(--ease), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2435,7 +2500,7 @@
             background: var(--surface-2);
             font-size: calc(12px * var(--font-scale));
             cursor: pointer;
-            transition: all .15s;
+            transition: transform 0.15s var(--ease), opacity 0.15s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
             color: var(--text);
         }
         .reason-modal .rm-prev .rm-chip:hover {
@@ -3281,7 +3346,7 @@
             font-size: calc(14px * var(--font-scale));
             z-index: 9000;
             opacity: 0;
-            transition: all .35s;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease), background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
             text-align: center;
             max-width: 90%
         }
@@ -3318,7 +3383,7 @@
             background: var(--neutral-slice);
             color: var(--text-muted);
             border: 2px solid var(--border);
-            transition: all .3s;
+            transition: transform 0.25s var(--ease), opacity 0.25s var(--ease), background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
             cursor: default;
             flex-shrink: 0;
             line-height: 1;
@@ -3428,7 +3493,7 @@
             cursor: pointer;
             border: 2px solid var(--surface);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            transition: all .15s;
+            transition: transform 0.15s var(--ease), opacity 0.15s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
         }
         .opacity-slider input[type="range"]::-webkit-slider-thumb:hover {
             transform: scale(1.1);
@@ -3496,7 +3561,7 @@
             font-size: calc(12px * var(--font-scale));
             font-weight: 700;
             cursor: pointer;
-            transition: all .2s;
+            transition: transform 0.2s var(--ease), opacity 0.2s var(--ease), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
         }
         .trigger-type-toggle button.active {
             background: var(--primary);
@@ -3803,7 +3868,7 @@
             color: var(--text-muted);
             padding: 4px 6px;
             border-radius: 8px;
-            transition: all .15s;
+            transition: transform 0.15s var(--ease), opacity 0.15s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
         }
         .todo-item .t-actions button:hover {
             background: rgba(0, 0, 0, 0.06);
@@ -3882,7 +3947,7 @@
             font-family: inherit;
             font-size: calc(12px * var(--font-scale));
             cursor: pointer;
-            transition: all .15s;
+            transition: transform 0.15s var(--ease), opacity 0.15s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
         }
         .cal-gender-toggle button.active, .cal-activity-toggle button.active {
             background: var(--primary);
@@ -4415,7 +4480,7 @@
             border-radius: 50%;
             border: 3px solid var(--border);
             cursor: pointer;
-            transition: all .2s;
+            transition: transform 0.2s var(--ease), opacity 0.2s var(--ease), background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
             flex-shrink: 0;
             position: relative;
         }
@@ -4544,10 +4609,57 @@
             opacity: 0;
             pointer-events: none;
         }
+
+        /* ============================================================
+           لایه‌ی نهایی تعامل و حرکت (Interaction polish)
+           فقط transform/opacity انیمیت می‌شن (GPU، بدون reflow)؛ همه‌ی زمان‌ها کوتاه (۱۲۰–۲۰۰ms).
+        ============================================================ */
+        html { -webkit-tap-highlight-color: transparent; }
+        button, a, .tile, [role="button"] { touch-action: manipulation; }
+
+        /* باز شدن مودال‌ها: محو پس‌زمینه + بالا اومدن نرمِ خودِ کارت */
+        .modal-backdrop.open { animation: rpFadeIn .16s ease-out both; }
+        .modal-backdrop.open > .modal { animation: rpModalIn .2s var(--ease) both; }
+        .onboarding-overlay.open > .onboarding-card { animation: rpModalIn .22s var(--ease) both; }
+        @keyframes rpFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes rpModalIn {
+            from { opacity: 0; transform: translateY(14px) scale(.98); }
+            to { opacity: 1; transform: none; }
+        }
+        /* ورود نرم به هر صفحه/تب */
+        section.view.active { animation: rpViewIn .18s ease-out both; }
+        /* فقط opacity: transform روی section باعث می‌شد دکمه‌های شناور (position:fixed) داخلش
+           برای لحظه‌ای جابه‌جا بشن */
+        @keyframes rpViewIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* حس فشرده‌شدن واقعی برای دکمه‌های اصلی */
+        .modal-actions button, .btn-confirm, .btn-cancel, .modal-close, .icon-btn,
+        .bottom-nav-btn, .rm-save, .t-actions button, .pro-plan-card {
+            transition: transform .12s var(--ease), box-shadow .12s var(--ease), background-color .15s, color .15s, opacity .15s;
+        }
+        .modal-actions button:active:not(:disabled), .btn-confirm:active:not(:disabled),
+        .btn-cancel:active, .modal-close:active, .icon-btn:active, .bottom-nav-btn:active,
+        .rm-save:active, .t-actions button:active, .pro-plan-card:active {
+            transform: scale(.96);
+        }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+
+        /* دکمه‌های داخل منوی «+»: شیشه‌ای + فرورفتن واقعی موقع لمس */
+        .tabs-picker-nav button:active {
+            transform: scale(.94);
+            box-shadow: 0 2px 6px rgba(43, 33, 24, .12), inset 0 2px 6px rgba(0, 0, 0, .08);
+        }
+
+        /* کسانی که در تنظیمات سیستم «کاهش حرکت» رو روشن کردن */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- فونت به‌صورت غیرمسدودکننده لود می‌شه: اگه اینترنت بین‌المللی کند یا قطع باشه، برنامه منتظرش نمی‌مونه و فوراً با فونت پیش‌فرض بالا میاد -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <!-- کتابخانه‌های سنگین (Chart.js / jsPDF / html2canvas) دیگر اینجا لود نمی‌شوند تا بارگذاری اول برنامه سریع و سبک بماند؛ فقط هنگام نیاز واقعی (باز کردن نمودار یا خروجی PDF) به‌صورت پویا لود می‌شوند. -->
 </head>
 <body>
@@ -5727,28 +5839,45 @@
             // ============================================================
             const _scriptCache = {};
 
+            // کتابخانه‌ها حالا داخل خودِ برنامه (پوشه‌ی vendor/) هستن و بدون اینترنت هم لود می‌شن.
+            // قبلاً فقط از CDN خارجی گرفته می‌شدن: وقتی اینترنت بین‌المللی قطع/کند بود، نمودارها
+            // اصلاً کار نمی‌کردن و هر بار رندر دوباره تلاش می‌شد (در یک جلسه‌ی کوتاه ۱۴ بار!).
+            // الان: اول نسخه‌ی محلی؛ فقط اگه اون هم نشد CDN؛ و یک شکستِ قطعی برای ۶۰ ثانیه
+            // به خاطر سپرده می‌شه تا تلاش‌های پشت‌سرهمِ بی‌فایده برنامه رو کند نکنن.
+            const _scriptFailedAt = {};
             function loadScriptOnce(src) {
                 if (_scriptCache[src]) return _scriptCache[src];
+                if (_scriptFailedAt[src] && Date.now() - _scriptFailedAt[src] < 60000) {
+                    return Promise.reject(new Error('recently failed: ' + src));
+                }
                 _scriptCache[src] = new Promise((resolve, reject) => {
                     const s = document.createElement('script');
                     s.src = src;
                     s.async = true;
                     s.onload = () => resolve();
-                    s.onerror = () => { delete _scriptCache[src]; reject(new Error('load failed: ' + src)); };
+                    s.onerror = () => {
+                        delete _scriptCache[src];
+                        _scriptFailedAt[src] = Date.now();
+                        s.remove();
+                        reject(new Error('load failed: ' + src));
+                    };
                     document.head.appendChild(s);
                 });
                 return _scriptCache[src];
             }
+            function loadLocalThenCdn(localSrc, cdnSrc) {
+                return loadScriptOnce(localSrc).catch(() => loadScriptOnce(cdnSrc));
+            }
 
             function ensureChartJs() {
                 if (window.Chart) return Promise.resolve();
-                return loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js');
+                return loadLocalThenCdn('vendor/chart.umd.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js');
             }
 
             function ensurePdfExportLibs() {
                 const jobs = [];
-                if (!window.html2canvas) jobs.push(loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'));
-                if (!window.jspdf) jobs.push(loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'));
+                if (!window.html2canvas) jobs.push(loadLocalThenCdn('vendor/html2canvas.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'));
+                if (!window.jspdf) jobs.push(loadLocalThenCdn('vendor/jspdf.umd.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'));
                 return Promise.all(jobs);
             }
 
@@ -8095,6 +8224,7 @@
             // ============================================================
             // RENDER FUNCTIONS
             // ============================================================
+            const tileLastBgByIso = {};
             function makeTile(dObj) {
                 const iso = dateToISO(dObj),
                     today = startOfDay(new Date()).getTime(),
@@ -8111,7 +8241,18 @@
                 tile.className = 'tile' + (isT ? ' today' : '') + (isF ? ' future' : '') + (isHoliday ? ' holiday' : '');
                 const gradient = tileGradient(stats);
                 tile.style.setProperty('--tile-bg', gradient);
-                tile.style.background = gradient;
+                // background-image/color جدا (نه shorthand «background») تا background-clip:padding-box
+                // از CSS حفظ بشه و رنگ زیر border نیمه‌شفاف و بیرون از گوشه‌های گرد رنگ نشه
+                if (gradient.indexOf('gradient(') !== -1) {
+                    tile.style.backgroundImage = gradient;
+                } else {
+                    tile.style.backgroundColor = gradient;
+                }
+                // پاپ نرم فقط وقتی وضعیت همین روز نسبت به آخرین رندر واقعاً عوض شده
+                if ((stats.success || 0) + (stats.fail || 0) > 0) tile.classList.add('is-marked');
+                const prevBg = tileLastBgByIso[iso];
+                if (prevBg !== undefined && prevBg !== gradient) tile.classList.add('tile-changed');
+                tileLastBgByIso[iso] = gradient;
                 const inner = document.createElement('div');
                 inner.className = 'inner';
                 inner.textContent = state.lang === 'fa' ? toPersianDigits(j.jd) : String(j.jd);
@@ -8163,7 +8304,19 @@
                     grid.appendChild(makeTile(d)); }
             }
 
+            // یک listener واحد (Event Delegation) برای کل ۳۶۵ خونه‌ی تقویم سالانه، به‌جای ساختن
+            // ۳۶۵ listener و closure جدید در هر بار رندر
+            let yearGridDelegated = false;
+            function ensureYearGridDelegation(grid) {
+                if (yearGridDelegated) return;
+                yearGridDelegated = true;
+                grid.addEventListener('click', e => {
+                    const cell = e.target.closest('.mini-day[data-iso]');
+                    if (cell) openDayModal(isoToDate(cell.dataset.iso));
+                });
+            }
             function renderYear() {
+                ensureYearGridDelegation(document.getElementById('yearGrid'));
                 document.getElementById('yearLabel').textContent = state.lang === 'fa' ? toPersianDigits(yearAnchor) :
                     String(yearAnchor);
                 const grid = document.getElementById('yearGrid');
@@ -8194,7 +8347,7 @@
                         cell.style.background = tileGradient(stats);
                         cell.textContent = state.lang === 'fa' ? toPersianDigits(dn) : String(dn);
                         if (startOfDay(d).getTime() > startOfDay(new Date()).getTime()) cell.style.opacity = '.5';
-                        cell.addEventListener('click', () => openDayModal(d));
+                        cell.dataset.iso = iso; // کلیک با یک listener مشترک روی خودِ yearGrid مدیریت می‌شه
                         mg.appendChild(cell); }
                     box.appendChild(mg);
                     grid.appendChild(box);
@@ -13626,31 +13779,46 @@
                 if (e.target === this) this.classList.remove('open');
             });
 
+            // نسخه‌ی آموزش: هر وقت اسلایدها به‌طور قابل‌توجهی عوض بشن این عدد بالا می‌ره تا
+            // کاربرهای فعلی هم نسخه‌ی جدید رو یک‌بار ببینن (بدون مرحله‌ی انتخاب زبان).
+            const ONBOARDING_VERSION = 2;
             const ONBOARDING_SLIDES = [
-                { icon: '👋', titleFa: 'خوش اومدی!', titleEn: 'Welcome!',
-                    textFa: 'بیا با هم یه دور سریع همه‌ی بخش‌های برنامه رو ببینیم تا گیج نشی.',
-                    textEn: "Let's take a quick tour of the app so you don't get lost." },
-                { icon: '🏠', titleFa: 'خانه (داشبورد)', titleEn: 'Home (Dashboard)',
-                    textFa: 'همیشه اول همین صفحه باز می‌شه: خلاصه‌ی پیشرفت کلی، پایبندی، پیاپی، پیشرفت عادت‌ها و چالش‌ها، نمودار رشد و فعالیت‌های اخیرت رو یک‌جا می‌بینی.',
-                    textEn: 'This is always the first screen: your overall progress, adherence, streak, habits & challenges progress, growth chart, and recent activity — all in one place.' },
-                { icon: '🎯', titleFa: 'تب عادت‌ها', titleEn: 'Habits tab',
-                    textFa: 'اینجا عادت‌های روزانه‌ات رو اضافه می‌کنی و هر روز باهاشون تیک می‌زنی. با فلش کوچیک کنار هر عادت می‌تونی یادداشت و عکس براش ثبت کنی.',
-                    textEn: 'Add your daily habits here and check them off each day. Tap the small arrow next to a habit to add notes and photos for it.' },
-                { icon: '📅', titleFa: 'ثبت ماهانه و سالانه', titleEn: 'Monthly & yearly record',
-                    textFa: 'توی این تب‌ها یه تقویم کامل از وضعیت موفق/ناموفق هر عادت رو می‌بینی.',
-                    textEn: 'These tabs show a full calendar of your success/fail record for each habit.' },
+                { icon: '👋', titleFa: 'خوش آمدید', titleEn: 'Welcome',
+                    textFa: 'در چند قدم کوتاه، بخش‌های اصلی برنامه را با هم مرور می‌کنیم. هر وقت خواستید می‌توانید «رد شدن» را بزنید.',
+                    textEn: 'A short tour of the main parts of the app. You can tap "Skip" at any time.' },
+                { icon: '🏠', titleFa: 'خانه', titleEn: 'Home',
+                    textFa: 'خلاصه‌ی امروز، پیشرفت عادت‌ها و چالش‌ها، سطح، سکه‌ها و روزهای موفقیت متوالی شما در این صفحه نمایش داده می‌شود.',
+                    textEn: "Today's summary, habit and challenge progress, your level, coins and success streak are shown here." },
+                { icon: '🎯', titleFa: 'عادت‌ها', titleEn: 'Habits',
+                    textFa: 'عادت‌های خود را اضافه کنید و هر روز وضعیت آن‌ها را ثبت کنید. با فلش کنار هر عادت، یادداشت و عکس هم اضافه می‌شود.',
+                    textEn: 'Add your habits and record them each day. The small arrow next to a habit lets you add notes and photos.' },
+                { icon: '🏆', titleFa: 'سکه و سطح', titleEn: 'Coins and levels',
+                    textFa: 'با انجام عادت‌ها سکه جمع می‌کنید. هر عادت سطح جداگانه دارد و با رسیدن به «استادی» می‌توانید وارد مرحله‌ی بعد شوید.',
+                    textEn: 'Completing habits earns coins. Each habit has its own levels; after reaching Master you can continue to the next stage.' },
+                { icon: '📅', titleFa: 'ثبت ماهانه و سالانه', titleEn: 'Monthly and yearly view',
+                    textFa: 'روی هر روز تقویم بزنید تا وضعیت همان روز را ببینید یا ثبت کنید. رنگ سبز یعنی موفق و قرمز یعنی ناموفق.',
+                    textEn: 'Tap any day to view or record it. Green means success, red means missed.' },
+                { icon: '🔥', titleFa: 'چالش‌ها و وسوسه', titleEn: 'Challenges and urges',
+                    textFa: 'دکمه‌ی شناور 🔥 برای لحظه‌های وسوسه است. از همین بخش می‌توانید چالش زمان‌دار یا عددی تعریف کنید و برای آن جایزه بگذارید.',
+                    textEn: 'The floating 🔥 button is for moments of temptation. From there you can also create timed or count-based challenges with rewards.' },
+                { icon: '➕', titleFa: 'منوی «+»', titleEn: 'The + menu',
+                    textFa: 'دکمه‌ی «+» پایین صفحه، همه‌ی بخش‌ها را نشان می‌دهد: لیست کارها، کالری‌شمار، کتابخانه، یادداشت، عهدنامه و تنظیمات.',
+                    textEn: 'The + button at the bottom opens every section: To-Do, Calorie counter, Library, Notes, Vows and Settings.' },
                 { icon: '✅', titleFa: 'لیست کارها', titleEn: 'To-Do list',
-                    textFa: 'اینجا می‌تونی برای کارهات زمان دقیق تعیین کنی و سرِ همون لحظه نوتیفیکیشن واقعی بگیری.',
-                    textEn: 'Set an exact time for your tasks here and get a real notification exactly then.' },
-                { icon: '📊', titleFa: 'محرک‌ها و علت‌ها', titleEn: 'Triggers & reasons',
-                    textFa: 'کنار هر عادت، آیکون نمودار محرک، مشوق و علت موفقیت/شکست رو نشون می‌ده تا بفهمی چی باعث موفقیت یا شکستت می‌شه.',
-                    textEn: "The chart icon next to each habit shows your triggers, incentives, and success/fail reasons — to help you see what's driving you." },
-                { icon: '⚙️', titleFa: 'تنظیمات', titleEn: 'Settings',
-                    textFa: 'از تنظیمات می‌تونی رنگ، تم تاریک/روشن، زبان، ریمایندرها و خیلی چیزای دیگه رو شخصی‌سازی کنی.',
-                    textEn: 'From Settings you can customize colors, light/dark theme, language, reminders, and much more.' },
-                { icon: '🎉', titleFa: 'همینه!', titleEn: "That's it!",
-                    textFa: 'هر وقت خواستی دوباره این آموزش رو ببینی، از تنظیمات دکمه‌ی «نمایش دوباره‌ی آموزش اولیه» رو بزن.',
-                    textEn: 'Whenever you want to see this tutorial again, tap "Show onboarding tutorial again" in Settings.' }
+                    textFa: 'برای هر کار می‌توانید زمان یادآوری و تکرار (روزانه یا روزهای مشخص هفته) تعیین کنید.',
+                    textEn: 'Each task can have a reminder time and a repeat pattern (daily or specific weekdays).' },
+                { icon: '📚', titleFa: 'کتابخانه و کالری‌شمار', titleEn: 'Library and calories',
+                    textFa: 'در کتابخانه، کتاب‌ها و میزان پیشرفت مطالعه را ثبت کنید. کالری‌شمار هم کالری و درشت‌مغذی‌های روزانه را محاسبه می‌کند.',
+                    textEn: 'Track your books and reading progress in the Library. The calorie counter tracks daily calories and macros.' },
+                { icon: '💾', titleFa: 'پشتیبان‌گیری', titleEn: 'Backups',
+                    textFa: 'اطلاعات فقط روی گوشی شما ذخیره می‌شود. از بخش تنظیمات گاهی یک نسخه‌ی پشتیبان تهیه کنید تا در صورت تعویض گوشی از دست نرود.',
+                    textEn: 'Your data lives only on your phone. Make a backup from Settings now and then so nothing is lost if you change devices.' },
+                { icon: '⭐', titleFa: 'نسخه‌ی کامل', titleEn: 'Full version',
+                    textFa: 'بعضی بخش‌ها مخصوص نسخه‌ی کامل هستند. از دکمه‌ی UPGRADE بالای صفحه می‌توانید یکی از پلن‌ها را انتخاب کنید.',
+                    textEn: 'Some sections are part of the full version. Use the UPGRADE button at the top to choose a plan.' },
+                { icon: '🎉', titleFa: 'آماده‌اید', titleEn: "You're all set",
+                    textFa: 'این راهنما هر زمان از «تنظیمات ← نمایش دوباره‌ی آموزش اولیه» در دسترس است. کنار بیشتر بخش‌ها هم دکمه‌ی ❓ برای توضیح بیشتر هست.',
+                    textEn: 'You can reopen this tour anytime from Settings. Most sections also have a ❓ button with more details.' }
             ];
             let obStep = 0;
             let obSkipLangStep = false;
@@ -13706,6 +13874,7 @@
             function closeOnboarding() {
                 document.getElementById('onboardingOverlay').classList.remove('open');
                 state.onboardingDone = true;
+                state.onboardingVersion = ONBOARDING_VERSION;
                 saveState();
             }
             function openOnboarding(skipLangStep) {
@@ -13756,6 +13925,7 @@
             }
             function proceedAfterTerms() {
                 if (!state.onboardingDone) openOnboarding(false);
+                else if ((state.onboardingVersion || 1) < ONBOARDING_VERSION) openOnboarding(true);
                 renderAll();
             }
             document.getElementById('termsAcceptCheckbox').addEventListener('change', function() {
