@@ -1397,7 +1397,11 @@
             background: var(--surface-2);
             border: 1px solid var(--glass-border);
             border-radius: 14px;
-            padding: 10px
+            padding: 10px;
+            /* روی گوشی فقط ۳–۴ ماه از ۱۲ ماه دیده می‌شه؛ مرورگر layout/paint ماه‌های بیرون از
+               صفحه رو تا وقتی بهشون اسکرول نشده انجام نمی‌ده (باز شدن تقویم سالانه خیلی سریع‌تر) */
+            content-visibility: auto;
+            contain-intrinsic-size: auto 190px;
         }
         .mini-month h4 {
             font-size: calc(12px * var(--font-scale));
@@ -2359,7 +2363,9 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 100
+            /* بالاتر از نوار پایین (۴۰۰) و دکمه‌ی شناور 🔥 (۵۰۰): قبلاً همه‌ی مودال‌ها زیر این دو
+               کشیده می‌شدن و دکمه‌ها روی محتوای مودال می‌افتادن */
+            z-index: 600
         }
         .modal-backdrop.open {
             display: flex
@@ -2666,7 +2672,7 @@
             border-color: var(--fail) !important;
         }
         #rewardPunishModalBackdrop {
-            z-index: 300;
+            z-index: 700;
         }
 
         .chart-tabs {
@@ -4654,6 +4660,112 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
         }
+
+        /* ============================================================
+           Performance: backdrop-filter (blur) — اندازه‌گیری‌شده، بزرگ‌ترین عامل کندی بود
+           ------------------------------------------------------------
+           با CPU شبیه‌سازی‌شده‌ی گوشی: تب عادت‌ها ۶۰۰ms → ۱۹۵ms، باز شدن منوی + از ۲۸/۳۰
+           فریم لگ‌دار → ۱/۳۰. blur روی ده‌ها المانِ تکراری (کارت‌ها، دکمه‌ها، ورودی‌ها، کاشی‌ها،
+           پس‌زمینه‌ی تمام‌صفحه‌ی مودال) باید در هر فریم پشتِ خودش رو دوباره محو کنه، در حالی که
+           پشتِ اکثرشون یک پس‌زمینه‌ی تقریباً یک‌دسته و blur عملاً دیده نمی‌شه.
+           فقط دو جا که واقعاً دیده می‌شه نگه داشته شده: نوار پایین (محتوا از زیرش رد می‌شه)
+           و پنل شیشه‌ای منوی «+». ظاهر شیشه‌ای بقیه با گرادیان/هایلایت/رنگ نیمه‌شفاف حفظ شده.
+        ============================================================ */
+        .glass-btn, .profile-btn, .profile-dropdown, nav.tabs, .tabs-picker-nav button, .card,
+        .search-box input, .journal-search input, .modal-backdrop, .onboarding-overlay,
+        .score-display, .summary-today, .todo-add input[type="text"], .todo-due-input,
+        .library-controls input[type="text"], .book-form-field textarea,
+        .tile-effect-glass .tile, .tile-effect-glass .tile .inner,
+        .tile-effect-frost .tile, .tile-effect-frost .tile .inner, .tile-effect-rainbow .tile .inner {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        /* پس‌زمینه‌ی تیره‌ی مودال‌ها کمی پررنگ‌تر، به‌جای blur تمام‌صفحه */
+        .modal-backdrop { background: rgba(0, 0, 0, .55); }
+        /* فقط وقتی الگوی پس‌زمینه فعاله (تنها جایی که blur واقعاً دیده می‌شد)، شیشه کمی مات‌تر
+           می‌شه تا الگو زیر کارت‌ها شلوغ و تیز دیده نشه */
+        body[class*="bg-pattern-"]:not(.bg-pattern-solid) { --glass-bg: rgba(255, 255, 255, .62); }
+        [data-theme="dark"] body[class*="bg-pattern-"]:not(.bg-pattern-solid) { --glass-bg: rgba(20, 30, 28, .72); }
+        /* کاشی‌های افکت شیشه/یخی: همون حس، با هایلایت به‌جای blur */
+        .tile-effect-glass .tile .inner, .tile-effect-frost .tile .inner {
+            background: linear-gradient(135deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .1)) !important;
+        }
+        /* منوی «+»: فقط خودِ پنل blur داره (یک لایه)، نه تک‌تکِ ۱۰ دکمه */
+        .tabs-picker-modal { backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+
+        /* دسترس‌پذیری: حالت فوکوس فقط برای کیبورد (نه لمس) + حداقل سطح لمسِ راحت روی موبایل */
+        :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 10px; }
+        button:focus:not(:focus-visible) { outline: none; }
+        @media (pointer: coarse) {
+            .icon-btn, .help-btn, .t-actions button, .cl-del, .bottom-nav-btn { min-width: 40px; min-height: 40px; }
+        }
+
+        /* ============================ آواتار ============================ */
+        .avatar-mini-btn { border: none; padding: 0; cursor: pointer; overflow: hidden; display: block;
+            transition: transform .15s var(--ease), box-shadow .15s var(--ease); }
+        .avatar-mini-btn canvas { width: 100% !important; height: 100% !important; display: block; image-rendering: pixelated; }
+        .brand .mark.avatar-mini-btn.has-avatar { background: linear-gradient(160deg, var(--primary-soft), var(--surface-2)); box-shadow: 0 4px 12px rgba(43, 33, 24, .14); }
+        .avatar-mini-btn:active { transform: scale(.92); }
+        .av-pop { animation: avPop .32s var(--ease); }
+        @keyframes avPop { 0% { transform: scale(.9); } 55% { transform: scale(1.06); } 100% { transform: none; } }
+        /* پنل آواتار: پیش‌نمایش، جنسیت و دسته‌ها ثابت می‌مونن؛ فقط شبکه‌ی آیتم‌ها اسکرول می‌خوره تا
+           هر آیتمی رو که لمس می‌کنی همیشه روی پیش‌نمایش ببینی */
+        .avatar-modal { max-width: 460px; padding: 16px 14px 0; display: flex; flex-direction: column; overflow: hidden; height: min(85vh, 720px); height: min(85dvh, 720px); }
+        .avatar-modal > * { flex-shrink: 0; }
+        .avatar-modal .av-grid { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px 2px 10px; align-content: start; }
+        .avatar-modal .modal-actions { margin: 0 -14px; position: static; border-radius: 0 0 20px 20px; }
+        .av-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+        .av-head h3 { margin: 0; }
+        .av-coins { font-weight: 800; font-size: calc(13px * var(--font-scale)); padding: 6px 12px; border-radius: 999px;
+            background: linear-gradient(135deg, #fff1c2, #f6d57a); color: #5a3d00; white-space: nowrap; }
+        .av-stage { height: 140px; display: flex; align-items: flex-end; justify-content: center; border-radius: 16px;
+            background: radial-gradient(ellipse 60% 18% at 50% 92%, rgba(0,0,0,.14), transparent 70%), linear-gradient(180deg, var(--primary-soft), var(--surface-2));
+            border: 1px solid var(--glass-border); overflow: hidden; }
+        /* قانون عمومیِ قدیمیِ «canvas { width:100% !important; height:auto !important }» مخصوص نمودارهاست؛
+           بوم‌های آواتار اندازه‌ی خودشون رو دارن و از اون مستثنا می‌شن */
+        .av-stage canvas, .av-card canvas, .av-gender-card canvas, .avatar-mini-btn canvas { margin: 0; max-height: none; }
+        .av-stage canvas { height: 128px !important; width: 128px !important; aspect-ratio: 1; image-rendering: pixelated; animation: avIdle 2.6s ease-in-out infinite; }
+        @keyframes avIdle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5%); } }
+        /* ضریب بزرگ‌نمایی صحیح (۲× یا ۳×) تا پیکسل‌ها کاملاً یکدست و تیز بمونن */
+        @media (min-height: 760px) { .av-stage { height: 204px; } .av-stage canvas { height: 192px !important; width: 192px !important; } }
+        .av-stage canvas.av-pop { animation: avPop .32s var(--ease), avIdle 2.6s ease-in-out .32s infinite; }
+        .av-gender-switch { display: flex; gap: 6px; justify-content: center; margin: 10px 0 8px; }
+        .av-gender-switch button, .av-cat { font-family: inherit; font-weight: 700; font-size: calc(12.5px * var(--font-scale)); color: var(--text);
+            background: var(--surface-2); border: 1px solid var(--glass-border); border-radius: 999px; padding: 7px 14px; cursor: pointer; white-space: nowrap;
+            transition: transform .12s var(--ease), background-color .15s, color .15s; }
+        .av-gender-switch button.active, .av-cat.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .av-gender-switch button:active, .av-cat:active { transform: scale(.95); }
+        /* ردیف دسته‌ها: روی موبایل با کشیدن، روی کامپیوتر با چرخ موس و نوار اسکرول باریک؛ لبه‌ها محو می‌شن
+           تا معلوم باشه دسته‌های بیشتری هست (قبلاً روی کامپیوتر نصف دسته‌ها اصلاً در دسترس نبودن) */
+        .av-cats { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain; scroll-behavior: smooth;
+            -webkit-mask-image: linear-gradient(to left, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+            mask-image: linear-gradient(to left, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%); }
+        .av-cats::-webkit-scrollbar { display: none; }
+        @media (hover: hover) and (pointer: fine) {
+            .av-cats { scrollbar-width: thin; padding-bottom: 6px; }
+            .av-cats::-webkit-scrollbar { display: block; height: 6px; }
+            .av-cats::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 6px; }
+        }
+        .av-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 8px; }
+        .av-card { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 4px 7px; min-height: 108px; cursor: pointer;
+            background: var(--surface-2); border: 1.5px solid var(--glass-border); border-radius: 14px; font-family: inherit; color: var(--text);
+            transition: transform .12s var(--ease), border-color .15s, background-color .15s; }
+        .av-card canvas { width: 56px !important; height: 56px !important; image-rendering: pixelated; }
+        .av-card:active { transform: scale(.95); }
+        .av-card.selected { border-color: var(--primary); background: var(--primary-soft); }
+        .av-card.equipped { border-color: var(--success); }
+        .av-card.locked canvas { opacity: .55; }
+        .av-name { font-size: calc(10.5px * var(--font-scale)); font-weight: 700; line-height: 1.35; text-align: center; }
+        .av-tag { font-size: calc(10px * var(--font-scale)); color: var(--text-muted); }
+        .av-card.equipped .av-tag { color: var(--success); font-weight: 800; }
+        #avActionBtn.av-danger { background: linear-gradient(135deg, #f0a13c, #e07b25); }
+        .av-gender-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 4px; }
+        .av-gender-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border-radius: 16px; cursor: pointer;
+            background: var(--surface-2); border: 1.5px solid var(--glass-border); font-family: inherit; font-weight: 800; color: var(--text);
+            font-size: calc(14px * var(--font-scale)); transition: transform .12s var(--ease), border-color .15s; }
+        .av-gender-card canvas { width: 96px !important; height: 128px !important; image-rendering: pixelated; }
+        .av-gender-card:active { transform: scale(.95); border-color: var(--primary); }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4666,7 +4778,7 @@
     <div class="wrap">
         <header>
             <div class="brand">
-                <div class="mark"></div>
+                <button type="button" class="mark avatar-mini-btn" id="avatarMiniBtn" aria-label="آواتار من"><canvas id="avatarMiniCanvas" width="96" height="96"></canvas></button>
                 <div>
                     <h1>روتین پلنر</h1>
                     <div class="clock"><span id="clockText">...</span></div>
@@ -5409,10 +5521,10 @@
             <p class="field-hint" data-fa="اختیاری: اگر خالی بذاری، هدف هفتگی در نظر گرفته نمیشه." data-en="Optional: leave empty to disable weekly goal.">اختیاری: اگر خالی بذاری، هدف هفتگی در نظر گرفته نمیشه.</p>
             <div class="field-label" data-fa="🪙 امتیاز به ازای هر بار انجام موفق" data-en="🪙 Points per success">🪙 امتیاز به ازای هر بار انجام موفق</div>
             <div class="habit-goal-input">
-                <input type="number" id="habitRewardPointsField" min="1" max="1000" value="10">
+                <input type="number" id="habitRewardPointsField" min="1" max="50" value="10" inputmode="numeric">
                 <span data-fa="امتیاز" data-en="points">امتیاز</span>
             </div>
-            <p class="field-hint" data-fa="این عادت هر بار که موفق ثبت بشه، این‌قدر امتیاز/سکه بهت میده. عادت‌های سخت‌تر رو می‌تونی امتیاز بیشتری بدی." data-en="Every time you complete this habit, you earn this many points/coins. Give harder habits a higher value.">این عادت هر بار که موفق ثبت بشه، این‌قدر امتیاز/سکه بهت میده. عادت‌های سخت‌تر رو می‌تونی امتیاز بیشتری بدی.</p>
+            <p class="field-hint" data-fa="این عادت هر بار که موفق ثبت بشه، این‌قدر سکه بهت میده (حداکثر ۵۰). در صورت ثبت ناموفق، نصف این مقدار کم می‌شه." data-en="Coins earned each time this habit succeeds (max 50). A failed entry deducts half of this.">این عادت هر بار که موفق ثبت بشه، این‌قدر سکه بهت میده (حداکثر ۵۰). در صورت ثبت ناموفق، نصف این مقدار کم می‌شه.</p>
             <div class="field-label" data-fa="🎁 پاداش موفقیت (اختیاری)" data-en="🎁 Success Reward (optional)">🎁 پاداش موفقیت (اختیاری)</div>
             <input type="text" id="habitRewardField" class="name-input" placeholder="مثلاً: یک ساعت بازی، خرید چیزی که دوست دارم..." maxlength="150">
             <p class="field-hint" data-fa="وقتی این عادت رو موفق ثبت کنی، این پاداش بهت نمایش داده میشه." data-en="Shown to you whenever you record this habit as successful.">وقتی این عادت رو موفق ثبت کنی، این پاداش بهت نمایش داده میشه.</p>
@@ -5797,6 +5909,37 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="avatarGenderModalBackdrop">
+        <div class="modal" style="max-width:400px;text-align:center">
+            <h3 data-fa="آواتار خود را انتخاب کنید" data-en="Choose your avatar">آواتار خود را انتخاب کنید</h3>
+            <p class="sub" data-fa="بعداً هم از پنل آواتار قابل تغییر است." data-en="You can change this later in the avatar panel.">بعداً هم از پنل آواتار قابل تغییر است.</p>
+            <div class="av-gender-pick">
+                <button type="button" class="av-gender-card" data-pick-gender="male"><canvas id="avGenderPreview_male" width="96" height="128"></canvas><span data-fa="مرد" data-en="Male">مرد</span></button>
+                <button type="button" class="av-gender-card" data-pick-gender="female"><canvas id="avGenderPreview_female" width="96" height="128"></canvas><span data-fa="زن" data-en="Female">زن</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="avatarModalBackdrop">
+        <div class="modal avatar-modal">
+            <div class="av-head">
+                <h3 data-fa="آواتار من" data-en="My avatar">آواتار من</h3>
+                <span class="av-coins" id="avCoins">🪙 0</span>
+            </div>
+            <div class="av-stage"><canvas id="avatarPreviewCanvas" width="256" height="256"></canvas></div>
+            <div class="av-gender-switch" id="avGenderSwitch">
+                <button type="button" data-g="male" data-fa="مرد" data-en="Male">مرد</button>
+                <button type="button" data-g="female" data-fa="زن" data-en="Female">زن</button>
+            </div>
+            <div class="av-cats" id="avCats"></div>
+            <div class="av-grid" id="avGrid"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="avCloseBtn" data-fa="بستن" data-en="Close">بستن</button>
+                <button class="btn-confirm" id="avActionBtn">—</button>
+            </div>
+        </div>
+    </div>
+
     <div class="onboarding-overlay" id="termsOverlay">
         <div class="onboarding-card terms-card" style="max-height:88vh;text-align:right">
             <div style="text-align:center">
@@ -6132,6 +6275,9 @@
             // STATE
             // ============================================================
             const STORAGE_KEY = "alshadow-v14-level-colors";
+            const COIN_MAX_PER_OP = 50; // سقف دریافت/کسر سکه در هر عملیات
+            let rpDataVersion = 0; // نسخه‌ی داده؛ پایین‌تر کنار saveState توضیح داده شده
+            const _viewSig = {};
             // شماره‌ی نسخه‌ی قوانین: هر وقت متن قوانین به‌طور قابل‌توجهی عوض بشه، این عدد رو
             // بالا ببر — چون کاربرهایی که نسخه‌ی قبلی رو پذیرفته بودن، دوباره باید تأیید کنن.
             const TERMS_VERSION = 3;
@@ -6225,6 +6371,7 @@
                 onboardingDone: false,
                 isPremium: false,
                 proCache: null,
+                avatar: { gender: null, owned: {}, equipped: { male: {}, female: {} } },
                 termsAcceptedVersion: null,
                 termsAcceptedAt: null,
                 calorie: { profile: null, logs: {}, burns: {}, customFoods: [], customActivities: [] },
@@ -6313,7 +6460,20 @@
                 }
             } catch (e) {}
 
+            // هر بار داده ذخیره می‌شه، این شماره بالا می‌ره؛ صفحه‌ها فقط وقتی دوباره ساخته می‌شن
+            // که از آخرین باری که دیده شدن داده (یا تاریخ/زبان/تنظیمات تقویم) واقعاً عوض شده باشه.
+            function currentViewSig(view) {
+                let extra = '';
+                if (view === 'month') extra = monthAnchor.jy + '-' + monthAnchor.jm;
+                else if (view === 'year') extra = String(yearAnchor);
+                return rpDataVersion + '|' + state.lang + '|' + state.calendarType + '|' + state.weekStart + '|' +
+                    state.showHolidays + '|' + dateToISO(startOfDay(new Date())) + '|' + extra;
+            }
+            function viewIsFresh(view) { return _viewSig[view] === currentViewSig(view); }
+            function markViewRendered(view) { _viewSig[view] = currentViewSig(view); }
+
             function saveState() {
+                rpDataVersion++;
                 pointsCacheMap = null;
                 try {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -6603,9 +6763,12 @@
                 return null;
             }
 
+            // سقف ۵۰ همین‌جا (نقطه‌ی مرکزیِ محاسبه‌ی امتیاز هر ثبت) اعمال می‌شه: حتی عادت‌هایی که
+            // قبلاً با امتیاز ۱۰۰ یا ۱۰۰۰ ساخته شدن، از این به بعد در هر ثبت حداکثر ۵۰ می‌گیرن
+            // (و حداکثر ۲۵ کم می‌شه). هم سکه و هم سطحِ عادت از همین عدد حساب می‌شن.
             function getHabitRewardPoints(h) {
                 const v = h && typeof h.rewardPoints === 'number' && h.rewardPoints > 0 ? h.rewardPoints : 10;
-                return v;
+                return Math.min(COIN_MAX_PER_OP, v);
             }
 
             function getRecordPoints(value, h) {
@@ -7876,7 +8039,6 @@
             // با هر افزایش امتیاز کل، همان مقدار به‌عنوان سکه‌ی قابل‌خرج اضافه می‌شود
             // محدودیت امنیتی: هیچ عملیات یا رویدادی نباید بیشتر از ۵۰ سکه در یک بار به کاربر
             // بده یا ازش کم کنه — این محدودیت مستقل از UI و همیشه همینجا اعمال می‌شه.
-            const COIN_MAX_PER_OP = 50;
             // ============================================================
             // تابع مرکزیِ تغییر موجودی سکه — هر مسیر دریافت یا کسر سکه در کل برنامه (عادت،
             // کار، چالش، کتابخونه، دستاورد، سطح، جایزه‌ی دستی و هر جای دیگه) باید از همینجا
@@ -7953,7 +8115,7 @@
                 document.getElementById('tileSuccessPicker').value = state.tileColors.success;
                 document.getElementById('tileFailPicker').value = state.tileColors.fail;
                 document.getElementById('tileNeutralPicker').value = state.tileColors.neutral;
-                if (document.getElementById('view-habits').classList.contains('active')) renderChart();
+                if (document.getElementById('view-dashboard').classList.contains('active')) renderChart();
                 if (document.getElementById('view-habits').classList.contains('active')) renderReasonsCharts();
                 if (document.getElementById('view-habits').classList.contains('active')) renderTriggers();
             }
@@ -7963,7 +8125,7 @@
                 document.body.classList.add('accent-' + state.accentTheme);
                 document.querySelectorAll('#accentGrid .accent-swatch').forEach(b => b.classList.toggle('active', b
                     .dataset.accent === state.accentTheme));
-                if (document.getElementById('view-habits').classList.contains('active')) renderChart();
+                if (document.getElementById('view-dashboard').classList.contains('active')) renderChart();
                 if (document.getElementById('view-habits').classList.contains('active')) renderReasonsCharts();
                 if (document.getElementById('view-habits').classList.contains('active')) renderTriggers();
             }
@@ -8315,14 +8477,16 @@
                     if (cell) openDayModal(isoToDate(cell.dataset.iso));
                 });
             }
+            let yearRenderToken = 0;
             function renderYear() {
                 ensureYearGridDelegation(document.getElementById('yearGrid'));
                 document.getElementById('yearLabel').textContent = state.lang === 'fa' ? toPersianDigits(yearAnchor) :
                     String(yearAnchor);
                 const grid = document.getElementById('yearGrid');
-                grid.innerHTML = "";
+                // هر ماه بیرون از صفحه (DocumentFragment) ساخته و یک‌جا اضافه می‌شه
+                const todayMs = startOfDay(new Date()).getTime();
                 const months = state.lang === 'fa' ? PERSIAN_MONTHS : EN_MONTHS;
-                for (let jm = 1; jm <= 12; jm++) {
+                function buildMiniMonth(jm) {
                     const box = document.createElement('div');
                     box.className = 'mini-month';
                     box.innerHTML = '<h4>' + months[jm - 1] + '</h4>';
@@ -8346,12 +8510,28 @@
                         cell.className = 'mini-day' + (state.showHolidays && d.getDay() === 5 ? ' holiday' : '');
                         cell.style.background = tileGradient(stats);
                         cell.textContent = state.lang === 'fa' ? toPersianDigits(dn) : String(dn);
-                        if (startOfDay(d).getTime() > startOfDay(new Date()).getTime()) cell.style.opacity = '.5';
+                        if (startOfDay(d).getTime() > todayMs) cell.style.opacity = '.5';
                         cell.dataset.iso = iso; // کلیک با یک listener مشترک روی خودِ yearGrid مدیریت می‌شه
                         mg.appendChild(cell); }
                     box.appendChild(mg);
-                    grid.appendChild(box);
+                    return box;
                 }
+                // رندر تدریجی: ۳ ماهِ اول فوراً (همون چیزی که کاربر اول می‌بینه)، ۹ ماهِ بعدی در
+                // دسته‌های کوچک در فریم‌های بعد — تا لمسِ تب فوراً جواب بده و هیچ‌وقت قفل نشه.
+                const token = ++yearRenderToken;
+                const first = document.createDocumentFragment();
+                for (let jm = 1; jm <= 3; jm++) first.appendChild(buildMiniMonth(jm));
+                grid.replaceChildren(first);
+                let nextJm = 4;
+                // اگه در این فاصله دوباره رندر شد (مثلاً سال عوض شد)، token قدیمی باطل می‌شه
+                function renderMoreMonths() {
+                    if (token !== yearRenderToken || nextJm > 12) return;
+                    const f = document.createDocumentFragment();
+                    for (let k = 0; k < 3 && nextJm <= 12; k++, nextJm++) f.appendChild(buildMiniMonth(nextJm));
+                    grid.appendChild(f);
+                    if (nextJm <= 12) setTimeout(renderMoreMonths, 16);
+                }
+                setTimeout(renderMoreMonths, 16);
             }
 
             // ============================================================
@@ -9670,7 +9850,7 @@
                 document.getElementById('habitWeeklyGoal').value = weeklyVal;
                 document.getElementById('habitRewardField').value = h ? (h.rewardText || '') : '';
                 document.getElementById('habitPunishmentField').value = h ? (h.punishmentText || '') : '';
-                document.getElementById('habitRewardPointsField').value = h && h.rewardPoints ? h.rewardPoints : 10;
+                document.getElementById('habitRewardPointsField').value = h && h.rewardPoints ? Math.min(COIN_MAX_PER_OP, h.rewardPoints) : 10;
                 document.getElementById('habitReminderEnabled').checked = h ? !!h.reminderEnabled : false;
                 document.getElementById('habitReminderTime').value = h && h.reminderTime ? h.reminderTime : '08:00';
                 document.getElementById('habitReminderTimeWrap').style.display = (h && h.reminderEnabled) ? 'block' : 'none';
@@ -9799,7 +9979,7 @@
                     weeklyGoal: weeklyGoal, direction: selectedDirection,
                     rewardText: document.getElementById('habitRewardField').value.trim(),
                     punishmentText: document.getElementById('habitPunishmentField').value.trim(),
-                    rewardPoints: Math.max(1, parseInt(document.getElementById('habitRewardPointsField').value, 10) || 10),
+                    rewardPoints: Math.min(COIN_MAX_PER_OP, Math.max(1, parseInt(document.getElementById('habitRewardPointsField').value, 10) || 10)),
                     reminderEnabled: document.getElementById('habitReminderEnabled').checked,
                     reminderTime: document.getElementById('habitReminderTime').value || '08:00' };
                 if (type === 'numeric') { d.numericTarget = parseFloat(document.getElementById(
@@ -9850,10 +10030,18 @@
             window.failReasonsChartInstance = null;
             window.triggerChartInstance = null;
 
+            let _lastChartSig = null;
             function renderChart() {
                 if (!window.Chart) { ensureChartJs().then(renderChart); return; }
                 try {
                     const { labels, values } = collectSeries(chartRange);
+                    // اگه داده، بازه، زبان و رنگ‌ها همونی‌ان که الان روی نمودار هست، ساخت دوباره‌ی
+                    // نمودار (destroy + new Chart، گرون‌ترین عملیات JS برنامه) لازم نیست
+                    const _sig = chartRange + '|' + state.lang + '|' + document.documentElement.getAttribute('data-theme') + '|' +
+                        getComputedStyle(document.documentElement).getPropertyValue('--primary') + '|' +
+                        rpDataVersion + '|' + labels.join(',') + '|' + values.join(',');
+                    if (_sig === _lastChartSig && window.chartInstance && document.getElementById('progressChart').isConnected) return;
+                    _lastChartSig = _sig;
                     const styles = getComputedStyle(document.documentElement);
                     const primary = styles.getPropertyValue('--primary').trim() || '#146B69';
                     const success = styles.getPropertyValue('--success').trim() || '#3E9B4F';
@@ -10593,7 +10781,7 @@
                         masteryColor: state.masteryColor,
                         customUrgeSuggestions: state.customUrgeSuggestions,
                         urgeHiddenIds: state.urgeHiddenIds, habitNotes: state.habitNotes,
-                        themeIntensity: state.themeIntensity } },
+                        themeIntensity: state.themeIntensity, avatar: state.avatar } },
                     null, 2);
             }
 
@@ -10641,6 +10829,7 @@
                     .getDate()).jy })();
 
             function renderAll() {
+                rpDataVersion++;
                 applyLang();
                 applyBgPattern();
                 applyTileShape();
@@ -10669,6 +10858,7 @@
                 if (isActive('view-habits')) {
                     setTimeout(renderTriggers, 50);
                 }
+                ['dashboard', 'habits', 'month', 'year'].forEach(v => { if (isActive('view-' + v)) markViewRendered(v); });
             }
 
             function renderClock() {
@@ -11070,21 +11260,24 @@
                 document.querySelectorAll('.view-tab-btn[data-view="' + viewName + '"]').forEach(x => x.classList.add('active'));
                 const viewEl = document.getElementById('view-' + viewName);
                 if (viewEl) viewEl.classList.add('active');
-                if (viewName === 'dashboard') {
+                // فقط اگه از آخرین باری که این صفحه ساخته شده داده واقعاً عوض شده، دوباره می‌سازیمش
+                const fresh = viewIsFresh(viewName);
+                if (viewName === 'dashboard' && !fresh) {
                     renderDashboard();
                     renderDashboardExtras();
                     setTimeout(renderChart, 50);
                 }
-                if (viewName === 'habits') {
+                if (viewName === 'habits' && !fresh) {
                     renderHabits();
-                    setTimeout(renderChart, 50);
+                    // نمودار پیشرفت در صفحه‌ی خانه‌ست؛ اینجا دیگه بی‌دلیل دوباره ساخته نمی‌شه
                     setTimeout(renderTriggers, 50);
                     setTimeout(renderReasonsCharts, 50);
                 }
                 if (viewName === 'journal') renderJournal();
                 if (viewName === 'todo') renderTodos();
-                if (viewName === 'month') renderMonth();
-                if (viewName === 'year') renderYear();
+                if (viewName === 'month' && !fresh) renderMonth();
+                if (viewName === 'year' && !fresh) renderYear();
+                if (['dashboard', 'habits', 'month', 'year'].includes(viewName)) markViewRendered(viewName);
                 if (viewName === 'vows') renderVows();
                 if (viewName === 'library') renderLibrary();
                 if (viewName === 'calorie') renderCalorie();
@@ -11317,6 +11510,7 @@
                         if (backup.data.urgeHiddenIds) state.urgeHiddenIds = backup.data
                             .urgeHiddenIds;
                         if (backup.data.books) state.books = backup.data.books;
+                        if (backup.data.avatar) state.avatar = backup.data.avatar;
                         if (backup.data.bookPhotos) restoreBookPhotosFromBackup(backup.data.bookPhotos);
                         saveState();
                         applyTheme();
@@ -13546,6 +13740,21 @@
                 return base + planDurationMs(months);
             }
 
+            // پیام‌های قابل‌فهم برای کاربر به‌جای کدهای فنیِ انگلیسیِ Poolakey
+            function purchaseErrorMessage(e) {
+                const code = (e && (e.message || e.code) || '').toString();
+                const fa = state.lang === 'fa';
+                if (code === 'cancelled') return fa ? 'خرید لغو شد.' : 'Purchase cancelled.';
+                if (code === 'connection_failed' || code === 'not_connected')
+                    return fa ? 'اتصال به کافه‌بازار برقرار نشد. مطمئن شوید برنامه‌ی کافه‌بازار روی گوشی نصب است، وارد حساب خود شده‌اید و به اینترنت وصل هستید.' :
+                        'Could not connect to Cafe Bazaar. Make sure the Bazaar app is installed, you are signed in, and you are online.';
+                if (code === 'failed_to_begin')
+                    return fa ? 'صفحه‌ی پرداخت کافه‌بازار باز نشد. کمی بعد دوباره امتحان کنید.' : "Cafe Bazaar's payment page could not be opened. Please try again shortly.";
+                if (/not.?found|sku|product|item/i.test(code))
+                    return fa ? 'این پلن هنوز در کافه‌بازار فعال نشده است.' : 'This plan is not available on Cafe Bazaar yet.';
+                return fa ? 'خرید انجام نشد. لطفاً دوباره تلاش کنید.' : 'Purchase failed. Please try again.';
+            }
+
             async function purchasePremium(productId) {
                 if (!isNativeApp()) {
                     showToast(state.lang === 'fa' ?
@@ -13574,11 +13783,7 @@
                     document.getElementById('proPlansModalBackdrop').classList.remove('open');
                     showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
                 } catch (e) {
-                    if (e && e.message !== 'cancelled') {
-                        showToast(state.lang === 'fa' ? 'خرید انجام نشد: ' + (e.message || '') : 'Purchase failed: ' + (e.message || ''), 3000);
-                    } else {
-                        showToast(state.lang === 'fa' ? 'خرید لغو شد.' : 'Purchase cancelled.', 2500);
-                    }
+                    showToast(purchaseErrorMessage(e), 5000);
                 }
             }
             // بازیابیِ خرید: هم موقع بالا اومدن اپ صدا زده می‌شه، هم هر وقت لازم باشه (مثلاً بعد
@@ -13619,7 +13824,7 @@
             function renderProPlansList() {
                 const wrap = document.getElementById('proPlansList');
                 wrap.innerHTML = PRO_PLANS.map(p =>
-                    '<div class="pro-plan-card" data-plan="' + p.id + '">' +
+                    '<div class="pro-plan-card' + (p.id === proPlansSelectedId ? ' active' : '') + '" data-plan="' + p.id + '">' +
                     '<div><div class="ppc-title">' + (state.lang === 'fa' ? p.labelFa : p.labelEn) + '</div></div>' +
                     '<div style="display:flex;align-items:center;gap:10px">' +
                     '<span class="ppc-price">' + (state.lang === 'fa' ? p.priceFa : p.priceEn) + '</span>' +
@@ -13634,8 +13839,9 @@
                 });
             }
             function openUpgradeFlow() {
-                proPlansSelectedId = null;
-                document.getElementById('proPlansBuyBtn').disabled = true;
+                // یک پلن از قبل انتخاب‌شده‌ست تا دکمه‌ی «خرید» هیچ‌وقت غیرفعال و «خراب» به نظر نرسه
+                proPlansSelectedId = PRO_PLANS[0].id;
+                document.getElementById('proPlansBuyBtn').disabled = false;
                 renderProPlansList();
                 document.getElementById('proPlansModalBackdrop').classList.add('open');
             }
@@ -13647,9 +13853,17 @@
             document.getElementById('proPlansModalBackdrop').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('open');
             });
-            document.getElementById('proPlansBuyBtn').addEventListener('click', () => {
-                if (!proPlansSelectedId) return;
-                purchasePremium(proPlansSelectedId);
+            document.getElementById('proPlansBuyBtn').addEventListener('click', async function() {
+                if (!proPlansSelectedId || this.dataset.busy) return;
+                const btn = this, label = btn.textContent;
+                btn.dataset.busy = '1';
+                btn.disabled = true;
+                btn.textContent = state.lang === 'fa' ? 'در حال اتصال…' : 'Connecting…';
+                try { await purchasePremium(proPlansSelectedId); } finally {
+                    delete btn.dataset.busy;
+                    btn.disabled = false;
+                    btn.textContent = label;
+                }
             });
             document.getElementById('premiumPaywallCloseBtn').addEventListener('click', () => {
                 document.getElementById('premiumPaywallBackdrop').classList.remove('open');
@@ -13729,6 +13943,318 @@
                 if (e.key === 'Enter') tryPremiumUnlockCode();
             });
 
+
+
+            // ============================================================
+            // آواتار — پیکربندی مرکزی، رندر لایه‌ای، فروشگاه و کمد
+            // ------------------------------------------------------------
+            // • همه‌ی Assetها روی یک شبکه‌ی ۴۸×۶۴ پیکسلیِ مشترک طراحی شدن؛ پس position پیش‌فرض
+            //   همه (0,0) است و روی بدن دقیقاً جا می‌افتن. حیوان همراه بوم ۲۴×۲۴ خودش رو داره و
+            //   کنار پای آواتار (x=40, y=36) روی همون بوم ترکیبی کشیده می‌شه.
+            // • آواتار زن در خودِ تصویر پایه حجاب و لباس بلند داره: هیچ ترکیبی (حتی بدون هیچ آیتمی)
+            //   بی‌حجاب نمی‌شه. آواتار مرد هم در تصویر پایه لباس کامل داره.
+            // • رندر: همه‌ی لایه‌ها اول کامل لود می‌شن، بعد یک‌جا روی یک بوم ترکیب می‌شن؛ تا اون موقع
+            //   فریم قبلی سر جاش می‌مونه — نه Flicker، نه فریم نیمه‌کاره.
+            // • قیمت‌ها فقط همین‌جا (AV_CATEGORIES / AV_FREE) تعریف می‌شن.
+            // ============================================================
+            const AV_COMPOSITE = { w: 64, h: 64 };
+            const AV_BASE = { male: 'avatar/base/male.png', female: 'avatar/base/female.png' };
+            const AV_CATEGORIES = [
+                { key: 'clothes', fa: 'لباس', en: 'Clothes', icon: '👕', price: 500 },
+                { key: 'pants', fa: 'شلوار', en: 'Pants', icon: '👖', price: 500 },
+                { key: 'shoes', fa: 'کفش', en: 'Shoes', icon: '👟', price: 500 },
+                { key: 'hair', fa: 'مو', en: 'Hair', icon: '💇', price: 100 },
+                { key: 'hat', fa: 'کلاه', en: 'Hats', icon: '🧢', price: 100 },
+                { key: 'hijab', fa: 'روسری', en: 'Hijab', icon: '🧕', price: 100 },
+                { key: 'armor', fa: 'زره', en: 'Armor', icon: '🦺', price: 700 },
+                { key: 'sword', fa: 'شمشیر', en: 'Swords', icon: '🗡️', price: 800 },
+                { key: 'helmet', fa: 'کلاه‌خود', en: 'Helmets', icon: '⛑️', price: 1000 },
+                { key: 'shield', fa: 'سپر', en: 'Shields', icon: '🛡️', price: 700 },
+                { key: 'pet', fa: 'حیوان', en: 'Pets', icon: '🐾', price: 500 }
+            ];
+            // لایه (ترتیب رسم) و اسلات هر نوع آیتم؛ اسلاتِ مشترک یعنی جایگزینِ هم (مثلاً کلاه و کلاه‌خود)
+            const AV_KIND = {
+                pet: { layer: -10, slot: 'pet', position: { x: 40, y: 36 } },
+                shoes: { layer: 10, slot: 'shoes' }, pants: { layer: 20, slot: 'pants' },
+                top: { layer: 30, slot: 'clothes' }, outfit: { layer: 40, slot: 'clothes' },
+                armor: { layer: 50, slot: 'armor' }, hair: { layer: 60, slot: 'hair' }, hijab: { layer: 60, slot: 'hijab' },
+                hat: { layer: 70, slot: 'headwear' }, helmet: { layer: 70, slot: 'headwear' },
+                sword: { layer: 80, slot: 'sword' }, shield: { layer: 90, slot: 'shield' }
+            };
+            // آیتم‌های پیش‌فرضِ رایگان هر جنسیت (از اول مال کاربر و پوشیده‌ان)
+            const AV_DEFAULTS = {
+                male: ['hair_men/01_short_black', 'tops/top_01', 'pants/pants_01', 'shoes/shoes_01'],
+                female: ['hijabs/01_plain_black', 'outfits_women/01_manteau_navy', 'shoes/shoes_01']
+            };
+            const AV_FREE = new Set([].concat(AV_DEFAULTS.male, AV_DEFAULTS.female));
+            const AV_ITEMS = ([["outfits_men/01_suit", "clothes", "male", "outfit", "کت‌وشلوار"], ["outfits_men/02_jacket", "clothes", "male", "outfit", "کاپشن و جین"], ["outfits_men/03_track", "clothes", "male", "outfit", "ست ورزشی"], ["outfits_men/04_hoodie", "clothes", "male", "outfit", "هودی"], ["outfits_men/05_robe", "clothes", "male", "outfit", "ردای بلند"], ["outfits_men/06_uniform", "clothes", "male", "outfit", "لباس فرم"], ["outfits_men/07_wizard", "clothes", "male", "outfit", "ردای جادوگر"], ["outfits_men/08_knight", "clothes", "male", "outfit", "لباس شوالیه"], ["outfits_men/09_parka", "clothes", "male", "outfit", "پارکای زمستانی"], ["outfits_men/10_gi", "clothes", "male", "outfit", "لباس رزمی"], ["outfits_women/01_manteau_navy", "clothes", "female", "outfit", "مانتوی سرمه‌ای"], ["outfits_women/02_abaya_black", "clothes", "female", "outfit", "عبای مشکی"], ["outfits_women/03_floral_dress", "clothes", "female", "outfit", "پیراهن بلند گلدار"], ["outfits_women/04_sport_set", "clothes", "female", "outfit", "ست ورزشی بلند"], ["outfits_women/05_camel_coat", "clothes", "female", "outfit", "پالتوی شتری"], ["outfits_women/06_embroidered", "clothes", "female", "outfit", "پیراهن دوزی‌دار"], ["outfits_women/07_pastel_frill", "clothes", "female", "outfit", "پیراهن بلند صورتی"], ["outfits_women/08_green_manteau", "clothes", "female", "outfit", "مانتوی سبز"], ["outfits_women/09_cloak_purple", "clothes", "female", "outfit", "شنل بلند بنفش"], ["outfits_women/10_school_uniform", "clothes", "female", "outfit", "مانتوی فرم"], ["tops/top_01", "clothes", "both", "top", "بلوز سفید"], ["tops/top_02", "clothes", "both", "top", "بلوز یقه‌هفت قرمز"], ["tops/top_03", "clothes", "both", "top", "پیراهن یقه‌دار سرمه‌ای"], ["tops/top_04", "clothes", "both", "top", "بلوز راه‌راه سبز"], ["tops/top_05", "clothes", "both", "top", "هودی زرد"], ["tops/top_06", "clothes", "both", "top", "پیراهن آبی آسمانی"], ["tops/top_07", "clothes", "both", "top", "بلوز مشکی"], ["tops/top_08", "clothes", "both", "top", "بلوز چهارخانه بنفش"], ["tops/top_09", "clothes", "both", "top", "بلوز جیب‌دار نارنجی"], ["tops/top_10", "clothes", "both", "top", "بلوز نعنایی"], ["pants/pants_01", "pants", "both", "pants", "جین آبی"], ["pants/pants_02", "pants", "both", "pants", "شلوار دودی"], ["pants/pants_03", "pants", "both", "pants", "کتان نخودی"], ["pants/pants_04", "pants", "both", "pants", "مشکی نواردار"], ["pants/pants_05", "pants", "both", "pants", "کارگو زیتونی"], ["pants/pants_06", "pants", "both", "pants", "شلوار سرمه‌ای"], ["pants/pants_07", "pants", "both", "pants", "اسلش طوسی"], ["pants/pants_08", "pants", "both", "pants", "شلوار قهوه‌ای"], ["pants/pants_09", "pants", "both", "pants", "کارگو سبز"], ["pants/pants_10", "pants", "both", "pants", "زرشکی نواردار"], ["shoes/shoes_01", "shoes", "both", "shoes", "کتانی سفید"], ["shoes/shoes_02", "shoes", "both", "shoes", "کتانی قرمز"], ["shoes/shoes_03", "shoes", "both", "shoes", "بوت قهوه‌ای"], ["shoes/shoes_04", "shoes", "both", "shoes", "کفش رسمی مشکی"], ["shoes/shoes_05", "shoes", "both", "shoes", "کفش کوهنوردی"], ["shoes/shoes_06", "shoes", "both", "shoes", "بوت زمستانی"], ["shoes/shoes_07", "shoes", "both", "shoes", "کفش راحتی آبی"], ["shoes/shoes_08", "shoes", "both", "shoes", "ساق‌دار بنفش"], ["shoes/shoes_09", "shoes", "both", "shoes", "چکمه‌ی فلزی"], ["shoes/shoes_10", "shoes", "both", "shoes", "کفش رسمی طلایی"], ["hair_men/01_short_black", "hair", "male", "hair", "کوتاه مشکی"], ["hair_men/02_spiky_brown", "hair", "male", "hair", "سیخ‌سیخی قهوه‌ای"], ["hair_men/03_sidepart_blond", "hair", "male", "hair", "فرق‌کج بلوند"], ["hair_men/04_ponytail_red", "hair", "male", "hair", "دم‌اسبی قرمز"], ["hair_men/05_bowl_brown", "hair", "male", "hair", "کاسه‌ای قهوه‌ای"], ["hair_men/06_crest_blue", "hair", "male", "hair", "تاج‌دار آبی"], ["hair_men/07_curly_brown", "hair", "male", "hair", "فرفری قهوه‌ای"], ["hair_men/08_undercut_silver", "hair", "male", "hair", "آندرکات نقره‌ای"], ["hair_men/09_long_black", "hair", "male", "hair", "بلند مشکی"], ["hair_men/10_messy_red", "hair", "male", "hair", "شلوغ قرمز"], ["hair_men/11_buzz_black", "hair", "male", "hair", "خیلی کوتاه"], ["hair_men/12_topbun_brown", "hair", "male", "hair", "گوجه‌ای بالا"], ["hair_men/13_fringe_blue", "hair", "male", "hair", "چتری آبی"], ["hair_men/14_slick_black", "hair", "male", "hair", "رو به عقب"], ["hair_men/15_wavy_green", "hair", "male", "hair", "موج‌دار سبز"], ["hats_men/01_cap", "hat", "male", "hat", "کلاه لبه‌دار"], ["hats_men/02_beanie", "hat", "male", "hat", "کلاه بافتنی"], ["hats_men/03_fedora", "hat", "male", "hat", "کلاه شاپو"], ["hats_men/04_tophat", "hat", "male", "hat", "کلاه استوانه‌ای"], ["hats_men/05_ranch", "hat", "male", "hat", "کلاه لبه‌پهن"], ["hats_men/06_beret", "hat", "male", "hat", "برت"], ["hats_men/07_wizard", "hat", "male", "hat", "کلاه جادوگری"], ["hats_men/08_straw", "hat", "male", "hat", "کلاه حصیری"], ["hats_men/09_bucket", "hat", "male", "hat", "کلاه باکت"], ["hats_men/10_earflap", "hat", "male", "hat", "کلاه گوش‌دار"], ["hijabs/01_plain_black", "hijab", "female", "hijab", "ساده‌ی مشکی"], ["hijabs/02_classic_navy", "hijab", "female", "hijab", "کلاسیک سرمه‌ای"], ["hijabs/03_floral_rose", "hijab", "female", "hijab", "گلدار صورتی"], ["hijabs/04_maghnaeh_navy", "hijab", "female", "hijab", "مقنعه‌ی سرمه‌ای"], ["hijabs/05_sport_teal", "hijab", "female", "hijab", "اسپرت فیروزه‌ای"], ["hijabs/06_trim_cream", "hijab", "female", "hijab", "کرم حاشیه‌دار"], ["hijabs/07_geo_purple", "hijab", "female", "hijab", "طرح‌دار بنفش"], ["hijabs/08_plain_pink", "hijab", "female", "hijab", "ساده‌ی صورتی"], ["hijabs/09_pin_green", "hijab", "female", "hijab", "سبز با سنجاق"], ["hijabs/10_classic_white", "hijab", "female", "hijab", "سفید کلاسیک"], ["armor/01_vest_leather", "armor", "both", "armor", "جلیقه‌ی چرمی"], ["armor/02_plate_steel", "armor", "both", "armor", "زره فولادی"], ["armor/03_plate_gold", "armor", "both", "armor", "زره طلایی"], ["armor/04_chain_silver", "armor", "both", "armor", "زره حلقه‌ای"], ["armor/05_scale_forest", "armor", "both", "armor", "زره فلس‌دار"], ["armor/06_plate_crystal", "armor", "both", "armor", "زره کریستالی"], ["armor/07_spiked_shadow", "armor", "both", "armor", "زره سایه"], ["armor/08_paladin_white", "armor", "both", "armor", "زره سفید و طلایی"], ["armor/09_ranger_moss", "armor", "both", "armor", "زره تکاور"], ["armor/10_lamellar_wine", "armor", "both", "armor", "زره لایه‌ای"], ["swords/01_short_steel", "sword", "both", "sword", "شمشیر کوتاه"], ["swords/02_long_steel", "sword", "both", "sword", "شمشیر بلند"], ["swords/03_broad_silver", "sword", "both", "sword", "شمشیر پهن"], ["swords/04_curved_silver", "sword", "both", "sword", "شمشیر خمیده"], ["swords/05_long_gold", "sword", "both", "sword", "شمشیر طلایی"], ["swords/06_long_crystal", "sword", "both", "sword", "شمشیر کریستالی"], ["swords/07_flame_fire", "sword", "both", "sword", "شمشیر آتشین"], ["swords/08_long_ice", "sword", "both", "sword", "شمشیر یخی"], ["swords/09_long_shadow", "sword", "both", "sword", "شمشیر سایه"], ["swords/10_short_wood", "sword", "both", "sword", "شمشیر چوبی"], ["helmets/01_open_steel", "helmet", "both", "helmet", "کلاه‌خود ساده"], ["helmets/02_horned_steel", "helmet", "both", "helmet", "کلاه‌خود شاخ‌دار"], ["helmets/03_crest_gold", "helmet", "both", "helmet", "کلاه‌خود طلایی"], ["helmets/04_cap_leather", "helmet", "both", "helmet", "کلاه‌خود چرمی"], ["helmets/05_open_crystal", "helmet", "both", "helmet", "کلاه‌خود کریستالی"], ["helmets/06_dragon_shadow", "helmet", "both", "helmet", "کلاه‌خود اژدها"], ["helmets/07_winged_silver", "helmet", "both", "helmet", "کلاه‌خود بال‌دار"], ["helmets/08_visor_steel", "helmet", "both", "helmet", "کلاه‌خود نقاب‌دار"], ["helmets/09_spike_bronze", "helmet", "both", "helmet", "کلاه‌خود برنزی"], ["helmets/10_halo_white", "helmet", "both", "helmet", "کلاه‌خود هاله‌دار"], ["shields/01_round_wood", "shield", "both", "shield", "سپر گرد چوبی"], ["shields/02_kite_steel", "shield", "both", "shield", "سپر فولادی"], ["shields/03_heater_navy", "shield", "both", "shield", "سپر سرمه‌ای"], ["shields/04_tower_steel", "shield", "both", "shield", "سپر برجی"], ["shields/05_buckler_gold", "shield", "both", "shield", "سپر کوچک طلایی"], ["shields/06_kite_crystal", "shield", "both", "shield", "سپر کریستالی"], ["shields/07_spiked_shadow", "shield", "both", "shield", "سپر خاردار"], ["shields/08_leaf_forest", "shield", "both", "shield", "سپر برگ"], ["shields/09_heater_red", "shield", "both", "shield", "سپر قرمز"], ["shields/10_sun_white", "shield", "both", "shield", "سپر خورشید"], ["pets/01_cat", "pet", "both", "pet", "گربه"], ["pets/02_dog", "pet", "both", "pet", "سگ"], ["pets/03_fox", "pet", "both", "pet", "روباه"], ["pets/04_bunny", "pet", "both", "pet", "خرگوش"], ["pets/05_owl", "pet", "both", "pet", "جغد"], ["pets/06_dragon", "pet", "both", "pet", "بچه‌اژدها"], ["pets/07_slime", "pet", "both", "pet", "ژله‌ای"], ["pets/08_penguin", "pet", "both", "pet", "پنگوئن"], ["pets/09_turtle", "pet", "both", "pet", "لاک‌پشت"], ["pets/10_hamster", "pet", "both", "pet", "همستر"]]).map(([id, category, gender, kind, name]) => {
+                const k = AV_KIND[kind], cat = AV_CATEGORIES.find(c => c.key === category);
+                return { id, category, kind, name, gender, asset: 'avatar/' + id + '.png', layer: k.layer, slot: k.slot,
+                    position: k.position || { x: 0, y: 0 }, scale: 1, anchor: 'top-left',
+                    price: AV_FREE.has(id) ? 0 : cat.price };
+            });
+            const AV_ITEM_MAP = {};
+            AV_ITEMS.forEach(it => { AV_ITEM_MAP[it.id] = it; });
+
+            function avState() {
+                if (!state.avatar || typeof state.avatar !== 'object') state.avatar = {};
+                const a = state.avatar;
+                if (!a.owned) a.owned = {};
+                if (!a.equipped) a.equipped = { male: {}, female: {} };
+                if (!a.equipped.male) a.equipped.male = {};
+                if (!a.equipped.female) a.equipped.female = {};
+                return a;
+            }
+            function avCompatible(it, gender) { return it && (it.gender === 'both' || it.gender === gender); }
+            function avOwned(id) { return !!avState().owned[id] || (AV_ITEM_MAP[id] && AV_ITEM_MAP[id].price === 0); }
+            function avEquippedFor(gender) {
+                // فقط آیتم‌های سازگار و موجود؛ یک آیتم در هر اسلات (پس هیچ‌وقت دو نسخه از یک نوع نمی‌مونه)
+                const eq = avState().equipped[gender] || {}, out = {};
+                Object.keys(eq).forEach(slot => { const it = AV_ITEM_MAP[eq[slot]]; if (it && it.slot === slot && avCompatible(it, gender)) out[slot] = it.id; });
+                return out;
+            }
+            function avEnsureDefaults(gender) {
+                const a = avState(), eq = a.equipped[gender];
+                AV_DEFAULTS[gender].forEach(id => { a.owned[id] = true; const it = AV_ITEM_MAP[id]; if (!eq[it.slot]) eq[it.slot] = id; });
+            }
+
+            // خرج‌کردن سکه در فروشگاه: عمداً جدا از addCoins/removeCoins است. سقف ۵۰ سکه مخصوص پاداش/جریمه‌ی
+            // فعالیت‌هاست (عادت، کار، چالش، کتابخانه)؛ خرید با قیمتِ ثابتِ همین پیکربندی و فقط در صورت کافی بودن موجودی.
+            function spendCoins(amount) {
+                const a = Math.max(0, Math.round(amount || 0));
+                if ((state.scores.coins || 0) < a) return false;
+                state.scores.coins = (state.scores.coins || 0) - a;
+                return true;
+            }
+
+            // ---------- رندر ----------
+            const avImgCache = {};
+            function avLoadImg(src) {
+                if (!avImgCache[src]) avImgCache[src] = new Promise((res, rej) => {
+                    const im = new Image();
+                    im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => res(im));
+                    im.onerror = () => { delete avImgCache[src]; rej(new Error('avatar asset: ' + src)); };
+                    im.src = src;
+                });
+                return avImgCache[src];
+            }
+            async function avCompose(gender, equippedIds) {
+                const layers = [{ asset: AV_BASE[gender], layer: 0, position: { x: 0, y: 0 }, scale: 1 }];
+                Object.values(equippedIds).forEach(id => { const it = AV_ITEM_MAP[id]; if (avCompatible(it, gender)) layers.push(it); });
+                layers.sort((a, b) => a.layer - b.layer);
+                const res = await Promise.allSettled(layers.map(l => avLoadImg(l.asset)));
+                if (res[layers.findIndex(l => l.layer === 0)].status !== 'fulfilled') throw new Error('base failed');
+                const c = document.createElement('canvas');
+                c.width = AV_COMPOSITE.w; c.height = AV_COMPOSITE.h;
+                const ctx = c.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                layers.forEach((l, i) => {
+                    if (res[i].status !== 'fulfilled') return; // لایه‌ی لودنشده رد می‌شه؛ پایه همیشه پوشیده‌ست
+                    const im = res[i].value, s = l.scale || 1;
+                    ctx.drawImage(im, l.position.x, l.position.y, im.width * s, im.height * s);
+                });
+                return c;
+            }
+            function avPaint(canvas, comp, crop) {
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (crop) ctx.drawImage(comp, crop.x, crop.y, crop.w, crop.h, 0, 0, canvas.width, canvas.height);
+                else ctx.drawImage(comp, 0, 0, canvas.width, canvas.height);
+            }
+            function avPop(el) {
+                el.classList.remove('av-pop'); void el.offsetWidth; el.classList.add('av-pop');
+            }
+            let avMiniToken = 0;
+            async function avRefreshMini(pop) {
+                const a = avState(); if (!a.gender) return;
+                const t = ++avMiniToken;
+                try {
+                    const comp = await avCompose(a.gender, avEquippedFor(a.gender));
+                    if (t !== avMiniToken) return;
+                    const cv = document.getElementById('avatarMiniCanvas');
+                    avPaint(cv, comp, { x: 12, y: 1, w: 24, h: 24 }); // نیم‌تنه برای آیکون هدر
+                    const btn = document.getElementById('avatarMiniBtn');
+                    btn.classList.add('has-avatar');
+                    if (pop) avPop(btn);
+                } catch (e) {}
+            }
+
+            // ---------- انتخاب جنسیت (اولین اجرا) ----------
+            async function openAvatarGenderPicker() {
+                const back = document.getElementById('avatarGenderModalBackdrop');
+                back.classList.add('open');
+                for (const g of ['male', 'female']) {
+                    const eq = {}; AV_DEFAULTS[g].forEach(id => { eq[AV_ITEM_MAP[id].slot] = id; });
+                    try { avPaint(document.getElementById('avGenderPreview_' + g), await avCompose(g, eq), { x: 0, y: 0, w: 48, h: 64 }); } catch (e) {}
+                }
+            }
+            function chooseAvatarGender(g) {
+                const a = avState();
+                a.gender = g;
+                avEnsureDefaults(g);
+                saveState();
+                document.getElementById('avatarGenderModalBackdrop').classList.remove('open');
+                avRefreshMini(true);
+                showToast(state.lang === 'fa' ? '✨ آواتار شما ساخته شد! برای شخصی‌سازی روی آن بزنید.' : '✨ Your avatar is ready! Tap it to customize.', 3000);
+            }
+            function maybeAskAvatarGender() {
+                if (!avState().gender && !document.querySelector('.onboarding-overlay.open')) openAvatarGenderPicker();
+            }
+
+            // ---------- پنل شخصی‌سازی / فروشگاه ----------
+            let avCat = 'clothes', avSelId = null, avBuyArmed = false, avPrevToken = 0;
+            function avVisibleCats(g) { return AV_CATEGORIES.filter(c => AV_ITEMS.some(it => it.category === c.key && avCompatible(it, g))); }
+            function avCoinsText() { const n = state.scores.coins || 0; return '🪙 ' + (state.lang === 'fa' ? toPersianDigits(n) : n); }
+            function openAvatarPanel() {
+                const a = avState();
+                if (!a.gender) { openAvatarGenderPicker(); return; }
+                avSelId = null; avBuyArmed = false;
+                if (!avVisibleCats(a.gender).some(c => c.key === avCat)) avCat = 'clothes';
+                document.getElementById('avatarModalBackdrop').classList.add('open');
+                avRenderPanel(); avRefreshPreview();
+            }
+            async function avRefreshPreview(pop) {
+                const a = avState(), g = a.gender, eq = avEquippedFor(g);
+                const sel = AV_ITEM_MAP[avSelId];
+                if (sel && avCompatible(sel, g)) {
+                    eq[sel.slot] = sel.id; // امتحان‌کردنِ آیتم انتخاب‌شده قبل از خرید
+                    // لباس بلند (مانتو/کت‌وشلوار) پاها رو می‌پوشونه؛ موقع امتحانِ شلوار، موقتاً لباس پایه نشون داده
+                    // می‌شه تا خودِ شلوار دیده بشه (بدن پایه همیشه لباس کامل و پوشیده داره)
+                    if (sel.kind === 'pants' && eq.clothes && AV_ITEM_MAP[eq.clothes].kind === 'outfit') delete eq.clothes;
+                }
+                const t = ++avPrevToken;
+                try {
+                    const comp = await avCompose(g, eq);
+                    if (t !== avPrevToken) return;
+                    const cv = document.getElementById('avatarPreviewCanvas');
+                    avPaint(cv, comp);
+                    if (pop) avPop(cv);
+                } catch (e) {}
+            }
+            const avBBoxCache = {};
+            async function avThumb(canvas, it) {
+                try {
+                    const im = await avLoadImg(it.asset);
+                    let bb = avBBoxCache[it.asset];
+                    if (!bb) {
+                        const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+                        const cx = c.getContext('2d'); cx.drawImage(im, 0, 0);
+                        const d = cx.getImageData(0, 0, im.width, im.height).data;
+                        let x0 = im.width, y0 = im.height, x1 = -1, y1 = -1;
+                        for (let y = 0; y < im.height; y++) for (let x = 0; x < im.width; x++) if (d[(y * im.width + x) * 4 + 3]) {
+                            if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+                        bb = avBBoxCache[it.asset] = x1 < 0 ? { x: 0, y: 0, w: im.width, h: im.height } : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+                    }
+                    const s = Math.max(1, Math.floor(Math.min(canvas.width / bb.w, canvas.height / bb.h)));
+                    const ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = false;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(im, bb.x, bb.y, bb.w, bb.h, Math.floor((canvas.width - bb.w * s) / 2), Math.floor((canvas.height - bb.h * s) / 2), bb.w * s, bb.h * s);
+                } catch (e) {}
+            }
+            function avRenderPanel() {
+                const a = avState(), g = a.gender, fa = state.lang === 'fa', eq = avEquippedFor(g);
+                document.getElementById('avCoins').textContent = avCoinsText();
+                document.querySelectorAll('#avGenderSwitch button').forEach(b => b.classList.toggle('active', b.dataset.g === g));
+                document.getElementById('avCats').innerHTML = avVisibleCats(g).map(c =>
+                    '<button type="button" class="av-cat' + (c.key === avCat ? ' active' : '') + '" data-cat="' + c.key + '">' + c.icon + ' ' + (fa ? c.fa : c.en) + '</button>').join('');
+                const activeChip = document.querySelector('#avCats .av-cat.active');
+                if (activeChip) activeChip.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+                const list = AV_ITEMS.filter(it => it.category === avCat && avCompatible(it, g));
+                const coins = state.scores.coins || 0;
+                document.getElementById('avGrid').innerHTML = list.map(it => {
+                    const owned = avOwned(it.id), on = eq[it.slot] === it.id, locked = !owned && it.price > coins;
+                    const tag = on ? (fa ? '✓ پوشیده' : '✓ Equipped') : owned ? (fa ? 'خریداری‌شده' : 'Owned') :
+                        it.price === 0 ? (fa ? 'رایگان' : 'Free') : (locked ? '🔒 ' : '🪙 ') + (fa ? toPersianDigits(it.price) : it.price);
+                    return '<button type="button" class="av-card' + (on ? ' equipped' : '') + (locked ? ' locked' : '') + (it.id === avSelId ? ' selected' : '') +
+                        '" data-id="' + it.id + '"><canvas width="64" height="64"></canvas><span class="av-name">' + escHtml(it.name) +
+                        '</span><span class="av-tag">' + tag + '</span></button>';
+                }).join('');
+                document.querySelectorAll('#avGrid .av-card').forEach(card => avThumb(card.querySelector('canvas'), AV_ITEM_MAP[card.dataset.id]));
+                avUpdateAction();
+            }
+            function avUpdateAction() {
+                const btn = document.getElementById('avActionBtn'), fa = state.lang === 'fa', it = AV_ITEM_MAP[avSelId];
+                const g = avState().gender, eq = avEquippedFor(g);
+                btn.disabled = false; btn.classList.remove('av-danger');
+                if (!it) { btn.textContent = fa ? 'یک آیتم را انتخاب کنید' : 'Select an item'; btn.disabled = true; return; }
+                if (eq[it.slot] === it.id) { btn.textContent = fa ? 'درآوردن' : 'Unequip'; return; }
+                if (avOwned(it.id)) { btn.textContent = fa ? 'پوشیدن' : 'Equip'; return; }
+                const coins = state.scores.coins || 0;
+                if (coins < it.price) {
+                    btn.textContent = fa ? ('سکه کافی نیست (' + toPersianDigits(it.price - coins) + ' کم است)') : ('Not enough coins (' + (it.price - coins) + ' short)');
+                    btn.disabled = true; return;
+                }
+                const p = fa ? toPersianDigits(it.price) : it.price;
+                btn.textContent = avBuyArmed ? (fa ? 'تأیید خرید · ' + p + ' 🪙' : 'Confirm · ' + p + ' 🪙') : (fa ? 'خرید · ' + p + ' 🪙' : 'Buy · ' + p + ' 🪙');
+                if (avBuyArmed) btn.classList.add('av-danger');
+            }
+            function avEquip(it) {
+                const a = avState(), g = a.gender;
+                if (!avCompatible(it, g) || !avOwned(it.id)) return;
+                a.equipped[g][it.slot] = it.id; // جایگزینِ هر چیزی که قبلاً در همین اسلات بود
+            }
+            function avHintHiddenPants(it) {
+                const eq = avEquippedFor(avState().gender);
+                if (it.kind === 'pants' && eq.clothes && AV_ITEM_MAP[eq.clothes].kind === 'outfit')
+                    showToast(state.lang === 'fa' ? 'این شلوار زیر لباس بلند فعلی است؛ برای دیدنش از «لباس» یک بلوز انتخاب کنید.' :
+                        'These pants are under your long outfit; pick a top in Clothes to show them.', 3500);
+            }
+            function avAction() {
+                const it = AV_ITEM_MAP[avSelId]; if (!it) return;
+                const a = avState(), g = a.gender, eq = a.equipped[g], fa = state.lang === 'fa';
+                if (!avCompatible(it, g)) return;
+                if (eq[it.slot] === it.id) {
+                    delete eq[it.slot];
+                    avSelId = null;
+                } else if (avOwned(it.id)) {
+                    avEquip(it);
+                    avHintHiddenPants(it);
+                } else {
+                    if (!avBuyArmed) { avBuyArmed = true; avUpdateAction(); setTimeout(() => { avBuyArmed = false; avUpdateAction(); }, 3500); return; }
+                    avBuyArmed = false;
+                    if (!spendCoins(it.price)) { avUpdateAction(); return; }
+                    a.owned[it.id] = true;
+                    avEquip(it);
+                    setTimeout(() => avHintHiddenPants(it), 2500);
+                    showToast(fa ? '🛍️ «' + it.name + '» خریداری شد و پوشیده شد.' : '🛍️ Bought and equipped!', 2400, 'toast-success');
+                    const sn = document.getElementById('scoreNum'); if (sn) sn.textContent = fa ? toPersianDigits(state.scores.coins) : String(state.scores.coins);
+                    updateProfileUI();
+                }
+                saveState();
+                avRenderPanel(); avRefreshPreview(true); avRefreshMini(true);
+            }
+            function avSwitchGender(g) {
+                const a = avState(); if (a.gender === g) return;
+                // هر جنسیت کمد و تجهیزات خودش رو داره؛ آیتم‌های ناسازگار هیچ‌وقت روی جنسیت دیگه پوشیده نمی‌شن
+                a.gender = g; avEnsureDefaults(g); avSelId = null; avBuyArmed = false;
+                if (!avVisibleCats(g).some(c => c.key === avCat)) avCat = 'clothes';
+                saveState(); avRenderPanel(); avRefreshPreview(true); avRefreshMini(true);
+            }
+            document.getElementById('avatarMiniBtn').addEventListener('click', openAvatarPanel);
+            document.getElementById('avCloseBtn').addEventListener('click', () => document.getElementById('avatarModalBackdrop').classList.remove('open'));
+            document.getElementById('avatarModalBackdrop').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+            document.getElementById('avActionBtn').addEventListener('click', avAction);
+            // چرخ موس (عمودی) روی ردیف دسته‌ها → اسکرول افقی؛ در RTL جهتِ «جلو» منفیه
+            document.getElementById('avCats').addEventListener('wheel', function(e) {
+                if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+                e.preventDefault();
+                const rtl = getComputedStyle(this).direction === 'rtl';
+                this.scrollBy({ left: rtl ? -e.deltaY : e.deltaY, behavior: 'auto' });
+            }, { passive: false });
+            document.getElementById('avCats').addEventListener('click', e => {
+                const b = e.target.closest('.av-cat'); if (!b) return;
+                avCat = b.dataset.cat; avSelId = null; avBuyArmed = false; avRenderPanel(); avRefreshPreview();
+            });
+            document.getElementById('avGrid').addEventListener('click', e => {
+                const c = e.target.closest('.av-card'); if (!c) return;
+                avSelId = c.dataset.id; avBuyArmed = false;
+                document.querySelectorAll('#avGrid .av-card').forEach(x => x.classList.toggle('selected', x === c));
+                avUpdateAction(); avRefreshPreview(true);
+            });
+            document.getElementById('avGenderSwitch').addEventListener('click', e => { const b = e.target.closest('button[data-g]'); if (b) avSwitchGender(b.dataset.g); });
+            document.querySelectorAll('[data-pick-gender]').forEach(b => b.addEventListener('click', () => chooseAvatarGender(b.dataset.pickGender)));
+            avRefreshMini(false);
 
             const HELP_CONTENT = {
                 habits: {
@@ -13810,6 +14336,9 @@
                 { icon: '📚', titleFa: 'کتابخانه و کالری‌شمار', titleEn: 'Library and calories',
                     textFa: 'در کتابخانه، کتاب‌ها و میزان پیشرفت مطالعه را ثبت کنید. کالری‌شمار هم کالری و درشت‌مغذی‌های روزانه را محاسبه می‌کند.',
                     textEn: 'Track your books and reading progress in the Library. The calorie counter tracks daily calories and macros.' },
+                { icon: '🧑‍🎨', titleFa: 'آواتار', titleEn: 'Avatar',
+                    textFa: 'روی تصویر آواتار بالای صفحه بزنید تا لباس، کفش، زره، سلاح و حیوان همراه را با سکه‌هایتان بخرید و بپوشید.',
+                    textEn: 'Tap the avatar at the top to buy and equip clothes, shoes, armor, weapons and a pet with your coins.' },
                 { icon: '💾', titleFa: 'پشتیبان‌گیری', titleEn: 'Backups',
                     textFa: 'اطلاعات فقط روی گوشی شما ذخیره می‌شود. از بخش تنظیمات گاهی یک نسخه‌ی پشتیبان تهیه کنید تا در صورت تعویض گوشی از دست نرود.',
                     textEn: 'Your data lives only on your phone. Make a backup from Settings now and then so nothing is lost if you change devices.' },
@@ -13876,6 +14405,7 @@
                 state.onboardingDone = true;
                 state.onboardingVersion = ONBOARDING_VERSION;
                 saveState();
+                setTimeout(maybeAskAvatarGender, 250);
             }
             function openOnboarding(skipLangStep) {
                 obSkipLangStep = !!skipLangStep;
@@ -13927,6 +14457,7 @@
                 if (!state.onboardingDone) openOnboarding(false);
                 else if ((state.onboardingVersion || 1) < ONBOARDING_VERSION) openOnboarding(true);
                 renderAll();
+                setTimeout(maybeAskAvatarGender, 300);
             }
             document.getElementById('termsAcceptCheckbox').addEventListener('change', function() {
                 document.getElementById('termsAcceptBtn').disabled = !this.checked;
