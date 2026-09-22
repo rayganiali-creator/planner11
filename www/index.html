@@ -342,11 +342,27 @@
             border-radius: 0 !important;
         }
         .tile-shape-heart .tile {
-            clip-path: polygon(50% 20%, 38% 8%, 25% 5%, 12% 12%, 6% 25%, 8% 38%, 15% 52%, 30% 65%, 50% 85%, 70% 65%, 85% 52%, 92% 38%, 94% 25%, 88% 12%, 75% 5%, 62% 8%);
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50,90 C22,68 4,45 4,25 C4,10 16,0 30,0 C40,0 47,6 50,15 C53,6 60,0 70,0 C84,0 96,10 96,25 C96,45 78,68 50,90 Z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50,90 C22,68 4,45 4,25 C4,10 16,0 30,0 C40,0 47,6 50,15 C53,6 60,0 70,0 C84,0 96,10 96,25 C96,45 78,68 50,90 Z'/%3E%3C/svg%3E");
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+            clip-path: none;
             border-radius: 0 !important;
         }
         .tile-shape-heart .tile .inner {
-            clip-path: polygon(50% 20%, 38% 8%, 25% 5%, 12% 12%, 6% 25%, 8% 38%, 15% 52%, 30% 65%, 50% 85%, 70% 65%, 85% 52%, 92% 38%, 94% 25%, 88% 12%, 75% 5%, 62% 8%);
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50,90 C22,68 4,45 4,25 C4,10 16,0 30,0 C40,0 47,6 50,15 C53,6 60,0 70,0 C84,0 96,10 96,25 C96,45 78,68 50,90 Z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50,90 C22,68 4,45 4,25 C4,10 16,0 30,0 C40,0 47,6 50,15 C53,6 60,0 70,0 C84,0 96,10 96,25 C96,45 78,68 50,90 Z'/%3E%3C/svg%3E");
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+            clip-path: none;
             border-radius: 0 !important;
         }
         .tile-shape-flower .tile {
@@ -439,8 +455,8 @@
         }
         .tile-effect-frost .tile {
             background: var(--tile-bg) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
             border: 1px solid rgba(255, 255, 255, 0.2) !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
         }
@@ -1166,8 +1182,8 @@
         }
         .card {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 20px;
@@ -1405,6 +1421,7 @@
             gap: 8px;
             box-shadow: 0 2px 10px rgba(43, 33, 24, .04);
             transition: box-shadow .2s var(--ease), transform .2s var(--ease);
+            overflow: hidden;
         }
         .habit-item:hover {
             box-shadow: 0 6px 18px rgba(43, 33, 24, .08);
@@ -7507,7 +7524,7 @@
 
                 if (nowCompleted && !wasCompleted) {
                     b.completedAt = Date.now();
-                    state.scores.coins = (state.scores.coins || 0) + COIN_MAX_PER_OP;
+                    addCoins(COIN_MAX_PER_OP);
                     saveState();
                     showBookCompleteModal(b);
                 } else {
@@ -7731,10 +7748,28 @@
             // محدودیت امنیتی: هیچ عملیات یا رویدادی نباید بیشتر از ۵۰ سکه در یک بار به کاربر
             // بده یا ازش کم کنه — این محدودیت مستقل از UI و همیشه همینجا اعمال می‌شه.
             const COIN_MAX_PER_OP = 50;
+            // ============================================================
+            // تابع مرکزیِ تغییر موجودی سکه — هر مسیر دریافت یا کسر سکه در کل برنامه (عادت،
+            // کار، چالش، کتابخونه، دستاورد، سطح، جایزه‌ی دستی و هر جای دیگه) باید از همینجا
+            // عبور کنه، نه با دست‌کاری مستقیم state.scores.coins. این یعنی سقف ۵۰ سکه در هر
+            // عملیات، فقط توی یک نقطه اعمال می‌شه و از هیچ مسیری قابل دور زدن نیست.
+            // (این محدودیتِ «هر عملیات» است، نه محدودیتِ مجموع سکه‌های کاربر — مجموع می‌تونه
+            // هر مقداری باشه.)
+            // ============================================================
+            function addCoins(amount) {
+                const safe = Math.max(0, Math.min(COIN_MAX_PER_OP, Math.round(amount || 0)));
+                state.scores.coins = (state.scores.coins || 0) + safe;
+                return safe;
+            }
+            function removeCoins(amount) {
+                const safe = Math.max(0, Math.min(COIN_MAX_PER_OP, Math.round(amount || 0)));
+                state.scores.coins = Math.max(0, (state.scores.coins || 0) - safe);
+                return safe;
+            }
             function syncCoinsFromPoints(totalPoints) {
                 if (state.scores.lastPoints === undefined) state.scores.lastPoints = totalPoints;
                 const delta = totalPoints - state.scores.lastPoints;
-                if (delta > 0) state.scores.coins = (state.scores.coins || 0) + Math.min(COIN_MAX_PER_OP, delta);
+                if (delta > 0) addCoins(delta);
                 state.scores.lastPoints = totalPoints;
             }
 
@@ -9318,7 +9353,16 @@
             document.getElementById('bookCompleteModalBackdrop').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('open');
             });
-            document.getElementById('bookSearchInput').addEventListener('input', renderLibrary);
+            // ابزار کوچکِ Debounce — برای جلوگیری از rebuild کامل لیست‌ها روی هر ضربه‌ی کیبورد
+            // موقع جستجو (که خصوصاً وقتی هر آیتم عکس IndexedDB هم داره، هزینه‌ی واقعی داره)
+            function debounce(fn, wait) {
+                let t;
+                return function(...args) {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn.apply(this, args), wait);
+                };
+            }
+            document.getElementById('bookSearchInput').addEventListener('input', debounce(renderLibrary, 200));
             document.querySelectorAll('#libraryFilterTabs button').forEach(btn => btn.addEventListener(
                 'click', function() {
                     document.querySelectorAll('#libraryFilterTabs button').forEach(x => x.classList
@@ -10461,7 +10505,7 @@
                 if (isActive('view-library')) renderLibrary();
                 if (isActive('view-calorie')) renderCalorie();
                 renderDashboard();
-                renderDashboardExtras();
+                if (isActive('view-dashboard')) renderDashboardExtras();
                 updateProfileUI();
                 if (isActive('view-dashboard')) {
                     setTimeout(renderChart, 50);
@@ -10575,7 +10619,7 @@
                     i.value = ''; } });
 
             document.getElementById('habitSearchBtn').addEventListener('click', renderHabits);
-            document.getElementById('habitSearchInput').addEventListener('input', renderHabits);
+            document.getElementById('habitSearchInput').addEventListener('input', debounce(renderHabits, 200));
 
             document.getElementById('addJournalBtn').addEventListener('click', () => { const text = document
                     .getElementById('newJournalText').value.trim(); if (!text) return;
@@ -10585,7 +10629,7 @@
                 renderJournal(); });
 
             document.getElementById('journalSearchBtn').addEventListener('click', renderJournal);
-            document.getElementById('journalSearchInput').addEventListener('input', renderJournal);
+            document.getElementById('journalSearchInput').addEventListener('input', debounce(renderJournal, 200));
             document.getElementById('journalClearSearch').addEventListener('click', function() {
                 document.getElementById('journalSearchInput').value = '';
                 renderJournal();
@@ -10862,6 +10906,11 @@
                     openPremiumPaywall(viewName);
                     return;
                 }
+                if (!isNavigatingBack && currentViewName && currentViewName !== viewName) {
+                    viewHistoryStack.push(currentViewName);
+                    if (viewHistoryStack.length > 20) viewHistoryStack.shift();
+                }
+                isNavigatingBack = false;
                 currentViewName = viewName;
                 document.querySelectorAll('.view-tab-btn').forEach(x => x.classList.remove('active'));
                 document.querySelectorAll('section.view').forEach(v => v.classList.remove('active'));
@@ -10894,22 +10943,55 @@
             }));
 
             // ============================================================
-            // دکمه‌ی فیزیکی Back اندروید: رفتار استاندارد —
-            // اول هر مودال/پنل بازی رو می‌بنده، بعد اگه توی صفحه‌ی اصلی نیستیم می‌بره صفحه‌ی
-            // اصلی، و اگه از قبل توی صفحه‌ی اصلی هستیم از اپ خارج می‌شه.
-            // نکته: HOME_VIEW فعلاً 'habits' است؛ وقتی تب Dashboard واقعی اضافه بشه، این مقدار
-            // باید به 'dashboard' تغییر کنه.
+            // ردیابیِ سبکِ کدام Modal/Overlay الان «روی همه» بازه — چون بعضی از این
+            // پنجره‌ها روی هم باز می‌شن (مثلاً پنجره‌ی روز + پنجره‌ی دلیل روی همون)، از یک
+            // MutationObserver سبک (فقط روی تغییر کلاس، فقط همین ~۱۶ تا overlay) استفاده
+            // می‌کنیم تا همیشه دقیقاً بدونیم آخرین موردی که باز شده کدومه — بدون این‌که
+            // لازم باشه هر جای کد که یه مودال رو باز/بسته می‌کنه دست بزنیم.
             // ============================================================
+            let openModalStack = [];
+            (function setupModalStackTracking() {
+                const modalEls = document.querySelectorAll('.modal-backdrop, .onboarding-overlay');
+                modalEls.forEach(el => {
+                    if (!el.id) return;
+                    const obs = new MutationObserver(() => {
+                        const isOpen = el.classList.contains('open');
+                        const idx = openModalStack.indexOf(el.id);
+                        if (isOpen && idx === -1) openModalStack.push(el.id);
+                        else if (!isOpen && idx !== -1) openModalStack.splice(idx, 1);
+                    });
+                    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+                });
+            })();
+
+            // ============================================================
+            // تاریخچه‌ی ناوبریِ تب‌ها: هر بار واقعاً وارد یه تب جدید می‌شیم (نه وقتی خودِ
+            // Back داره برمی‌گردونه)، تبِ قبلی رو توی این پشته نگه می‌داریم تا Back بتونه
+            // واقعاً «برگرده» به تب قبلی، نه اینکه همیشه بپره خونه.
+            // ============================================================
+            let viewHistoryStack = [];
+            let isNavigatingBack = false;
+
+            // دکمه‌ی فیزیکی Back اندروید: رفتار استاندارد —
+            // ۱. اگه یک Overlay/Modal بازه، فقط همون (آخرین موردی که باز شده) بسته می‌شه.
+            // ۲. اگه منوی پروفایل یا لایت‌باکس عکس بازه، همون بسته می‌شه.
+            // ۳. اگه توی یه تب داخلی هستیم، به تبِ قبلی (طبق تاریخچه‌ی واقعی) برمی‌گردیم؛
+            //    اگه تاریخچه‌ای نیست، می‌ریم خونه.
+            // ۴. اگه از قبل توی خونه هستیم، از اپ خارج می‌شه (رفتار استاندارد اندروید).
             const HOME_VIEW = 'dashboard';
             function rpHandleAndroidBack() {
-                const onboardingOverlay = document.getElementById('onboardingOverlay');
-                if (onboardingOverlay && onboardingOverlay.classList.contains('open')) {
-                    document.getElementById('onboardingSkipBtn').click();
-                    return;
-                }
-                const openModals = document.querySelectorAll('.modal-backdrop.open');
-                if (openModals.length) {
-                    openModals.forEach(m => m.classList.remove('open'));
+                if (openModalStack.length) {
+                    const topId = openModalStack[openModalStack.length - 1];
+                    // قوانین و شرایط استفاده، تا وقتی پذیرفته نشده، اجباریه؛ Back نباید ببندتش
+                    if (topId === 'termsOverlay' && typeof needsTermsAcceptance === 'function' && needsTermsAcceptance()) {
+                        return;
+                    }
+                    if (topId === 'onboardingOverlay') {
+                        closeOnboarding();
+                        return;
+                    }
+                    const topEl = document.getElementById(topId);
+                    if (topEl) topEl.classList.remove('open');
                     return;
                 }
                 const profileDropdown = document.getElementById('profileDropdown');
@@ -10923,7 +11005,14 @@
                     return;
                 }
                 if (currentViewName !== HOME_VIEW) {
-                    switchToView(HOME_VIEW);
+                    if (viewHistoryStack.length > 0) {
+                        const prev = viewHistoryStack.pop();
+                        isNavigatingBack = true;
+                        switchToView(prev);
+                    } else {
+                        isNavigatingBack = true;
+                        switchToView(HOME_VIEW);
+                    }
                     return;
                 }
                 const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
@@ -13929,9 +14018,8 @@
 
             function awardChallenge(ch) {
                 // دفاع دوم: حتی اگه هرجایی مقدار ch.rewardCoins به‌درستی محدود نشده باشه (مثلاً یک
-                // چالش قدیمی از قبلِ این محدودیت)، اینجا دوباره سقف ۵۰ سکه رو اعمال می‌کنیم.
-                const awardedCoins = Math.min(COIN_MAX_PER_OP, Math.max(0, ch.rewardCoins || 0));
-                state.scores.coins = (state.scores.coins || 0) + awardedCoins;
+                // چالش قدیمی از قبلِ این محدودیت)، تابع مرکزی addCoins خودش دوباره سقف رو اعمال می‌کنه.
+                const awardedCoins = addCoins(ch.rewardCoins || 0);
                 showToast((state.lang === 'fa' ?
                     ('🎉 آفرین! چالش «' + ch.name + '» موفق شد. +' + toPersianDigits(awardedCoins) + ' سکه' + (ch.rewardText ? ' + 🎁 ' + ch.rewardText : '')) :
                     ('🎉 Well done! "' + ch.name + '" succeeded. +' + awardedCoins + ' coins' + (ch.rewardText ? ' + 🎁 ' + ch.rewardText : ''))

@@ -342,11 +342,11 @@
             border-radius: 0 !important;
         }
         .tile-shape-heart .tile {
-            clip-path: path('M50,30 A20,20,0,0,1,90,30 A20,20,0,0,1,50,80 A20,20,0,0,1,10,30 A20,20,0,0,1,50,30 Z');
+            clip-path: polygon(50% 20%, 38% 8%, 25% 5%, 12% 12%, 6% 25%, 8% 38%, 15% 52%, 30% 65%, 50% 85%, 70% 65%, 85% 52%, 92% 38%, 94% 25%, 88% 12%, 75% 5%, 62% 8%);
             border-radius: 0 !important;
         }
         .tile-shape-heart .tile .inner {
-            clip-path: path('M50,30 A20,20,0,0,1,90,30 A20,20,0,0,1,50,80 A20,20,0,0,1,10,30 A20,20,0,0,1,50,30 Z');
+            clip-path: polygon(50% 20%, 38% 8%, 25% 5%, 12% 12%, 6% 25%, 8% 38%, 15% 52%, 30% 65%, 50% 85%, 70% 65%, 85% 52%, 92% 38%, 94% 25%, 88% 12%, 75% 5%, 62% 8%);
             border-radius: 0 !important;
         }
         .tile-shape-flower .tile {
@@ -439,8 +439,8 @@
         }
         .tile-effect-frost .tile {
             background: var(--tile-bg) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
             border: 1px solid rgba(255, 255, 255, 0.2) !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
         }
@@ -996,6 +996,18 @@
             flex-shrink: 0;
             border-radius: 50%;
         }
+        .upgrade-btn-header {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: calc(11.5px * var(--font-scale));
+            background: linear-gradient(135deg, #f6c453, #e8a83c);
+            color: #4a2e00;
+            border: none;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(232, 168, 60, .4);
+        }
 
         nav.tabs {
             display: flex;
@@ -1032,7 +1044,7 @@
             box-shadow: 0 4px 12px rgba(20, 107, 105, .3);
         }
         /* منوی انتخاب صفحه (زیر دکمه +): شبکه‌ی مرتب از مستطیل‌های شفاف */
-        .tabs-picker-nav {
+        nav.tabs-picker-nav {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
@@ -1044,25 +1056,42 @@
             -webkit-backdrop-filter: none;
             padding: 2px;
         }
+        .tabs-picker-modal {
+            background: rgba(255, 255, 255, .55) !important;
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+        }
+        html[data-theme="dark"] .tabs-picker-modal {
+            background: rgba(24, 32, 30, .55) !important;
+        }
         .tabs-picker-nav button {
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            min-height: 54px;
+            min-height: 64px;
             padding: 12px 10px;
             white-space: normal;
             line-height: 1.5;
             font-size: calc(15px * var(--font-scale));
             font-weight: 700;
             color: var(--text);
-            background: var(--glass-bg);
-            border: 1.5px solid var(--glass-border);
-            border-radius: 14px;
-            box-shadow: 0 2px 10px rgba(43, 33, 24, .06);
+            background: linear-gradient(135deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .18));
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, .55);
+            border-radius: 16px;
+            box-shadow: 0 8px 22px rgba(43, 33, 24, .12), inset 0 1px 0 rgba(255, 255, 255, .55);
+            transition: transform .12s, box-shadow .12s;
+        }
+        html[data-theme="dark"] .tabs-picker-nav button {
+            background: linear-gradient(135deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .04));
+            border-color: rgba(255, 255, 255, .16);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .12);
         }
         .tabs-picker-nav button:active {
-            transform: scale(.97);
+            transform: scale(.96);
+            box-shadow: 0 2px 6px rgba(43, 33, 24, .1);
         }
         .tabs-picker-nav button.active {
             background: linear-gradient(135deg, var(--primary), var(--primary-2));
@@ -1137,8 +1166,8 @@
         }
         .card {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 20px;
@@ -1207,20 +1236,21 @@
             width: 70%;
             height: 70%;
             border-radius: var(--tile-inner-radius);
-            background: rgba(255, 255, 255, .55);
-            border: 1px solid rgba(255, 255, 255, .5);
+            background: rgba(255, 255, 255, .18);
+            border: 1px solid rgba(255, 255, 255, .35);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: calc(12px * var(--font-scale));
             font-weight: 700;
             color: var(--text);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 0 2px rgba(255, 255, 255, .5);
             clip-path: var(--tile-clip, none);
             transition: all .2s;
         }
         html[data-theme="dark"] .tile .inner {
-            background: rgba(20, 30, 28, .5);
-            border-color: rgba(255, 255, 255, .1)
+            background: rgba(10, 16, 15, .22);
+            border-color: rgba(255, 255, 255, .12)
         }
         .tile.today {
             box-shadow: 0 0 0 3px var(--accent), 0 4px 16px rgba(20, 15, 10, .1)
@@ -1375,6 +1405,7 @@
             gap: 8px;
             box-shadow: 0 2px 10px rgba(43, 33, 24, .04);
             transition: box-shadow .2s var(--ease), transform .2s var(--ease);
+            overflow: hidden;
         }
         .habit-item:hover {
             box-shadow: 0 6px 18px rgba(43, 33, 24, .08);
@@ -1509,6 +1540,74 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+        }
+        .terms-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: var(--primary-soft);
+            font-size: 26px;
+        }
+        .terms-subtitle {
+            color: var(--text-muted);
+            font-size: calc(12px * var(--font-scale));
+            margin-top: 4px;
+        }
+        .terms-body {
+            max-height: 44vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 4px 4px 4px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .terms-section {
+            background: var(--glass-bg);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+        .terms-section .ts-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: calc(13px * var(--font-scale));
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .terms-section .ts-head .ts-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-size: calc(11px * var(--font-scale));
+            flex-shrink: 0;
+        }
+        .terms-section p {
+            margin: 0;
+            font-size: calc(12.5px * var(--font-scale));
+            line-height: 1.95;
+            color: var(--text);
+        }
+        .terms-checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 2px 0;
+            cursor: pointer;
+            font-size: calc(12.5px * var(--font-scale));
+        }
+        .terms-checkbox-row input {
+            margin-top: 3px;
+            flex-shrink: 0;
         }
         .onboarding-dots {
             display: flex;
@@ -1662,6 +1761,65 @@
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+        .book-photo-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(28px, 9vw, 42px);
+            color: var(--text-muted);
+            background: var(--glass-bg);
+            border-style: dashed;
+            cursor: default;
+            opacity: .65;
+        }
+        .pro-plan-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1.5px solid var(--glass-border);
+            background: var(--surface-2);
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+        }
+        .pro-plan-card:hover {
+            border-color: var(--primary);
+        }
+        .pro-plan-card.active {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+        .pro-plan-card .ppc-title {
+            font-weight: 700;
+            font-size: calc(14px * var(--font-scale));
+            color: var(--text);
+        }
+        .pro-plan-card .ppc-price {
+            font-weight: 800;
+            font-size: calc(13.5px * var(--font-scale));
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .pro-plan-card .ppc-radio {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+            position: relative;
+        }
+        .pro-plan-card.active .ppc-radio {
+            border-color: var(--primary);
+        }
+        .pro-plan-card.active .ppc-radio::after {
+            content: "";
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            background: var(--primary);
         }
         .habit-photo-thumb .habit-photo-del {
             position: absolute;
@@ -2133,7 +2291,12 @@
             width: 90%;
             max-width: 460px;
             max-height: 85vh;
+            max-height: 85dvh;
+            /* dvh ارتفاعِ واقعیِ در دسترس رو حساب می‌کنه (وقتی کیبورد گوشی بازه هم درست کار می‌کنه)؛
+               مرورگرهایی که dvh رو نمی‌شناسن همون خط بالا (vh) رو استفاده می‌کنن. */
+            box-sizing: border-box;
             overflow-y: auto;
+            overscroll-behavior: contain;
             box-shadow: 0 20px 60px rgba(0, 0, 0, .3)
         }
         .modal h3 {
@@ -2196,15 +2359,19 @@
         }
         .modal-close {
             width: 100%;
-            margin-top: 16px;
-            padding: 12px;
+            margin: 16px -24px -24px -24px;
+            width: calc(100% + 48px);
+            padding: 11px 24px max(11px, env(safe-area-inset-bottom, 0px));
             border: none;
-            border-radius: 14px;
+            border-radius: 0 0 20px 20px;
             background: var(--surface-2);
             color: var(--text);
             font-family: inherit;
             font-weight: 700;
-            cursor: pointer
+            font-size: calc(13.5px * var(--font-scale));
+            cursor: pointer;
+            position: sticky;
+            bottom: -24px;
         }
         .future-note {
             background: var(--primary-soft);
@@ -2453,10 +2620,15 @@
             min-width: 280px
         }
         canvas {
-            max-height: 300px;
+            max-height: 220px;
             margin-top: 10px;
             width: 100% !important;
             height: auto !important
+        }
+        #pieChart {
+            max-height: 170px;
+            max-width: 170px;
+            margin: 10px auto 0;
         }
         .stat-row {
             display: flex;
@@ -2870,16 +3042,23 @@
         .modal-actions {
             display: flex;
             gap: 8px;
-            margin-top: 18px
+            margin: 16px -24px -24px -24px;
+            padding: 8px 24px max(8px, env(safe-area-inset-bottom, 0px));
+            position: sticky;
+            bottom: -24px;
+            background: var(--surface);
+            border-top: 1px solid var(--glass-border);
+            border-radius: 0 0 20px 20px;
         }
         .modal-actions button {
             flex: 1;
-            padding: 12px;
-            border-radius: 14px;
+            padding: 11px 12px;
+            border-radius: 12px;
             border: none;
             font-family: inherit;
             font-weight: 700;
-            font-size: calc(14px * var(--font-scale));
+            font-size: calc(13.5px * var(--font-scale));
+            line-height: 1.3;
             cursor: pointer
         }
         .btn-cancel {
@@ -3521,6 +3700,25 @@
             font-size: calc(11px * var(--font-scale));
             color: var(--text-muted);
             margin-top: 2px;
+        }
+        .todo-item .t-repeat {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: calc(11px * var(--font-scale));
+            color: var(--primary);
+            margin-top: 2px;
+            margin-right: 8px;
+        }
+        .todo-repeat-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        #todoRepeatToggleBtn {
+            white-space: nowrap;
         }
         .todo-item.overdue .t-due {
             color: var(--fail);
@@ -4347,6 +4545,7 @@
                 </div>
             </div>
             <div class="header-right">
+                <button class="glass-btn upgrade-btn-header" id="upgradeHeaderBtn" style="display:none" data-fa="⭐ UPGRADE" data-en="⭐ UPGRADE">⭐ UPGRADE</button>
                 <button class="glass-btn theme-btn-header" id="installAppBtn" style="display:none" title="نصب برنامه">⬇️</button>
                 <button class="glass-btn theme-btn-header" id="themeToggle">🌙</button>
                 <div class="profile-btn-wrap">
@@ -4366,9 +4565,10 @@
                         </div>
                         <div class="pstats">
                             <div class="ps-item"><div class="ps-num" id="pStatHabits">0</div><div class="ps-lbl" data-fa="عادت" data-en="Habits">عادت</div></div>
-                            <div class="ps-item"><div class="ps-num" id="pStatStreak">0</div><div class="ps-lbl" data-fa="پیاپی" data-en="Streak">پیاپی</div></div>
+                            <div class="ps-item"><div class="ps-num" id="pStatStreak">0</div><div class="ps-lbl" data-fa="روزهای متوالی" data-en="Streak" title="تعداد روزهای پیاپی که همه‌ی عادت‌های اون روز رو با موفقیت انجام دادی">روزهای متوالی</div></div>
                             <div class="ps-item"><div class="ps-num" id="pStatPoints">0</div><div class="ps-lbl"><span class="coin-icon"></span><span data-fa="سکه" data-en="Coins">سکه</span></div></div>
                         </div>
+                        <button type="button" id="profileSettingsLink" style="width:100%;margin-top:12px;padding:10px;border-radius:12px;border:1px solid var(--glass-border);background:var(--surface-2);color:var(--text);font-family:inherit;font-weight:700;font-size:calc(13px * var(--font-scale));cursor:pointer" data-fa="⚙ تنظیمات" data-en="⚙ Settings">⚙ تنظیمات</button>
                     </div>
                 </div>
             </div>
@@ -4499,7 +4699,7 @@
                     <div style="margin-top:16px"><canvas id="habitCompareChart" style="max-height:200px"></canvas></div>
                     <div class="stat-row">
                         <div class="stat-box"><div class="num" id="statAvg">۰٪</div><div class="lbl" data-fa="میانگین" data-en="Avg">میانگین</div></div>
-                        <div class="stat-box"><div class="num" id="statStreak">۰</div><div class="lbl" data-fa="پیاپی" data-en="Streak">پیاپی</div></div>
+                        <div class="stat-box"><div class="num" id="statStreak">۰</div><div class="lbl" data-fa="روزهای متوالی" data-en="Streak" title="تعداد روزهای پیاپی که همه‌ی عادت‌های اون روز رو با موفقیت انجام دادی">روزهای متوالی</div></div>
                         <div class="stat-box"><div class="num" id="statHabits">۰</div><div class="lbl" data-fa="عادت‌ها" data-en="Habits">عادت‌ها</div></div>
                     </div>
                     <div style="margin-top:16px;background:var(--glass-bg);border-radius:14px;padding:12px">
@@ -4670,11 +4870,20 @@
                 <div class="todo-add">
                     <input type="text" id="todoInput" placeholder="کار جدید..." maxlength="100">
                     <input type="datetime-local" id="todoDueInput" class="todo-due-input">
+                    <button type="button" class="glass-btn" id="todoRepeatToggleBtn" data-fa="🔁 تکرار: بدون تکرار" data-en="🔁 Repeat: None">🔁 تکرار: بدون تکرار</button>
                     <button class="glass-btn primary" id="todoAddBtn" data-fa="➕ افزودن" data-en="➕ Add">➕ افزودن</button>
                     <button class="glass-btn" id="todoClearDoneBtn" data-fa="🗑 حذف انجام‌شده‌ها" data-en="🗑 Clear Done">🗑 حذف انجام‌شده‌ها</button>
                 </div>
-                <div class="todo-reminder-bar" id="todoReminderBar">
-                    <span class="todo-reminder-hint" id="todoReminderHint" data-fa="🔔 با تعیین زمان برای هر کار، سرِ همان لحظه یک نوتیفیکیشن واقعی دریافت می‌کنی (لازم است یک‌بار اجازه‌ی نوتیفیکیشن را بدهی)." data-en="🔔 Set a time for a task and you'll get a real notification exactly then (notification permission required once).">🔔 با تعیین زمان برای هر کار، سرِ همان لحظه یک نوتیفیکیشن واقعی دریافت می‌کنی (لازم است یک‌بار اجازه‌ی نوتیفیکیشن را بدهی).</span>
+                <div class="todo-repeat-panel" id="todoRepeatPanel" style="display:none">
+                    <div class="gender-toggle" id="todoRepeatModeToggle">
+                        <button type="button" data-rmode="none" class="active" data-fa="بدون تکرار" data-en="No repeat">بدون تکرار</button>
+                        <button type="button" data-rmode="daily" data-fa="همه‌روزه" data-en="Daily">همه‌روزه</button>
+                        <button type="button" data-rmode="custom" data-fa="روزهای خاص" data-en="Custom days">روزهای خاص</button>
+                    </div>
+                    <div class="weekday-select-wrap" id="todoWeekdaySelectWrap" style="display:none">
+                        <div class="weekday-selector" id="todoWeekdaySelector"></div>
+                    </div>
+                    <p class="field-hint" data-fa="اگه تکرار رو فعال کنی، این کار فقط توی روزهای انتخاب‌شده نشون داده می‌شه و بعد از هر بار انجام، برای دفعه‌ی بعد دوباره فعال می‌شه." data-en="If you enable repeat, this task only shows on the selected days and re-activates each time it recurs.">اگه تکرار رو فعال کنی، این کار فقط توی روزهای انتخاب‌شده نشون داده می‌شه و بعد از هر بار انجام، برای دفعه‌ی بعد دوباره فعال می‌شه.</p>
                 </div>
                 <div class="todo-list" id="todoList"></div>
             </div>
@@ -4945,6 +5154,13 @@
                 <div class="settings-section">
                     <h3 data-fa="راهنمای استفاده" data-en="How to use">راهنمای استفاده</h3>
                     <button class="glass-btn" id="replayTutorialBtn" style="width:100%" data-fa="🎓 نمایش دوباره‌ی آموزش اولیه" data-en="🎓 Show onboarding tutorial again">🎓 نمایش دوباره‌ی آموزش اولیه</button>
+                    <button class="glass-btn" id="viewTermsBtn" style="width:100%;margin-top:8px" data-fa="📜 قوانین و شرایط استفاده" data-en="📜 Terms of Use">📜 قوانین و شرایط استفاده</button>
+                </div>
+
+                <div class="settings-section">
+                    <h3 data-fa="تماس با ما" data-en="Contact Us">تماس با ما</h3>
+                    <p class="field-hint" style="margin-bottom:8px" data-fa="برای ارتباط با توسعه‌دهنده:" data-en="To reach the developer:">برای ارتباط با توسعه‌دهنده:</p>
+                    <a href="mailto:rayganiali@gmail.com" class="glass-btn" style="width:100%;display:block;box-sizing:border-box;text-align:center;text-decoration:none">✉️ rayganiali@gmail.com</a>
                 </div>
 
                 <div class="settings-section">
@@ -5091,6 +5307,41 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="levelCapstoneModalBackdrop">
+        <div class="modal" style="max-width:400px;text-align:center">
+            <div style="font-size:40px;margin-bottom:6px">🏆</div>
+            <h3 data-fa="سطح استادی!" data-en="Mastery reached!">سطح استادی!</h3>
+            <p id="levelCapstoneText" style="font-size:calc(13.5px * var(--font-scale));line-height:2;color:var(--text)"></p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="levelCapstoneNoBtn" data-fa="نه، همین‌جا کافیه" data-en="No, this is enough">نه، همین‌جا کافیه</button>
+                <button class="btn-confirm" id="levelCapstoneYesBtn" data-fa="بله، ادامه بده" data-en="Yes, continue">بله، ادامه بده</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="todoEditModalBackdrop">
+        <div class="modal">
+            <h3 data-fa="ویرایش کار" data-en="Edit Task">ویرایش کار</h3>
+            <div class="field-label" data-fa="عنوان" data-en="Title">عنوان</div>
+            <input type="text" id="todoEditTitleField" class="name-input" maxlength="100">
+            <div class="field-label" data-fa="زمان یادآوری (اختیاری)" data-en="Reminder time (optional)">زمان یادآوری (اختیاری)</div>
+            <input type="datetime-local" id="todoEditDueField" class="name-input">
+            <div class="field-label" data-fa="تکرار" data-en="Repeat">تکرار</div>
+            <div class="gender-toggle" id="todoEditRepeatModeToggle">
+                <button type="button" data-rmode="none" data-fa="بدون تکرار" data-en="No repeat">بدون تکرار</button>
+                <button type="button" data-rmode="daily" data-fa="همه‌روزه" data-en="Daily">همه‌روزه</button>
+                <button type="button" data-rmode="custom" data-fa="روزهای خاص" data-en="Custom days">روزهای خاص</button>
+            </div>
+            <div class="weekday-select-wrap" id="todoEditWeekdaySelectWrap" style="display:none">
+                <div class="weekday-selector" id="todoEditWeekdaySelector"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="todoEditCancelBtn" data-fa="انصراف" data-en="Cancel">انصراف</button>
+                <button class="btn-confirm" id="todoEditSaveBtn" data-fa="ذخیره" data-en="Save">ذخیره</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-backdrop reason-modal" id="reasonModalBackdrop">
         <div class="modal">
             <h3 id="reasonModalTitle" data-fa="چرا؟" data-en="Why?">چرا؟</h3>
@@ -5178,6 +5429,13 @@
                 <label data-fa="پاداش تمام کردن کتاب" data-en="Reward for Finishing">پاداش تمام کردن کتاب</label>
                 <input type="text" id="bookRewardInput" maxlength="150" placeholder="مثلاً: یک ساعت بازی، خرید یک چیز خاص...">
             </div>
+            <div class="book-form-field">
+                <label data-fa="عکس‌های کتاب" data-en="Book Photos">عکس‌های کتاب</label>
+                <div class="habit-photo-box">
+                    <button type="button" class="habit-photo-addbtn" id="bookPhotoAddBtn" data-fa="📷 افزودن عکس" data-en="📷 Add Photo">📷 افزودن عکس</button>
+                    <div class="habit-photo-strip" id="bookPhotoStrip"></div>
+                </div>
+            </div>
             <div class="modal-actions" style="display:flex;gap:8px;">
                 <button class="glass-btn primary" id="saveBookBtn" style="flex:1" data-fa="✅ ثبت" data-en="✅ Save">✅ ثبت</button>
                 <button class="glass-btn" id="cancelBookBtn" style="flex:1" data-fa="انصراف" data-en="Cancel">انصراف</button>
@@ -5263,6 +5521,7 @@
     </div>
 
     <input type="file" id="habitPhotoFileInput" accept="image/*" multiple style="display:none">
+    <input type="file" id="bookPhotoFileInput" accept="image/*" multiple style="display:none">
 
     <div class="modal-backdrop" id="challengeModalBackdrop">
         <div class="modal challenge-modal">
@@ -5335,14 +5594,14 @@
 
                 <div class="field-label" data-fa="🪙 جایزه سکه" data-en="🪙 Coin reward">🪙 جایزه سکه</div>
                 <div class="habit-goal-input">
-                    <input type="number" id="challengeRewardCoinsField" min="0" max="100000" value="50">
+                    <input type="number" id="challengeRewardCoinsField" min="0" max="50" value="20">
                     <span data-fa="سکه" data-en="coins">سکه</span>
                 </div>
 
                 <div class="field-label" data-fa="🎁 جایزه اضافه (اختیاری)" data-en="🎁 Extra reward (optional)">🎁 جایزه اضافه (اختیاری)</div>
                 <input type="text" id="challengeRewardTextField" class="name-input" maxlength="80" placeholder="مثلاً: یه بستنی برای خودم بخرم">
 
-                <button class="rm-save" id="challengeCreateBtn" style="width:100%;margin-top:14px" data-fa="🔥 ثبت چالش" data-en="🔥 Start Challenge">🔥 ثبت چالش</button>
+                <button class="rm-save" id="challengeCreateBtn" style="width:100%;margin:14px -24px -24px -24px;width:calc(100% + 48px);padding:11px 24px max(11px, env(safe-area-inset-bottom, 0px));border-radius:0 0 16px 16px;position:sticky;bottom:-24px;background:var(--primary);color:#fff;border:none;font-weight:700;font-size:calc(13.5px * var(--font-scale));cursor:pointer" data-fa="🔥 ثبت چالش" data-en="🔥 Start Challenge">🔥 ثبت چالش</button>
             </div>
 
             <div id="challengeTabActive" style="display:none">
@@ -5383,11 +5642,47 @@
 
     <div class="modal-backdrop" id="premiumPaywallBackdrop">
         <div class="modal" style="max-width:420px;text-align:center">
-            <div style="font-size:44px;margin-bottom:6px">🔒</div>
+            <div style="font-size:44px;margin-bottom:6px;cursor:pointer;user-select:none" id="premiumLockIcon">🔒</div>
             <h3 data-fa="این بخش، ویژه‌ی نسخه‌ی کامله" data-en="This section is part of the full version">این بخش، ویژه‌ی نسخه‌ی کامله</h3>
             <p id="premiumPaywallBody" style="font-size:calc(13.5px * var(--font-scale));line-height:2;color:var(--text-muted);margin:10px 0 18px"></p>
             <button class="btn-confirm" id="premiumPurchaseBtn" style="width:100%;margin-bottom:10px" data-fa="🔓 خرید نسخه‌ی کامل" data-en="🔓 Unlock Full Version">🔓 خرید نسخه‌ی کامل</button>
             <button class="modal-close" id="premiumPaywallCloseBtn" data-fa="بعداً" data-en="Later">بعداً</button>
+            <div id="premiumCodeRow" style="display:none;margin-top:14px;gap:8px;flex-direction:column">
+                <input type="text" id="premiumCodeInput" autocomplete="off" autocapitalize="off" spellcheck="false"
+                    style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-size:calc(13px * var(--font-scale));text-align:center"
+                    data-fa-placeholder="کد رو وارد کن" data-en-placeholder="Enter code" placeholder="کد رو وارد کن">
+                <button class="glass-btn" id="premiumCodeSubmitBtn" data-fa="تأیید کد" data-en="Submit code">تأیید کد</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="proPlansModalBackdrop">
+        <div class="modal" style="max-width:420px">
+            <h3 style="text-align:center" data-fa="انتخاب پلن نسخه‌ی کامل" data-en="Choose a Pro plan">انتخاب پلن نسخه‌ی کامل</h3>
+            <p class="sub" style="text-align:center" data-fa="یکی از پلن‌ها رو انتخاب کن" data-en="Pick one of the plans below">یکی از پلن‌ها رو انتخاب کن</p>
+            <div id="proPlansList" style="display:flex;flex-direction:column;gap:10px;margin:14px 0"></div>
+            <p class="field-hint" style="text-align:center" data-fa="قیمت‌ها فقط جهت اطلاع هستن؛ مبلغ نهایی همون چیزیه که کافه‌بازار موقع خرید نشون می‌ده." data-en="Prices shown are informational; the final amount is whatever Cafe Bazaar shows at checkout.">قیمت‌ها فقط جهت اطلاع هستن؛ مبلغ نهایی همون چیزیه که کافه‌بازار موقع خرید نشون می‌ده.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="proPlansCancelBtn" data-fa="انصراف" data-en="Cancel">انصراف</button>
+                <button class="btn-confirm" id="proPlansBuyBtn" disabled data-fa="خرید" data-en="Buy">خرید</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="onboarding-overlay" id="termsOverlay">
+        <div class="onboarding-card terms-card" style="max-height:88vh;text-align:right">
+            <div style="text-align:center">
+                <div class="terms-badge">📜</div>
+                <div class="ob-title" style="margin-top:8px" data-fa="قوانین و شرایط استفاده" data-en="Terms of Use">قوانین و شرایط استفاده</div>
+                <p class="terms-subtitle" data-fa="لطفاً پیش از استفاده از برنامه، موارد زیر را مطالعه کنید" data-en="Please review the following before using the app">لطفاً پیش از استفاده از برنامه، موارد زیر را مطالعه کنید</p>
+            </div>
+            <div id="termsBodyText" class="terms-body"></div>
+            <label id="termsCheckboxRow" class="terms-checkbox-row">
+                <input type="checkbox" id="termsAcceptCheckbox">
+                <span data-fa="با استفاده از نرم‌افزار، قوانین و شرایط استفاده را می‌پذیرم." data-en="By using this app, I accept the Terms of Use.">با استفاده از نرم‌افزار، قوانین و شرایط استفاده را می‌پذیرم.</span>
+            </label>
+            <button class="glass-btn primary" id="termsAcceptBtn" style="width:100%" disabled data-fa="قوانین را می‌پذیرم" data-en="I accept the terms">قوانین را می‌پذیرم</button>
+            <button class="modal-close" id="termsCloseViewBtn" style="width:100%;margin-top:8px;display:none" data-fa="بستن" data-en="Close">بستن</button>
         </div>
     </div>
 
@@ -5449,18 +5744,23 @@
             // ============================================================
             const HABIT_PHOTOS_DB = 'routinePlannerPhotos';
             const HABIT_PHOTOS_STORE = 'photos';
+            const BOOK_PHOTOS_STORE = 'bookPhotos';
             let _photosDbPromise = null;
 
             function openPhotosDb() {
                 if (_photosDbPromise) return _photosDbPromise;
                 _photosDbPromise = new Promise((resolve, reject) => {
                     if (!window.indexedDB) { reject(new Error('indexedDB not supported')); return; }
-                    const req = indexedDB.open(HABIT_PHOTOS_DB, 1);
+                    const req = indexedDB.open(HABIT_PHOTOS_DB, 2);
                     req.onupgradeneeded = () => {
                         const db = req.result;
                         if (!db.objectStoreNames.contains(HABIT_PHOTOS_STORE)) {
                             const store = db.createObjectStore(HABIT_PHOTOS_STORE, { keyPath: 'id' });
                             store.createIndex('habitId', 'habitId', { unique: false });
+                        }
+                        if (!db.objectStoreNames.contains(BOOK_PHOTOS_STORE)) {
+                            const bstore = db.createObjectStore(BOOK_PHOTOS_STORE, { keyPath: 'id' });
+                            bstore.createIndex('bookId', 'bookId', { unique: false });
                         }
                     };
                     req.onsuccess = () => resolve(req.result);
@@ -5500,6 +5800,49 @@
 
             function habitPhotosDeleteAllForHabit(habitId) {
                 return habitPhotosGet(habitId).then(list => Promise.all(list.map(p => habitPhotoDelete(p.id))));
+            }
+
+            // --------- همان الگو، برای عکس‌های کتاب‌های کتابخونه ---------
+            function bookPhotoAdd(bookId, dataUrl) {
+                return openPhotosDb().then(db => new Promise((resolve, reject) => {
+                    const id = 'bp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+                    const tx = db.transaction(BOOK_PHOTOS_STORE, 'readwrite');
+                    tx.objectStore(BOOK_PHOTOS_STORE).put({ id, bookId, dataUrl, ts: Date.now() });
+                    tx.oncomplete = () => resolve(id);
+                    tx.onerror = () => reject(tx.error);
+                }));
+            }
+            function bookPhotosGet(bookId) {
+                return openPhotosDb().then(db => new Promise((resolve, reject) => {
+                    const tx = db.transaction(BOOK_PHOTOS_STORE, 'readonly');
+                    const idx = tx.objectStore(BOOK_PHOTOS_STORE).index('bookId');
+                    const req = idx.getAll(IDBKeyRange.only(bookId));
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => reject(req.error);
+                }));
+            }
+            function bookPhotoDelete(photoId) {
+                return openPhotosDb().then(db => new Promise((resolve, reject) => {
+                    const tx = db.transaction(BOOK_PHOTOS_STORE, 'readwrite');
+                    tx.objectStore(BOOK_PHOTOS_STORE).delete(photoId);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                }));
+            }
+            function bookPhotosDeleteAllForBook(bookId) {
+                return bookPhotosGet(bookId).then(list => Promise.all(list.map(p => bookPhotoDelete(p.id))));
+            }
+            // بازیابیِ عکس‌های کتاب از یک فایل پشتیبان (که توش به‌صورت base64 ذخیره شدن)
+            async function restoreBookPhotosFromBackup(map) {
+                try {
+                    for (const bookId of Object.keys(map)) {
+                        await bookPhotosDeleteAllForBook(bookId);
+                        for (const dataUrl of map[bookId]) {
+                            await bookPhotoAdd(bookId, dataUrl);
+                        }
+                    }
+                    renderLibrary();
+                } catch (e) {}
             }
 
             // فشرده‌سازی عکس قبل از ذخیره تا سبک و سریع بماند
@@ -5644,6 +5987,63 @@
             // STATE
             // ============================================================
             const STORAGE_KEY = "alshadow-v14-level-colors";
+            // شماره‌ی نسخه‌ی قوانین: هر وقت متن قوانین به‌طور قابل‌توجهی عوض بشه، این عدد رو
+            // بالا ببر — چون کاربرهایی که نسخه‌ی قبلی رو پذیرفته بودن، دوباره باید تأیید کنن.
+            const TERMS_VERSION = 3;
+            // هر بخش: {icon, titleFa/En, bodyFa/En} — با این ساختار، رابط کاربری خودش شماره‌گذاری
+            // و طراحی رو می‌سازه؛ لحن عمداً دوستانه و بدون تهدیده، نه یه متن حقوقیِ سنگین.
+            const TERMS_SECTIONS = [
+                {
+                    icon: '🧩', titleFa: 'ماهیت نرم‌افزار', titleEn: 'Nature of the software',
+                    bodyFa: 'این نرم‌افزار به همان صورتی که در دسترس قرار گرفته، ارائه می‌شود. تلاش شده تجربه‌ای روان و بدون‌نقص فراهم شود، اما مانند هر نرم‌افزار دیگری، امکان بروز خطا یا محدودیت‌های فنی وجود دارد.',
+                    bodyEn: "This application is provided as available. Every effort has been made to ensure a smooth, reliable experience, but as with any software, occasional errors or technical limitations may occur."
+                },
+                {
+                    icon: '💾', titleFa: 'داده‌ها و پشتیبان‌گیری', titleEn: 'Data and backups',
+                    bodyFa: 'اطلاعاتی که در برنامه ثبت می‌کنید (عادت‌ها، وظایف، یادداشت‌ها، تصاویر و موارد مشابه) صرفاً روی دستگاه شما ذخیره می‌شود و به هیچ سروری ارسال نمی‌گردد. امکان تهیه‌ی نسخه‌ی پشتیبان و بازیابی آن در برنامه فراهم است؛ نگهداری از این نسخه‌ی پشتیبان بر عهده‌ی کاربر است. در صورت حذف برنامه، آسیب‌دیدگی یا از‌دست‌رفتن دستگاه بدون وجود نسخه‌ی پشتیبان، بازیابی اطلاعات محلی امکان‌پذیر نخواهد بود.',
+                    bodyEn: "Information you enter (habits, tasks, notes, photos, and similar items) is stored only on your device and is never sent to any server. The app provides backup and restore tools; keeping that backup safe is your responsibility. If the app is uninstalled, or the device is lost or damaged, local data cannot be recovered without an existing backup."
+                },
+                {
+                    icon: '🔄', titleFa: 'تغییرات و به‌روزرسانی‌های آینده', titleEn: 'Future changes and updates',
+                    bodyFa: 'به‌منظور بهبود مستمر نرم‌افزار، ممکن است در نسخه‌های بعدی، امکانات، ظاهر یا نحوه‌ی عملکرد بخش‌های مختلف تغییر کند، گسترش یابد یا حذف شود.',
+                    bodyEn: "In order to continually improve the software, features, appearance, or the behavior of various sections may be changed, expanded, or removed in future versions."
+                },
+                {
+                    icon: '⚖️', titleFa: 'محدودیت مسئولیت', titleEn: 'Limitation of liability',
+                    bodyFa: 'استفاده از این نرم‌افزار بر عهده و مسئولیت کاربر است. مسئولیت توسعه‌دهنده در قبال خسارات احتمالی ناشی از استفاده، عدم امکان استفاده، یا توقف یک قابلیت، تا حدی که قوانین جاری اجازه می‌دهند، محدود است. این محدودیت به‌هیچ‌وجه به معنای سلب حقوق قانونی کاربر نیست.',
+                    bodyEn: "Use of this software is at the user's own discretion and responsibility. To the extent permitted by applicable law, the developer's liability for damages arising from use, inability to use, or discontinuation of a feature is limited. This limitation does not remove any legal rights the user may have."
+                },
+                {
+                    icon: '🙋', titleFa: 'مسئولیت کاربر', titleEn: "User responsibility",
+                    bodyFa: 'کاربر مسئول نحوه‌ی استفاده‌ی خود از این نرم‌افزار و صحت اطلاعاتی است که در آن ثبت می‌کند.',
+                    bodyEn: "The user is responsible for how they use this software and for the accuracy of the information they enter into it."
+                },
+                {
+                    icon: '📝', titleFa: 'تغییرات در این قوانین', titleEn: 'Changes to these terms',
+                    bodyFa: 'این قوانین ممکن است در آینده به‌روزرسانی شود. در صورت اعمال تغییرات قابل‌توجه، نسخه‌ی جدید مجدداً برای تأیید در اختیار کاربر قرار خواهد گرفت.',
+                    bodyEn: "These terms may be updated in the future. In the event of a significant change, the new version will be presented to the user again for acceptance."
+                }
+            ];
+            // این‌ها زودتر از بقیه تعریف می‌شن (نه پایین‌تر، کنار خودِ UI کد مخفی) چون
+            // recomputeTrustedPremiumFlag همین پایین‌تر، هنگام لود اولیه‌ی state هم صدا
+            // زده می‌شه و باید این مقادیر از قبل آماده باشن.
+            const PREMIUM_UNLOCK_SALT = 'routineplanner-salt-9f3';
+            const PREMIUM_UNLOCK_HASH = '93b059bdfe8555bbd80de6c4dba97fc081229d2e52714bbcdf99a8c741419a64';
+            // این مقدار فقط یک نشانه‌ی داخلیه (نه رمز جدید) که از خودِ هش بالا مشتق می‌شه؛
+            // به‌جای یک true/false ساده که هرکسی می‌تونه توی localStorage بسازه، وضعیت مالک
+            // این مقدارِ خاص رو لازم داره که فقط بعد از عبور واقعی از چک هش قابل‌تولیده.
+            const RP_OWNER_MARK_VALUE = PREMIUM_UNLOCK_HASH.slice(0, 12) + '-ok';
+            // پریمیوم همیشه از این تابع دوباره محاسبه می‌شه، نه از مقدار خامِ ذخیره‌شده —
+            // یعنی دستکاری مستقیمِ isPremium توی داده‌ی ذخیره‌شده به‌تنهایی بی‌اثره.
+            function recomputeTrustedPremiumFlag() {
+                const pc = state.proCache;
+                // bazaarOk: خرید واقعی از Bazaar تأیید شده باشه و (اگه پلنِ زمان‌دار بود) هنوز
+                // منقضی نشده باشه؛ expiresAt=null یعنی خرید همیشگی (بدون انقضا).
+                const bazaarOk = !!(pc && pc.isPro === true && pc.purchaseToken &&
+                    (pc.expiresAt == null || pc.expiresAt > Date.now()));
+                const ownerOk = state.__rpOwnerMark === RP_OWNER_MARK_VALUE;
+                state.isPremium = bazaarOk || ownerOk;
+            }
             let pointsCacheMap = null; // perf cache: invalidated in saveState()
             let state = {
                 theme: "light",
@@ -5679,6 +6079,9 @@
                 habitNotes: {},
                 onboardingDone: false,
                 isPremium: false,
+                proCache: null,
+                termsAcceptedVersion: null,
+                termsAcceptedAt: null,
                 calorie: { profile: null, logs: {}, burns: {}, customFoods: [], customActivities: [] },
                 challenges: []
             };
@@ -5687,6 +6090,11 @@
                 if (raw) {
                     const p = JSON.parse(raw);
                     state = Object.assign(state, p);
+                    // امنیتی: isPremiumِ خام و ذخیره‌شده هیچ‌وقت مستقیم قابل‌اعتماد نیست؛
+                    // همیشه از منابع واقعی (proCache معتبر Bazaar یا نشانه‌ی مالک) دوباره
+                    // محاسبه می‌شه. این یعنی دستکاری مستقیم isPremium توی داده‌ی ذخیره‌شده
+                    // بی‌اثره — همین‌جا بازنویسی می‌شه.
+                    recomputeTrustedPremiumFlag();
                     if (!state.journal) state.journal = [];
                     if (!state.todos) state.todos = [];
                     if (!state.books) state.books = [];
@@ -5875,34 +6283,62 @@
             }
 
             // ============================================================
-            // سطح‌ها (Levels) - 100 سکه = 1 سطح
+            // سطح‌ها (Levels) — به‌ازای هر عادت، جداگانه محاسبه می‌شود
+            // ------------------------------------------------------------
+            // سیستم به‌صورت «مرحله‌ای» طراحی شده: مرحله‌ی اول (سطح ۱ تا ۵ + استادی) برای
+            // همه‌ی عادت‌ها از ابتدا فعاله. وقتی عادتی به استادی برسه، از کاربر می‌پرسیم
+            // می‌خواد ادامه بده یا نه؛ اگه بله، مرحله‌ی بعدی (که سطح آخرش «استاد اعظم»
+            // است) براش باز می‌شه. برای گسترش در آینده، کافیه یک آرایه‌ی جدید به همین
+            // لیست اضافه بشه — بقیه‌ی کد بدون تغییر با هر تعداد مرحله کار می‌کنه.
             // ============================================================
-            const LEVEL_THRESHOLDS = [
-                { num: 1, minPoints: 0, labelFa: 'سطح ۱', labelEn: 'Level 1' },
-                { num: 2, minPoints: 100, labelFa: 'سطح ۲', labelEn: 'Level 2' },
-                { num: 3, minPoints: 200, labelFa: 'سطح ۳', labelEn: 'Level 3' },
-                { num: 4, minPoints: 300, labelFa: 'سطح ۴', labelEn: 'Level 4' },
-                { num: 5, minPoints: 400, labelFa: 'سطح ۵', labelEn: 'Level 5' },
-                { num: 6, minPoints: 500, labelFa: 'استادی 🏆', labelEn: 'Master 🏆' }
+            const HABIT_LEVEL_STAGES = [
+                [
+                    { num: 1, minPoints: 250, labelFa: 'سطح ۱', labelEn: 'Level 1' },
+                    { num: 2, minPoints: 500, labelFa: 'سطح ۲', labelEn: 'Level 2' },
+                    { num: 3, minPoints: 750, labelFa: 'سطح ۳', labelEn: 'Level 3' },
+                    { num: 4, minPoints: 1000, labelFa: 'سطح ۴', labelEn: 'Level 4' },
+                    { num: 5, minPoints: 1500, labelFa: 'سطح ۵', labelEn: 'Level 5' },
+                    { num: 6, minPoints: 2000, labelFa: 'استادی', labelEn: 'Master', icon: '🏆', isCapstone: true }
+                ],
+                [
+                    { num: 7, minPoints: 2500, labelFa: 'سطح ۷', labelEn: 'Level 7' },
+                    { num: 8, minPoints: 3000, labelFa: 'سطح ۸', labelEn: 'Level 8' },
+                    { num: 9, minPoints: 3500, labelFa: 'سطح ۹', labelEn: 'Level 9' },
+                    { num: 10, minPoints: 4000, labelFa: 'سطح ۱۰', labelEn: 'Level 10' },
+                    { num: 11, minPoints: 4500, labelFa: 'سطح ۱۱', labelEn: 'Level 11' },
+                    { num: 12, minPoints: 5000, labelFa: 'استاد اعظم', labelEn: 'Grand Master', icon: '👑', isCapstone: true }
+                ]
             ];
+            const LEVEL_THRESHOLDS = HABIT_LEVEL_STAGES[0]; // برای کدهای قدیمی که فقط مرحله‌ی پایه رو می‌خوان
 
-            function getLevelFromPoints(points) {
-                let result = LEVEL_THRESHOLDS[0];
-                for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
-                    if (points >= LEVEL_THRESHOLDS[i].minPoints) {
-                        result = LEVEL_THRESHOLDS[i];
+            function habitUnlockedStageCount(h) { return (h && h.unlockedStage) ? h.unlockedStage : 1; }
+            function habitActiveThresholds(h) {
+                const n = habitUnlockedStageCount(h);
+                return HABIT_LEVEL_STAGES.slice(0, Math.min(n, HABIT_LEVEL_STAGES.length)).flat();
+            }
+            function habitCurrentStageThresholds(h) {
+                const n = Math.min(habitUnlockedStageCount(h), HABIT_LEVEL_STAGES.length);
+                return HABIT_LEVEL_STAGES[n - 1] || HABIT_LEVEL_STAGES[0];
+            }
+
+            function getLevelFromPoints(points, thresholds) {
+                const list = thresholds || LEVEL_THRESHOLDS;
+                let result = { num: 0, minPoints: 0, labelFa: 'شروع', labelEn: 'Beginner', icon: '' };
+                for (let i = list.length - 1; i >= 0; i--) {
+                    if (points >= list[i].minPoints) {
+                        result = list[i];
                         break;
                     }
                 }
                 return result;
             }
 
-            function getLevelNum(points) {
-                return getLevelFromPoints(points).num;
+            function getLevelNum(points, thresholds) {
+                return getLevelFromPoints(points, thresholds).num;
             }
 
-            function getLevelLabel(points) {
-                const lv = getLevelFromPoints(points);
+            function getLevelLabel(points, thresholds) {
+                const lv = getLevelFromPoints(points, thresholds);
                 return state.lang === 'fa' ? lv.labelFa : lv.labelEn;
             }
 
@@ -6063,29 +6499,34 @@
             }
 
             // ============================================================
-            // بررسی ارتقای سطح و نمایش پیام تبریک
+            // بررسی ارتقای سطح و نمایش پیام تبریک (یا پیشنهاد ادامه‌ی مرحله‌ی بعد)
             // ============================================================
             function checkLevelUp(hid) {
                 const h = state.habits.find(x => x.id === hid);
                 if (!h) return;
                 const points = computeHabitPoints(hid);
-                const currentLevel = getLevelNum(points);
-                const prevLevel = getLevelNum(points - 10);
+                const thresholds = habitActiveThresholds(h);
+                const currentLv = getLevelFromPoints(points, thresholds);
+                const prevLv = getLevelFromPoints(points - COIN_MAX_PER_OP, thresholds);
 
-                if (currentLevel > prevLevel) {
-                    const key = hid + '_level_' + currentLevel;
+                if (currentLv.num > prevLv.num) {
+                    const key = hid + '_level_' + currentLv.num;
                     if (!state.levelToastSent[key]) {
                         state.levelToastSent[key] = true;
                         saveState();
 
-                        if (currentLevel === 6) {
-                            const msg = state.lang === 'fa' ?
-                                '🎉🏆 تبریک! شما عادت «' + h.name + '» را بطور کامل کسب کردید! به استادی رسیدید! 🎉🏆' :
-                                '🎉🏆 Congratulations! You have fully mastered "' + h.name +
-                                '"! You reached Mastery! 🎉🏆';
-                            showToast(msg, 5000, 'level-toast-mastery');
+                        if (currentLv.isCapstone) {
+                            const hasNextStage = habitUnlockedStageCount(h) < HABIT_LEVEL_STAGES.length;
+                            if (hasNextStage) {
+                                openLevelCapstoneModal(h, currentLv);
+                            } else {
+                                const msg = state.lang === 'fa' ?
+                                    '🎉' + (currentLv.icon || '🏆') + ' تبریک! شما عادت «' + h.name + '» را در بالاترین سطح فعلی به اتمام رساندید! 🎉' :
+                                    '🎉' + (currentLv.icon || '🏆') + ' Congratulations! You reached the highest current level for "' + h.name + '"! 🎉';
+                                showToast(msg, 5000, 'level-toast-mastery');
+                            }
                         } else {
-                            const levelLabel = getLevelLabel(points);
+                            const levelLabel = state.lang === 'fa' ? currentLv.labelFa : currentLv.labelEn;
                             const msg = state.lang === 'fa' ?
                                 '🎉 تبریک! شما به ' + levelLabel + ' در عادت «' + h.name + '» رسیدید! 🎉' :
                                 '🎉 Congratulations! You reached ' + levelLabel + ' for "' + h.name +
@@ -6095,6 +6536,17 @@
                     }
                 }
             }
+
+            // پیشنهاد ادامه به مرحله‌ی سطح‌بندیِ بعدی، بعد از رسیدن به سقفِ مرحله‌ی فعلی (مثلاً استادی)
+            function openLevelCapstoneModal(h, capstoneLv) {
+                pendingCapstoneHabitId = h.id;
+                const label = state.lang === 'fa' ? capstoneLv.labelFa : capstoneLv.labelEn;
+                document.getElementById('levelCapstoneText').textContent = state.lang === 'fa' ?
+                    ('تبریک! شما در عادت «' + h.name + '» به سطح ' + label + ' رسیدید. می‌خواهید این عادت را ادامه دهید و وارد مرحله‌ی بعد شوید؟') :
+                    ('Congratulations! You reached ' + label + ' level in the habit "' + h.name + '". Would you like to continue this habit and move to the next stage?');
+                document.getElementById('levelCapstoneModalBackdrop').classList.add('open');
+            }
+            let pendingCapstoneHabitId = null;
 
             // ============================================================
             // RECORD FUNCTIONS with level check
@@ -6294,7 +6746,7 @@
             // ============================================================
             // TO-DO LIST
             // ============================================================
-            function addTodo(title, dueAt) {
+            function addTodo(title, dueAt, repeatMode, repeatDays) {
                 if (!title.trim()) return null;
                 const todo = {
                     id: todoUid(),
@@ -6302,12 +6754,63 @@
                     done: false,
                     createdAt: Date.now(),
                     dueAt: dueAt || null, // timestamp (ms) - زمانی که کار باید انجام شود
-                    notified: false // آیا هشدار درون‌برنامه‌ای برای آن ارسال شده
+                    notified: false, // آیا هشدار درون‌برنامه‌ای برای آن ارسال شده
+                    // تکرار: 'none' (بدون تکرار، رفتار قدیمی)، 'daily' (همه‌روزه)، 'custom' (روزهای خاص هفته)
+                    repeatMode: repeatMode || 'none',
+                    repeatDays: (repeatMode === 'custom' && Array.isArray(repeatDays)) ? repeatDays.slice() : [],
+                    lastActiveResetDate: null
                 };
                 state.todos.push(todo);
                 saveState();
                 renderTodos();
                 return todo;
+            }
+
+            // ============================================================
+            // تکرار کارها (Todo Repeat): آیا کار امروز فعاله، و زمان بعدیِ یادآوریش کِیه
+            // ============================================================
+            function todoAppliesToday(t) {
+                if (!t.repeatMode || t.repeatMode === 'none') return true; // رفتار قدیمی: همیشه نشون داده می‌شه
+                if (t.repeatMode === 'daily') return true;
+                if (t.repeatMode === 'custom') {
+                    const jsDay = new Date().getDay(), persianIdx = (jsDay + 1) % 7;
+                    return Array.isArray(t.repeatDays) && t.repeatDays.includes(persianIdx);
+                }
+                return true;
+            }
+            // برای کارهای تکرارشونده، هر روزی که نوبتشون می‌رسه، وضعیت «انجام‌شده»ی روزِ قبل
+            // پاک می‌شه تا دوباره قابل‌انجام باشن (دقیقاً مثل یک یادآوریِ روزانه‌ی تازه).
+            function resetRepeatingTodosIfNeeded() {
+                const todayIso = dateToISO(startOfDay(new Date()));
+                let changed = false;
+                (state.todos || []).forEach(t => {
+                    if (!t.repeatMode || t.repeatMode === 'none') return;
+                    if (t.lastActiveResetDate !== todayIso) {
+                        if (t.done) { t.done = false; changed = true; }
+                        t.lastActiveResetDate = todayIso;
+                        changed = true;
+                    }
+                });
+                if (changed) saveState();
+            }
+            // برای کار بدون تکرار: همون dueAt قبلی (رفتار قدیمی). برای کار تکرارشونده: نزدیک‌ترین
+            // زمانِ آینده‌ای که هم با روزهای انتخاب‌شده جور دربیاد، هم بر پایه‌ی همون ساعتِ تعیین‌شده باشه.
+            function computeNextTodoOccurrence(t) {
+                if (!t.dueAt) return null;
+                if (!t.repeatMode || t.repeatMode === 'none') return t.dueAt > Date.now() ? t.dueAt : null;
+                const due = new Date(t.dueAt);
+                const hh = due.getHours(), mm = due.getMinutes();
+                const now = new Date();
+                for (let i = 0; i < 8; i++) {
+                    const cand = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, hh, mm, 0, 0);
+                    if (cand.getTime() <= now.getTime()) continue;
+                    if (t.repeatMode === 'daily') return cand.getTime();
+                    if (t.repeatMode === 'custom') {
+                        const jsDay = cand.getDay(), persianIdx = (jsDay + 1) % 7;
+                        if (Array.isArray(t.repeatDays) && t.repeatDays.includes(persianIdx)) return cand.getTime();
+                    }
+                }
+                return null;
             }
 
             function toggleTodo(id) {
@@ -6350,49 +6853,6 @@
             // را از یک لینک وب اجرا نمی‌کند.) روشی که واقعاً و روی همه‌ی گوشی‌ها جواب می‌دهد، ساخت یک رویداد
             // تقویمی با یادآور (.ics) است؛ وقتی آن را با اپ تقویم (گوگل‌کلندر/تقویم آیفون) باز و «افزودن» کنی،
             // درست سر همان ساعت یک هشدار واقعی سیستمی با صدا می‌دهی — حتی اگر مرورگر یا این برنامه بسته باشد.
-            function addRealAlarm(todo) {
-                if (!todo.dueAt) {
-                    showToast(state.lang === 'fa' ? '⛔ ابتدا زمانی برای این کار مشخص کن' :
-                        '⛔ Set a time for this task first', 2200);
-                    return;
-                }
-                downloadTodoICS(todo);
-                const msg = state.lang === 'fa' ?
-                    '📥 فایل یادآور دانلود شد. آن را باز کن و «افزودن به تقویم» را بزن تا سر زمانش هشدار واقعی با صدا بگیری.' :
-                    '📥 Reminder file downloaded. Open it and tap "Add to Calendar" to get a real alarm at that time.';
-                showToast(msg, 4200);
-            }
-
-            // ساخت یک فایل تقویمی (.ics) با یادآور، تنها روشی که واقعاً روی همه‌ی گوشی‌ها
-            // (اندروید، آیفون و ...) کار می‌کند: با افزودن به اپ تقویم، در زمان مقرر هشدار سیستمی واقعی می‌دهد.
-            function downloadTodoICS(todo) {
-                if (!todo.dueAt) return;
-                const start = new Date(todo.dueAt);
-                const end = new Date(todo.dueAt + 15 * 60000);
-                const fmt = dt => dt.getUTCFullYear() + pad2(dt.getUTCMonth() + 1) + pad2(dt.getUTCDate()) + 'T' +
-                    pad2(dt.getUTCHours()) + pad2(dt.getUTCMinutes()) + '00Z';
-                const ics = [
-                    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//RoutinePlanner//Reminder//FA',
-                    'BEGIN:VEVENT',
-                    'UID:' + todo.id + '@routineplanner',
-                    'DTSTAMP:' + fmt(new Date()),
-                    'DTSTART:' + fmt(start),
-                    'DTEND:' + fmt(end),
-                    'SUMMARY:' + (todo.title || '').replace(/\n/g, ' '),
-                    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + (todo.title || ''), 'TRIGGER:PT0M', 'END:VALARM',
-                    'END:VEVENT', 'END:VCALENDAR'
-                ].join('\r\n');
-                const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'reminder-' + todo.id + '.ics';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
             // درخواست اجازه‌ی نوتیفیکیشن از کاربر (فقط وقتی واقعاً برای یک یادآوری لازم می‌شود، نه بی‌دلیل).
             // بعد از گرفتن اجازه، تلاش می‌کند Periodic Background Sync را هم فعال کند تا در پس‌زمینه
             // (وقتی برنامه کاملاً بسته است) بهترین تلاش ممکن برای نمایش یادآوری انجام شود.
@@ -6531,11 +6991,12 @@
                 const now = Date.now();
                 const items = [];
                 (state.todos || []).forEach(function(t) {
-                    if (!t.done && t.dueAt && t.dueAt >= now - 3600000) {
+                    const nextAt = computeNextTodoOccurrence(t);
+                    if (!t.done && nextAt && nextAt >= now - 3600000) {
                         items.push({
                             id: 'todo-' + t.id,
                             title: state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due',
-                            body: t.title, dueAt: t.dueAt, tag: 'todo-' + t.id
+                            body: t.title, dueAt: nextAt, tag: 'todo-' + t.id
                         });
                     }
                 });
@@ -6644,8 +7105,9 @@
             }
 
             function renderTodos() {
+                resetRepeatingTodosIfNeeded();
                 const list = document.getElementById('todoList');
-                const todos = state.todos || [];
+                const todos = (state.todos || []).filter(todoAppliesToday);
                 const sorted = [...todos].sort((a, b) => {
                     if (a.done !== b.done) return a.done ? 1 : -1;
                     return b.createdAt - a.createdAt;
@@ -6653,8 +7115,8 @@
 
                 if (!sorted.length) {
                     list.innerHTML = '<div class="todo-empty">' + (state.lang === 'fa' ?
-                        'هیچ کاری ثبت نشده. یک کار جدید اضافه کن! ✅' :
-                        'No tasks. Add a new one! ✅') + '</div>';
+                        'هیچ کاری برای امروز نیست. یک کار جدید اضافه کن! ✅' :
+                        'No tasks for today. Add a new one! ✅') + '</div>';
                 } else {
                     list.innerHTML = '';
                     const now = Date.now();
@@ -6668,13 +7130,15 @@
                         item.className = 'todo-item' + stateClass;
                         const dueHtml = t.dueAt ?
                             '<div class="t-due">⏰ ' + escHtml(formatDueLabel(t.dueAt)) + '</div>' : '';
-                        const alarmBtn = t.dueAt ? ('<button class="t-alarm-btn" data-talarm="' + t.id +
-                            '" title="' + (state.lang === 'fa' ? 'ساخت هشدار واقعی (تقویم)' :
-                                'Create real alarm (calendar)') + '">⏰</button>') : '';
+                        const repeatHtml = (t.repeatMode && t.repeatMode !== 'none') ?
+                            '<div class="t-repeat">🔁 ' + escHtml(todoRepeatSummary(t)) + '</div>' : '';
                         item.innerHTML =
-                            '<div class="t-info"><div class="t-title">' + escHtml(t.title) + '</div>' + dueHtml +
+                            '<div class="t-info"><div class="t-title">' + escHtml(t.title) + '</div>' + dueHtml + repeatHtml +
                             '</div>' +
-                            '<div class="t-actions">' + alarmBtn + '<button class="t-done-btn" data-td="' + t
+                            '<div class="t-actions">' +
+                            '<button class="t-edit-btn" data-tedit="' + t.id + '" title="' +
+                            (state.lang === 'fa' ? 'ویرایش' : 'Edit') + '">✏️</button>' +
+                            '<button class="t-done-btn" data-td="' + t
                             .id + '" title="' + (state.lang === 'fa' ? 'انجام شد' : 'Done') +
                             '">' + (t.done ? '↩️' : '✅') +
                             '</button><button class="t-del-btn" data-tdel="' + t.id +
@@ -6702,10 +7166,16 @@
                         deleteTodo(this.dataset.tdel);
                     }
                 }));
-                list.querySelectorAll('[data-talarm]').forEach(b => b.addEventListener('click', function() {
-                    const todo = state.todos.find(x => x.id === this.dataset.talarm);
-                    if (todo) addRealAlarm(todo);
+                list.querySelectorAll('[data-tedit]').forEach(b => b.addEventListener('click', function() {
+                    openTodoEditModal(this.dataset.tedit);
                 }));
+            }
+            function todoRepeatSummary(t) {
+                if (!t.repeatMode || t.repeatMode === 'none') return '';
+                if (t.repeatMode === 'daily') return state.lang === 'fa' ? 'همه‌روزه' : 'Daily';
+                const names = state.lang === 'fa' ? PERSIAN_WEEKDAYS_SHORT : EN_WEEKDAYS_SHORT;
+                const days = (t.repeatDays || []).slice().sort((a, b) => a - b).map(i => names[i]);
+                return days.length ? days.join('، ') : (state.lang === 'fa' ? 'روزهای خاص' : 'Custom days');
             }
 
             // ============================================================
@@ -6713,6 +7183,7 @@
             // ============================================================
             let libraryFilter = 'all';
             let editingBookId = null;
+            let bookModalIsNew = false;
             let logPagesBookId = null;
 
             function getLibraryLevelNum(completedCount) {
@@ -6829,6 +7300,7 @@
                             '</div><div class="b-author">' + (b.author ? escHtml(b.author) : '') +
                             '</div></div>' + badge + '</div>' +
                             summaryHtml +
+                            '<div class="habit-photo-strip" data-bcard-photo="' + b.id + '" style="display:none"></div>' +
                             '<div class="book-progress-row">' +
                             '<div class="book-progress-label"><span>' + (state.lang === 'fa' ?
                                 (toPersianDigits(b.pagesRead || 0) + ' از ' + toPersianDigits(b
@@ -6853,6 +7325,7 @@
                                 '<div class="bh-row">' + (state.lang === 'fa' ?
                                     'هنوز ثبتی نشده' : 'No entries yet') + '</div>') + '</div>';
                         list.appendChild(item);
+                        renderBookCardPhotoStrip(item.querySelector('[data-bcard-photo="' + b.id + '"]'), b.id);
                     });
                 }
 
@@ -6879,7 +7352,8 @@
             }
 
             function openAddBookModal() {
-                editingBookId = null;
+                editingBookId = uid(); // شناسه رو از همین الان می‌سازیم تا بشه قبل از ثبت نهایی هم عکس اضافه کرد
+                bookModalIsNew = true;
                 document.getElementById('bookModalTitle').textContent = state.lang === 'fa' ?
                     '📚 افزودن کتاب' : '📚 Add Book';
                 document.getElementById('bookTitleInput').value = '';
@@ -6887,6 +7361,7 @@
                 document.getElementById('bookSummaryInput').value = '';
                 document.getElementById('bookPagesInput').value = '';
                 document.getElementById('bookRewardInput').value = '';
+                renderBookPhotoStrip(editingBookId);
                 document.getElementById('addBookModalBackdrop').classList.add('open');
             }
 
@@ -6894,6 +7369,7 @@
                 const b = state.books.find(x => x.id === id);
                 if (!b) return;
                 editingBookId = id;
+                bookModalIsNew = false;
                 document.getElementById('bookModalTitle').textContent = state.lang === 'fa' ?
                     '✏️ ویرایش کتاب' : '✏️ Edit Book';
                 document.getElementById('bookTitleInput').value = b.title || '';
@@ -6901,12 +7377,18 @@
                 document.getElementById('bookSummaryInput').value = b.summary || '';
                 document.getElementById('bookPagesInput').value = b.totalPages || '';
                 document.getElementById('bookRewardInput').value = b.reward || '';
+                renderBookPhotoStrip(editingBookId);
                 document.getElementById('addBookModalBackdrop').classList.add('open');
             }
 
             function closeAddBookModal() {
                 document.getElementById('addBookModalBackdrop').classList.remove('open');
+                // اگه داشت کتاب جدید می‌ساخت ولی بدون ثبت انصراف داد، عکس‌های یتیمِ همون پیش‌نویس رو پاک می‌کنیم
+                if (bookModalIsNew && editingBookId) {
+                    bookPhotosDeleteAllForBook(editingBookId).catch(() => {});
+                }
                 editingBookId = null;
+                bookModalIsNew = false;
             }
 
             function saveBookFromModal() {
@@ -6927,7 +7409,7 @@
                     return;
                 }
 
-                if (editingBookId) {
+                if (!bookModalIsNew) {
                     const b = state.books.find(x => x.id === editingBookId);
                     if (b) {
                         b.title = title;
@@ -6944,7 +7426,7 @@
                     }
                 } else {
                     state.books.push({
-                        id: uid(),
+                        id: editingBookId,
                         title: title,
                         author: author,
                         summary: summary,
@@ -6958,6 +7440,7 @@
                     });
                 }
                 saveState();
+                bookModalIsNew = false; // دیگه پیش‌نویس نیست، پس بستنِ مودال عکس‌ها رو پاک نکنه
                 closeAddBookModal();
                 renderLibrary();
                 showToast(state.lang === 'fa' ? '✅ کتاب ثبت شد' : '✅ Book saved');
@@ -6965,6 +7448,7 @@
 
             function deleteBook(id) {
                 state.books = state.books.filter(b => b.id !== id);
+                bookPhotosDeleteAllForBook(id).catch(() => {});
                 saveState();
                 renderLibrary();
             }
@@ -7024,7 +7508,7 @@
 
                 if (nowCompleted && !wasCompleted) {
                     b.completedAt = Date.now();
-                    state.scores.coins = (state.scores.coins || 0) + 100;
+                    addCoins(COIN_MAX_PER_OP);
                     saveState();
                     showBookCompleteModal(b);
                 } else {
@@ -7245,10 +7729,31 @@
             });
 
             // با هر افزایش امتیاز کل، همان مقدار به‌عنوان سکه‌ی قابل‌خرج اضافه می‌شود
+            // محدودیت امنیتی: هیچ عملیات یا رویدادی نباید بیشتر از ۵۰ سکه در یک بار به کاربر
+            // بده یا ازش کم کنه — این محدودیت مستقل از UI و همیشه همینجا اعمال می‌شه.
+            const COIN_MAX_PER_OP = 50;
+            // ============================================================
+            // تابع مرکزیِ تغییر موجودی سکه — هر مسیر دریافت یا کسر سکه در کل برنامه (عادت،
+            // کار، چالش، کتابخونه، دستاورد، سطح، جایزه‌ی دستی و هر جای دیگه) باید از همینجا
+            // عبور کنه، نه با دست‌کاری مستقیم state.scores.coins. این یعنی سقف ۵۰ سکه در هر
+            // عملیات، فقط توی یک نقطه اعمال می‌شه و از هیچ مسیری قابل دور زدن نیست.
+            // (این محدودیتِ «هر عملیات» است، نه محدودیتِ مجموع سکه‌های کاربر — مجموع می‌تونه
+            // هر مقداری باشه.)
+            // ============================================================
+            function addCoins(amount) {
+                const safe = Math.max(0, Math.min(COIN_MAX_PER_OP, Math.round(amount || 0)));
+                state.scores.coins = (state.scores.coins || 0) + safe;
+                return safe;
+            }
+            function removeCoins(amount) {
+                const safe = Math.max(0, Math.min(COIN_MAX_PER_OP, Math.round(amount || 0)));
+                state.scores.coins = Math.max(0, (state.scores.coins || 0) - safe);
+                return safe;
+            }
             function syncCoinsFromPoints(totalPoints) {
                 if (state.scores.lastPoints === undefined) state.scores.lastPoints = totalPoints;
                 const delta = totalPoints - state.scores.lastPoints;
-                if (delta > 0) state.scores.coins = (state.scores.coins || 0) + delta;
+                if (delta > 0) addCoins(delta);
                 state.scores.lastPoints = totalPoints;
             }
 
@@ -7684,41 +8189,39 @@
             // BUILD LEVEL DISPLAY (با رنگ‌های قابل تنظیم)
             // ============================================================
             function buildLevelDisplay(hid, points) {
-                const currentLevel = getLevelNum(points);
-                const isMastery = currentLevel >= 6;
+                const h = state.habits.find(x => x.id === hid);
+                const stageThresholds = habitCurrentStageThresholds(h);
+                const activeThresholds = habitActiveThresholds(h);
+                const currentLv = getLevelFromPoints(points, activeThresholds);
+                const capstone = stageThresholds[stageThresholds.length - 1];
+                const isCapstoneReached = currentLv.num >= capstone.num;
 
                 let html = '<div class="habit-levels"><span class="lv-label">' + (state.lang === 'fa' ?
                     'پیشرفت:' : 'Progress:') + '</span>';
 
-                // سطح ۱ تا ۵
-                for (let i = 1; i <= 5; i++) {
-                    const threshold = LEVEL_THRESHOLDS[i - 1];
-                    const reached = currentLevel >= i;
-                    const isCurrent = currentLevel === i;
-                    const cls = 'lv-item' +
-                        (reached ? ' reached' : ' locked') +
-                        (isCurrent ? ' current' : '');
-                    const label = state.lang === 'fa' ? 'سطح ' + toPersianDigits(i) : 'L' + i;
-                    html += '<div class="' + cls + '" title="' + (state.lang === 'fa' ?
-                        'سطح ' + toPersianDigits(i) + ' (' + threshold.minPoints + ' سکه)' :
-                        'Level ' + i + ' (' + threshold.minPoints + ' coins)') + '">' + label + '</div>';
+                // پیپ‌های سطح‌های عادیِ همین مرحله (همه به‌جز آخری که سرآمد/Capstone است)
+                for (let i = 0; i < stageThresholds.length - 1; i++) {
+                    const threshold = stageThresholds[i];
+                    const reached = currentLv.num >= threshold.num;
+                    const isCurrent = currentLv.num === threshold.num;
+                    const cls = 'lv-item' + (reached ? ' reached' : ' locked') + (isCurrent ? ' current' : '');
+                    const label = state.lang === 'fa' ? toPersianDigits(i + 1) : String(i + 1);
+                    html += '<div class="' + cls + '" title="' + ((state.lang === 'fa' ? threshold.labelFa : threshold.labelEn) +
+                        ' (' + (state.lang === 'fa' ? toPersianDigits(threshold.minPoints) : threshold.minPoints) +
+                        (state.lang === 'fa' ? ' سکه)' : ' coins)')) + '">' + label + '</div>';
                 }
 
-                // استادی
-                const masteryThreshold = LEVEL_THRESHOLDS[5];
-                const masteryReached = currentLevel >= 6;
-                const isMasteryCurrent = currentLevel === 6;
-                const masteryCls = 'lv-item' +
-                    (masteryReached ? ' mastery' : ' locked') +
-                    (isMasteryCurrent ? ' current' : '');
-                const masteryLabel = state.lang === 'fa' ? '🏆' : '🏆';
-                html += '<div class="' + masteryCls + '" title="' + (state.lang === 'fa' ?
-                    'استادی (' + masteryThreshold.minPoints + ' سکه)' :
-                    'Mastery (' + masteryThreshold.minPoints + ' coins)') + '">' + masteryLabel + '</div>';
+                // پیپِ سرآمدِ همین مرحله (استادی / استاد اعظم / ...)
+                const capstoneCls = 'lv-item' + (isCapstoneReached ? ' mastery' : ' locked') +
+                    (currentLv.num === capstone.num ? ' current' : '');
+                html += '<div class="' + capstoneCls + '" title="' +
+                    ((state.lang === 'fa' ? capstone.labelFa : capstone.labelEn) + ' (' +
+                        (state.lang === 'fa' ? toPersianDigits(capstone.minPoints) : capstone.minPoints) +
+                        (state.lang === 'fa' ? ' سکه)' : ' coins)')) + '">' + (capstone.icon || '🏆') + '</div>';
 
-                if (masteryReached) {
-                    html += '<span class="habit-levels-mastery">' + (state.lang === 'fa' ?
-                        '🎉 استادی 🎉' : '🎉 Mastery 🎉') + '</span>';
+                if (isCapstoneReached) {
+                    const label = state.lang === 'fa' ? capstone.labelFa : capstone.labelEn;
+                    html += '<span class="habit-levels-mastery">🎉 ' + label + ' 🎉</span>';
                 }
 
                 html += '</div>';
@@ -7875,6 +8378,14 @@
                         delete state.reasons[id];
                         delete state.triggers[id];
                         if (state.habitNotes) delete state.habitNotes[id];
+                        // پاک‌سازی نشانه‌های «پیام تبریک سطح قبلاً نشون داده شده» مخصوص همین عادت —
+                        // سکه‌های قبلاً کسب‌شده دست‌نخورده می‌مونن (منصفانه‌ست، پس‌گرفته نمی‌شن)،
+                        // فقط این ردهای داخلیِ دیگه‌مصرف‌نشده رو تمیز می‌کنیم.
+                        if (state.levelToastSent) {
+                            Object.keys(state.levelToastSent).forEach(k => {
+                                if (k.indexOf(id + '_level_') === 0) delete state.levelToastSent[k];
+                            });
+                        }
                         habitPhotosDeleteAllForHabit(id).catch(() => {});
                         saveState();
                         renderAll(); } }));
@@ -7976,9 +8487,88 @@
                 }
             })();
 
-            // ============================================================
-            // DASHBOARD
-            // ============================================================
+            // --------- گالری عکس کتاب‌ها (داخل مودال افزودن/ویرایش کتاب) ---------
+            function renderBookPhotoStrip(bookId) {
+                const strip = document.getElementById('bookPhotoStrip');
+                if (!strip) return;
+                bookPhotosGet(bookId).then(photos => {
+                    const stripNow = document.getElementById('bookPhotoStrip');
+                    if (!stripNow) return;
+                    stripNow.innerHTML = photos.map(p =>
+                        '<div class="habit-photo-thumb" data-bphoto-id="' + p.id + '"><img src="' + p.dataUrl +
+                        '" loading="lazy" alt=""><button type="button" class="habit-photo-del" data-bphoto-del="' +
+                        p.id + '">✕</button></div>'
+                    ).join('');
+                    stripNow.querySelectorAll('[data-bphoto-id]').forEach(thumb => {
+                        thumb.querySelector('img').addEventListener('click', () => {
+                            openHabitPhotoLightbox(thumb.querySelector('img').src);
+                        });
+                    });
+                    stripNow.querySelectorAll('[data-bphoto-del]').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            bookPhotoDelete(btn.dataset.bphotoDel).then(() => renderBookPhotoStrip(bookId));
+                        });
+                    });
+                }).catch(() => {});
+            }
+
+            // --------- نوار کوچک عکس‌ها روی کارتِ هر کتاب توی لیست کتابخونه ---------
+            function renderBookCardPhotoStrip(el, bookId) {
+                if (!el) return;
+                bookPhotosGet(bookId).then(photos => {
+                    el.style.display = '';
+                    if (!photos.length) {
+                        // بدون عکس: یک Placeholder ساده و هماهنگ با ظاهر اپ به‌جای خالی‌گذاشتن جا
+                        el.innerHTML = '<div class="habit-photo-thumb book-photo-placeholder">📕</div>';
+                        return;
+                    }
+                    el.innerHTML = photos.map(p =>
+                        '<div class="habit-photo-thumb"><img src="' + p.dataUrl + '" loading="lazy" alt=""></div>'
+                    ).join('');
+                    el.querySelectorAll('img').forEach(img => {
+                        img.addEventListener('click', () => openHabitPhotoLightbox(img.src));
+                    });
+                }).catch(() => {});
+            }
+
+            (function initBookPhotoGlobalHandlers() {
+                const addBtn = document.getElementById('bookPhotoAddBtn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        if (!editingBookId) return;
+                        const fileInput = document.getElementById('bookPhotoFileInput');
+                        fileInput.value = '';
+                        fileInput.dataset.forBook = editingBookId;
+                        fileInput.click();
+                    });
+                }
+                const fileInput = document.getElementById('bookPhotoFileInput');
+                if (fileInput) {
+                    fileInput.addEventListener('change', function() {
+                        const bookId = this.dataset.forBook;
+                        const files = Array.from(this.files || []);
+                        if (!bookId || !files.length) return;
+                        const strip = document.getElementById('bookPhotoStrip');
+                        const loadingThumbs = files.map(() => {
+                            const d = document.createElement('div');
+                            d.className = 'habit-photo-thumb loading';
+                            d.textContent = '⏳';
+                            if (strip) strip.appendChild(d);
+                            return d;
+                        });
+                        Promise.all(files.map(f => compressImageFile(f, 1280, .72)
+                            .then(dataUrl => bookPhotoAdd(bookId, dataUrl))
+                            .catch(() => null)
+                        )).then(() => {
+                            loadingThumbs.forEach(d => d.remove());
+                            renderBookPhotoStrip(bookId);
+                        });
+                    });
+                }
+            })();
+
+
             function renderDashboard() {
                 const today = dateToISO(startOfDay(new Date()));
                 const permStats = dayStats(today, h => h.permanent !== false);
@@ -7989,21 +8579,33 @@
                     html += '<div class="empty-state">' + (state.lang === 'fa' ? 'هیچ عادتی برای امروز فعال نیست.' :
                         'No active habits for today.') + '</div>';
                 } else {
-                    if (permStats.total > 0) { const pct = Math.round((permStats.success / permStats.total) *
-                            100);
-                        html += '<div class="item"><span>' + (state.lang === 'fa' ? 'عادت‌های دائمی' :
-                            'Permanent habits') + '</span><span>' + permStats.success + '/' + permStats
-                            .total + ' — ' + pct + '%</span></div>'; }
+                    // عادت‌های دائمی: هدف مشخص و پایانی ندارن، پس به‌جای «X از Y — درصد» که یعنی یه
+                    // هدف باید کامل بشه، همین امروز چندتا انجام شده رو با پیاپی (streak) نشون می‌دیم —
+                    // نه یه درصدی که با گذشت زمان به ۱۰۰ نمی‌رسه و آدم رو کمال‌گرا و ناامید می‌کنه.
+                    if (permStats.total > 0) {
+                        const streakNum2 = computePermanentStreak();
+                        const doneTxt = state.lang === 'fa' ? toPersianDigits(permStats.success) : permStats.success;
+                        const totalTxt = state.lang === 'fa' ? toPersianDigits(permStats.total) : permStats.total;
+                        const streakTxt = state.lang === 'fa' ? toPersianDigits(streakNum2) : streakNum2;
+                        html += '<div class="item"><span>' + (state.lang === 'fa' ? 'عادت‌های دائمی (امروز)' :
+                            'Permanent habits (today)') + '</span><span>' + doneTxt + '/' + totalTxt +
+                            (streakNum2 > 0 ? ('  🔥' + streakTxt) : '') + '</span></div>';
+                    }
+                    // عادت‌های مدت‌دار واقعاً یه هدف و پایان مشخص دارن، پس «X از Y — درصد» اینجا معنی داره
                     if (limStats.total > 0) { const pct = Math.round((limStats.success / limStats.total) *
                             100);
                         html += '<div class="item"><span>' + (state.lang === 'fa' ? 'عادت‌های مدت‌دار' :
                             'Limited habits') + '</span><span>' + limStats.success + '/' + limStats.total +
                             ' — ' + pct + '%</span></div>'; }
-                    const totalAll = permStats.total + limStats.total,
-                        successAll = permStats.success + limStats.success;
-                    const pctAll = totalAll ? Math.round((successAll / totalAll) * 100) : 0;
-                    html += '<div class="item"><span>' + (state.lang === 'fa' ? 'درصد تکمیل کل' :
-                        'Overall completion') + '</span><span><b>' + pctAll + '%</b></span></div>';
+                    // «درصد تکمیل کل» فقط وقتی نشون داده می‌شه که عادت مدت‌دار (هدف‌دار) هم وجود داشته باشه؛
+                    // اگه فقط عادت دائمی داری، این عدد بی‌معنیه و حذف می‌شه.
+                    if (limStats.total > 0) {
+                        const totalAll = permStats.total + limStats.total,
+                            successAll = permStats.success + limStats.success;
+                        const pctAll = totalAll ? Math.round((successAll / totalAll) * 100) : 0;
+                        html += '<div class="item"><span>' + (state.lang === 'fa' ? 'درصد تکمیل کل' :
+                            'Overall completion') + '</span><span><b>' + pctAll + '%</b></span></div>';
+                    }
                 }
                 summary.innerHTML = html;
 
@@ -8012,13 +8614,16 @@
                 syncCoinsFromPoints(totalPoints);
                 document.getElementById('scoreNum').textContent = state.lang === 'fa' ? toPersianDigits(state.scores
                     .coins || 0) : String(state.scores.coins || 0);
-                const levelNum = getLevelNum(totalPoints);
+                // سطح کلی حساب: هر ۱۰۰۰ سکه‌ی کلِ حساب، یک سطح بالاتر (۰ تا ۹۹۹=سطح پایه، ۱۰۰۰=سطح ۱، ۲۰۰۰=سطح ۲ و...)
+                const levelNum = getAccountLevelFromCoins(state.scores.coins || 0);
+                announceAccountLevelUpIfNeeded(levelNum);
                 state.scores.level = levelNum;
-                document.getElementById('levelLabel').textContent = state.lang === 'fa' ? 'سطح ' + levelNum :
+                document.getElementById('levelLabel').textContent = state.lang === 'fa' ? 'سطح ' + toPersianDigits(levelNum) :
                     'Level ' + levelNum;
                 const streakNum = computeStreak();
                 state.scores.streak = streakNum;
-                document.getElementById('streakLabel').textContent = (state.lang === 'fa' ? 'پیاپی: ' : 'Streak: ') +
+                document.getElementById('streakLabel').textContent =
+                    (state.lang === 'fa' ? 'روزهای موفقیت متوالی: ' : 'Consecutive successful days: ') +
                     (state.lang === 'fa' ? toPersianDigits(streakNum) : streakNum);
 
                 document.getElementById('pStatHabits').textContent = state.lang === 'fa' ? toPersianDigits(state
@@ -8042,8 +8647,19 @@
                     } else {
                         const today = startOfDay(new Date());
                         habitsWrap.innerHTML = state.habits.map(h => {
+                            const isPermanent = h.permanent !== false;
                             let total = 0, succ = 0;
-                            let d = new Date(h.createdAt);
+                            let d;
+                            if (isPermanent) {
+                                // عادت‌های دائمی هدف/پایان مشخصی ندارن؛ اگه درصد رو از روز ساختِ عادت حساب کنیم،
+                                // یه لغزش قدیمی برای همیشه سقف عدد رو پایین نگه می‌داره و آدمِ کمال‌گرا رو ناامید می‌کنه.
+                                // برای همین فقط ۳۰ روز اخیر رو حساب می‌کنیم — یه بازه‌ی تازه که واقعاً نشون‌دهنده‌ی
+                                // وضعیتِ الانشه، نه گذشته‌ی دور.
+                                const windowStart = addDays(today, -29);
+                                d = new Date(h.createdAt) > windowStart ? new Date(h.createdAt) : windowStart;
+                            } else {
+                                d = new Date(h.createdAt);
+                            }
                             while (d <= today) {
                                 const iso = dateToISO(d);
                                 if (habitAppliesOnISO(h, iso)) {
@@ -8054,10 +8670,16 @@
                             }
                             const pct = total > 0 ? Math.round((succ / total) * 100) : 0;
                             const pctText = state.lang === 'fa' ? toPersianDigits(pct) : String(pct);
+                            const habitStreak = isPermanent ? computeHabitStreak(h) : 0;
+                            const streakBadge = (isPermanent && habitStreak > 0) ?
+                                (' <span style="color:var(--accent)">🔥' + (state.lang === 'fa' ? toPersianDigits(habitStreak) : habitStreak) + '</span>') : '';
+                            const nameSuffix = isPermanent ?
+                                (' <span style="font-size:calc(10px * var(--font-scale));color:var(--text-muted);font-weight:normal">' +
+                                    (state.lang === 'fa' ? '(۳۰ روز اخیر)' : '(last 30 days)') + '</span>') : '';
                             return '<div class="dash-progress-row">' +
-                                '<div class="dash-progress-name">' + escHtml(h.name) + '</div>' +
+                                '<div class="dash-progress-name">' + escHtml(h.name) + nameSuffix + '</div>' +
                                 '<div class="dash-progress-bar"><div class="dash-progress-fill" style="width:' + pct + '%"></div></div>' +
-                                '<div class="dash-progress-pct">' + pctText + '%</div>' +
+                                '<div class="dash-progress-pct">' + pctText + '%' + streakBadge + '</div>' +
                                 '</div>';
                         }).join('');
                     }
@@ -8715,7 +9337,16 @@
             document.getElementById('bookCompleteModalBackdrop').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('open');
             });
-            document.getElementById('bookSearchInput').addEventListener('input', renderLibrary);
+            // ابزار کوچکِ Debounce — برای جلوگیری از rebuild کامل لیست‌ها روی هر ضربه‌ی کیبورد
+            // موقع جستجو (که خصوصاً وقتی هر آیتم عکس IndexedDB هم داره، هزینه‌ی واقعی داره)
+            function debounce(fn, wait) {
+                let t;
+                return function(...args) {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn.apply(this, args), wait);
+                };
+            }
+            document.getElementById('bookSearchInput').addEventListener('input', debounce(renderLibrary, 200));
             document.querySelectorAll('#libraryFilterTabs button').forEach(btn => btn.addEventListener(
                 'click', function() {
                     document.querySelectorAll('#libraryFilterTabs button').forEach(x => x.classList
@@ -8832,7 +9463,15 @@
                 });
             }
 
+            const FREE_HABIT_LIMIT = 10;
             function openHabitModal(mode, id, prefill) {
+                if (mode === 'create' && !state.isPremium && state.habits.length >= FREE_HABIT_LIMIT) {
+                    showToast(state.lang === 'fa' ?
+                        '📌 نسخه‌ی رایگان حداکثر ۱۰ عادت داره. برای عادت بیشتر، نسخه‌ی کامل رو تهیه کن.' :
+                        '📌 The free version allows up to 10 habits. Upgrade for more.', 3200);
+                    openUpgradeFlow();
+                    return;
+                }
                 habitModalMode = mode;
                 habitModalEditingId = id || null;
                 const h = mode === 'edit' ? state.habits.find(x => x.id === id) : null;
@@ -8948,6 +9587,27 @@
                 if (this.checked) ensureNotifyPermission();
             });
             document.getElementById('habitModalCancel').addEventListener('click', closeHabitModal);
+            document.getElementById('levelCapstoneNoBtn').addEventListener('click', () => {
+                document.getElementById('levelCapstoneModalBackdrop').classList.remove('open');
+                pendingCapstoneHabitId = null;
+            });
+            document.getElementById('levelCapstoneYesBtn').addEventListener('click', () => {
+                const h = state.habits.find(x => x.id === pendingCapstoneHabitId);
+                document.getElementById('levelCapstoneModalBackdrop').classList.remove('open');
+                if (h) {
+                    h.unlockedStage = habitUnlockedStageCount(h) + 1;
+                    saveState();
+                    const nextStage = habitCurrentStageThresholds(h);
+                    const capstoneName = state.lang === 'fa' ? nextStage[nextStage.length - 1].labelFa :
+                        nextStage[nextStage.length - 1].labelEn;
+                    showToast(state.lang === 'fa' ?
+                        ('🚀 مرحله‌ی جدید برای «' + h.name + '» باز شد! تا ' + capstoneName + ' ادامه بده.') :
+                        ('🚀 A new stage opened for "' + h.name + '"! Keep going toward ' + capstoneName + '.'),
+                        4500, 'level-toast-up');
+                    renderHabits();
+                }
+                pendingCapstoneHabitId = null;
+            });
             document.getElementById('habitModalBackdrop').addEventListener('click', e => { if (e.target === document
                     .getElementById('habitModalBackdrop')) closeHabitModal() });
             document.getElementById('habitModalConfirm').addEventListener('click', () => {
@@ -9498,6 +10158,25 @@
             // ============================================================
             // HELPERS
             // ============================================================
+            // ============================================================
+            // سطح کلی حساب (Achievements): از روی مجموع سکه‌های کل حساب، نه سکه‌های
+            // یک عادت خاص. هر ۱۰۰۰ سکه = یک سطح بالاتر (۱۰۰۰=سطح ۱، ۲۰۰۰=سطح ۲، ...).
+            // ============================================================
+            function getAccountLevelFromCoins(coins) {
+                return Math.floor(Math.max(0, coins || 0) / 1000);
+            }
+            function announceAccountLevelUpIfNeeded(newLevel) {
+                if (!state.scores.accountLevelToastSent) state.scores.accountLevelToastSent = {};
+                if (newLevel > 0 && !state.scores.accountLevelToastSent[newLevel]) {
+                    state.scores.accountLevelToastSent[newLevel] = true;
+                    saveState();
+                    showToast(state.lang === 'fa' ?
+                        ('🎉 تبریک! به سطح ' + toPersianDigits(newLevel) + ' حساب رسیدید!') :
+                        ('🎉 Congratulations! You reached account level ' + newLevel + '!'),
+                        4500, 'level-toast-up');
+                }
+            }
+
             function computeStreak() {
                 let streak = 0,
                     d = startOfDay(new Date());
@@ -9512,6 +10191,28 @@
                     }
                     // امروز هنوز به‌طور کامل ثبت نشده (بعضی عادت‌ها هنوز بدون وضعیت‌اند)؛
                     // این نباید باعث صفر شدن پیاپیِ روزهای قبل بشه، پس امروز را نادیده می‌گیریم و به دیروز می‌رویم.
+                    if (iso === todayISO) { d = addDays(d, -1);
+                        continue;
+                    }
+                    break;
+                }
+                return streak;
+            }
+
+            // پیاپیِ مخصوصِ فقط عادت‌های دائمی (بدون احتساب عادت‌های مدت‌دار/هدف‌دار)،
+            // برای کارت «وضعیت امروز» که فقط عادت‌های دائمی رو با پیاپی نشون می‌ده
+            function computePermanentStreak() {
+                let streak = 0,
+                    d = startOfDay(new Date());
+                const todayISO = dateToISO(d);
+                while (true) {
+                    const iso = dateToISO(d);
+                    const s = dayStats(iso, h => h.permanent !== false);
+                    if (s.total === 0 || s.fail > 0) break;
+                    if (s.success === s.total) { streak++;
+                        d = addDays(d, -1);
+                        continue;
+                    }
                     if (iso === todayISO) { d = addDays(d, -1);
                         continue;
                     }
@@ -9693,11 +10394,23 @@
                 return { success: sS, fail: fS };
             }
 
-            function createBackupJSON() {
-                return JSON.stringify({ version: '2.8', exportedAt: new Date().toISOString(),
+            async function createBackupJSON() {
+                // عکس‌های کتاب‌ها توی IndexedDBان، نه توی state معمولی؛ برای این‌که پشتیبان
+                // واقعاً کامل باشه (طبق درخواست)، این‌جا هم جمعشون می‌کنیم و توی همون JSON
+                // به‌صورت base64 embed می‌کنیم.
+                let bookPhotosBackup = {};
+                try {
+                    for (const b of (state.books || [])) {
+                        const photos = await bookPhotosGet(b.id);
+                        if (photos && photos.length) {
+                            bookPhotosBackup[b.id] = photos.map(p => p.dataUrl);
+                        }
+                    }
+                } catch (e) {}
+                return JSON.stringify({ version: '2.9', exportedAt: new Date().toISOString(),
                     appName: 'روتین پلنر', data: { habits: state.habits, records: state
                         .records, vows: state.vows, journal: state.journal, todos: state
-                        .todos, books: state.books, scores: state.scores, theme: state.theme, lang: state
+                        .todos, books: state.books, bookPhotos: bookPhotosBackup, scores: state.scores, theme: state.theme, lang: state
                         .lang, bgColor: state.bgColor, accentTheme: state.accentTheme,
                         weekStart: state.weekStart, showHolidays: state.showHolidays,
                         calendarType: state.calendarType, fontSize: state.fontSize,
@@ -9776,7 +10489,7 @@
                 if (isActive('view-library')) renderLibrary();
                 if (isActive('view-calorie')) renderCalorie();
                 renderDashboard();
-                renderDashboardExtras();
+                if (isActive('view-dashboard')) renderDashboardExtras();
                 updateProfileUI();
                 if (isActive('view-dashboard')) {
                     setTimeout(renderChart, 50);
@@ -9837,6 +10550,10 @@
             document.getElementById('profileNameInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') { document.getElementById('profileNameSave').click(); }
             });
+            document.getElementById('profileSettingsLink').addEventListener('click', function() {
+                document.getElementById('profileDropdown').classList.remove('open');
+                switchToView('settings');
+            });
 
             document.querySelectorAll('#accentGrid .accent-swatch').forEach(b => b.addEventListener('click', () => {
                 state.accentTheme = b.dataset.accent;
@@ -9886,7 +10603,7 @@
                     i.value = ''; } });
 
             document.getElementById('habitSearchBtn').addEventListener('click', renderHabits);
-            document.getElementById('habitSearchInput').addEventListener('input', renderHabits);
+            document.getElementById('habitSearchInput').addEventListener('input', debounce(renderHabits, 200));
 
             document.getElementById('addJournalBtn').addEventListener('click', () => { const text = document
                     .getElementById('newJournalText').value.trim(); if (!text) return;
@@ -9896,7 +10613,7 @@
                 renderJournal(); });
 
             document.getElementById('journalSearchBtn').addEventListener('click', renderJournal);
-            document.getElementById('journalSearchInput').addEventListener('input', renderJournal);
+            document.getElementById('journalSearchInput').addEventListener('input', debounce(renderJournal, 200));
             document.getElementById('journalClearSearch').addEventListener('click', function() {
                 document.getElementById('journalSearchInput').value = '';
                 renderJournal();
@@ -9910,6 +10627,55 @@
                 renderVows(); });
 
             // ===== TODO LIST EVENTS =====
+            function buildGenericWeekdaySelector(containerEl, selectedArr, onToggle) {
+                const names = state.lang === 'fa' ? PERSIAN_WEEKDAYS_SHORT : EN_WEEKDAYS_SHORT;
+                containerEl.innerHTML = '';
+                names.forEach((n, i) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = n;
+                    btn.dataset.day = i;
+                    if (selectedArr.includes(i)) btn.classList.add('active');
+                    btn.addEventListener('click', () => {
+                        const idx = selectedArr.indexOf(i);
+                        if (idx > -1) selectedArr.splice(idx, 1); else selectedArr.push(i);
+                        btn.classList.toggle('active');
+                        if (onToggle) onToggle();
+                    });
+                    containerEl.appendChild(btn);
+                });
+            }
+
+            // ---- ردیف افزودن کار جدید: تکرار اختیاری ----
+            let todoAddRepeatMode = 'none';
+            let todoAddRepeatDays = [];
+            function updateTodoRepeatToggleLabel() {
+                const btn = document.getElementById('todoRepeatToggleBtn');
+                let label;
+                if (todoAddRepeatMode === 'none') label = state.lang === 'fa' ? 'بدون تکرار' : 'None';
+                else if (todoAddRepeatMode === 'daily') label = state.lang === 'fa' ? 'همه‌روزه' : 'Daily';
+                else {
+                    const names = state.lang === 'fa' ? PERSIAN_WEEKDAYS_SHORT : EN_WEEKDAYS_SHORT;
+                    label = todoAddRepeatDays.length ?
+                        todoAddRepeatDays.slice().sort((a, b) => a - b).map(i => names[i]).join('،') :
+                        (state.lang === 'fa' ? 'روزهای خاص' : 'Custom');
+                }
+                btn.textContent = '🔁 ' + (state.lang === 'fa' ? 'تکرار: ' : 'Repeat: ') + label;
+            }
+            document.getElementById('todoRepeatToggleBtn').addEventListener('click', function() {
+                const panel = document.getElementById('todoRepeatPanel');
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            });
+            document.querySelectorAll('#todoRepeatModeToggle button').forEach(b => {
+                b.addEventListener('click', function() {
+                    todoAddRepeatMode = this.dataset.rmode;
+                    document.querySelectorAll('#todoRepeatModeToggle button').forEach(x => x.classList.toggle('active', x === this));
+                    document.getElementById('todoWeekdaySelectWrap').style.display = todoAddRepeatMode === 'custom' ? 'block' : 'none';
+                    updateTodoRepeatToggleLabel();
+                });
+            });
+            buildGenericWeekdaySelector(document.getElementById('todoWeekdaySelector'), todoAddRepeatDays, updateTodoRepeatToggleLabel);
+
             document.getElementById('todoAddBtn').addEventListener('click', function() {
                 const title = document.getElementById('todoInput').value.trim();
                 if (!title) { showToast(state.lang === 'fa' ? 'لطفاً عنوان کار را وارد کن' :
@@ -9921,19 +10687,83 @@
                     if (!isNaN(parsed.getTime())) dueAt = parsed.getTime();
                 }
                 if (dueAt) ensureNotifyPermission();
-                const newTodo = addTodo(title, dueAt);
+                const newTodo = addTodo(title, dueAt, todoAddRepeatMode, todoAddRepeatDays);
                 if (dueAt && newTodo) {
-                    const bodyText = newTodo.title;
-                    nativeScheduleOnce('todo-' + newTodo.id,
-                        state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due',
-                        bodyText, dueAt);
+                    const nextAt = computeNextTodoOccurrence(newTodo);
+                    if (nextAt) {
+                        nativeScheduleOnce('todo-' + newTodo.id,
+                            state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due',
+                            newTodo.title, nextAt);
+                    }
                 }
                 document.getElementById('todoInput').value = '';
                 if (dueInput) dueInput.value = '';
+                // تنظیمات تکرار رو برای کار بعدی هم نگه می‌داریم چون معمولاً کارهای پشت‌سرهم
+                // یک الگو دارن؛ اگه خواست عوضش کنه، خودش دوباره از پنل تغییرش می‌ده.
                 showToast(state.lang === 'fa' ? '✅ کار اضافه شد' : '✅ Task added', 1500);
             });
             document.getElementById('todoInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') { document.getElementById('todoAddBtn').click(); }
+            });
+
+            // ---- ویرایش کار: عنوان، زمان، و الگوی تکرار ----
+            let todoEditingId = null;
+            let todoEditRepeatMode = 'none';
+            let todoEditRepeatDays = [];
+            function openTodoEditModal(id) {
+                const t = state.todos.find(x => x.id === id);
+                if (!t) return;
+                todoEditingId = id;
+                todoEditRepeatMode = t.repeatMode || 'none';
+                todoEditRepeatDays = (t.repeatDays || []).slice();
+                document.getElementById('todoEditTitleField').value = t.title;
+                // datetime-local باید به وقت محلی باشه نه UTC؛ تبدیل درست:
+                if (t.dueAt) {
+                    const d = new Date(t.dueAt);
+                    const pad = n => String(n).padStart(2, '0');
+                    document.getElementById('todoEditDueField').value =
+                        d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' +
+                        pad(d.getHours()) + ':' + pad(d.getMinutes());
+                } else {
+                    document.getElementById('todoEditDueField').value = '';
+                }
+                document.querySelectorAll('#todoEditRepeatModeToggle button').forEach(b =>
+                    b.classList.toggle('active', b.dataset.rmode === todoEditRepeatMode));
+                document.getElementById('todoEditWeekdaySelectWrap').style.display = todoEditRepeatMode === 'custom' ? 'block' : 'none';
+                buildGenericWeekdaySelector(document.getElementById('todoEditWeekdaySelector'), todoEditRepeatDays, null);
+                document.getElementById('todoEditModalBackdrop').classList.add('open');
+            }
+            document.querySelectorAll('#todoEditRepeatModeToggle button').forEach(b => {
+                b.addEventListener('click', function() {
+                    todoEditRepeatMode = this.dataset.rmode;
+                    document.querySelectorAll('#todoEditRepeatModeToggle button').forEach(x => x.classList.toggle('active', x === this));
+                    document.getElementById('todoEditWeekdaySelectWrap').style.display = todoEditRepeatMode === 'custom' ? 'block' : 'none';
+                });
+            });
+            document.getElementById('todoEditCancelBtn').addEventListener('click', function() {
+                document.getElementById('todoEditModalBackdrop').classList.remove('open');
+            });
+            document.getElementById('todoEditSaveBtn').addEventListener('click', function() {
+                const t = state.todos.find(x => x.id === todoEditingId);
+                if (!t) return;
+                const newTitle = document.getElementById('todoEditTitleField').value.trim();
+                if (!newTitle) { showToast(state.lang === 'fa' ? 'عنوان نمی‌تونه خالی باشه' : 'Title cannot be empty', 2000); return; }
+                t.title = newTitle;
+                const dueVal = document.getElementById('todoEditDueField').value;
+                t.dueAt = dueVal ? new Date(dueVal).getTime() : null;
+                t.repeatMode = todoEditRepeatMode;
+                t.repeatDays = todoEditRepeatMode === 'custom' ? todoEditRepeatDays.slice() : [];
+                saveState();
+                nativeCancel('todo-' + t.id);
+                const nextAt = computeNextTodoOccurrence(t);
+                if (!t.done && nextAt) {
+                    ensureNotifyPermission();
+                    nativeScheduleOnce('todo-' + t.id,
+                        state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due', t.title, nextAt);
+                }
+                document.getElementById('todoEditModalBackdrop').classList.remove('open');
+                renderTodos();
+                showToast(state.lang === 'fa' ? '✅ ذخیره شد' : '✅ Saved', 1500);
             });
             // به‌محض این‌که کاربر برای یک کار زمانی تعیین می‌کند، اجازه‌ی نوتیفیکیشن گرفته می‌شود
             // (نه بعد از یک تیک جداگانه)؛ چون یادآوری‌ها حالا همیشه و خودکار فعال هستند.
@@ -10060,6 +10890,11 @@
                     openPremiumPaywall(viewName);
                     return;
                 }
+                if (!isNavigatingBack && currentViewName && currentViewName !== viewName) {
+                    viewHistoryStack.push(currentViewName);
+                    if (viewHistoryStack.length > 20) viewHistoryStack.shift();
+                }
+                isNavigatingBack = false;
                 currentViewName = viewName;
                 document.querySelectorAll('.view-tab-btn').forEach(x => x.classList.remove('active'));
                 document.querySelectorAll('section.view').forEach(v => v.classList.remove('active'));
@@ -10092,22 +10927,55 @@
             }));
 
             // ============================================================
-            // دکمه‌ی فیزیکی Back اندروید: رفتار استاندارد —
-            // اول هر مودال/پنل بازی رو می‌بنده، بعد اگه توی صفحه‌ی اصلی نیستیم می‌بره صفحه‌ی
-            // اصلی، و اگه از قبل توی صفحه‌ی اصلی هستیم از اپ خارج می‌شه.
-            // نکته: HOME_VIEW فعلاً 'habits' است؛ وقتی تب Dashboard واقعی اضافه بشه، این مقدار
-            // باید به 'dashboard' تغییر کنه.
+            // ردیابیِ سبکِ کدام Modal/Overlay الان «روی همه» بازه — چون بعضی از این
+            // پنجره‌ها روی هم باز می‌شن (مثلاً پنجره‌ی روز + پنجره‌ی دلیل روی همون)، از یک
+            // MutationObserver سبک (فقط روی تغییر کلاس، فقط همین ~۱۶ تا overlay) استفاده
+            // می‌کنیم تا همیشه دقیقاً بدونیم آخرین موردی که باز شده کدومه — بدون این‌که
+            // لازم باشه هر جای کد که یه مودال رو باز/بسته می‌کنه دست بزنیم.
             // ============================================================
+            let openModalStack = [];
+            (function setupModalStackTracking() {
+                const modalEls = document.querySelectorAll('.modal-backdrop, .onboarding-overlay');
+                modalEls.forEach(el => {
+                    if (!el.id) return;
+                    const obs = new MutationObserver(() => {
+                        const isOpen = el.classList.contains('open');
+                        const idx = openModalStack.indexOf(el.id);
+                        if (isOpen && idx === -1) openModalStack.push(el.id);
+                        else if (!isOpen && idx !== -1) openModalStack.splice(idx, 1);
+                    });
+                    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+                });
+            })();
+
+            // ============================================================
+            // تاریخچه‌ی ناوبریِ تب‌ها: هر بار واقعاً وارد یه تب جدید می‌شیم (نه وقتی خودِ
+            // Back داره برمی‌گردونه)، تبِ قبلی رو توی این پشته نگه می‌داریم تا Back بتونه
+            // واقعاً «برگرده» به تب قبلی، نه اینکه همیشه بپره خونه.
+            // ============================================================
+            let viewHistoryStack = [];
+            let isNavigatingBack = false;
+
+            // دکمه‌ی فیزیکی Back اندروید: رفتار استاندارد —
+            // ۱. اگه یک Overlay/Modal بازه، فقط همون (آخرین موردی که باز شده) بسته می‌شه.
+            // ۲. اگه منوی پروفایل یا لایت‌باکس عکس بازه، همون بسته می‌شه.
+            // ۳. اگه توی یه تب داخلی هستیم، به تبِ قبلی (طبق تاریخچه‌ی واقعی) برمی‌گردیم؛
+            //    اگه تاریخچه‌ای نیست، می‌ریم خونه.
+            // ۴. اگه از قبل توی خونه هستیم، از اپ خارج می‌شه (رفتار استاندارد اندروید).
             const HOME_VIEW = 'dashboard';
             function rpHandleAndroidBack() {
-                const onboardingOverlay = document.getElementById('onboardingOverlay');
-                if (onboardingOverlay && onboardingOverlay.classList.contains('open')) {
-                    document.getElementById('onboardingSkipBtn').click();
-                    return;
-                }
-                const openModals = document.querySelectorAll('.modal-backdrop.open');
-                if (openModals.length) {
-                    openModals.forEach(m => m.classList.remove('open'));
+                if (openModalStack.length) {
+                    const topId = openModalStack[openModalStack.length - 1];
+                    // قوانین و شرایط استفاده، تا وقتی پذیرفته نشده، اجباریه؛ Back نباید ببندتش
+                    if (topId === 'termsOverlay' && typeof needsTermsAcceptance === 'function' && needsTermsAcceptance()) {
+                        return;
+                    }
+                    if (topId === 'onboardingOverlay') {
+                        closeOnboarding();
+                        return;
+                    }
+                    const topEl = document.getElementById(topId);
+                    if (topEl) topEl.classList.remove('open');
                     return;
                 }
                 const profileDropdown = document.getElementById('profileDropdown');
@@ -10121,7 +10989,14 @@
                     return;
                 }
                 if (currentViewName !== HOME_VIEW) {
-                    switchToView(HOME_VIEW);
+                    if (viewHistoryStack.length > 0) {
+                        const prev = viewHistoryStack.pop();
+                        isNavigatingBack = true;
+                        switchToView(prev);
+                    } else {
+                        isNavigatingBack = true;
+                        switchToView(HOME_VIEW);
+                    }
                     return;
                 }
                 const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
@@ -10165,8 +11040,8 @@
                 } catch (e) { return false; }
             }
 
-            document.getElementById('exportDataBtn').addEventListener('click', () => {
-                const jsonStr = createBackupJSON();
+            document.getElementById('exportDataBtn').addEventListener('click', async () => {
+                const jsonStr = await createBackupJSON();
                 const now = new Date(),
                     dStr = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() +
                     '-' + now.getHours() + '-' + now.getMinutes();
@@ -10197,8 +11072,8 @@
                 setTimeout(() => preview.classList.remove('show'), 3000);
             });
 
-            document.getElementById('shareDataBtn').addEventListener('click', () => {
-                const jsonStr = createBackupJSON();
+            document.getElementById('shareDataBtn').addEventListener('click', async () => {
+                const jsonStr = await createBackupJSON();
                 if (isNativeApp()) {
                     nativeSaveBackup(jsonStr, 'RoutinePlanner-Backup.json');
                     return;
@@ -10273,6 +11148,7 @@
                         if (backup.data.urgeHiddenIds) state.urgeHiddenIds = backup.data
                             .urgeHiddenIds;
                         if (backup.data.books) state.books = backup.data.books;
+                        if (backup.data.bookPhotos) restoreBookPhotosFromBackup(backup.data.bookPhotos);
                         saveState();
                         applyTheme();
                         applyBgTheme();
@@ -12376,9 +13252,10 @@
                 ensureNotifyPermission();
                 const now = Date.now();
                 (state.todos || []).forEach(t => {
-                    if (!t.done && t.dueAt && t.dueAt > now) {
+                    const nextAt = computeNextTodoOccurrence(t);
+                    if (!t.done && nextAt) {
                         nativeScheduleOnce('todo-' + t.id,
-                            state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due', t.title, t.dueAt);
+                            state.lang === 'fa' ? '⏰ وقت انجام کار رسید' : '⏰ Task is due', t.title, nextAt);
                     }
                 });
                 (state.habits || []).forEach(h => {
@@ -12397,7 +13274,7 @@
                 });
             }
             nativeResyncAllReminders();
-            if (isNativeApp() && !state.isPremium) restorePurchases();
+            if (isNativeApp()) restorePurchases();
             applyFontSize();
             applyLevelColors();
             applyLang();
@@ -12441,24 +13318,66 @@
                     const labelEl = btn.querySelector('.bn-label') || btn;
                     if (!state.isPremium && !labelEl.textContent.includes('🔒')) {
                         labelEl.textContent = '🔒 ' + labelEl.textContent;
+                    } else if (state.isPremium && labelEl.textContent.includes('🔒')) {
+                        labelEl.textContent = labelEl.textContent.replace('🔒 ', '').replace('🔒', '');
                     }
                 });
+                const upgradeBtn = document.getElementById('upgradeHeaderBtn');
+                if (upgradeBtn) upgradeBtn.style.display = state.isPremium ? 'none' : '';
             }
-            // این تابع فعلاً یک Placeholder است: بعد از وصل‌شدن پلاگین نیتیو کافه‌بازار،
-            // اینجا فرایند واقعی خرید (باز کردن صفحه‌ی پرداخت کافه‌بازار + تأیید خرید از
-            // طریق Worker سرورلس) جایگزین می‌شود.
             // ============================================================
-            // این دو مقدار رو وقتی محصول واقعی رو توی پنل کافه‌بازار ساختی و
-            // Worker سرورلس رو دیپلوی کردی، اینجا پر کن:
+            // پلن‌های نسخه‌ی کامل: هرکدوم یه SKU جدا توی کافه‌بازار داره. قیمت‌های این‌جا فقط
+            // برای نمایشه؛ مبلغ واقعی همونیه که توی پنل کافه‌بازار برای اون SKU ثبت شده.
             // ============================================================
-            const PREMIUM_PRODUCT_ID = 'premium_unlock'; // دقیقاً همین SKU رو توی پنل کافه‌بازار بساز
-            const PREMIUM_VERIFY_WORKER_URL = ''; // مثلاً: 'https://routine-planner-verify.یوزرنیمت.workers.dev'
+            const PRO_PLANS = [
+                { id: 'pro_1m', months: 1, priceFa: '۲۵٬۰۰۰ تومان', priceEn: '25,000 Toman', labelFa: '۱ ماهه', labelEn: '1 Month' },
+                { id: 'pro_2m', months: 2, priceFa: '۴۵٬۰۰۰ تومان', priceEn: '45,000 Toman', labelFa: '۲ ماهه', labelEn: '2 Months' },
+                { id: 'pro_3m', months: 3, priceFa: '۶۰٬۰۰۰ تومان', priceEn: '60,000 Toman', labelFa: '۳ ماهه', labelEn: '3 Months' },
+                { id: 'pro_6m', months: 6, priceFa: '۱۲۰٬۰۰۰ تومان', priceEn: '120,000 Toman', labelFa: '۶ ماهه', labelEn: '6 Months' }
+            ];
+            // برای سازگاری با نسخه‌ی قبلی این برنامه (اگه کسی قبلاً همون محصولِ همیشگی رو
+            // خریده باشه، همچنان بدون انقضا معتبر بمونه):
+            const LEGACY_LIFETIME_PRODUCT_ID = 'premium_unlock';
+            const PREMIUM_PRODUCT_ID = LEGACY_LIFETIME_PRODUCT_ID; // نگه داشته شده برای ارجاع‌های قدیمی احتمالی
+            function planDurationMs(months) { return months * 30 * 24 * 3600 * 1000; }
+            function findProPlan(productId) { return PRO_PLANS.find(p => p.id === productId) || null; }
 
             function bazaarBillingPlugin() {
                 return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BazaarBilling) || null;
             }
 
-            async function purchasePremium() {
+            // ============================================================
+            // منبع اصلیِ حقیقتِ پریمیوم: خودِ Poolakey/کافه‌بازار — نه Local Storage،
+            // نه هیچ سروری. state.proCache فقط یک «کش آخرین وضعیت معتبر» است، نه منبع اصلی.
+            // اگر آفلاین یا خطای اتصال باشیم، هیچ تغییری در وضعیت فعلی داده نمی‌شود (isPro
+            // قبلی همچنان معتبر می‌ماند)؛ فقط وقتی خودِ Bazaar/Poolakey با موفقیت جواب بده
+            // (چه «داری» چه «نداری») کش به‌روز می‌شود.
+            // نکته‌ی مهم: این تابع هیچ‌وقت پریمیومی که از راه دیگری (مثل کد مخفی مالک) فعال
+            // شده را خاموش نمی‌کند — فقط زمانی state.isPremium را false می‌کند که پیش از این
+            // خودِ Bazaar/Poolakey آن را true کرده بوده و الان دیگر خریدی نمی‌بیند (مثلاً استرداد).
+            // expiresAt: null برای خرید همیشگی (محصول قدیمی)، یا timestamp برای پلن‌های زمان‌دار.
+            // ============================================================
+            function applyProStatusFromBazaar(isPro, productId, purchaseToken, expiresAt) {
+                state.proCache = {
+                    isPro: isPro,
+                    checkedAt: Date.now(),
+                    productId: productId || null,
+                    purchaseToken: purchaseToken || null,
+                    expiresAt: expiresAt !== undefined ? expiresAt : ((state.proCache && state.proCache.expiresAt) || null)
+                };
+                recomputeTrustedPremiumFlag();
+                saveState();
+                applyPremiumLockUI();
+            }
+
+            // مدت باقی‌مانده‌ی فعلی رو حساب می‌کنه (برای تمدید: اگه هنوز زمان مونده، پلن جدید
+            // روی همون باقیمونده اضافه می‌شه، نه جایگزینش)
+            function proExtendedExpiry(months) {
+                const base = Math.max(Date.now(), (state.proCache && state.proCache.expiresAt) || 0);
+                return base + planDurationMs(months);
+            }
+
+            async function purchasePremium(productId) {
                 if (!isNativeApp()) {
                     showToast(state.lang === 'fa' ?
                         'خرید فقط از داخل اپ نصب‌شده از کافه‌بازار امکان‌پذیره.' :
@@ -12470,68 +13389,177 @@
                     showToast(state.lang === 'fa' ? 'پلاگین خرید در دسترس نیست.' : 'Billing plugin unavailable.', 3000);
                     return;
                 }
-                if (!PREMIUM_VERIFY_WORKER_URL) {
-                    showToast(state.lang === 'fa' ?
-                        'هنوز آدرس سرور تأیید خرید تنظیم نشده (PREMIUM_VERIFY_WORKER_URL).' :
-                        'Verify server URL not configured yet (PREMIUM_VERIFY_WORKER_URL).', 3500);
-                    return;
-                }
+                const pid = productId || LEGACY_LIFETIME_PRODUCT_ID;
                 try {
                     await plugin.connect();
-                    const purchase = await plugin.purchase({ productId: PREMIUM_PRODUCT_ID });
-                    showToast(state.lang === 'fa' ? 'در حال تأیید خرید...' : 'Verifying purchase...', 2000);
-                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId: purchase.productId, purchaseToken: purchase.purchaseToken })
-                    });
-                    const data = await res.json();
-                    if (data.valid) {
-                        state.isPremium = true;
-                        state.premiumPurchaseToken = purchase.purchaseToken;
-                        saveState();
-                        applyPremiumLockUI();
-                        document.getElementById('premiumPaywallBackdrop').classList.remove('open');
-                        showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
-                    } else {
-                        showToast(state.lang === 'fa' ? 'تأیید خرید ناموفق بود.' : 'Purchase verification failed.', 3000);
-                    }
+                    // منبع اصلی اعتبار پریمیوم، همین جواب موفقِ Poolakey (purchaseSucceed) است —
+                    // خودِ کافه‌بازار خرید رو تأیید کرده؛ به هیچ سرور واسطه‌ای نیاز نیست.
+                    const purchase = await plugin.purchase({ productId: pid });
+                    const plan = findProPlan(purchase.productId);
+                    const expiresAt = plan ? proExtendedExpiry(plan.months) : null; // null = همیشگی
+                    applyProStatusFromBazaar(true, purchase.productId, purchase.purchaseToken, expiresAt);
+                    // این محصولات مثل اشتراک عمل می‌کنن (زمان‌دار)، پس بعد از اعطای مدت، مصرفش
+                    // می‌کنیم تا دفعه‌ی بعد (تمدید) بشه دوباره همون پلن رو خرید
+                    if (plan) { try { await plugin.consume({ purchaseToken: purchase.purchaseToken }); } catch (e2) {} }
+                    document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+                    document.getElementById('proPlansModalBackdrop').classList.remove('open');
+                    showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
                 } catch (e) {
                     if (e && e.message !== 'cancelled') {
                         showToast(state.lang === 'fa' ? 'خرید انجام نشد: ' + (e.message || '') : 'Purchase failed: ' + (e.message || ''), 3000);
+                    } else {
+                        showToast(state.lang === 'fa' ? 'خرید لغو شد.' : 'Purchase cancelled.', 2500);
                     }
                 }
             }
-            // اگر قبلاً خرید انجام شده (مثلاً روی گوشی دیگه)، با این تابع می‌تونه بازیابیش کنه
+            // بازیابیِ خرید: هم موقع بالا اومدن اپ صدا زده می‌شه، هم هر وقت لازم باشه (مثلاً بعد
+            // از نصب مجدد روی گوشیِ جدید). همیشه از طریق خودِ Poolakey/کافه‌بازار چک می‌کنه، نه سرور.
             async function restorePurchases() {
                 const plugin = bazaarBillingPlugin();
-                if (!plugin || !PREMIUM_VERIFY_WORKER_URL) return;
+                if (!plugin) return;
                 try {
                     await plugin.connect();
                     const result = await plugin.getPurchasedProducts();
-                    const owned = (result.products || []).find(p => p.productId === PREMIUM_PRODUCT_ID);
-                    if (!owned) return;
-                    const res = await fetch(PREMIUM_VERIFY_WORKER_URL + '/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId: owned.productId, purchaseToken: owned.purchaseToken })
-                    });
-                    const data = await res.json();
-                    if (data.valid) {
-                        state.isPremium = true;
-                        state.premiumPurchaseToken = owned.purchaseToken;
+                    const allIds = [LEGACY_LIFETIME_PRODUCT_ID, ...PRO_PLANS.map(p => p.id)];
+                    const owned = (result.products || []).filter(p => allIds.includes(p.productId));
+                    if (owned.length) {
+                        // معمولاً این‌جا چیزی پیدا نمی‌شه چون همون لحظه‌ی خرید مصرف می‌شن؛ اگه
+                        // چیزی موند (مثلاً برنامه قبل از consume بسته شده بود)، الان اعمالش کن.
+                        for (const p of owned) {
+                            const plan = findProPlan(p.productId);
+                            const expiresAt = plan ? proExtendedExpiry(plan.months) : null;
+                            applyProStatusFromBazaar(true, p.productId, p.purchaseToken, expiresAt);
+                            if (plan) { try { await plugin.consume({ purchaseToken: p.purchaseToken }); } catch (e2) {} }
+                        }
+                    } else {
+                        // این پاسخِ رسمیِ Bazaar/Poolakeyه (نه خطای اتصال)؛ چون پلن‌های زمان‌دار
+                        // خودشون مصرف می‌شن، نبودنشون این‌جا طبیعیه. isPremium رو فقط از روی
+                        // همون expiresAt ذخیره‌شده (که مستقل از این پاسخه) دوباره حساب می‌کنیم.
+                        recomputeTrustedPremiumFlag();
                         saveState();
                         applyPremiumLockUI();
                     }
-                } catch (e) {}
+                } catch (e) {
+                    // آفلاین یا خطای اتصال به کافه‌بازار/Poolakey: هیچ تغییری نمی‌دیم، وضعیت
+                    // معتبر قبلی (state.isPremium فعلی) دست‌نخورده باقی می‌مونه.
+                }
             }
-            document.getElementById('premiumPurchaseBtn').addEventListener('click', purchasePremium);
+
+            // ---- مودال انتخاب پلن ----
+            let proPlansSelectedId = null;
+            function renderProPlansList() {
+                const wrap = document.getElementById('proPlansList');
+                wrap.innerHTML = PRO_PLANS.map(p =>
+                    '<div class="pro-plan-card" data-plan="' + p.id + '">' +
+                    '<div><div class="ppc-title">' + (state.lang === 'fa' ? p.labelFa : p.labelEn) + '</div></div>' +
+                    '<div style="display:flex;align-items:center;gap:10px">' +
+                    '<span class="ppc-price">' + (state.lang === 'fa' ? p.priceFa : p.priceEn) + '</span>' +
+                    '<span class="ppc-radio"></span></div></div>'
+                ).join('');
+                wrap.querySelectorAll('.pro-plan-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        proPlansSelectedId = card.dataset.plan;
+                        wrap.querySelectorAll('.pro-plan-card').forEach(c => c.classList.toggle('active', c === card));
+                        document.getElementById('proPlansBuyBtn').disabled = false;
+                    });
+                });
+            }
+            function openUpgradeFlow() {
+                proPlansSelectedId = null;
+                document.getElementById('proPlansBuyBtn').disabled = true;
+                renderProPlansList();
+                document.getElementById('proPlansModalBackdrop').classList.add('open');
+            }
+            document.getElementById('premiumPurchaseBtn').addEventListener('click', openUpgradeFlow);
+            document.getElementById('upgradeHeaderBtn').addEventListener('click', openUpgradeFlow);
+            document.getElementById('proPlansCancelBtn').addEventListener('click', () => {
+                document.getElementById('proPlansModalBackdrop').classList.remove('open');
+            });
+            document.getElementById('proPlansModalBackdrop').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
+            document.getElementById('proPlansBuyBtn').addEventListener('click', () => {
+                if (!proPlansSelectedId) return;
+                purchasePremium(proPlansSelectedId);
+            });
             document.getElementById('premiumPaywallCloseBtn').addEventListener('click', () => {
                 document.getElementById('premiumPaywallBackdrop').classList.remove('open');
             });
             document.getElementById('premiumPaywallBackdrop').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('open');
             });
+
+            // ============================================================
+            // باز کردن دستی نسخه‌ی کامل با یه کد مخفی (برای تست خودت، بدون خرید واقعی)
+            // هیچ دکمه یا متنی این قابلیت رو لو نمی‌ده؛ فقط با ۷ بار ضربه‌ی سریع
+            // روی آیکون 🔒 بالای همین پنجره، کادر وارد کردن کد ظاهر می‌شه.
+            //
+            // برخلاف نسخه‌ی قبلی، خودِ کد اینجا به‌صورت متن ساده نوشته نشده؛ فقط
+            // هش (SHA-256 نمک‌دار) اون ذخیره شده، پس با دیدن سورس کد هم کد واقعی
+            // به‌سادگی قابل خوندن نیست. همچنین بعد از چند بار کد اشتباه، چند ثانیه
+            // قفل موقت می‌خوره تا حدس زدن پشت‌سرهم عملاً بی‌فایده باشه.
+            // (PREMIUM_UNLOCK_SALT / PREMIUM_UNLOCK_HASH / RP_OWNER_MARK_VALUE بالای
+            // فایل، کنار STORAGE_KEY، تعریف شدن تا موقع لود اولیه‌ی state هم در دسترس باشن.)
+            // ============================================================
+            let premiumTapCount = 0;
+            let premiumTapTimer = null;
+            document.getElementById('premiumLockIcon').addEventListener('click', function() {
+                premiumTapCount++;
+                clearTimeout(premiumTapTimer);
+                premiumTapTimer = setTimeout(() => { premiumTapCount = 0; }, 2500);
+                if (premiumTapCount >= 7) {
+                    premiumTapCount = 0;
+                    document.getElementById('premiumCodeRow').style.display = 'flex';
+                    document.getElementById('premiumCodeInput').focus();
+                }
+            });
+            let premiumUnlockAttempts = 0;
+            let premiumUnlockLockedUntil = 0;
+            async function sha256Hex(text) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+            async function tryPremiumUnlockCode() {
+                const input = document.getElementById('premiumCodeInput');
+                const now = Date.now();
+                if (now < premiumUnlockLockedUntil) {
+                    const secsLeft = Math.ceil((premiumUnlockLockedUntil - now) / 1000);
+                    input.value = '';
+                    showToast(state.lang === 'fa' ?
+                        ('⏳ چند بار اشتباه زدی؛ ' + secsLeft + ' ثانیه‌ی دیگه دوباره امتحان کن') :
+                        ('⏳ Too many attempts; try again in ' + secsLeft + 's'), 2500);
+                    return;
+                }
+                const val = (input.value || '').trim();
+                const hash = await sha256Hex(PREMIUM_UNLOCK_SALT + val);
+                if (val && hash === PREMIUM_UNLOCK_HASH) {
+                    premiumUnlockAttempts = 0;
+                    state.__rpOwnerMark = RP_OWNER_MARK_VALUE;
+                    recomputeTrustedPremiumFlag();
+                    saveState();
+                    applyPremiumLockUI();
+                    document.getElementById('premiumPaywallBackdrop').classList.remove('open');
+                    input.value = '';
+                    document.getElementById('premiumCodeRow').style.display = 'none';
+                    showToast(state.lang === 'fa' ? '🎉 نسخه‌ی کامل فعال شد!' : '🎉 Full version unlocked!', 3000);
+                } else {
+                    premiumUnlockAttempts++;
+                    input.value = '';
+                    input.placeholder = state.lang === 'fa' ? 'کد اشتباهه' : 'Wrong code';
+                    if (premiumUnlockAttempts >= 5) {
+                        premiumUnlockLockedUntil = now + 30000; // ۳۰ ثانیه قفل موقت بعد از ۵ بار اشتباه
+                        premiumUnlockAttempts = 0;
+                        showToast(state.lang === 'fa' ? '⏳ به‌خاطر تلاش زیاد، ۳۰ ثانیه قفل شد' : '⏳ Locked for 30s after too many attempts', 2800);
+                    } else {
+                        showToast(state.lang === 'fa' ? '❌ کد درست نیست' : '❌ Incorrect code', 2000);
+                    }
+                }
+            }
+            document.getElementById('premiumCodeSubmitBtn').addEventListener('click', tryPremiumUnlockCode);
+            document.getElementById('premiumCodeInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') tryPremiumUnlockCode();
+            });
+
 
             const HELP_CONTENT = {
                 habits: {
@@ -12682,8 +13710,61 @@
             });
             document.getElementById('onboardingSkipBtn').addEventListener('click', closeOnboarding);
             document.getElementById('replayTutorialBtn').addEventListener('click', () => openOnboarding(true));
-            if (!state.onboardingDone) openOnboarding(false);
-            renderAll();
+
+            // ============================================================
+            // قوانین و شرایط استفاده: قبل از هر چیز دیگه‌ای (حتی قبل از انتخاب زبان و
+            // آموزش اولیه) باید یک‌بار به‌صراحت پذیرفته بشه؛ در تنظیمات هم همیشه قابل
+            // مشاهده‌ی دوباره‌ست. نسخه‌ی پذیرفته‌شده و تاریخش ذخیره می‌شه تا اگه بعداً متن
+            // قوانین عوض شد، دوباره درخواست پذیرش بشه.
+            // ============================================================
+            function renderTermsText() {
+                const fa = state.lang === 'fa';
+                const numLabel = n => fa ? toPersianDigits(n) : String(n);
+                document.getElementById('termsBodyText').innerHTML = TERMS_SECTIONS.map((s, i) =>
+                    '<div class="terms-section"><div class="ts-head"><span class="ts-num">' + numLabel(i + 1) +
+                    '</span><span>' + s.icon + ' ' + (fa ? s.titleFa : s.titleEn) + '</span></div>' +
+                    '<p>' + (fa ? s.bodyFa : s.bodyEn) + '</p></div>'
+                ).join('');
+            }
+            function openTermsOverlay(isViewOnly) {
+                renderTermsText();
+                document.getElementById('termsCheckboxRow').style.display = isViewOnly ? 'none' : 'flex';
+                document.getElementById('termsAcceptBtn').style.display = isViewOnly ? 'none' : 'block';
+                document.getElementById('termsCloseViewBtn').style.display = isViewOnly ? 'block' : 'none';
+                document.getElementById('termsAcceptCheckbox').checked = false;
+                document.getElementById('termsAcceptBtn').disabled = true;
+                document.getElementById('termsOverlay').classList.add('open');
+            }
+            function needsTermsAcceptance() {
+                return state.termsAcceptedVersion !== TERMS_VERSION;
+            }
+            function proceedAfterTerms() {
+                if (!state.onboardingDone) openOnboarding(false);
+                renderAll();
+            }
+            document.getElementById('termsAcceptCheckbox').addEventListener('change', function() {
+                document.getElementById('termsAcceptBtn').disabled = !this.checked;
+            });
+            document.getElementById('termsAcceptBtn').addEventListener('click', function() {
+                if (document.getElementById('termsAcceptBtn').disabled) return;
+                state.termsAcceptedVersion = TERMS_VERSION;
+                state.termsAcceptedAt = Date.now();
+                saveState();
+                document.getElementById('termsOverlay').classList.remove('open');
+                proceedAfterTerms();
+            });
+            document.getElementById('termsCloseViewBtn').addEventListener('click', function() {
+                document.getElementById('termsOverlay').classList.remove('open');
+            });
+            document.getElementById('viewTermsBtn').addEventListener('click', function() {
+                openTermsOverlay(true);
+            });
+
+            if (needsTermsAcceptance()) {
+                openTermsOverlay(false);
+            } else {
+                proceedAfterTerms();
+            }
 
             let resizeTimer;
             window.addEventListener('resize', () => {
@@ -12789,7 +13870,7 @@
                     showToast(state.lang === 'fa' ? 'اسم چالش رو وارد کن' : 'Enter a challenge name');
                     return;
                 }
-                const rewardCoins = Math.max(0, parseInt(document.getElementById('challengeRewardCoinsField').value, 10) || 0);
+                const rewardCoins = Math.min(COIN_MAX_PER_OP, Math.max(0, parseInt(document.getElementById('challengeRewardCoinsField').value, 10) || 0));
                 const rewardText = document.getElementById('challengeRewardTextField').value.trim();
                 const now = Date.now();
                 const ch = {
@@ -12920,10 +14001,12 @@
             }
 
             function awardChallenge(ch) {
-                state.scores.coins = (state.scores.coins || 0) + (ch.rewardCoins || 0);
+                // دفاع دوم: حتی اگه هرجایی مقدار ch.rewardCoins به‌درستی محدود نشده باشه (مثلاً یک
+                // چالش قدیمی از قبلِ این محدودیت)، تابع مرکزی addCoins خودش دوباره سقف رو اعمال می‌کنه.
+                const awardedCoins = addCoins(ch.rewardCoins || 0);
                 showToast((state.lang === 'fa' ?
-                    ('🎉 آفرین! چالش «' + ch.name + '» موفق شد. +' + toPersianDigits(ch.rewardCoins) + ' سکه' + (ch.rewardText ? ' + 🎁 ' + ch.rewardText : '')) :
-                    ('🎉 Well done! "' + ch.name + '" succeeded. +' + ch.rewardCoins + ' coins' + (ch.rewardText ? ' + 🎁 ' + ch.rewardText : ''))
+                    ('🎉 آفرین! چالش «' + ch.name + '» موفق شد. +' + toPersianDigits(awardedCoins) + ' سکه' + (ch.rewardText ? ' + 🎁 ' + ch.rewardText : '')) :
+                    ('🎉 Well done! "' + ch.name + '" succeeded. +' + awardedCoins + ' coins' + (ch.rewardText ? ' + 🎁 ' + ch.rewardText : ''))
                 ), 4200, 'toast-success');
                 saveState();
                 updateProfileUI();
