@@ -2,7 +2,7 @@
 // این عدد نسخه را عوض کنید (v3 -> v4 -> ...). با این کار مرورگر/PWA نصب‌شده روی گوشی کاربر
 // کش قدیمی را دور می‌ریزد و نسخه‌ی تازه را می‌گیرد. قبلاً این عدد ثابت می‌ماند و همین باعث می‌شد
 // تغییرات (مثلاً رنگ پس‌زمینه) بعد از نصب PWA هیچ‌وقت به‌روزرسانی نشوند.
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v11';
 const CACHE_NAME = 'routine-planner-' + CACHE_VERSION;
 const ASSETS = ['./', './index.html', './manifest.json', './vendor/chart.umd.min.js'];
 
