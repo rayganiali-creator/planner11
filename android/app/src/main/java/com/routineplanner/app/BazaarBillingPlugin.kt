@@ -71,6 +71,8 @@ class BazaarBillingPlugin : Plugin() {
                 ret.put("productId", purchaseInfo.productId)
                 ret.put("purchaseToken", purchaseInfo.purchaseToken)
                 ret.put("payload", purchaseInfo.payload)
+                // زمان خرید از سرور کافه‌بازار — مبنای مطمئنِ محاسبه‌ی انقضا (نه ساعت گوشی)
+                ret.put("purchaseTime", purchaseInfo.purchaseTime)
                 call.resolve(ret)
             }
             purchaseCanceled {
@@ -108,6 +110,7 @@ class BazaarBillingPlugin : Plugin() {
                     val o = JSObject()
                     o.put("productId", p.productId)
                     o.put("purchaseToken", p.purchaseToken)
+                    o.put("purchaseTime", p.purchaseTime)
                     arr.put(o)
                 }
                 val ret = JSObject()
@@ -117,6 +120,32 @@ class BazaarBillingPlugin : Plugin() {
             queryFailed { throwable ->
                 call.reject("query_failed", throwable.message ?: "query failed")
             }
+        }
+    }
+
+    // ذخیره‌ی فایل در پوشه‌ی عمومی Download/RoutinePlanner از راه MediaStore (روش رسمی اندروید ۱۰+،
+    // بدون نیاز به هیچ مجوزی). روی اندروید قدیمی‌تر reject می‌شه و JS به Documents / اشتراک‌گذاری برمی‌گرده.
+    @PluginMethod
+    fun saveToDownloads(call: PluginCall) {
+        val fileName = call.getString("fileName") ?: return call.reject("fileName required")
+        val mime = call.getString("mimeType") ?: "application/octet-stream"
+        val data = call.getString("data") ?: return call.reject("data required")
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) return call.reject("legacy_android")
+        try {
+            val bytes = android.util.Base64.decode(data, android.util.Base64.DEFAULT)
+            val values = android.content.ContentValues().apply {
+                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(android.provider.MediaStore.MediaColumns.MIME_TYPE, mime)
+                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS + "/RoutinePlanner")
+            }
+            val resolver = context.contentResolver
+            val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                ?: return call.reject("insert_failed")
+            val out = resolver.openOutputStream(uri) ?: return call.reject("stream_failed")
+            out.use { it.write(bytes) }
+            call.resolve(JSObject().put("uri", uri.toString()))
+        } catch (e: Exception) {
+            call.reject("save_failed", e.message)
         }
     }
 

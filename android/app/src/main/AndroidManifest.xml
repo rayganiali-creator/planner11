@@ -47,6 +47,9 @@
     <!-- برای این‌که بعد از روشن‌شدن دوباره‌ی گوشی، یادآوری‌های زمان‌بندی‌شده از بین نروند -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- یادداشت صوتی کتاب‌ها (پرو): اندروید هنگام اولین ضبط از کاربر اجازه می‌گیرد -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!-- روی اندروید ۱۱ به بالا، بدون این بخش اپ نمی‌تونه ببینه کافه‌بازار نصبه یا نه
          و اتصال به سرویس پرداخت درون‌برنامه‌ای (Poolakey) با خطا مواجه می‌شه. -->
