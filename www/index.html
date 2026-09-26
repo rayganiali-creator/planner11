@@ -1788,12 +1788,8 @@
             font-size: calc(13.5px * var(--font-scale));
         }
 
-        .habit-details-toggle {
-            transition: transform .2s;
-        }
-        .habit-details-toggle.open {
-            transform: rotate(180deg);
-        }
+        .habit-details-toggle { transition: background-color .2s, border-color .2s; }
+        .habit-details-toggle.open { background: var(--primary-soft); border-color: var(--primary); }
         .habit-details-wrap {
             display: none;
         }
@@ -4759,6 +4755,40 @@
         .sa-link-bar { height: 6px; border-radius: 999px; background: var(--hairline); overflow: hidden; margin: 8px 0 6px; }
         .sa-link-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #EF6F6C, #d9463b); }
         .sa-link small { display: block; color: var(--text-muted); font-size: calc(11px * var(--font-scale)); line-height: 1.85; }
+
+        .sa-jentry { position: relative; }
+        .sa-j-acts { display: flex; gap: 4px; justify-content: flex-end; margin-top: 4px; }
+        .sa-jentry textarea { width: 100%; box-sizing: border-box; margin-top: 6px; }
+
+        /* ===== کارتِ عادت: چیدمانِ مرتب و مدرن ===== */
+        .hb-main { display: flex; align-items: flex-start; gap: 8px; flex: 1; min-width: 0; }
+        .hb-title { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 7px; }
+        .hb-name { font-size: calc(14.5px * var(--font-scale)); font-weight: 800; line-height: 1.5; overflow-wrap: anywhere; }
+        .hb-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 7px; }
+        .hb-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px;
+            background: var(--surface-2); border: 1px solid var(--hairline); color: var(--text-muted);
+            font-size: calc(10.5px * var(--font-scale)); font-weight: 700; line-height: 1.7; white-space: nowrap; }
+        .hb-chip.good { color: #1f9d55; background: rgba(31,157,85,.10); border-color: rgba(31,157,85,.25); }
+        .hb-chip.bad { color: #d9463b; background: rgba(217,70,59,.10); border-color: rgba(217,70,59,.25); }
+        [data-theme="dark"] .hb-chip.good { color: #4fd18a; } [data-theme="dark"] .hb-chip.bad { color: #ff7a70; }
+        .hb-chip.prio.green { color: #1f9d55; } .hb-chip.prio.red { color: #d9463b; } .hb-chip.prio.gold { color: #b8912f; }
+        .hb-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: calc(11px * var(--font-scale)); color: var(--text-muted); }
+        .hb-since { opacity: .85; }
+        .hb-title .badge, .hb-stats .badge { margin: 0; }
+        /* دکمه‌ی یادداشت و عکسِ هر عادت، کنار خودش */
+        .habit-details-toggle { display: inline-flex; align-items: center; gap: 4px; }
+        .habit-details-wrap.open { margin-top: 10px; padding: 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--hairline); }
+
+        .hrow { display: flex; align-items: flex-start; gap: 8px; }
+        .hb-actions { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; justify-content: flex-end; flex: 0 0 auto; max-width: 116px; align-self: flex-start; }
+        .hinfo { min-width: 0; flex: 1; }
+
+
+        .rp-pro-note { padding: 10px 12px; border-radius: 12px; margin-bottom: 10px; line-height: 1.85;
+            background: linear-gradient(135deg, color-mix(in srgb, #f5bf42 14%, var(--surface)), var(--surface));
+            border: 1px solid color-mix(in srgb, #f5bf42 40%, transparent); font-size: calc(11.5px * var(--font-scale)); }
+        .rp-pro-note b { display: block; margin-bottom: 3px; }
+        .jrnl-remind-on { margin-top: 6px; font-size: calc(10.5px * var(--font-scale)); color: var(--primary); font-weight: 700; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4823,6 +4853,7 @@
                     <button data-view="journal" class="view-tab-btn" data-fa="📓 یادداشت" data-en="📓 Journal">📓 یادداشت</button>
                     <button data-view="todo" class="view-tab-btn" data-fa="✅ لیست کارها" data-en="✅ To-Do">✅ لیست کارها</button>
                     <button data-view="pomodoro" class="view-tab-btn" data-fa="⏱️ پومودورو" data-en="⏱️ Pomodoro">⏱️ پومودورو</button>
+                    <button id="tabsPickerChallenges" class="view-tab-btn" data-fa="🔥 چالش‌ها" data-en="🔥 Challenges">🔥 چالش‌ها</button>
                     <button data-view="settings" class="view-tab-btn" data-fa="⚙ تنظیمات" data-en="⚙ Settings">⚙ تنظیمات</button>
                 </nav>
                 <button class="modal-close" id="tabsPickerCloseBtn" data-fa="بستن" data-en="Close">بستن</button>
@@ -5477,9 +5508,7 @@
     <input type="file" id="importFileInput" accept=".json" style="display:none">
     <div class="toast" id="toast"></div>
 
-    <button id="challengeFloatBtn" class="urge-float-btn challenge-float-btn" title="چالش جدید" data-fa-title="چالش جدید" data-en-title="New Challenge">
-        <span>🔥</span>
-    </button>
+    
 
     <div class="modal-backdrop urge-modal" id="urgeModalBackdrop">
         <div class="modal">
@@ -5750,6 +5779,23 @@
         <img id="habitPhotoLightboxImg" src="" alt="">
     </div>
 
+
+    <div class="modal-backdrop" id="remindPickerBackdrop">
+        <div class="modal" style="max-width:360px">
+            <h3 id="remindPickerTitle" data-fa="⏰ یادآوری" data-en="⏰ Reminder">⏰ یادآوری</h3>
+            <div class="sub" id="remindPickerSub"></div>
+            <div id="remindProNote" class="rp-pro-note" style="display:none">
+                <b data-fa="⭐ این قابلیت مخصوص پرو است" data-en="⭐ This is a Pro feature">⭐ این قابلیت مخصوص پرو است</b>
+                <span data-fa="با پرو می‌توانی برای هر یادداشت و هر کتاب زمان یادآوری بگذاری تا سر وقت به تو اطلاع داده شود." data-en="With Pro you can set a reminder time for any note or book and get a notification.">با پرو می‌توانی برای هر یادداشت و هر کتاب زمان یادآوری بگذاری تا سر وقت به تو اطلاع داده شود.</span>
+            </div>
+            <input type="datetime-local" id="remindPickerInput" style="width:100%;margin:10px 0">
+            <div style="display:flex;gap:8px">
+                <button class="glass-btn primary" id="remindPickerSave" style="flex:1" data-fa="ثبت یادآوری" data-en="Set reminder">ثبت یادآوری</button>
+                <button class="glass-btn" id="remindPickerClear" style="flex:1" data-fa="حذف یادآوری" data-en="Remove">حذف یادآوری</button>
+            </div>
+            <button class="modal-close" id="remindPickerClose" data-fa="بستن" data-en="Close">بستن</button>
+        </div>
+    </div>
     <div class="modal-backdrop" id="helpModalBackdrop">
         <div class="modal" style="max-width:420px">
             <h3 id="helpModalTitle">❓</h3>
@@ -5981,7 +6027,7 @@
                         sc.ticks = Object.assign({}, sc.ticks || {}, { color: muted, padding: 8, font: { family: 'Vazirmatn, Tahoma, sans-serif', size: 11 } });
                     });
                     (cfg.data.datasets || []).forEach(ds => {
-                        if (type === 'bar') Object.assign(ds, { borderRadius: 10, borderSkipped: false, maxBarThickness: 26, categoryPercentage: .72, barPercentage: .82, rpGradient: true });
+                        if (type === 'bar') Object.assign(ds, { borderRadius: 6, borderSkipped: false, maxBarThickness: 14, categoryPercentage: .78, barPercentage: .62, rpGradient: true });   // میله‌های باریک‌تر و دقیق‌تر
                         if (type === 'line') Object.assign(ds, { tension: .4, borderWidth: 3, pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 12, fill: true, rpGradient: true });
                     });
                     if (o.plugins.legend && o.plugins.legend.display !== false) o.plugins.legend = { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, padding: 14, color: muted, font: { family: 'Vazirmatn, Tahoma, sans-serif', size: 11 } } };
@@ -6416,7 +6462,8 @@
                     en: ['Unlimited habits (free: 3 active)', 'Smart analytics: trigger → outcome cross charts, monthly/yearly ranges, period comparison', 'Failure pattern detection with suggestions', 'Behavioral journaling on reasons'] },
                 todo: { fa: ['تکرار پیشرفته در روزهای خاص هفته', 'زیرتسک نامحدود (رایگان: ۳ زیرتسک برای هر کار)'], en: ['Advanced repeat on specific weekdays', 'Unlimited subtasks (free: 3 per task)'] },
                 pomodoro: { fa: ['زمان‌های دلخواه برای تمرکز، استراحت کوتاه و استراحت بلند'], en: ['Custom focus, short break and long break durations'] },
-                library: { fa: ['کتاب‌های نامحدود (رایگان: ۳ کتاب در حال مطالعه)', 'پیوست عکس و یادداشت صوتی به کتاب‌ها'], en: ['Unlimited books (free: 3 in progress)', 'Photo and voice attachments'] }
+                library: { fa: ['کتاب‌های نامحدود (رایگان: ۳ کتاب در حال مطالعه)', 'پیوست عکس و یادداشت صوتی به کتاب‌ها', 'یادآوری با اعلان برای هر کتاب'], en: ['Unlimited books (free: 3 in progress)', 'Photo and voice attachments', 'Notification reminder for each book'] },
+                journal: { fa: ['یادآوری با اعلان برای هر یادداشت (هر زمانی که بخواهی)'], en: ['Notification reminder for any note, at any time you choose'] }
             };
             let _proNotesKey = '';
             // ============================================================
@@ -7830,6 +7877,9 @@
                                 state.lang === 'fa' ? '📖 ثبت صفحه' : '📖 Log Pages') + '</button>')) +
                             '<button class="b-hist-btn" data-bhist="' + b.id + '">' + (state.lang === 'fa' ?
                                 '🕒 تاریخچه' : '🕒 History') + '</button>' +
+                            '<button class="b-hist-btn" data-bremind="' + b.id + '">⏰ ' + (state.lang === 'fa' ?
+                                (b.remindAt && b.remindAt > Date.now() ? rpFmtDateTime(b.remindAt) : 'یادآوری') :
+                                (b.remindAt && b.remindAt > Date.now() ? rpFmtDateTime(b.remindAt) : 'Reminder')) + '</button>' +
                             '<button class="b-edit-btn" data-bedit="' + b.id + '">' + (state.lang === 'fa' ?
                                 '✏️ ویرایش' : '✏️ Edit') + '</button>' +
                             '<button class="b-del-btn" data-bdel="' + b.id + '">' + (state.lang === 'fa' ?
@@ -7847,6 +7897,7 @@
                     function() {
                         openLogPagesModal(this.dataset.blog);
                     }));
+                list.querySelectorAll('[data-bremind]').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); rpOpenReminderPicker('book', btn.dataset.bremind); }));
                 list.querySelectorAll('[data-bedit]').forEach(btn => btn.addEventListener('click',
                     function() {
                         openEditBookModal(this.dataset.bedit);
@@ -8809,11 +8860,20 @@
                         '<div class="empty-state">No habits found.</div>'; return; }
                 list.innerHTML = "";
                 filtered.forEach((h, i) => {
-                    const j = toJalaali(...h.createdAt.split('-').map(Number));
-                    const badge = h.permanent ? (state.lang === 'fa' ? 'دائمی' : 'Perm') : (state.lang ===
-                        'fa' ? 'تا ' : '~') + (() => { const je = toJalaali(...h.endDate.split('-')
-                            .map(Number)); return toPersianDigits(je.jd) + ' ' + PERSIAN_MONTHS[je
-                            .jm - 1]; })();
+                  try {
+                    const j = toJalaali(...String(h.createdAt || dateToISO(new Date())).split('-').map(Number));
+                    // عادتِ مدت‌دار ممکن است endDate نداشته باشد (از نسخه‌های قدیمی یا پشتیبان)؛
+                    // در آن صورت از مدتِ روزها حساب می‌شود و اگر آن هم نبود، فقط «موقت» نوشته می‌شود.
+                    const badge = (() => {
+                        if (h.permanent) return state.lang === 'fa' ? 'دائمی' : 'Perm';
+                        let end = h.endDate;
+                        if (!end && h.durationDays) { const d = new Date(h.createdAt); d.setDate(d.getDate() + h.durationDays); end = dateToISO(d); }
+                        if (!end) return state.lang === 'fa' ? 'موقت' : 'Temp';
+                        try {
+                            const je = toJalaali(...end.split('-').map(Number));
+                            return (state.lang === 'fa' ? 'تا ' : '~') + toPersianDigits(je.jd) + ' ' + PERSIAN_MONTHS[je.jm - 1];
+                        } catch (e) { return state.lang === 'fa' ? 'موقت' : 'Temp'; }
+                    })();
                     const schLabel = scheduleLabel(h);
                     const dirLabel = directionLabel(h);
                     const typeLabel = h.type === 'binary' ? '✓/✗' : h.type === 'numeric' ? '#' : '⏱';
@@ -8869,24 +8929,22 @@
                     const item = document.createElement('div');
                     item.className = 'habit-item';
                     item.innerHTML =
-                        '<div class="hrow"><div style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap"><div class="drag-handle">⋮⋮</div><div class="hinfo"><div class="hname"><span class="priority-dot ' +
-                        priorityClass(h.priority) + '"></span>' + h.name.replace(/</g, '&lt;').replace(/>/g,
-                            '&gt;') + '<span class="habit-type-badge">' + typeLabel + '</span>' +
-                        '<span class="quit-badge" style="background:' + (h.direction === 'less' ? 'var(--fail)' :
-                            'var(--success)') + '">' + dirLabel + '</span>' +
-                        (goalDisplay ? '<span class="goal-badge">' + goalDisplay + '</span>' : '') +
-                        (goalInfo ? '<span class="goal-badge" style="background:var(--primary)">' +
-                            goalInfo + '</span>' : '') +
-                        '<span style="margin-right:6px">' + pointsDisplay + '</span>' +
-                        '<span style="margin-right:6px">' + streakBadge + '</span>' +
-                        (bestRecordBadge ? '<span style="margin-right:6px">' + bestRecordBadge + '</span>' : '') +
-                        '</div><div class="hdate">' + (state.lang === 'fa' ? ('از ' + toPersianDigits(j
-                            .jd) + ' ' + PERSIAN_MONTHS[j.jm - 1]) : ('Since ' + EN_MONTHS[j.jm -
-                            1] + ' ' + j.jd)) + '<span class="badge">' + badge +
-                        '</span><span class="badge" style="background:var(--primary-soft);color:var(--primary)">' +
-                        schLabel + '</span><span class="priority-badge ' + (h.priority || 'yellow') + '">' +
-                        priorityBadge(h.priority || 'yellow') + '</span></div>' + progressHTML +
-                        '</div></div><div style="display:flex;gap:2px;align-items:center"><button class="icon-btn" data-up="' +
+                        '<div class="hrow"><div class="hb-main"><div class="drag-handle">⋮⋮</div><div class="hinfo">' +
+                        '<div class="hb-title"><span class="priority-dot ' + priorityClass(h.priority) + '"></span>' +
+                        '<b class="hb-name">' + escHtml(h.name) + '</b>' + pointsDisplay + '</div>' +
+                        '<div class="hb-chips">' +
+                            '<span class="hb-chip">' + typeLabel + '</span>' +
+                            '<span class="hb-chip">' + schLabel + '</span>' +
+                            (goalDisplay ? '<span class="hb-chip">' + goalDisplay + '</span>' : '') +
+                            (goalInfo ? '<span class="hb-chip">' + goalInfo + '</span>' : '') +
+                            '<span class="hb-chip ' + (h.direction === 'less' ? 'bad' : 'good') + '">' + dirLabel + '</span>' +
+                            '<span class="hb-chip">' + badge + '</span>' +
+                            '<span class="hb-chip prio ' + (h.priority || 'yellow') + '">' + priorityBadge(h.priority || 'yellow') + '</span>' +
+                        '</div>' +
+                        '<div class="hb-stats">' + streakBadge + (bestRecordBadge ? bestRecordBadge : '') +
+                            '<span class="hb-since">' + (state.lang === 'fa' ? ('از ' + toPersianDigits(j.jd) + ' ' + PERSIAN_MONTHS[j.jm - 1]) : ('Since ' + EN_MONTHS[j.jm - 1] + ' ' + j.jd)) + '</span></div>' +
+                        progressHTML +
+                        '</div></div><div class="hb-actions"><button class="icon-btn" data-up="' +
                         i + '" ' + (i === 0 ? 'disabled' : '') + '>▲</button><button class="icon-btn" data-down="' +
                         i + '" ' + (i === state.habits.length - 1 ? 'disabled' : '') +
                         '>▼</button><button class="habit-mini-chart-btn" data-habit-charts="' + h.id +
@@ -8894,7 +8952,7 @@
                         '"><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--primary)" stroke-width="3" opacity="0.25"/><path d="M16 2 A14 14 0 0 1 29.6 19.5 L16 16 Z" fill="var(--primary)"/><path d="M29.6 19.5 A14 14 0 0 1 9 29 L16 16 Z" fill="var(--accent)"/><path d="M9 29 A14 14 0 0 1 2.4 12.5 L16 16 Z" fill="var(--success)"/></svg></button><button class="icon-btn" data-edit="' + h.id +
                         '">✎</button><button class="icon-btn danger" data-del="' + h.id + '">✕</button><button class="icon-btn habit-details-toggle' +
                         (habitDetailsOpenSet.has(h.id) ? ' open' : '') + '" data-details-toggle="' + h.id + '" title="' +
-                        (state.lang === 'fa' ? 'یادداشت و عکس این عادت' : "This habit's note and photos") + '">▾</button></div></div>' +
+                        (state.lang === 'fa' ? 'یادداشت و عکس این عادت' : "This habit's note and photos") + '">📝</button></div></div>' +
                         levelsHtml +
                         '<div class="habit-details-wrap' + (habitDetailsOpenSet.has(h.id) ? ' open' : '') + '" data-details-wrap="' + h.id + '">' +
                         '<div class="habit-note-box"><textarea data-note="' + h.id + '" maxlength="1000" placeholder="' +
@@ -8906,6 +8964,7 @@
                         (state.lang === 'fa' ? 'افزودن عکس' : 'Add photo') + '</button>' +
                         '<div class="habit-photo-strip" data-photo-strip="' + h.id + '"></div></div></div>';
                     list.appendChild(item);
+                  } catch (err) { console.warn('habit render skipped', h && h.id, err); }
                 });
                 list.querySelectorAll('[data-details-toggle]').forEach(b => b.addEventListener('click', function() {
                     const hid = this.dataset.detailsToggle;
@@ -9388,7 +9447,10 @@
                     item.innerHTML = '<div class="jrnl-date">📅 ' + dateStr +
                         '</div><div class="jrnl-text">' + entry.text.replace(/</g, '&lt;').replace(
                             />/g, '&gt;') +
-                        '</div><div class="jrnl-actions"><button class="icon-btn" data-ej="' + entry
+                        '</div>' + (entry.remindAt && entry.remindAt > Date.now() ? '<div class="jrnl-remind-on">⏰ ' +
+                            (state.lang === 'fa' ? 'یادآوری: ' + rpFmtDateTime(entry.remindAt) : 'Reminder: ' + rpFmtDateTime(entry.remindAt)) + '</div>' : '') +
+                        '<div class="jrnl-actions"><button class="icon-btn" data-jremind="' + entry.id + '" title="' +
+                        (state.lang === 'fa' ? 'یادآوری' : 'Reminder') + '">⏰</button><button class="icon-btn" data-ej="' + entry
                         .id + '">✎</button><button class="icon-btn danger" data-dj="' + entry.id +
                         '">✕</button></div><div class="journal-edit-area" id="je_' + entry.id +
                         '"><textarea id="jet_' + entry.id + '" maxlength="2000">' + entry.text
@@ -9408,6 +9470,7 @@
                     list.appendChild(more);
                 }
 
+                list.querySelectorAll('[data-jremind]').forEach(b => b.addEventListener('click', () => rpOpenReminderPicker('journal', b.dataset.jremind)));
                 list.querySelectorAll('[data-ej]').forEach(b => b.addEventListener('click', () => document
                     .getElementById('je_' + b.dataset.ej).classList.toggle('show')));
                 list.querySelectorAll('[data-cej]').forEach(b => b.addEventListener('click', () => document
@@ -10623,7 +10686,7 @@
                                         stepSize: 1 }, grid: { color: 'rgba(128,128,128,0.1)' } },
                                 x: { ticks: { color: tc2, maxRotation: 30,
                                         font: { size: 9 } }, grid: { display: false } } },
-                            barPercentage: 0.7,
+                            barPercentage: 0.55,
                             categoryPercentage: 0.8
                         } });
                 } else {
@@ -10942,13 +11005,23 @@
                 // عکس‌های کتاب‌ها توی IndexedDBان، نه توی state معمولی؛ برای این‌که پشتیبان
                 // واقعاً کامل باشه (طبق درخواست)، این‌جا هم جمعشون می‌کنیم و توی همون JSON
                 // به‌صورت base64 embed می‌کنیم.
-                let bookPhotosBackup = {};
+                let bookPhotosBackup = {}, habitPhotosBackup = {}, voiceBackup = {};
                 try {
                     for (const b of (state.books || [])) {
                         const photos = await bookPhotosGet(b.id);
-                        if (photos && photos.length) {
-                            bookPhotosBackup[b.id] = photos.map(p => p.dataUrl);
-                        }
+                        if (photos && photos.length) bookPhotosBackup[b.id] = photos.map(p => p.dataUrl);
+                        // یادداشت‌های صوتی هر کتاب هم داخل پشتیبان می‌آیند
+                        try {
+                            const vs = await voiceList(b.id);
+                            if (vs && vs.length) voiceBackup[b.id] = vs.map(v => ({ id: v.id, createdAt: v.createdAt, dataUrl: v.dataUrl, duration: v.duration || 0 }));
+                        } catch (e) {}
+                    }
+                } catch (e) {}
+                try {
+                    // عکس‌های هر عادت
+                    for (const h of (state.habits || [])) {
+                        const ps = await habitPhotosGet(h.id);
+                        if (ps && ps.length) habitPhotosBackup[h.id] = ps.map(p => p.dataUrl);
                     }
                 } catch (e) {}
                 return JSON.stringify({ version: '2.9', exportedAt: new Date().toISOString(),
@@ -10968,7 +11041,11 @@
                         masteryColor: state.masteryColor,
                         customUrgeSuggestions: state.customUrgeSuggestions,
                         urgeHiddenIds: state.urgeHiddenIds, habitNotes: state.habitNotes,
-                        themeIntensity: state.themeIntensity, avatar: state.avatar, medals: state.medals || [], pomodoro: state.pomodoro || null, behaviorJournal: state.behaviorJournal || {} } },
+                        themeIntensity: state.themeIntensity, avatar: state.avatar, medals: state.medals || [], pomodoro: state.pomodoro || null, behaviorJournal: state.behaviorJournal || {},
+                        // مواردی که قبلاً در پشتیبان نبودند
+                        records: state.records || {}, todos: state.todos || [], challenges: state.challenges || [],
+                        coins: state.coins || 0, level: state.level || 1, lang: state.lang,
+                        habitPhotos: habitPhotosBackup, bookVoices: voiceBackup } },
                     null, 2);
             }
 
@@ -11357,10 +11434,92 @@
             // یادآوری‌ها همیشه فعال هستند: هر ۱۵ ثانیه بررسی می‌کند که آیا زمان انجام کاری یا
             // یادآوری عادتی فرارسیده، و هم‌زمان لیست یادآوری‌های نزدیک را برای Service Worker
             // در IndexedDB به‌روز نگه می‌دارد (برای وقتی که برنامه کاملاً بسته است).
+
+            // ============ یادآوری برای یادداشت‌ها و کتاب‌ها (قابلیت پرو) ============
+            let rpRemindTarget = null;      // {kind:'journal'|'book', id}
+            function rpFmtDateTime(ms) {
+                const d = new Date(ms), fa = state.lang === 'fa';
+                const two = n => (n < 10 ? '0' : '') + n;
+                const t = two(d.getHours()) + ':' + two(d.getMinutes());
+                const j = toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+                return fa ? toPersianDigits(j.jd + ' ' + PERSIAN_MONTHS[j.jm - 1] + ' — ' + t)
+                          : (EN_MONTHS[d.getMonth()].slice(0, 3) + ' ' + d.getDate() + ' — ' + t);
+            }
+            function rpRemindItem(kind, id) {
+                return kind === 'journal' ? (state.journal || []).find(x => x.id === id)
+                                          : (state.books || []).find(x => x.id === id);
+            }
+            function rpOpenReminderPicker(kind, id) {
+                rpRemindTarget = { kind, id };
+                const fa = state.lang === 'fa', it = rpRemindItem(kind, id);
+                const pro = isPro();
+                document.getElementById('remindProNote').style.display = pro ? 'none' : 'block';
+                document.getElementById('remindPickerInput').disabled = !pro;
+                document.getElementById('remindPickerSave').disabled = !pro;
+                document.getElementById('remindPickerClear').disabled = !pro;
+                document.getElementById('remindPickerSub').textContent = it
+                    ? (kind === 'journal' ? (it.text || '').slice(0, 48) : (it.title || '')).trim()
+                    : '';
+                const cur = it && it.remindAt ? new Date(it.remindAt) : new Date(Date.now() + 3600000);
+                const two = n => (n < 10 ? '0' : '') + n;
+                document.getElementById('remindPickerInput').value =
+                    cur.getFullYear() + '-' + two(cur.getMonth() + 1) + '-' + two(cur.getDate()) + 'T' + two(cur.getHours()) + ':' + two(cur.getMinutes());
+                document.getElementById('remindPickerBackdrop').classList.add('open');
+            }
+            function rpScheduleItemReminder(kind, id) {
+                const it = rpRemindItem(kind, id); if (!it) return;
+                const fa = state.lang === 'fa';
+                const title = kind === 'journal' ? (fa ? '📓 یادآوری یادداشت' : '📓 Journal reminder')
+                                                 : (fa ? '📚 یادآوری کتاب' : '📚 Book reminder');
+                const body = kind === 'journal' ? (it.text || '').slice(0, 80) : (it.title || '');
+                // شناسه‌ی یکتا برای هر مورد → یادآورها هرگز با هم قاطی نمی‌شوند
+                nativeScheduleOnce(kind + '-' + id, title, body, it.remindAt || 0);
+            }
+            document.getElementById('remindPickerSave').addEventListener('click', () => {
+                if (!isPro() || !rpRemindTarget) return;
+                const v = document.getElementById('remindPickerInput').value;
+                if (!v) return;
+                const at = new Date(v).getTime();
+                if (!at || at < Date.now()) { showToast(state.lang === 'fa' ? 'زمان باید در آینده باشد.' : 'Pick a future time.', 2500); return; }
+                const it = rpRemindItem(rpRemindTarget.kind, rpRemindTarget.id); if (!it) return;
+                it.remindAt = at; saveState();
+                rpScheduleItemReminder(rpRemindTarget.kind, rpRemindTarget.id);
+                document.getElementById('remindPickerBackdrop').classList.remove('open');
+                showToast(state.lang === 'fa' ? '⏰ یادآوری ثبت شد: ' + rpFmtDateTime(at) : '⏰ Reminder set: ' + rpFmtDateTime(at), 3000, 'toast-success');
+                if (rpRemindTarget.kind === 'journal') renderJournal(); else renderLibrary();
+            });
+            document.getElementById('remindPickerClear').addEventListener('click', () => {
+                if (!isPro() || !rpRemindTarget) return;
+                const it = rpRemindItem(rpRemindTarget.kind, rpRemindTarget.id); if (!it) return;
+                delete it.remindAt; saveState();
+                nativeCancel(rpRemindTarget.kind + '-' + rpRemindTarget.id);
+                document.getElementById('remindPickerBackdrop').classList.remove('open');
+                if (rpRemindTarget.kind === 'journal') renderJournal(); else renderLibrary();
+            });
+            document.getElementById('remindPickerClose').addEventListener('click', () => document.getElementById('remindPickerBackdrop').classList.remove('open'));
             let rpReminderSig = '';
+            function rpItemRemindersTick() {
+                // یادآورِ یادداشت‌ها و کتاب‌ها وقتی برنامه باز است (روی گوشی، اعلانِ سیستمی هم جداگانه ثبت شده)
+                const now = Date.now(), fa = state.lang === 'fa';
+                let changed = false;
+                (state.journal || []).forEach(j => {
+                    if (j.remindAt && j.remindAt <= now && !j.remindFired) {
+                        j.remindFired = true; changed = true;
+                        showToast('📓 ' + (fa ? 'یادآوری یادداشت: ' : 'Journal reminder: ') + (j.text || '').slice(0, 40), 6000);
+                    }
+                });
+                (state.books || []).forEach(b => {
+                    if (b.remindAt && b.remindAt <= now && !b.remindFired) {
+                        b.remindFired = true; changed = true;
+                        showToast('📚 ' + (fa ? 'یادآوری کتاب: ' : 'Book reminder: ') + (b.title || ''), 6000);
+                    }
+                });
+                if (changed) saveState();
+            }
             function rpReminderTick() {
                 checkDueTodos();
                 checkHabitReminders();
+                rpItemRemindersTick();
                 // فقط وقتی فهرستِ یادآورها تغییر کرده روی حافظه نوشته می‌شود
                 const sig = JSON.stringify((state.todos || []).map(t => [t.id, t.dueAt, t.done])) +
                     JSON.stringify((state.habits || []).map(h => [h.id, h.reminder, h.reminderTime]));
@@ -11631,6 +11790,10 @@
             document.getElementById('bottomNavPlusBtn').addEventListener('click', () => {
                 document.getElementById('tabsPickerBackdrop').classList.add('open');
             });
+            document.getElementById('tabsPickerChallenges').addEventListener('click', () => {
+                document.getElementById('tabsPickerBackdrop').classList.remove('open');
+                openChallengeModal();
+            });
             document.getElementById('tabsPickerCloseBtn').addEventListener('click', () => {
                 document.getElementById('tabsPickerBackdrop').classList.remove('open');
             });
@@ -11642,6 +11805,11 @@
             // نمی‌کنن چون WebView خام مدیریت دانلود ندارد. به‌جاش فایل رو با پلاگین Filesystem
             // می‌نویسیم و با پلاگین Share (شیت اشتراک‌گذاری واقعی اندروید) تحویل کاربر می‌دیم
             // تا خودش انتخاب کنه کجا ذخیره‌ش کنه (Drive، Files، ایمیل و ...).
+            // متنِ ساده را از همان مسیرِ استانداردِ ذخیره (MediaStore → پوشه‌ی Downloads) رد می‌کند
+            async function rpSaveText(text, fileName, mime) {
+                const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(text)));
+                return rpSaveFile(fileName, mime || 'text/plain', b64);
+            }
             async function nativeSaveBackup(jsonStr, fileName) {
                 const Filesystem = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
                 const Share = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
@@ -11669,7 +11837,7 @@
                 const fileName = 'RoutinePlanner-Backup-' + dStr + '.json';
                 const preview = document.getElementById('jsonPreview');
                 if (isNativeApp()) {
-                    nativeSaveBackup(jsonStr, fileName).then(ok => {
+                    rpSaveText(jsonStr, fileName, 'application/json').then(ok => {
                         preview.textContent = ok ?
                             (state.lang === 'fa' ? '✅ فایل پشتیبان آماده شد — محل ذخیره رو انتخاب کن' : '✅ Backup file ready — choose where to save it') :
                             (state.lang === 'fa' ? '⚠️ ذخیره‌سازی ناموفق بود' : '⚠️ Saving failed');
@@ -11773,6 +11941,18 @@
                         if (backup.data.pomodoro) state.pomodoro = backup.data.pomodoro;
                         if (backup.data.behaviorJournal) state.behaviorJournal = backup.data.behaviorJournal;
                         if (backup.data.bookPhotos) restoreBookPhotosFromBackup(backup.data.bookPhotos);
+                        // بازیابیِ مواردی که تازه به پشتیبان اضافه شدند
+                        if (backup.data.records && typeof backup.data.records === 'object') state.records = backup.data.records;
+                        if (Array.isArray(backup.data.todos)) state.todos = backup.data.todos;
+                        if (Array.isArray(backup.data.challenges)) state.challenges = backup.data.challenges;
+                        if (typeof backup.data.coins === 'number') state.coins = backup.data.coins;
+                        if (typeof backup.data.level === 'number') state.level = backup.data.level;
+                        if (backup.data.habitPhotos) {
+                            try { Object.entries(backup.data.habitPhotos).forEach(([hid, arr]) => (arr || []).forEach(d => habitPhotoAdd(hid, d))); } catch (e) {}
+                        }
+                        if (backup.data.bookVoices) {
+                            try { Object.entries(backup.data.bookVoices).forEach(([bid, arr]) => (arr || []).forEach(v => voicePut({ id: v.id || ('v_' + Math.random().toString(36).slice(2)), bookId: bid, dataUrl: v.dataUrl, createdAt: v.createdAt || Date.now(), duration: v.duration || 0 }))); } catch (e) {}
+                        }
                         saveState();
                         applyTheme();
                         applyBgTheme();
@@ -11824,13 +12004,15 @@
                 const fa = state.lang === 'fa';
                 const P = window.Capacitor && window.Capacitor.Plugins;
                 if (isNativeApp() && P) {
+                    let why = '';
                     if (P.BazaarBilling && P.BazaarBilling.saveToDownloads) {
                         try {
                             await P.BazaarBilling.saveToDownloads({ fileName, mimeType, data: base64Data });
                             showToast(fa ? '✅ در پوشه‌ی Downloads ذخیره شد: ' + fileName : '✅ Saved to Downloads: ' + fileName, 4000, 'toast-success');
                             return true;
-                        } catch (e) {}
-                    }
+                        } catch (e) { why = 'E:' + ((e && (e.message || e.code)) || 'x'); }
+                    } else { why = 'NOPLUGIN'; }
+                    window.__rpSaveWhy = why;      // برای عیب‌یابی: در تنظیمات «چرا در Downloads ذخیره نشد؟» نشان داده می‌شود
                     if (P.Filesystem) {
                         try {
                             // اندروید ۹ و قدیمی‌تر: MediaStore در دسترس نیست → پوشه‌ی Documents
@@ -11841,6 +12023,7 @@
                         try {
                             const r = await P.Filesystem.writeFile({ path: fileName, data: base64Data, directory: 'CACHE' });
                             if (P.Share) await P.Share.share({ title: fileName, dialogTitle: fa ? 'ذخیره یا ارسال فایل' : 'Save or share file', files: [r.uri] });
+                            showToast((fa ? 'ℹ️ ذخیره‌ی مستقیم در Downloads ممکن نشد، پنجره‌ی ذخیره باز شد. کد: ' : 'ℹ️ Direct save failed, share sheet opened. Code: ') + (window.__rpSaveWhy || '?'), 6000);
                             return true;
                         } catch (e) {}
                     }
@@ -12017,6 +12200,9 @@
                             parseInt(parts[0], 10) || 8, parseInt(parts[1], 10) || 0);
                     }
                 });
+                // یادداشت‌ها و کتاب‌ها (هرکدام شناسه‌ی یکتای خودش را دارد)
+                (state.journal || []).forEach(j => { if (j.remindAt && j.remindAt > now) nativeScheduleOnce('journal-' + j.id, state.lang === 'fa' ? '📓 یادآوری یادداشت' : '📓 Journal reminder', (j.text || '').slice(0, 80), j.remindAt); });
+                (state.books || []).forEach(bk => { if (bk.remindAt && bk.remindAt > now) nativeScheduleOnce('book-' + bk.id, state.lang === 'fa' ? '📚 یادآوری کتاب' : '📚 Book reminder', bk.title || '', bk.remindAt); });
                 (state.challenges || []).forEach(c => {
                     if ((c.status === 'active') && (c.kind === 'timed' || c.kind === 'both') && c.deadlineAt > now) {
                         nativeScheduleChallengeNotifications(c);
@@ -12099,10 +12285,10 @@
             // برای نمایشه؛ مبلغ واقعی همونیه که توی پنل کافه‌بازار برای اون SKU ثبت شده.
             // ============================================================
             const PRO_PLANS = [
-                { id: 'pro_1m', months: 1, priceFa: '۲۵٬۰۰۰ تومان', priceEn: '25,000 Toman', labelFa: '۱ ماهه', labelEn: '1 Month' },
-                { id: 'pro_2m', months: 2, priceFa: '۴۵٬۰۰۰ تومان', priceEn: '45,000 Toman', labelFa: '۲ ماهه', labelEn: '2 Months' },
-                { id: 'pro_3m', months: 3, priceFa: '۶۰٬۰۰۰ تومان', priceEn: '60,000 Toman', labelFa: '۳ ماهه', labelEn: '3 Months' },
-                { id: 'pro_6m', months: 6, priceFa: '۱۲۰٬۰۰۰ تومان', priceEn: '120,000 Toman', labelFa: '۶ ماهه', labelEn: '6 Months' }
+                { id: 'pro_1m', months: 1, priceFa: '۳۹٬۰۰۰ تومان', priceEn: '39,000 Toman', labelFa: '۱ ماهه', labelEn: '1 Month' },
+                { id: 'pro_2m', months: 2, priceFa: '۶۸٬۰۰۰ تومان', priceEn: '68,000 Toman', labelFa: '۲ ماهه', labelEn: '2 Months' },
+                { id: 'pro_3m', months: 3, priceFa: '۹۹٬۰۰۰ تومان', priceEn: '99,000 Toman', labelFa: '۳ ماهه', labelEn: '3 Months' },
+                { id: 'pro_6m', months: 6, priceFa: '۱۷۹٬۰۰۰ تومان', priceEn: '179,000 Toman', labelFa: '۶ ماهه', labelEn: '6 Months' }
             ];
             // برای سازگاری با نسخه‌ی قبلی این برنامه (اگه کسی قبلاً همون محصولِ همیشگی رو
             // خریده باشه، همچنان بدون انقضا معتبر بمونه):
@@ -12833,9 +13019,9 @@
                 document.getElementById('avGrid').innerHTML = list.map(it => {
                     const proLock = it.price > 0 && !isPro();
                     const owned = avOwned(it.id), on = it.kind === 'base' ? (eq.base || (g === 'male' ? 'base/male' : 'base/female')) === it.id : eq[it.slot] === it.id, locked = proLock || (!owned && it.price > coins);
-                    const tag = proLock ? (owned ? (fa ? '⭐ پرو (خریداری‌شده)' : '⭐ Pro (owned)') : '⭐ ' + (fa ? 'پرو · ' + toPersianDigits(it.price) : 'Pro · ' + it.price)) :
+                    const tag = proLock ? (owned ? (fa ? '⭐ پرو (خریداری‌شده)' : '⭐ Pro (owned)') : '⭐ ' + (fa ? 'پرو · ' + toPersianDigits(it.price) + ' 🪙 سکه' : 'Pro · ' + it.price + ' 🪙 coins')) :
                         on ? (it.kind === 'base' ? (fa ? '✓ مدل فعلی' : '✓ Current') : (fa ? '✓ پوشیده' : '✓ Equipped')) : it.kind === 'base' ? (fa ? 'رایگان' : 'Free') : owned ? (fa ? 'خریداری‌شده' : 'Owned') :
-                        it.price === 0 ? (fa ? 'رایگان' : 'Free') : (locked ? '🔒 ' : '🪙 ') + (fa ? toPersianDigits(it.price) : it.price);
+                        it.price === 0 ? (fa ? 'رایگان' : 'Free') : (locked ? '🔒 ' : '') + (fa ? toPersianDigits(it.price) + ' 🪙 سکه' : it.price + ' 🪙 coins');
                     return '<button type="button" class="av-card' + (on ? ' equipped' : '') + (locked ? ' locked' : '') + (it.id === avSelId ? ' selected' : '') +
                         '" data-id="' + it.id + '"><canvas width="112" height="112"></canvas><span class="av-name">' + escHtml(it.name) +
                         '</span><span class="av-tag">' + tag + '</span></button>';
@@ -13248,9 +13434,10 @@
                         kpi('🔁', fa ? 'تاب‌آوری' : 'Resilience', pct(cur.recovery), delta(cur.recovery, prev.recovery), fa ? 'برگشت پس از شکست' : 'comeback after a miss') +
                         kpi('📆', fa ? 'ثبات' : 'Consistency', pct(cur.consistency), delta(cur.consistency, prev.consistency), fa ? 'روزهای ثبت‌شده' : 'days with entries') +
                     '</div>' +
-                    section('📈', fa ? (saRange === 'year' ? 'روند ماهانه' : 'روند روزانه') : (saRange === 'year' ? 'Monthly trend' : 'Daily trend'),
-                        fa ? (saRange === 'year' ? 'میانگین نرخ موفقیت در هر ماه' : saRange === 'month' ? 'نرخ هر روز و میانگین متحرک ۷ روزه' : 'نرخ موفقیت هر روز')
-                           : (saRange === 'year' ? 'Average success rate per month' : saRange === 'month' ? 'Daily rate with 7-day moving average' : 'Daily success rate'),
+                    section('📈', fa ? (saRange === 'year' ? 'روند ماهانه' : saRange === 'month' ? 'روند ۳۰ روز اخیر' : 'روند هفته')
+                                     : (saRange === 'year' ? 'Monthly trend' : saRange === 'month' ? 'Last 30 days' : 'This week'),
+                        fa ? (saRange === 'year' ? 'میانگین نرخ موفقیت در هر ماه' : 'نرخ موفقیت هر روز')
+                           : (saRange === 'year' ? 'Average success rate per month' : 'Daily success rate'),
                         cur.series.some(x => x.rate !== null) ? '<div class="chart-box" style="height:170px"><canvas id="saTrendChart"></canvas></div>' : empty(fa ? 'در این بازه ثبتی وجود ندارد.' : 'No entries in this period.')) +
                     section('🗓️', fa ? 'نقشه‌ی روزهای هفته' : 'Weekday heatmap', fa ? 'درصد موفقیت هر روز هفته' : 'Success % by weekday', '<div class="sa-heat">' + cur.byWeekday.map(heatCell).join('') + '</div>') +
                     section('🏅', fa ? 'رتبه‌بندی عادت‌ها' : 'Habit ranking', fa ? 'موفقیت و تغییر نسبت به بازه‌ی قبل' : 'Success and change vs. previous period',
@@ -13279,14 +13466,35 @@
                         reasonsList.length ? '<select id="saJournalReason">' + reasonsList.map(r => '<option' + (r === saJournalReason ? ' selected' : '') + '>' + escHtml(r) + '</option>').join('') + '</select>' +
                             '<textarea id="saJournalText" rows="3" placeholder="' + (fa ? 'چه چیزی واقعاً باعث این شد؟ دفعه‌ی بعد چه می‌کنم؟' : 'What really caused this? What will I do next time?') + '"></textarea>' +
                             '<button type="button" class="glass-btn primary" id="saJournalSave">' + (fa ? 'ثبت یادداشت' : 'Save note') + '</button>' +
-                            journal.map(j => '<div class="sa-jentry"><small>' + escHtml(new Date(j.at).toLocaleDateString(fa ? 'fa-IR' : 'en-US')) + '</small>' + escHtml(j.text) + '</div>').join('') :
+                            journal.map((j, ji) => '<div class="sa-jentry" data-jix="' + ji + '"><small>' + escHtml(new Date(j.at).toLocaleDateString(fa ? 'fa-IR' : 'en-US')) + '</small>' +
+                                '<div class="sa-j-text">' + escHtml(j.text) + '</div>' +
+                                '<div class="sa-j-acts"><button type="button" class="icon-btn" data-jedit="' + ji + '">✏️</button><button type="button" class="icon-btn danger" data-jdel="' + ji + '">✕</button></div></div>').join('') :
                             empty(fa ? 'وقتی علت شکستی ثبت کنید، اینجا می‌توانید درباره‌اش بنویسید.' : 'Once you record a failure reason you can journal about it here.')) +
                     '</div>';
+                // ویرایش و حذفِ یادداشت‌های ژورنال رفتاری
+                body.querySelectorAll('[data-jdel]').forEach(b => b.addEventListener('click', async () => {
+                    if (!(await rpConfirm(fa ? 'حذف شود؟' : 'Delete?'))) return;
+                    const list = (state.behaviorJournal || {})[saJournalReason] || [];
+                    list.splice(parseInt(b.dataset.jdel, 10), 1); saveState(); saSig = ''; renderSmartAnalytics();
+                }));
+                body.querySelectorAll('[data-jedit]').forEach(b => b.addEventListener('click', () => {
+                    const wrap = b.closest('.sa-jentry'), ix = parseInt(b.dataset.jedit, 10);
+                    const list = (state.behaviorJournal || {})[saJournalReason] || [];
+                    if (wrap.querySelector('textarea')) return;
+                    const ta = document.createElement('textarea'); ta.rows = 3; ta.value = list[ix] ? list[ix].text : '';
+                    const ok = document.createElement('button'); ok.className = 'glass-btn primary'; ok.style.marginTop = '6px'; ok.textContent = fa ? 'ذخیره' : 'Save';
+                    ok.addEventListener('click', () => {
+                        const v = ta.value.trim(); if (!v) return;
+                        list[ix].text = v; list[ix].editedAt = Date.now(); saveState(); saSig = ''; renderSmartAnalytics();
+                    });
+                    wrap.querySelector('.sa-j-text').style.display = 'none';
+                    wrap.appendChild(ta); wrap.appendChild(ok); ta.focus();
+                }));
                 const drawTrend = () => {
                     const cv = document.getElementById('saTrendChart'); if (!cv) return;
                     if (saChart) saChart.destroy();
                     const cs = getComputedStyle(document.documentElement), primary = cs.getPropertyValue('--primary').trim() || '#1FA2A0';
-                    let labels, data, avg = null, type = 'bar';
+                    let labels, data, avg = null; const type = 'bar';   // همه‌ی نمودارها میله‌ای
                     if (saRange === 'year') {
                         // سالانه: میانگینِ هر ماه (نه ۳۶۵ نقطه‌ی درهم)
                         const buckets = {};
@@ -13301,10 +13509,7 @@
                             return state.calendarType === 'jalali' ? (fa ? toPersianDigits(j.jm + '/' + j.jd) : j.jm + '/' + j.jd) : (fa ? toPersianDigits(m + '/' + d) : m + '/' + d); };
                         labels = cur.series.map(fmt);
                         data = cur.series.map(x => x.rate === null ? null : Math.round(x.rate * 100));
-                        if (saRange === 'month') {
-                            type = 'line';
-                            avg = data.map((_, i) => { const w = data.slice(Math.max(0, i - 6), i + 1).filter(v => v !== null); return w.length ? Math.round(w.reduce((a, b) => a + b, 0) / w.length) : null; });
-                        }
+                        avg = null;                       // میانگین متحرک حذف شد؛ خودِ میله‌ها گویا هستند
                     }
                     const sets = [{ label: saRange === 'year' ? (fa ? 'میانگین ماه' : 'Monthly avg') : (fa ? 'روزانه' : 'Daily'),
                         data: data, borderColor: primary, backgroundColor: primary, spanGaps: true }];
@@ -14035,8 +14240,6 @@
 
             document.getElementById('checkinYesBtn').addEventListener('click', () => resolveChallengeCheckin(true));
             document.getElementById('checkinNoBtn').addEventListener('click', () => resolveChallengeCheckin(false));
-
-            document.getElementById('challengeFloatBtn').addEventListener('click', () => openChallengeModal());
             const dashOpenChBtn = document.getElementById('dashboardOpenChallengesBtn');
             if (dashOpenChBtn) dashOpenChBtn.addEventListener('click', () => openChallengeModal('active'));
             document.getElementById('challengeModalCloseBtn').addEventListener('click', () => {
