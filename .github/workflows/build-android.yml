@@ -29,11 +29,31 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
+      # کلیدِ امضا از Secrets گرفته و به فایل تبدیل می‌شود (هیچ‌وقت داخل کد نیست)
+      - name: Restore keystore from secrets
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/routineplanner.jks
+
+      - name: Build signed release APK
+        working-directory: android
+        env:
+          RP_STORE_FILE: routineplanner.jks
+          RP_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RP_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RP_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Upload signed APK (این فایل برای کافه‌بازار است)
+        uses: actions/upload-artifact@v4
+        with:
+          name: routine-planner-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+      # نسخه‌ی تست برای نصب روی گوشی خودت (برای فروشگاه نیست)
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: routine-planner-debug-apk
