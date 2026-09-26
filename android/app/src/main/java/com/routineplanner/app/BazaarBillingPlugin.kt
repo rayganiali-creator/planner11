@@ -136,13 +136,18 @@ class BazaarBillingPlugin : Plugin() {
             val values = android.content.ContentValues().apply {
                 put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                 put(android.provider.MediaStore.MediaColumns.MIME_TYPE, mime)
-                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS + "/RoutinePlanner")
+                // مستقیم داخلِ خودِ پوشه‌ی Downloads (نه زیرپوشه) تا در فهرستِ دانلودها دیده شود
+                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS)
+                put(android.provider.MediaStore.MediaColumns.IS_PENDING, 1)
             }
             val resolver = context.contentResolver
             val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
                 ?: return call.reject("insert_failed")
             val out = resolver.openOutputStream(uri) ?: return call.reject("stream_failed")
-            out.use { it.write(bytes) }
+            out.use { it.write(bytes); it.flush() }
+            // پایانِ نوشتن: فایل از حالتِ «در حالِ نوشتن» خارج و برای همه‌ی برنامه‌ها قابل دیدن می‌شود
+            val done = android.content.ContentValues().apply { put(android.provider.MediaStore.MediaColumns.IS_PENDING, 0) }
+            resolver.update(uri, done, null, null)
             call.resolve(JSObject().put("uri", uri.toString()))
         } catch (e: Exception) {
             call.reject("save_failed", e.message)

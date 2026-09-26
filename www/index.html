@@ -4752,6 +4752,13 @@
 
         /* آیکونِ سرِ بخش‌ها و شاخص‌ها همیشه هم‌رنگِ برند (روی زمینه‌ی روشن و تاریک) */
         .sa-sec-ico .ic, .sa-kpi-ico .ic, .jrnl-head-ico .ic { color: var(--primary) !important; }
+
+        /* محرک‌ها و علت شکست: یک جمله‌ی روشن به‌جای عددهای مبهم */
+        .sa-link { padding: 11px 12px; border-radius: 14px; background: var(--surface-2); margin-bottom: 8px; }
+        .sa-link-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: calc(11.5px * var(--font-scale)); }
+        .sa-link-bar { height: 6px; border-radius: 999px; background: var(--hairline); overflow: hidden; margin: 8px 0 6px; }
+        .sa-link-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #EF6F6C, #d9463b); }
+        .sa-link small { display: block; color: var(--text-muted); font-size: calc(11px * var(--font-scale)); line-height: 1.85; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -6378,6 +6385,28 @@
             }).observe(document.body, { childList: true, subtree: true, characterData: true });
             rpIconizeTree(document.body);
             const STORAGE_KEY = "alshadow-v14-level-colors";
+            // ============================================================
+            // تایمرهای مدیریت‌شده (مصرف باتری)
+            // ------------------------------------------------------------
+            // وقتی برنامه در پس‌زمینه یا صفحه خاموش است، همه‌ی این تایمرها متوقف می‌شوند و
+            // هنگام بازگشت یک‌بار فوراً اجرا و دوباره روشن می‌شوند. پس هیچ کاری در پس‌زمینه
+            // تکرار نمی‌شود و شارژ مصرف نمی‌کند. زمان‌ها از «لحظه‌ی پایان» حساب می‌شوند،
+            // برای همین پومودورو و یادآورها بعد از بازگشت هم دقیق‌اند.
+            // ============================================================
+            const rpTimers = [];
+            function rpInterval(fn, ms, runNow) {
+                const t = { fn, ms, id: null };
+                rpTimers.push(t);
+                if (!document.hidden) t.id = setInterval(fn, ms);
+                if (runNow) { try { fn(); } catch (e) {} }
+                return t;
+            }
+            document.addEventListener('visibilitychange', () => {
+                rpTimers.forEach(t => {
+                    if (document.hidden) { clearInterval(t.id); t.id = null; }
+                    else if (!t.id) { try { t.fn(); } catch (e) {} t.id = setInterval(t.fn, t.ms); }
+                });
+            });
             const COIN_MAX_PER_OP = 50; // سقف دریافت/کسر سکه در هر عملیات
             let rpDataVersion = 0; // نسخه‌ی داده؛ پایین‌تر کنار saveState توضیح داده شده
             // (زود تعریف می‌شن چون renderAll هنگام بالا اومدن برنامه renderProNotes رو صدا می‌زنه)
@@ -7377,7 +7406,16 @@
                 return next.getTime();
             }
             async function nativeScheduleDailyHabit(habitId, title, body, hh, mm) {
-                await nativeScheduleOnce('habit-' + habitId, title, body, rpNextHabitOccurrence(hh, mm));
+                // ۱۴ نوبتِ بعدی ثبت می‌شود، نه فقط فردا؛ پس اگر کاربر دو هفته هم برنامه را باز نکند
+                // یادآوری‌ها سر وقت می‌آیند. هر بار که برنامه باز شود دوباره تازه‌سازی می‌شوند.
+                const h = (state.habits || []).find(x => x.id === habitId);
+                const first = rpNextHabitOccurrence(hh, mm);
+                for (let i = 0; i < 14; i++) {
+                    const at = first + i * 86400000;
+                    const iso = dateToISO(new Date(at));
+                    const applies = !h || habitAppliesOnISO(h, iso);      // فقط روزهایی که خودِ عادت فعال است
+                    await nativeScheduleOnce('habit-' + habitId + '-d' + i, title, body, applies ? at : 0);
+                }
             }
             async function nativeCancelDailyHabit(habitId) {
                 await nativeCancel('habit-' + habitId);
@@ -7558,6 +7596,7 @@
                 renderTodos();
             }
 
+            let todoShown = 80;
             function renderTodos() {
                 resetRepeatingTodosIfNeeded();
                 const list = document.getElementById('todoList');
@@ -7574,7 +7613,8 @@
                 } else {
                     list.innerHTML = '';
                     const now = Date.now();
-                    sorted.forEach(t => {
+                    const TODO_CAP = 80;                      // برای حجم بالا: فقط ۸۰ کارِ اول رسم می‌شود
+                sorted.slice(0, todoShown).forEach(t => {
                         const item = document.createElement('div');
                         let stateClass = t.done ? ' done' : '';
                         if (!t.done && t.dueAt) {
@@ -7601,6 +7641,13 @@
                 }
 
                 const total = todos.length;
+                if (sorted.length > todoShown) {
+                    const more = document.createElement('button');
+                    more.className = 'glass-btn'; more.style.cssText = 'width:100%;margin-top:10px';
+                    more.textContent = state.lang === 'fa' ? 'نمایش بیشتر (' + toPersianDigits(sorted.length - todoShown) + ' کار دیگر)' : 'Show more (' + (sorted.length - todoShown) + ' more)';
+                    more.addEventListener('click', () => { todoShown += 80; renderTodos(); });
+                    list.appendChild(more);
+                }
                 const done = todos.filter(t => t.done).length;
                 const pending = total - done;
                 document.getElementById('todoTotal').textContent = state.lang === 'fa' ? toPersianDigits(
@@ -9281,7 +9328,7 @@
                             (state.lang === 'fa' ? 'هنوز فعالیتی ثبت نشده.' : 'No activity yet.') + '</div>';
                     } else {
                         actWrap.innerHTML = '<div class="dash-activity-list">' +
-                            top.map(e => '<div class="dash-activity-item">' + e.text + '</div>').join('') + '</div>';
+                            top.map(e => '<div class="dash-activity-item">' + escHtml(e.text) + '</div>').join('') + '</div>';
                     }
                 }
             }
@@ -9308,6 +9355,7 @@
             // ============================================================
             // JOURNAL
             // ============================================================
+            let jrnlShown = 30;                     // برای حجم بالا: نمایش تدریجی
             function renderJournal() {
                 const list = document.getElementById('journalList');
                 const searchTerm = document.getElementById('journalSearchInput').value.trim().toLowerCase();
@@ -9324,7 +9372,8 @@
                     return;
                 }
                 list.innerHTML = "";
-                const sorted = [...entries].sort((a, b) => b.createdAt - a.createdAt);
+                const all = [...entries].sort((a, b) => b.createdAt - a.createdAt);
+                const sorted = all.slice(0, jrnlShown);          // نمایش تدریجی: برنامه با صدها یادداشت هم سریع می‌ماند
                 sorted.forEach(entry => {
                     const d = new Date(entry.createdAt),
                         j = toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate()),
@@ -9351,6 +9400,14 @@
                         '</button></div></div>';
                     list.appendChild(item);
                 });
+                if (all.length > sorted.length) {
+                    const more = document.createElement('button');
+                    more.className = 'glass-btn'; more.style.cssText = 'width:100%;margin-top:10px';
+                    more.textContent = (state.lang === 'fa' ? 'نمایش بیشتر (' + toPersianDigits(all.length - sorted.length) + ' یادداشت دیگر)' : 'Show more (' + (all.length - sorted.length) + ' more)');
+                    more.addEventListener('click', () => { jrnlShown += 30; renderJournal(); });
+                    list.appendChild(more);
+                }
+
                 list.querySelectorAll('[data-ej]').forEach(b => b.addEventListener('click', () => document
                     .getElementById('je_' + b.dataset.ej).classList.toggle('show')));
                 list.querySelectorAll('[data-cej]').forEach(b => b.addEventListener('click', () => document
@@ -11005,7 +11062,7 @@
                         " " + d.getDate() + " — " + t; }
             }
             renderClock();
-            setInterval(renderClock, 30000);
+            rpInterval(renderClock, 30000);
 
             document.getElementById('themeToggle').addEventListener('click', () => { state.theme = state.theme ===
                     'dark' ? 'light' : 'dark';
@@ -11300,13 +11357,16 @@
             // یادآوری‌ها همیشه فعال هستند: هر ۱۵ ثانیه بررسی می‌کند که آیا زمان انجام کاری یا
             // یادآوری عادتی فرارسیده، و هم‌زمان لیست یادآوری‌های نزدیک را برای Service Worker
             // در IndexedDB به‌روز نگه می‌دارد (برای وقتی که برنامه کاملاً بسته است).
+            let rpReminderSig = '';
             function rpReminderTick() {
                 checkDueTodos();
                 checkHabitReminders();
-                syncRemindersToIDB();
+                // فقط وقتی فهرستِ یادآورها تغییر کرده روی حافظه نوشته می‌شود
+                const sig = JSON.stringify((state.todos || []).map(t => [t.id, t.dueAt, t.done])) +
+                    JSON.stringify((state.habits || []).map(h => [h.id, h.reminder, h.reminderTime]));
+                if (sig !== rpReminderSig) { rpReminderSig = sig; syncRemindersToIDB(); }
             }
-            setInterval(rpReminderTick, 15000);
-            rpReminderTick();
+            rpInterval(rpReminderTick, 15000, true);
             document.getElementById('todoClearDoneBtn').addEventListener('click', async function() {
                 if (state.todos.filter(t => t.done).length === 0) {
                     showToast(state.lang === 'fa' ? 'هیچ کار انجام‌شده‌ای وجود ندارد' :
@@ -11767,12 +11827,13 @@
                     if (P.BazaarBilling && P.BazaarBilling.saveToDownloads) {
                         try {
                             await P.BazaarBilling.saveToDownloads({ fileName, mimeType, data: base64Data });
-                            showToast(fa ? '✅ در پوشه‌ی Download ذخیره شد: ' + fileName : '✅ Saved to Download: ' + fileName, 4000, 'toast-success');
+                            showToast(fa ? '✅ در پوشه‌ی Downloads ذخیره شد: ' + fileName : '✅ Saved to Downloads: ' + fileName, 4000, 'toast-success');
                             return true;
                         } catch (e) {}
                     }
                     if (P.Filesystem) {
                         try {
+                            // اندروید ۹ و قدیمی‌تر: MediaStore در دسترس نیست → پوشه‌ی Documents
                             await P.Filesystem.writeFile({ path: 'RoutinePlanner/' + fileName, data: base64Data, directory: 'DOCUMENTS', recursive: true });
                             showToast(fa ? '✅ ذخیره شد در: Documents/RoutinePlanner/' + fileName : '✅ Saved to Documents/RoutinePlanner/' + fileName, 4500, 'toast-success');
                             return true;
@@ -12171,7 +12232,7 @@
                 checkProExpiry();
                 return true;
             }
-            setInterval(checkProExpiry, 60000);
+            rpInterval(checkProExpiry, 60000);
             document.addEventListener('visibilitychange', () => { if (!document.hidden) { checkProExpiry(); rpSyncTrustedTime(); } });
             window.addEventListener('online', () => { rpSyncTrustedTime(); if (isNativeApp()) restorePurchases(); });
 
@@ -12999,7 +13060,8 @@
                     const C = 2 * Math.PI * 88; document.getElementById('pomoArc').style.strokeDashoffset = String(C * (1 - rem / pomoDurationMs(p.phase)));
                 }
             }
-            pomoTick = setInterval(pomoLoop, 500);
+            // پومودورو از «لحظه‌ی پایان» حساب می‌شود، پس در پس‌زمینه هم دقیق می‌ماند
+            rpInterval(pomoLoop, 500);
             document.getElementById('pomoStartBtn').addEventListener('click', () => pomoState().running ? pomoPause() : pomoStart());
             document.getElementById('pomoResetBtn').addEventListener('click', () => pomoSetPhase(pomoState().phase, true));
             document.getElementById('pomoSkipBtn').addEventListener('click', () => pomoSetPhase(pomoNextPhase(), true));
@@ -13130,11 +13192,11 @@
                         d > 0 ? (fa ? 'روالی که ساخته‌اید جواب می‌دهد؛ ادامه دهید.' : 'Your routine is working — keep going.') : (fa ? 'یک عادت را موقتاً ساده‌تر کنید تا دوباره روی روال بیفتید.' : 'Simplify one habit for a while to regain momentum.'), Math.abs(d));
                     const improved = Object.values(cur.byHabit).map(h => { const p = prev.byHabit[h.id]; if (!p || p.s + p.f < 3 || h.s + h.f < 3) return null;
                         return { name: h.name, d: h.s / (h.s + h.f) - p.s / (p.s + p.f) }; }).filter(Boolean).sort((a, b) => b.d - a.d)[0];
-                    if (improved && improved.d >= 0.15) add('good', '🚀', fa ? 'بیشترین پیشرفت: «' + improved.name + '» (+' + N(pct(improved.d)) + '٪).' : 'Most improved: “' + improved.name + '” (+' + pct(improved.d) + '%).',
+                    if (improved && improved.d >= 0.15) add('good', '🚀', fa ? 'بیشترین پیشرفت: «<bdi>' + escHtml(improved.name) + '</bdi>» (+' + N(pct(improved.d)) + '٪).' : 'Most improved: “<bdi>' + escHtml(improved.name) + '</bdi>” (+' + pct(improved.d) + '%).',
                         fa ? 'روشی که برای این عادت جواب داده را روی عادت‌های دیگر هم امتحان کنید.' : 'Apply what worked here to your other habits.', improved.d * .8);
                 }
                 const weakest = Object.values(cur.byHabit).filter(x => x.s + x.f >= 4).map(x => Object.assign(x, { r: x.s / (x.s + x.f) })).sort((a, b) => a.r - b.r)[0];
-                if (weakest && weakest.r < 0.5) add('warn', '🎯', fa ? '«' + weakest.name + '» کمترین موفقیت را دارد (' + N(pct(weakest.r)) + '٪).' : '“' + weakest.name + '” has the lowest success (' + pct(weakest.r) + '%).',
+                if (weakest && weakest.r < 0.5) add('warn', '🎯', fa ? '«<bdi>' + escHtml(weakest.name) + '</bdi>» کمترین موفقیت را دارد (' + N(pct(weakest.r)) + '٪).' : '“<bdi>' + escHtml(weakest.name) + '</bdi>” has the lowest success (' + pct(weakest.r) + '%).',
                     fa ? 'تمرکز این بازه را روی همین عادت بگذارید یا هدفش را کوچک‌تر کنید.' : 'Focus on this habit next, or shrink its goal.', .5 - weakest.r);
                 return out.sort((a, b) => b.w - a.w);
             }
@@ -13167,7 +13229,7 @@
                 // اثر محرک‌ها (نمودار واگرا)
                 const impacts = Object.values(cur.trig).filter(e => e.s + e.f >= 1).map(e => ({ name: e.name, type: e.type, n: e.s + e.f, lift: cur.rate === null ? 0 : e.s / (e.s + e.f) - cur.rate })).sort((a, b) => a.lift - b.lift);
                 const maxLift = Math.max(0.05, ...impacts.map(x => Math.abs(x.lift)));
-                const pairs = []; Object.values(cur.trig).forEach(e => Object.entries(e.reasons).forEach(([r, n]) => pairs.push({ t: e.name, r, n, share: n / Math.max(1, e.f) }))); pairs.sort((a, b) => b.n - a.n);
+                const pairs = []; Object.values(cur.trig).forEach(e => Object.entries(e.reasons).forEach(([r, n]) => pairs.push({ t: e.name, r, n, fails: e.f, share: n / Math.max(1, e.f) }))); pairs.sort((a, b) => b.n - a.n || b.share - a.share);
                 const insights = saInsights(cur, prev);
                 const reasonsList = Object.keys(Object.assign({}, cur.failReasons, ...Object.keys(state.reasons || {}).map(h => {
                     const o = {}; Object.values(state.reasons[h]).forEach(e => { if (e && e.reason && e.reason !== '(بدون دلیل)') o[e.reason] = 1; }); return o; })));
@@ -13192,18 +13254,24 @@
                         cur.series.some(x => x.rate !== null) ? '<div class="chart-box" style="height:170px"><canvas id="saTrendChart"></canvas></div>' : empty(fa ? 'در این بازه ثبتی وجود ندارد.' : 'No entries in this period.')) +
                     section('🗓️', fa ? 'نقشه‌ی روزهای هفته' : 'Weekday heatmap', fa ? 'درصد موفقیت هر روز هفته' : 'Success % by weekday', '<div class="sa-heat">' + cur.byWeekday.map(heatCell).join('') + '</div>') +
                     section('🏅', fa ? 'رتبه‌بندی عادت‌ها' : 'Habit ranking', fa ? 'موفقیت و تغییر نسبت به بازه‌ی قبل' : 'Success and change vs. previous period',
-                        habits.length ? '<div class="sa-rank">' + habits.map((h, i) => '<div class="sa-rank-row"><span class="sa-rank-n">' + N(i + 1) + '</span><div class="sa-rank-main"><div class="sa-rank-top"><b>' + escHtml(h.name) + '</b>' +
+                        habits.length ? '<div class="sa-rank">' + habits.map((h, i) => '<div class="sa-rank-row"><span class="sa-rank-n">' + N(i + 1) + '</span><div class="sa-rank-main"><div class="sa-rank-top"><b><bdi>' + escHtml(h.name) + '</bdi></b>' +
                             delta(h.r, h.p) + '</div><div class="sa-bar"><i style="width:' + Math.round(h.r * 100) + '%"></i></div><small>' + pct(h.r) + ' · ' + (fa ? 'بهترین زنجیره: ' + N(h.best) + ' روز' : 'best streak: ' + h.best + 'd') + '</small></div></div>').join('') + '</div>' :
                             empty(fa ? 'داده‌ای نیست.' : 'No data.')) +
                     section('⚡', fa ? 'اثر محرک‌ها و مشوق‌ها' : 'Trigger & incentive impact', fa ? 'تفاوت نرخ موفقیت نسبت به حالت معمول' : 'Change in success vs. your usual rate',
                         impacts.length ? '<div class="sa-div">' + impacts.map(x => { const w = Math.round(Math.abs(x.lift) / maxLift * 50);
-                            return '<div class="sa-div-row"><span class="sa-div-name">' + (x.type === 'incentive' ? '✨ ' : '⚡ ') + escHtml(x.name) + (x.n < 3 ? ' <em>' + (fa ? 'داده‌ی کم' : 'low data') + '</em>' : '') + '</span>' +
+                            return '<div class="sa-div-row"><span class="sa-div-name">' + (x.type === 'incentive' ? '✨ ' : '⚡ ') + '<bdi>' + escHtml(x.name) + '</bdi>' + (x.n < 3 ? ' <em>' + (fa ? 'داده‌ی کم' : 'low data') + '</em>' : '') + '</span>' +
                                 '<div class="sa-div-track"><span class="mid"></span><i class="' + (x.lift >= 0 ? 'pos' : 'neg') + '" style="width:' + w + '%"></i></div><b class="' + (x.lift >= 0 ? 'up' : 'down') + '">' +
                                 (x.lift >= 0 ? '+' : '−') + N(Math.abs(Math.round(x.lift * 100))) + PCT + '</b></div>'; }).join('') + '</div>' :
                             empty(fa ? 'در این بازه محرک یا مشوقی همراه با نتیجه‌ی ثبت‌شده نیست.' : 'No triggers with recorded outcomes in this period.')) +
-                    section('🔗', fa ? 'محرک ← علت شکست' : 'Trigger → failure reason', fa ? 'کدام محرک‌ها با کدام علت‌ها همراه بوده‌اند' : 'Which triggers co-occur with which reasons',
-                        pairs.length ? pairs.slice(0, 6).map(x => '<div class="sa-pair"><span class="sa-pill neg">⚡ ' + escHtml(x.t) + '</span><span class="sa-arrow">←</span><span class="sa-pill">' + escHtml(x.r) + '</span><b>' + N(x.n) +
-                            (fa ? ' بار · ' : '× · ') + N(Math.round(x.share * 100)) + PCT + '</b></div>').join('') : empty(fa ? 'هنوز رابطه‌ای ثبت نشده.' : 'No links yet.')) +
+                    section('🔗', fa ? 'محرک‌ها و علت شکست' : 'Triggers & failure reasons',
+                        fa ? 'وقتی هر محرک بوده، بیشتر چه علتی ثبت شده' : 'When each trigger was present, which reason was recorded',
+                        pairs.length ? pairs.slice(0, 6).map(x => '<div class="sa-link">' +
+                            '<div class="sa-link-top"><span class="sa-pill neg">⚡ ' + escHtml(x.t) + '</span><span class="sa-arrow">' + (fa ? '⟵' : '⟶') + '</span><span class="sa-pill">🧱 ' + escHtml(x.r) + '</span></div>' +
+                            '<div class="sa-link-bar"><i style="width:' + Math.round(x.share * 100) + '%"></i></div>' +
+                            '<small>' + (fa
+                                ? ('از <bdi>' + N(x.fails) + '</bdi> شکستِ همراه با «<bdi>' + escHtml(x.t) + '</bdi>»، <bdi>' + N(x.n) + ' بار (' + N(Math.round(x.share * 100)) + '٪)</bdi> علتش «<bdi>' + escHtml(x.r) + '</bdi>» بوده.')
+                                : ('Of <bdi>' + x.fails + '</bdi> misses with “<bdi>' + escHtml(x.t) + '</bdi>”, <bdi>' + x.n + ' (' + Math.round(x.share * 100) + '%)</bdi> were due to “<bdi>' + escHtml(x.r) + '</bdi>”.')) + '</small></div>').join('')
+                            : empty(fa ? 'برای این تحلیل باید هنگام شکست، هم محرک و هم علت را ثبت کنید.' : 'Record both a trigger and a reason on a missed day to see links here.')) +
                     section('💡', fa ? 'الگوها و پیشنهادها' : 'Patterns & suggestions', fa ? 'به ترتیب اهمیت' : 'Sorted by importance',
                         insights.length ? insights.map(x => '<div class="sa-insight ' + x.level + '"><span class="ico">' + x.ico + '</span><div><b>' + x.t + '</b><small>' + x.s + '</small></div></div>').join('') :
                             empty(fa ? 'برای کشف الگو، چند روز ثبت بیشتر لازم است.' : 'A few more days of data are needed.')) +
@@ -13827,7 +13895,7 @@
                             '</div>';
                     }
                     return '<div class="challenge-card"><div class="cc-top"><span class="cc-icon">' + c.icon +
-                        '</span><span class="cc-name">' + c.name + '</span>' + challengeStatusBadge(c.status) + '</div>' + body + '</div>';
+                        '</span><span class="cc-name">' + escHtml(c.name) + '</span>' + challengeStatusBadge(c.status) + '</div>' + body + '</div>';
                 }).join('');
 
                 list.querySelectorAll('[data-cc-plus]').forEach(b => b.addEventListener('click', () => incrementChallengeProgress(b.dataset.ccPlus, 1)));
@@ -13852,7 +13920,7 @@
                             (c.rewardText ? ' + 🎁 ' + c.rewardText : '') + '</div>';
                     }
                     return '<div class="challenge-card"><div class="cc-top"><span class="cc-icon">' + c.icon +
-                        '</span><span class="cc-name">' + c.name + '</span>' + challengeStatusBadge(c.status) + '</div>' +
+                        '</span><span class="cc-name">' + escHtml(c.name) + '</span>' + challengeStatusBadge(c.status) + '</div>' +
                         '<div class="cc-meta">' + dateStr + '</div>' + rewardLine + '</div>';
                 }).join('');
             }
@@ -13983,8 +14051,8 @@
 
             // بررسی دوره‌ای مهلت چالش‌های زمان‌دار
             checkChallengeDeadlines();
-            setInterval(checkChallengeDeadlines, 20000);
-            setInterval(() => {
+            rpInterval(checkChallengeDeadlines, 20000);
+            rpInterval(() => {
                 if (document.getElementById('challengeTabActive').style.display !== 'none' &&
                     document.getElementById('challengeModalBackdrop').classList.contains('open')) {
                     document.querySelectorAll('[data-cc-countdown]').forEach(el => {
