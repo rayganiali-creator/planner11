@@ -15,17 +15,29 @@ import ir.cafebazaar.poolakey.request.PurchaseRequest
 // ============================================================
 // پلاگین پرداخت درون‌برنامه‌ای کافه‌بازار (روی کتابخانه‌ی رسمی Poolakey)
 // ------------------------------------------------------------
-// چون تأیید نهایی خرید سمت سرور (Cloudflare Worker) انجام می‌شه، این‌جا
-// SecurityCheck.Disable استفاده شده تا نیازی به کلید RSA محلی نباشه.
+// این برنامه هیچ سروری ندارد؛ بنابراین امضای هر خرید باید همین‌جا روی
+// دستگاه با کلید عمومی RSA پنل کافه‌بازار راستی‌آزمایی شود، وگرنه یک
+// برنامه‌ی جعلی می‌تواند پاسخِ ساختگی بدهد و اشتراک را رایگان باز کند.
 // ============================================================
 @CapacitorPlugin(name = "BazaarBilling")
 class BazaarBillingPlugin : Plugin() {
+
+    companion object {
+        // ⬇️ کلید عمومی RSA از پنل کافه‌بازار: توسعه‌دهنده ← برنامه ← «پرداخت درون‌برنامه‌ای»
+        //    با دکمه‌ی کپیِ خودِ پنل بردار و بین همین دو گیومه بچسبان (یک خط، بدون فاصله و
+        //    بدون خط جدید). این کلید «عمومی» است و افشای آن خطری ندارد.
+        //    تا وقتی خالی بماند، راستی‌آزمایی محلی خاموش است و خرید امن نیست.
+        private const val BAZAAR_RSA_KEY = ""
+    }
 
     private lateinit var payment: Payment
     private var connection: Connection? = null
 
     override fun load() {
-        val paymentConfig = PaymentConfiguration(localSecurityCheck = SecurityCheck.Disable)
+        val key = BAZAAR_RSA_KEY.trim()
+        // اگر کلید جا نیفتاده باشد به‌جای کرش کردنِ همه‌ی خریدها، فقط راستی‌آزمایی خاموش می‌شود
+        val securityCheck = if (key.isEmpty()) SecurityCheck.Disable else SecurityCheck.Enable(rsaPublicKey = key)
+        val paymentConfig = PaymentConfiguration(localSecurityCheck = securityCheck)
         payment = Payment(context = context, config = paymentConfig)
     }
 
