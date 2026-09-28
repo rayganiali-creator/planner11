@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- اندروید ۱۲ به بالا: نه پشتیبان‌گیری ابری، نه انتقالِ دستگاه‌به‌دستگاه.
+     داده فقط روی همین گوشی می‌ماند؛ انتقال با فایلِ پشتیبانِ خودِ برنامه انجام می‌شود. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="file" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="file" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>
