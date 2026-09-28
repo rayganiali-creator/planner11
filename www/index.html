@@ -13199,8 +13199,8 @@
                         // کلاه بیش از اندازه پایین می‌افتد
                         const ox = off[0] * sc, oy = off[1] * sc;
                         // سر: پایینِ آیتم روی جمجمه · گردن: بالای آیتم از سینه آویزان
-                        ctx.drawImage(im, 0, 0, l.size[0], l.size[1],
-                            Math.round(p.x - w / 2 + ox), Math.round(l.on === 'head' ? p.y - h + oy : p.y + oy), w, h);
+                        // size یعنی «اندازه‌ی رسم‌شده»، نه بریدنِ تصویر — پس کلِ تصویر به همان اندازه کشیده می‌شود
+                        ctx.drawImage(im, Math.round(p.x - w / 2 + ox), Math.round(l.on === 'head' ? p.y - h + oy : p.y + oy), w, h);
                         return;
                     }
                     const r = (l.isBase || l.isBack) ? l.rect : l.fits[gender];
@@ -13213,9 +13213,11 @@
                     if (l.kind === 'hijab') {        // سایه‌ی نرمِ روسری روی لباس/شنلِ زیرش (عمق)
                         const sc = document.createElement('canvas'); sc.width = im.width; sc.height = im.height; const sx = sc.getContext('2d');
                         sx.drawImage(im, 0, 0); sx.globalCompositeOperation = 'source-in'; sx.fillStyle = 'rgba(20,14,24,0.38)'; sx.fillRect(0, 0, sc.width, sc.height);
-                        ctx.drawImage(sc, AV_OFF_X + r[0], r[1] + 1); ctx.drawImage(sc, AV_OFF_X + r[0] + 1, r[1] + 1); ctx.drawImage(sc, AV_OFF_X + r[0] - 1, r[1] + 1);
+                        ctx.drawImage(sc, AV_OFF_X + r[0], r[1] + 1, r[2], r[3]); ctx.drawImage(sc, AV_OFF_X + r[0] + 1, r[1] + 1, r[2], r[3]); ctx.drawImage(sc, AV_OFF_X + r[0] - 1, r[1] + 1, r[2], r[3]);
                     }
-                    ctx.drawImage(im, AV_OFF_X + r[0], r[1]);
+                    // پهنا/بلندی از خودِ fit خوانده می‌شود (نه اندازه‌ی خامِ تصویر) تا بشود اندازه‌ی
+                    // هر آیتم را هم مثل جایش تنظیم کرد
+                    ctx.drawImage(im, AV_OFF_X + r[0], r[1], r[2], r[3]);
                 });
                 extra.forEach((e, k) => { const rr = res[layers.length + k]; if (rr.status === 'fulfilled') ctx.drawImage(rr.value, AV_OFF_X + e.rect[0], e.rect[1]); });
                 // زخم‌بند/دستمالِ حیوان، روی سرش
