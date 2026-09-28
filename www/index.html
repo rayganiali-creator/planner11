@@ -4364,7 +4364,11 @@
            هر آیتمی رو که لمس می‌کنی همیشه روی پیش‌نمایش ببینی */
         .avatar-modal { max-width: 460px; padding: 16px 14px 0; display: flex; flex-direction: column; overflow: hidden; height: min(85vh, 720px); height: min(85dvh, 720px); }
         .avatar-modal > * { flex-shrink: 0; }
-        .avatar-modal .av-grid { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px 2px 10px; align-content: start; }
+        /* کلِ بدنه‌ی پنجره اسکرول می‌شود تا روی هر ارتفاعی، آیتم‌ها در دسترس باشند */
+        .avatar-modal .av-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 2px; }
+        .avatar-modal .av-grid { padding: 2px 2px 10px; align-content: start; }
+        /* ردیفِ دسته‌ها موقعِ اسکرول بالا می‌چسبد تا همیشه بشود دسته عوض کرد */
+        .avatar-modal .av-cats { position: sticky; top: 0; z-index: 3; background: var(--surface); padding-top: 6px; }
         .avatar-modal .modal-actions { margin: 0 -14px; position: static; border-radius: 0 0 20px 20px; }
         .av-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
         .av-head h3 { margin: 0; }
@@ -4379,6 +4383,12 @@
         .av-stage canvas { height: 100% !important; width: 100% !important; image-rendering: pixelated; }
         /* ضریب بزرگ‌نمایی صحیح (۲× یا ۳×) تا پیکسل‌ها کاملاً یکدست و تیز بمونن */
         @media (min-height: 700px) { .av-stage { height: 204px; } } @media (min-height: 820px) { .av-stage { height: 268px; } }
+        @media (max-height: 660px) { .av-stage { height: 132px; } .av-hp-hint { display: none; } .av-gender-switch { margin: 6px 0 4px; } }
+        /* با اسکرول به پایین، پیش‌نمایشِ آواتار جمع می‌شود تا دو ردیفِ کاملِ آیتم دیده شود */
+        .av-stage, .av-hp-hint { transition: height .18s var(--ease), margin .18s var(--ease), opacity .15s; }
+        .avatar-modal.compact .av-stage { height: 92px !important; }
+        .avatar-modal.compact .av-hp-hint { display: none; }
+        .avatar-modal.compact .av-gender-switch { margin: 6px 0 4px; }
         .av-gender-switch { display: flex; gap: 6px; justify-content: center; margin: 10px 0 8px; }
         .av-gender-switch button, .av-cat { font-family: inherit; font-weight: 700; font-size: calc(12.5px * var(--font-scale)); color: var(--text);
             background: var(--surface-2); border: 1px solid var(--glass-border); border-radius: 999px; padding: 7px 14px; cursor: pointer; white-space: nowrap;
@@ -4821,13 +4831,13 @@
 
         /* کارت‌های انتخاب آیتم آواتار: بزرگ‌تر و خواناتر */
         #avGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
-        #avGrid .av-card { padding: 10px 8px !important; min-height: calc(104px + 74px * var(--font-scale)) !important; }
-        #avGrid .av-card canvas { width: 104px !important; height: 104px !important; }
+        #avGrid .av-card { padding: 8px 8px !important; min-height: calc(86px + 70px * var(--font-scale)) !important; }
+        #avGrid .av-card canvas { width: 86px !important; height: 86px !important; }
         #avGrid .av-name { font-size: calc(12px * var(--font-scale)) !important; }
         #avGrid .av-tag { font-size: calc(11px * var(--font-scale)) !important; }
         @media (min-width: 420px) { #avGrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-            #avGrid .av-card { min-height: calc(92px + 74px * var(--font-scale)) !important; }
-            #avGrid .av-card canvas { width: 92px !important; height: 92px !important; } }
+            #avGrid .av-card { min-height: calc(80px + 70px * var(--font-scale)) !important; }
+            #avGrid .av-card canvas { width: 80px !important; height: 80px !important; } }
 
         /* ===== خورشید و ماهِ مینیمال پشت آواتار ===== */
         .av-sky { position: absolute; top: 12px; inset-inline-start: 14px; width: 30px; height: 30px; border-radius: 50%;
@@ -5905,6 +5915,7 @@
                 <h3 data-fa="آواتار من" data-en="My avatar">آواتار من</h3>
                 <span class="av-coins" id="avCoins">🪙 0</span>
             </div>
+            <div class="av-scroll">
             <div class="av-stage"><span class="av-sky" aria-hidden="true"></span><div class="av-figure"><canvas id="avatarPetCanvas" class="rp-breathe rp-breathe-pet" width="360" height="372"></canvas><canvas id="avatarPreviewCanvas" class="rp-breathe" width="360" height="372"></canvas></div><span class="av-zz">💤</span></div>
             <div class="av-hp"><div class="av-hp-bar"><i id="avHpFill"></i></div><span id="avHpText">❤️ HP</span></div>
             <p class="av-hp-hint" data-fa="با انجام عادت‌ها HP بالا می‌رود و آواتار و حیوانت سرحال می‌مانند. اگر عادت‌ها انجام نشود، اول خسته، بعد زخمی و در آخر مریض می‌شوند. شب‌ها (۰ تا ۷) هم می‌خوابند." data-en="Completing habits raises HP and keeps your avatar and pet healthy. Skip your habits and they get tired, then wounded, then sick. At night (0–7) they sleep.">با انجام عادت‌ها HP بالا می‌رود و آواتار و حیوانت سرحال می‌مانند. اگر عادت‌ها انجام نشود، اول خسته، بعد زخمی و در آخر مریض می‌شوند. شب‌ها (۰ تا ۷) هم می‌خوابند.</p>
@@ -5914,6 +5925,7 @@
             </div>
             <div class="av-cats" id="avCats"></div>
             <div class="av-grid" id="avGrid"></div>
+            </div>
             <div class="modal-actions">
                 <button class="btn-cancel" id="avCloseBtn" data-fa="بستن" data-en="Close">بستن</button>
                 <button class="btn-confirm" id="avActionBtn">—</button>
@@ -13217,6 +13229,9 @@
                 avSelId = null; avBuyArmed = false;
                 if (!avVisibleCats(a.gender).some(c => c.key === avCat)) avCat = 'clothes';
                 document.getElementById('avatarModalBackdrop').classList.add('open');
+                const sc = document.querySelector('.avatar-modal .av-scroll');
+                if (sc) sc.scrollTop = 0;
+                document.querySelector('.avatar-modal').classList.remove('compact');
                 avRenderPanel(); avRefreshPreview();
             }
             async function avRefreshPreview(pop) {
@@ -13376,6 +13391,17 @@
                 saveState(); avRenderPanel(); avRefreshPreview(true); avRefreshMini(true);
             }
             document.getElementById('avatarMiniBtn').addEventListener('click', openAvatarPanel);
+            // پیش‌نمایشِ آواتار با اسکرول جمع/باز می‌شود (با یک آستانه‌ی جدا برای رفت و برگشت،
+            // تا نزدیکِ مرز مدام باز و بسته نشود)
+            (function () {
+                const sc = document.querySelector('.avatar-modal .av-scroll');
+                const modal = document.querySelector('.avatar-modal');
+                if (!sc || !modal) return;
+                sc.addEventListener('scroll', () => {
+                    if (!modal.classList.contains('compact') && sc.scrollTop > 40) modal.classList.add('compact');
+                    else if (modal.classList.contains('compact') && sc.scrollTop < 12) modal.classList.remove('compact');
+                }, { passive: true });
+            })();
             document.getElementById('avCloseBtn').addEventListener('click', () => document.getElementById('avatarModalBackdrop').classList.remove('open'));
             document.getElementById('avatarModalBackdrop').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
             document.getElementById('avActionBtn').addEventListener('click', avAction);
@@ -13389,6 +13415,8 @@
             document.getElementById('avCats').addEventListener('click', e => {
                 const b = e.target.closest('.av-cat'); if (!b) return;
                 avCat = b.dataset.cat; avSelId = null; avBuyArmed = false; avRenderPanel(); avRefreshPreview();
+                const sc = document.querySelector('.avatar-modal .av-scroll'), grid = document.getElementById('avGrid');
+                if (sc && grid) sc.scrollTop = Math.max(0, grid.offsetTop - document.getElementById('avCats').offsetHeight);
             });
             document.getElementById('avGrid').addEventListener('click', e => {
                 const c = e.target.closest('.av-card'); if (!c) return;
