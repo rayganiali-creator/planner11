@@ -1,0 +1,20 @@
+# کلیدِ امضا هرگز نباید داخل ریپازیتوری برود — بدونش به‌روزرسانی در کافه‌بازار ممکن نیست
+*.jks
+*.keystore
+*.p12
+*.pem
+key.properties
+
+# خروجی‌های ساخت
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/release/
+android/app/debug/
+*.apk
+*.aab
+
+node_modules/
+.DS_Store
+Thumbs.db
