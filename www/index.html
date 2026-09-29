@@ -1873,6 +1873,82 @@
             cursor: default;
             opacity: .65;
         }
+        /* ===== تبِ «خریدها»: وضعیت پلن، خریدِ پلنِ تازه، و تاریخچه ===== */
+        .pur-hero {
+            position: relative; overflow: hidden; border-radius: 18px; padding: 18px 16px;
+            background: linear-gradient(135deg, var(--primary-soft), transparent 72%), var(--surface-2);
+            border: 1.5px solid var(--glass-border);
+        }
+        .pur-hero::after {
+            content: ''; position: absolute; top: -46px; inset-inline-end: -46px; width: 150px; height: 150px;
+            border-radius: 50%; background: var(--primary); opacity: .07; pointer-events: none;
+        }
+        .pur-hero > * { position: relative; }
+        .ph-badge {
+            display: inline-flex; align-items: center; gap: 5px; font-weight: 800;
+            font-size: calc(11.5px * var(--font-scale)); padding: 4px 11px; border-radius: 999px;
+            background: var(--primary); color: #fff;
+        }
+        .ph-badge.free { background: var(--border); color: var(--text-muted); }
+        .ph-num { font-size: calc(40px * var(--font-scale)); font-weight: 900; line-height: 1.15; color: var(--primary); }
+        .ph-unit { font-size: calc(13px * var(--font-scale)); font-weight: 700; color: var(--text-muted); }
+        .ph-sub { margin-top: 4px; font-size: calc(12.5px * var(--font-scale)); color: var(--text-muted); line-height: 1.7; }
+        .ph-bar { margin-top: 12px; height: 8px; border-radius: 999px; background: var(--border); overflow: hidden; }
+        .ph-bar i { display: block; height: 100%; border-radius: 999px; background: var(--primary); transition: width .45s var(--ease); }
+        .pur-h {
+            font-size: calc(15px * var(--font-scale)); font-weight: 800; color: var(--primary);
+            margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+        }
+        .pur-note {
+            font-size: calc(12px * var(--font-scale)); color: var(--text-muted); line-height: 1.85;
+            background: var(--surface-2); border: 1px dashed var(--glass-border);
+            border-radius: 12px; padding: 10px 12px; margin-bottom: 12px;
+        }
+        .pur-note b { color: var(--text); }
+        .pur-plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .pur-plan {
+            position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px;
+            padding: 15px 8px 11px; border-radius: 16px; text-align: center;
+            border: 1.5px solid var(--glass-border); background: var(--surface-2); min-width: 0;
+            transition: border-color .15s, background .15s;
+        }
+        .pur-plan.best { border-color: var(--primary); background: var(--primary-soft); }
+        .pur-plan.owned { opacity: .75; }
+        .pp-ribbon {
+            position: absolute; top: -9px; left: 0; right: 0; margin-inline: auto; width: max-content;
+            font-size: calc(10px * var(--font-scale)); font-weight: 800; padding: 2px 9px;
+            border-radius: 999px; background: var(--primary); color: #fff;
+        }
+        .pp-label { font-weight: 800; font-size: calc(14px * var(--font-scale)); color: var(--text); }
+        .pp-price { font-weight: 900; font-size: calc(14px * var(--font-scale)); color: var(--primary); white-space: nowrap; }
+        .pp-add { font-size: calc(11.5px * var(--font-scale)); font-weight: 700; color: var(--text-muted); }
+        .pp-until { font-size: calc(10.5px * var(--font-scale)); color: var(--text-muted); line-height: 1.6; }
+        .pp-buy { margin-top: 7px; width: 100%; }
+        .pp-buy[disabled] { opacity: .7; cursor: default; }
+        .pur-empty {
+            text-align: center; color: var(--text-muted); font-size: calc(12.5px * var(--font-scale));
+            padding: 22px 10px; border: 1px dashed var(--border); border-radius: 14px;
+        }
+        .pur-item { display: flex; gap: 10px; }
+        .pi-rail { flex: 0 0 14px; display: flex; flex-direction: column; align-items: center; padding-top: 5px; }
+        .pi-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+        .pi-line { flex: 1; width: 2px; background: var(--border); margin: 4px 0 0; border-radius: 2px; }
+        .pur-item:last-child .pi-line { display: none; }
+        .pur-item.is-active .pi-dot { background: var(--success); box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 25%, transparent); }
+        .pur-item.is-queued .pi-dot { background: var(--primary); }
+        .pi-body { flex: 1; min-width: 0; padding-bottom: 14px; }
+        .pi-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .pi-name { font-weight: 800; font-size: calc(13.5px * var(--font-scale)); color: var(--text); }
+        .pi-chip {
+            font-size: calc(10.5px * var(--font-scale)); font-weight: 800; padding: 2px 9px;
+            border-radius: 999px; background: var(--border); color: var(--text-muted); white-space: nowrap;
+        }
+        .pur-item.is-active .pi-chip { background: var(--success); color: #fff; }
+        .pur-item.is-queued .pi-chip { background: var(--primary); color: #fff; }
+        .pi-meta, .pi-range { font-size: calc(11.5px * var(--font-scale)); color: var(--text-muted); margin-top: 3px; line-height: 1.7; }
+        .pi-range { font-weight: 700; }
+        .pi-token { font-size: calc(10px * var(--font-scale)); color: var(--text-muted); opacity: .75; margin-top: 3px; direction: ltr; text-align: start; }
+        @media (max-width: 340px) { .pur-plans { grid-template-columns: 1fr; } }
         .pro-plan-card {
             display: flex;
             align-items: center;
@@ -4939,6 +5015,7 @@
                     <button data-view="month" class="view-tab-btn" data-fa="📅 ثبت ماهانه" data-en="📅 Monthly Record">📅 ثبت ماهانه</button>
                     <button data-view="year" class="view-tab-btn" data-fa="🗓️ ثبت سالانه" data-en="🗓️ Yearly Record">🗓️ ثبت سالانه</button>
                     <button data-view="library" class="view-tab-btn" data-fa="📚 کتابخونه" data-en="📚 Library">📚 کتابخونه</button>
+                    <button data-view="purchases" class="view-tab-btn" data-fa="🧾 خریدها" data-en="🧾 Purchases">🧾 خریدها</button>
                     <button data-view="journal" class="view-tab-btn" data-fa="📓 یادداشت" data-en="📓 Journal">📓 یادداشت</button>
                     <button data-view="todo" class="view-tab-btn" data-fa="✅ لیست کارها" data-en="✅ To-Do">✅ لیست کارها</button>
                     <button data-view="pomodoro" class="view-tab-btn" data-fa="⏱️ پومودورو" data-en="⏱️ Pomodoro">⏱️ پومودورو</button>
@@ -5182,6 +5259,26 @@
                     </div>
                 </div>
                 <div class="book-list" id="bookList"></div>
+            </div>
+        </section>
+
+
+        <section class="view" id="view-purchases">
+            <div class="card">
+                <div class="pur-hero" id="purHero"></div>
+            </div>
+
+            <div class="card" id="purPlansCard">
+                <h3 class="pur-h" data-fa="⭐ خرید یا تمدید پلن" data-en="⭐ Buy or extend a plan">⭐ خرید یا تمدید پلن</h3>
+                <div class="pur-note" id="purStackNote"></div>
+                <div class="pur-plans" id="purPlansGrid"></div>
+                <button type="button" class="glass-btn sm" id="purRestoreBtn" style="margin-top:12px;width:100%"
+                    data-fa="🔄 بازیابی خریدها" data-en="🔄 Restore purchases">🔄 بازیابی خریدها</button>
+            </div>
+
+            <div class="card">
+                <h3 class="pur-h" data-fa="🧾 تاریخچه‌ی خریدها" data-en="🧾 Purchase history">🧾 تاریخچه‌ی خریدها</h3>
+                <div class="pur-history" id="purHistory"></div>
             </div>
         </section>
 
@@ -11308,6 +11405,7 @@
                 if (isActive('view-journal')) renderJournal();
                 if (isActive('view-todo')) renderTodos();
                 if (isActive('view-library')) renderLibrary();
+                if (isActive('view-purchases')) renderPurchases();
                 renderDashboard();
                 if (isActive('view-dashboard')) renderDashboardExtras();
                 updateProfileUI();
@@ -11911,6 +12009,7 @@
                 if (viewName === 'year' && !fresh) renderYear();
                 if (['dashboard', 'habits', 'month', 'year'].includes(viewName)) markViewRendered(viewName);
                 if (viewName === 'library') renderLibrary();
+                if (viewName === 'purchases') renderPurchases();
                 document.getElementById('tabsPickerBackdrop').classList.remove('open');
             }
 
@@ -12500,6 +12599,8 @@
                 });
                 const upgradeBtn = document.getElementById('upgradeHeaderBtn');
                 if (upgradeBtn) upgradeBtn.style.display = state.isPremium ? 'none' : '';
+                // اگر همین حالا روی تبِ خریدها هستیم، وضعیت و تاریخچه تازه می‌شوند
+                try { if (document.getElementById('view-purchases').classList.contains('active')) renderPurchases(); } catch (e) {}
             }
             // ============================================================
             // پلن‌های نسخه‌ی کامل: هرکدوم یه SKU جدا توی کافه‌بازار داره. قیمت‌های این‌جا فقط
@@ -12714,6 +12815,170 @@
                     checkProExpiry();
                 }
             }
+
+            // ============================================================
+            // تبِ «خریدها»
+            // ------------------------------------------------------------
+            // قاعده‌ی تجمیع همان چیزی است که computeProWindow از قبل انجام می‌دهد؛ اینجا
+            // فقط دیده می‌شود: هر پلنِ تازه از «انتهای پلنِ قبلی» شروع می‌شود، نه از امروز.
+            // پس اگر روزِ ۱۵مِ یک پلنِ یک‌ماهه، پلنِ دوماهه خریده شود:
+            //     ۱۵ روزِ باقی‌مانده + ۶۰ روز = ۷۵ روز.
+            // ============================================================
+            function proPurchaseSegments() {
+                const pc = state.proCache;
+                const list = ((pc && pc.purchases) || []).slice()
+                    .sort((a, b) => (a.purchaseTime || 0) - (b.purchaseTime || 0));
+                let exp = 0;
+                return list.map(p => {
+                    if (p.productId === LEGACY_LIFETIME_PRODUCT_ID)
+                        return { p: p, plan: null, lifetime: true, from: p.purchaseTime || 0, to: null };
+                    const plan = findProPlan(p.productId);
+                    // پلنِ ناشناس دقیقاً مثل computeProWindow نادیده گرفته می‌شود و پنجره را جلو نمی‌برد
+                    if (!plan) return { p: p, plan: null, unknown: true, from: p.purchaseTime || 0, to: p.purchaseTime || 0 };
+                    const from = Math.max(exp, p.purchaseTime || 0);
+                    exp = from + planDurationMs(plan.months);
+                    return { p: p, plan: plan, from: from, to: exp };
+                });
+            }
+            function purDateLabel(ts, withTime) {
+                if (!ts) return '—';
+                const d = new Date(ts), fa = state.lang === 'fa';
+                let out;
+                if (state.calendarType === 'jalali') {
+                    const j = toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+                    const mon = fa ? PERSIAN_MONTHS[j.jm - 1] : JALALI_MONTHS_EN[j.jm - 1];
+                    out = (fa ? toPersianDigits(j.jd) : j.jd) + ' ' + mon + ' ' + (fa ? toPersianDigits(j.jy) : j.jy);
+                } else if (fa) {
+                    out = toPersianDigits(d.getFullYear()) + '/' + toPersianDigits(pad2(d.getMonth() + 1)) + '/' + toPersianDigits(pad2(d.getDate()));
+                } else {
+                    out = EN_MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+                }
+                if (withTime) {
+                    const t = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+                    out += ' — ' + (fa ? toPersianDigits(t) : t);
+                }
+                return out;
+            }
+            function renderPurchases() {
+                const hero = document.getElementById('purHero');
+                if (!hero) return;
+                const fa = state.lang === 'fa', N = n => fa ? toPersianDigits(n) : String(n);
+                const pc = state.proCache, segs = proPurchaseSegments(), now = rpNow();
+                const lifetime = segs.some(x => x.lifetime);
+                const expiresAt = (pc && pc.expiresAt) || 0;
+                const timed = !!(state.isPremium && expiresAt && !lifetime);
+
+                // ---- کارتِ وضعیت ----
+                if (lifetime) {
+                    hero.innerHTML = '<span class="ph-badge">⭐ ' + (fa ? 'پرو همیشگی' : 'Lifetime Pro') + '</span>' +
+                        '<div class="ph-num">∞</div>' +
+                        '<div class="ph-sub">' + (fa ? 'دسترسی همیشگی داری؛ تاریخ پایانی ندارد.' : 'You have lifetime access — no expiry date.') + '</div>';
+                } else if (timed) {
+                    const days = proDaysLeft() || 0;
+                    const start = segs.length ? segs[0].from : now;
+                    const total = Math.max(1, expiresAt - start);
+                    const left = Math.max(0, Math.min(100, Math.round((expiresAt - now) / total * 100)));
+                    hero.innerHTML = '<span class="ph-badge">⭐ ' + (fa ? 'پرو فعال' : 'Pro active') + '</span>' +
+                        '<div><span class="ph-num">' + N(days) + '</span> <span class="ph-unit">' + (fa ? 'روز باقی‌مانده' : 'days left') + '</span></div>' +
+                        '<div class="ph-sub">' + (fa ? 'پایان دوره: ' : 'Ends on: ') + purDateLabel(expiresAt) + '</div>' +
+                        '<div class="ph-bar"><i style="width:' + left + '%"></i></div>';
+                } else if (state.isPremium) {
+                    hero.innerHTML = '<span class="ph-badge">⭐ ' + (fa ? 'پرو فعال' : 'Pro active') + '</span>' +
+                        '<div class="ph-num">∞</div>' +
+                        '<div class="ph-sub">' + (fa ? 'بدون تاریخ پایان.' : 'No end date.') + '</div>';
+                } else {
+                    hero.innerHTML = '<span class="ph-badge free">' + (fa ? 'نسخه‌ی رایگان' : 'Free plan') + '</span>' +
+                        '<div class="ph-sub" style="margin-top:10px">' + (fa ?
+                            'پلن فعالی نداری. با خرید هر پلن، همه‌ی امکانات پرو باز می‌شود.' :
+                            'No active plan. Any plan unlocks every Pro feature.') + '</div>';
+                }
+
+                // ---- پلن‌ها ----
+                const card = document.getElementById('purPlansCard');
+                const note = document.getElementById('purStackNote');
+                const grid = document.getElementById('purPlansGrid');
+                if (lifetime) { card.style.display = 'none'; }
+                else {
+                    card.style.display = '';
+                    const base = timed ? expiresAt : now;
+                    note.innerHTML = timed ? (fa ?
+                        'پلن تازه <b>به انتهای پلن فعلی اضافه می‌شود</b>، نه اینکه جایش را بگیرد. مثلاً اگر ۱۵ روز از پلنِ یک‌ماهه‌ات مانده باشد و پلنِ دوماهه بخری، ۷۵ روز خواهی داشت.' :
+                        'A new plan is <b>added to the end of your current plan</b> — it does not replace it. If 15 days remain on your 1-month plan and you buy 2 months, you will have 75 days.') :
+                        (fa ? 'با خرید هر پلن، پرو از همین لحظه فعال می‌شود.' : 'Buying any plan activates Pro right away.');
+                    const ownedIds = segs.filter(x => !x.unknown && (x.to === null || x.to > now)).map(x => x.p.productId);
+                    grid.innerHTML = PRO_PLANS.map(p => {
+                        const dd = Math.round(planDurationMs(p.months) / 86400000);
+                        const owned = ownedIds.indexOf(p.id) >= 0;
+                        return '<div class="pur-plan' + (p.months === 6 ? ' best' : '') + (owned ? ' owned' : '') + '">' +
+                            (p.months === 6 ? '<span class="pp-ribbon">' + (fa ? 'به‌صرفه‌ترین' : 'Best value') + '</span>' : '') +
+                            '<div class="pp-label">' + (fa ? p.labelFa : p.labelEn) + '</div>' +
+                            '<div class="pp-price">' + (fa ? p.priceFa : p.priceEn) + '</div>' +
+                            '<div class="pp-add">+ ' + N(dd) + ' ' + (fa ? 'روز' : 'days') + '</div>' +
+                            '<div class="pp-until">' + (owned ? (fa ? 'همین حالا در پلن توست' : 'already in your plan')
+                                : (fa ? 'تا ' : 'until ') + purDateLabel(base + planDurationMs(p.months))) + '</div>' +
+                            '<button type="button" class="glass-btn primary sm pp-buy" data-buy="' + p.id + '"' + (owned ? ' disabled' : '') + '>' +
+                            (owned ? (fa ? 'خریداری‌شده' : 'Owned') : timed ? (fa ? 'افزودن' : 'Add') : (fa ? 'خرید' : 'Buy')) +
+                            '</button></div>';
+                    }).join('');
+                    if (ownedIds.length) {
+                        note.innerHTML += '<div style="margin-top:8px">' + (fa ?
+                            'هر پلن تا پایان دوره‌اش دوباره قابل خرید نیست؛ برای تمدید یکی از پلن‌های دیگر را انتخاب کن.' :
+                            'A plan cannot be bought again until its period ends; pick one of the other plans to extend.') + '</div>';
+                    }
+                }
+
+                // ---- تاریخچه ----
+                const hist = document.getElementById('purHistory');
+                if (!segs.length) {
+                    hist.innerHTML = '<div class="pur-empty">' + (fa ?
+                        'هنوز خریدی ثبت نشده. هر خریدی که انجام بدهی همین‌جا با تاریخ و مدتش ثبت می‌شود.' :
+                        'No purchases yet. Every purchase you make will be listed here with its date and duration.') + '</div>';
+                } else {
+                    hist.innerHTML = segs.slice().reverse().map(x => {
+                        let cls = '', chip;
+                        if (x.lifetime) { cls = 'is-active'; chip = fa ? 'همیشگی' : 'Lifetime'; }
+                        else if (x.unknown) { chip = fa ? 'نامشخص' : 'Unknown'; }
+                        else if (now >= x.to) { chip = fa ? 'تمام‌شده' : 'Ended'; }
+                        else if (now >= x.from) { cls = 'is-active'; chip = fa ? 'فعال' : 'Active'; }
+                        else { cls = 'is-queued'; chip = fa ? 'در نوبت' : 'Queued'; }
+                        const name = x.plan ? (fa ? x.plan.labelFa : x.plan.labelEn)
+                            : x.lifetime ? (fa ? 'نسخه‌ی همیشگی' : 'Lifetime unlock') : escHtml(x.p.productId || '—');
+                        const price = x.plan ? ' · ' + (fa ? x.plan.priceFa : x.plan.priceEn) : '';
+                        const tok = String(x.p.purchaseToken || '');
+                        return '<div class="pur-item ' + cls + '">' +
+                            '<div class="pi-rail"><span class="pi-dot"></span><span class="pi-line"></span></div>' +
+                            '<div class="pi-body">' +
+                            '<div class="pi-top"><span class="pi-name">' + name + '</span><span class="pi-chip">' + chip + '</span></div>' +
+                            '<div class="pi-meta">' + (fa ? 'خرید: ' : 'Purchased: ') + purDateLabel(x.p.purchaseTime, true) + price + '</div>' +
+                            (x.unknown ? '' : '<div class="pi-range">' + (fa ? 'از ' : 'From ') + purDateLabel(x.from) +
+                                (x.to === null ? (fa ? ' برای همیشه' : ' forever') : (fa ? ' تا ' : ' to ') + purDateLabel(x.to)) + '</div>') +
+                            (tok ? '<div class="pi-token">' + (fa ? 'کد رهگیری: ' : 'Receipt: ') + escHtml('…' + tok.slice(-10)) + '</div>' : '') +
+                            '</div></div>';
+                    }).join('');
+                }
+            }
+            document.getElementById('purPlansGrid').addEventListener('click', async e => {
+                const b = e.target.closest('[data-buy]');
+                if (!b || b.disabled || b.dataset.busy) return;
+                const label = b.textContent;
+                b.dataset.busy = '1'; b.disabled = true;
+                b.textContent = state.lang === 'fa' ? 'در حال اتصال…' : 'Connecting…';
+                try { await purchasePremium(b.dataset.buy); } finally {
+                    delete b.dataset.busy; b.disabled = false; b.textContent = label;
+                    renderPurchases();
+                }
+            });
+            document.getElementById('purRestoreBtn').addEventListener('click', async function() {
+                if (this.dataset.busy) return;
+                const label = this.textContent;
+                this.dataset.busy = '1'; this.disabled = true;
+                this.textContent = state.lang === 'fa' ? 'در حال بررسی…' : 'Checking…';
+                try { await restorePurchases(); } catch (err) {} finally {
+                    delete this.dataset.busy; this.disabled = false; this.textContent = label;
+                    renderPurchases();
+                    showToast(state.lang === 'fa' ? 'وضعیت خریدها به‌روز شد.' : 'Purchase status refreshed.', 2500);
+                }
+            });
 
             // ---- مودال انتخاب پلن ----
             let proPlansSelectedId = null;
