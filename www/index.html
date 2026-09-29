@@ -4719,9 +4719,10 @@
         .card h2 .ic, .card > h3 .ic { color: var(--primary); }
 
         /* ===== تنفس طبیعی ===== */
-        .av-figure { position: relative; width: 130px; height: 160px; }
+        /* فیگور همیشه دقیقاً به قدِ صحنه است و نسبتِ بومِ ۱۸۰×۱۸۶ را نگه می‌دارد،
+           پس هر قدر هم صحنه کوتاه باشد سرِ آواتار بریده نمی‌شود — فقط کوچک‌تر می‌شود. */
+        .av-figure { position: relative; height: 100% !important; aspect-ratio: 180 / 186; width: auto !important; max-width: 100%; }
         .av-figure canvas { position: absolute; inset: 0; }
-        @media (min-height: 700px) { .av-figure { width: 156px; height: 192px; } } @media (min-height: 820px) { .av-figure { width: 208px; height: 256px; } }
         /* نقطه‌ی ثابت = کف پا (آواتار در x≈۳۷٪ بوم، حیوان در x≈۸۱٪) */
         #avatarPreviewCanvas { transform-origin: 30% 93%; }
         #avatarPetCanvas { transform-origin: 77% 94%; }
@@ -4738,26 +4739,17 @@
 
         /* آواتار نسخه‌ی ۳: تصاویر نقاشی‌شده → نرم رسم می‌شن (نه پیکسلی) */
         .av-stage canvas, .av-card canvas, .av-gender-card canvas, .avatar-mini-btn canvas { image-rendering: auto !important; }
-        .av-figure { width: 133px !important; height: 160px !important; }
-        @media (min-height: 700px) { .av-figure { width: 160px !important; height: 192px !important; } }
-        @media (min-height: 820px) { .av-figure { width: 213px !important; height: 256px !important; } }
         #avatarPreviewCanvas { transform-origin: 30% 97.5% !important; }
         #avatarPetCanvas { transform-origin: 78% 97.5% !important; }
         .av-card.locked canvas { opacity: .8; }
 
         /* آواتار نسخه‌ی ۴: بوم ۳۰۰×۴۰۰، آواتار وسط، حیوان پشت و کنارش */
-        .av-figure { width: 120px !important; height: 160px !important; }
-        @media (min-height: 700px) { .av-figure { width: 144px !important; height: 192px !important; } }
-        @media (min-height: 820px) { .av-figure { width: 192px !important; height: 256px !important; } }
         #avatarPetCanvas { z-index: 0; transform-origin: 77% 98% !important; }
         #avatarPreviewCanvas { z-index: 1; transform-origin: 50% 98% !important; }
         .av-gender-card canvas { width: 80px !important; height: 160px !important; }
 
         /* آواتار پیکسل‌آرت: بوم ۱۸۰×۱۷۸ */
         .av-stage canvas, .av-card canvas, .av-gender-card canvas, .avatar-mini-btn canvas { image-rendering: pixelated !important; image-rendering: crisp-edges; }
-        .av-figure { width: 158px !important; height: 163px !important; }
-        @media (min-height: 700px) { .av-figure { width: 188px !important; height: 194px !important; } }
-        @media (min-height: 820px) { .av-figure { width: 250px !important; height: 258px !important; } }
         #avatarPetCanvas { transform-origin: 79% 98% !important; }
         #avatarPreviewCanvas { transform-origin: 50% 98% !important; }
         .av-gender-card canvas { width: 80px !important; height: 160px !important; }
