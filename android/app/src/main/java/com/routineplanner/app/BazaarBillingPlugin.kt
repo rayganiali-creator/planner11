@@ -27,7 +27,7 @@ class BazaarBillingPlugin : Plugin() {
         //    با دکمه‌ی کپیِ خودِ پنل بردار و بین همین دو گیومه بچسبان (یک خط، بدون فاصله و
         //    بدون خط جدید). این کلید «عمومی» است و افشای آن خطری ندارد.
         //    تا وقتی خالی بماند، راستی‌آزمایی محلی خاموش است و خرید امن نیست.
-        private const val BAZAAR_RSA_KEY = ""
+        private const val BAZAAR_RSA_KEY = "MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwCu77+2kO1tvCGhLwngUzNmUs2sE1Cp8VfREHeSXVAjbOEXciNqB7r8wXMF+qdudOV/fuVzENcvcvhTmdIAYpaLJhZ1BzNWn8tZ1Ydv7yaiP0SVY9ZNo+14aBkStR62RQ3TDFvfj8/QkXGd7zqIbpej22SBSdIN71T07GbhaduSvqfSIQ3sLznUn6HH7Vuh5n06PkmeAMowmYXwza4b2BDOqPPNnBzu/I2ri3fiszsCAwEAAQ=="
     }
 
     private lateinit var payment: Payment
