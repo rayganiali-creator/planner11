@@ -11168,7 +11168,16 @@
                         // یادداشت‌های صوتی هر کتاب هم داخل پشتیبان می‌آیند
                         try {
                             const vs = await voiceList(b.id);
-                            if (vs && vs.length) voiceBackup[b.id] = vs.map(v => ({ id: v.id, createdAt: v.createdAt, dataUrl: v.dataUrl, duration: v.duration || 0 }));
+                            const outV = [];
+                            for (const v of (vs || [])) {
+                                // صدا به‌صورت Blob ذخیره شده؛ باید واقعاً به base64 تبدیل شود،
+                                // وگرنه JSON.stringify از یک Blob فقط {} می‌سازد و صدا از پشتیبان می‌افتد.
+                                const du = await voiceToDataUrl(v);
+                                if (!du) continue;
+                                outV.push({ id: v.id, at: v.at || v.createdAt || 0, ms: v.ms || v.duration || 0,
+                                            type: (v.blob && v.blob.type) || 'audio/webm', dataUrl: du });
+                            }
+                            if (outV.length) voiceBackup[b.id] = outV;
                         } catch (e) {}
                     }
                 } catch (e) {}
@@ -12164,8 +12173,11 @@
                                 try {
                                     await voiceDeleteAllForBook(bid);
                                     for (const vo of (d.bookVoices[bid] || [])) {
+                                        // باید دوباره Blob شود؛ پخش‌کننده روی رکوردِ بدونِ blob کار نمی‌کند.
+                                        const bl = voiceDataUrlToBlob(vo.dataUrl, vo.type);
+                                        if (!bl) continue;
                                         await voicePut({ id: vo.id || ('v_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)),
-                                            bookId: bid, dataUrl: vo.dataUrl, createdAt: vo.createdAt || Date.now(), duration: vo.duration || 0 });
+                                            bookId: bid, blob: bl, at: vo.at || vo.createdAt || Date.now(), ms: vo.ms || vo.duration || 0 });
                                     }
                                 } catch (err) {}
                             }
@@ -13968,18 +13980,47 @@
             async function voiceList(bookId) {
                 const db = await voiceDb();
                 return new Promise(res => { const out = []; const rq = db.transaction('notes').objectStore('notes').index('bookId').openCursor(IDBKeyRange.only(bookId));
-                    rq.onsuccess = () => { const c = rq.result; if (c) { out.push(c.value); c.continue(); } else res(out.sort((a, b) => a.at - b.at)); }; rq.onerror = () => res(out); });
+                    rq.onsuccess = () => { const c = rq.result; if (c) { out.push(c.value); c.continue(); } else res(out.sort((a, b) => (a.at || a.createdAt || 0) - (b.at || b.createdAt || 0))); }; rq.onerror = () => res(out); });
             }
             async function voicePut(rec) { const db = await voiceDb(); return new Promise(res => { const tx = db.transaction('notes', 'readwrite'); tx.objectStore('notes').put(rec); tx.oncomplete = res; tx.onerror = res; }); }
             async function voiceDelete(id) { const db = await voiceDb(); return new Promise(res => { const tx = db.transaction('notes', 'readwrite'); tx.objectStore('notes').delete(id); tx.oncomplete = res; tx.onerror = res; }); }
             async function voiceDeleteAllForBook(bookId) { try { (await voiceList(bookId)).forEach(v => voiceDelete(v.id)); } catch (e) {} }
+            // تبدیل‌های لازم برای پشتیبان‌گیری: Blob ↔ dataUrl. رکوردهای قدیمی که فقط
+            // dataUrl دارند هم پشتیبانی می‌شوند تا پشتیبان‌های ساخته‌شده با نسخه‌های قبلی نسوزند.
+            function voiceToDataUrl(v) {
+                return new Promise(res => {
+                    if (v && typeof v.dataUrl === 'string' && v.dataUrl) return res(v.dataUrl);
+                    if (!v || !(v.blob instanceof Blob)) return res('');
+                    const r = new FileReader();
+                    r.onload = () => res(typeof r.result === 'string' ? r.result : '');
+                    r.onerror = () => res('');
+                    try { r.readAsDataURL(v.blob); } catch (e) { res(''); }
+                });
+            }
+            function voiceDataUrlToBlob(u, type) {
+                try {
+                    if (typeof u !== 'string' || u.slice(0, 5) !== 'data:') return null;
+                    const i = u.indexOf(','); if (i < 0) return null;
+                    const head = u.slice(5, i);
+                    const mime = (head.split(';')[0] || type || 'audio/webm');
+                    const body = u.slice(i + 1);
+                    if (head.indexOf('base64') < 0) return new Blob([decodeURIComponent(body)], { type: mime });
+                    const bin = atob(body), arr = new Uint8Array(bin.length);
+                    for (let j = 0; j < bin.length; j++) arr[j] = bin.charCodeAt(j);
+                    return new Blob([arr], { type: mime });
+                } catch (e) { return null; }
+            }
             const voiceUrls = [];
             async function renderBookVoiceList(bookId) {
                 const wrap = document.getElementById('bookVoiceList'); if (!wrap) return;
                 voiceUrls.splice(0).forEach(u => URL.revokeObjectURL(u));
                 let list = []; try { list = await voiceList(bookId); } catch (e) {}
                 const fa = state.lang === 'fa';
-                wrap.innerHTML = list.map(v => { const u = URL.createObjectURL(v.blob); voiceUrls.push(u);
+                wrap.innerHTML = list.map(v => {
+                    let u = '';
+                    if (v && v.blob instanceof Blob) { u = URL.createObjectURL(v.blob); voiceUrls.push(u); }
+                    else if (v && typeof v.dataUrl === 'string' && v.dataUrl) { u = v.dataUrl; }
+                    if (!u) return '';   // رکوردِ خراب فقط خودش را نشان نمی‌دهد، بقیه سالم می‌مانند
                     return '<div class="voice-row"><audio controls preload="none" src="' + u + '"></audio><button type="button" data-vdel="' + v.id + '" aria-label="حذف">🗑</button></div>'; }).join('') ||
                     '<small class="voice-empty">' + (fa ? 'هنوز یادداشت صوتی ثبت نشده.' : 'No voice notes yet.') + '</small>';
             }
@@ -13992,7 +14033,13 @@
                 if (!navigator.mediaDevices || !window.MediaRecorder) { showToast(fa ? 'ضبط صدا روی این دستگاه پشتیبانی نمی‌شود.' : 'Recording is not supported here.', 3000); return; }
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    const chunks = [], mr = new MediaRecorder(stream), bookId = editingBookId, btn = this, started = Date.now();
+                    // بعضی وب‌ویوها با mimeTypeِ پیش‌فرض ساخته نمی‌شوند؛ پس چند گزینه را امتحان می‌کنیم.
+                    let mr = null;
+                    for (const opt of [null, { mimeType: 'audio/webm;codecs=opus' }, { mimeType: 'audio/webm' }, { mimeType: 'audio/mp4' }, { mimeType: 'audio/aac' }]) {
+                        try { mr = opt ? new MediaRecorder(stream, opt) : new MediaRecorder(stream); break; } catch (err) { mr = null; }
+                    }
+                    if (!mr) { stream.getTracks().forEach(t => t.stop()); showToast(fa ? 'ضبط صدا روی این دستگاه پشتیبانی نمی‌شود.' : 'Recording is not supported here.', 3000); return; }
+                    const chunks = [], bookId = editingBookId, btn = this, started = Date.now();
                     mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
                     mr.onstop = async () => {
                         stream.getTracks().forEach(t => t.stop()); voiceRec = null;
@@ -14001,10 +14048,24 @@
                         await voicePut({ id: 'v' + Date.now().toString(36), bookId, blob: new Blob(chunks, { type: mr.mimeType || 'audio/webm' }), at: Date.now(), ms: Date.now() - started });
                         renderBookVoiceList(bookId);
                     };
-                    mr.start(); voiceRec = mr;
+                    mr.start(1000); voiceRec = mr;   // هر ثانیه یک تکه، تا اگر ضبط نیمه‌کاره ماند چیزی از دست نرود
                     btn.textContent = fa ? '⏹ پایان ضبط' : '⏹ Stop recording'; btn.classList.add('recording');
                     setTimeout(() => { if (voiceRec === mr) mr.stop(); }, 5 * 60000); // حداکثر ۵ دقیقه
-                } catch (e) { showToast(fa ? 'اجازه‌ی دسترسی به میکروفون داده نشد.' : 'Microphone permission was denied.', 3000); }
+                } catch (e) {
+                    // پیامِ دقیق لازم است: «اجازه داده نشد» برای هر خطایی، کاربر را گمراه می‌کرد.
+                    const nm = (e && e.name) || '';
+                    let msg;
+                    if (nm === 'NotAllowedError' || nm === 'SecurityError' || nm === 'PermissionDeniedError')
+                        msg = fa ? 'اجازه‌ی میکروفون داده نشد. تنظیمات اندروید ← برنامه‌ها ← روتین پلنر ← مجوزها ← میکروفون را روشن کنید.'
+                                 : 'Microphone permission denied. Turn it on in Android Settings → Apps → Routine Planner → Permissions → Microphone.';
+                    else if (nm === 'NotFoundError' || nm === 'DevicesNotFoundError')
+                        msg = fa ? 'میکروفونی روی این دستگاه پیدا نشد.' : 'No microphone was found on this device.';
+                    else if (nm === 'NotReadableError' || nm === 'TrackStartError')
+                        msg = fa ? 'میکروفون در اختیار برنامه‌ی دیگری است؛ آن را ببندید و دوباره بزنید.' : 'The microphone is busy in another app. Close it and try again.';
+                    else
+                        msg = (fa ? 'ضبط صدا شروع نشد' : 'Recording could not start') + (nm ? ' (' + nm + ')' : '');
+                    showToast(msg, 4500);
+                }
             });
             document.getElementById('bookVoiceList').addEventListener('click', async e => {
                 const b = e.target.closest('[data-vdel]'); if (!b) return;
