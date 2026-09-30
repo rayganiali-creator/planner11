@@ -76,7 +76,8 @@ bool rpNormalizeState(Doc state) {
   }
   final sc = state['scores'] as Map;
   for (final k in const ['points', 'level', 'streak', 'coins', 'lastPoints']) {
-    final n = jsToNumber(sc[k]);
+    // Number(undefined) = NaN (غایب) ولی Number(null) = 0؛ این دو را باید جدا گرفت
+    final n = sc.containsKey(k) ? jsToNumber(sc[k]) : double.nan;
     sc[k] = n.isFinite ? _intIfWhole(n) : (k == 'level' ? 1 : 0);
   }
   if (state['avatar'] is! Map) {

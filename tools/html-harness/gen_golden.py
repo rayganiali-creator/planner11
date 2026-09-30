@@ -44,6 +44,12 @@ class Page:
     def call(self, fn, args):
         return self.pg.evaluate('([f,a]) => window.__rpFn[f](...a)', [fn, args])
 
+    def abatch(self, cases):
+        """مثل batch ولی برای توابع async (Promise) — یکی‌یکی await می‌شوند."""
+        return self.pg.evaluate(
+            '''async (cs) => { const out = []; for (const [f, a] of cs) { try { out.push({ok: await window.__rpFn[f](...a)}); } catch (e) { out.push({err: String(e)}); } } return out; }''',
+            [[c[0], c[1]] for c in cases])
+
     def batch(self, cases):
         """cases = [(fn, args)] → [out]  (یک رفت‌وبرگشت برای هزاران مورد)"""
         return self.pg.evaluate(
@@ -406,7 +412,90 @@ def m_load(P):
     print(f'  load: {len(rows)} مورد بارگذاریِ واقعیِ صفحه → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB فشرده / {round(n / 1024)} KB خام]')
 
 
-MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load}
+def m_backup(P):
+    import copy
+    from datetime import date
+    rnd = random.Random(20260930 + 4)
+    P.set_now(2026, 9, 30, 10, 0)
+    # ---- ۱) اعتبارسنجی + بازیابی ----
+    def good_state(i):
+        st = gen_state(rnd, date(2026, 9, 30))
+        st.update({'theme': 'dark', 'fontSize': 'large', 'bgColor': '#112233', 'accentTheme': 'rose', 'weekStart': 6, 'showHolidays': False,
+                   'calendarType': 'gregorian', 'tileColors': {'success': '#0a0', 'fail': '#a00', 'neutral': '#ccc'}, 'bgPattern': 'dots',
+                   'tileShape': 'square', 'tileEffect': 'glow', 'bgPatternOpacity': 0.5, 'themeIntensity': 40, 'profileName': f'نام {i}',
+                   'triggerType': 'reason', 'levelReachedColor': '#123456', 'masteryColor': '#654321', 'medals': [{'id': 'm1'}],
+                   'pomodoro': {'phase': 'focus'}, 'behaviorJournal': {'r': [{'text': 'x'}]}, 'habitNotes': {'h': 'n'},
+                   'avatar': {'gender': 'male', 'owned': {'a/b': True}, 'equipped': {'male': {'base': 'base/male'}, 'female': {}}}})
+        return st
+    cases, cur_states = [], []
+    for i in range(120):
+        st = good_state(i)
+        data = {k: st[k] for k in ['habits', 'records', 'journal', 'todos', 'books', 'challenges', 'scores', 'medals', 'pomodoro', 'behaviorJournal', 'habitNotes',
+                                   'reasons', 'triggers', 'customUrgeSuggestions', 'urgeHiddenIds', 'avatar', 'levelToastSent', 'theme', 'lang', 'bgColor',
+                                   'accentTheme', 'weekStart', 'showHolidays', 'calendarType', 'fontSize', 'tileColors', 'bgPattern', 'tileShape', 'tileEffect',
+                                   'bgPatternOpacity', 'themeIntensity', 'profileName', 'triggerType', 'levelReachedColor', 'masteryColor'] if k in st}
+        data.setdefault('reasons', {}); data.setdefault('triggers', {})
+        raw = {'version': rnd.choice(['3.0', 3, 0, None, '2.1']), 'exportedAt': '2026-09-30T08:00:00.000Z', 'appName': 'روتین پلنر', 'data': data,
+               'bookPhotos': {}, 'habitPhotos': {}}
+        if raw['version'] is None: del raw['version']
+        mode = rnd.random()
+        if mode < 0.55:
+            for _ in range(rnd.randint(1, 4)):
+                k = rnd.choice(list(data.keys()) + ['habits', 'records'])
+                data[k] = rnd.choice([None, 5, 'x', [], {}, True, [1], {'a': 1}, 0, '', 3.5, False])
+        if rnd.random() < 0.15: data['avatar'] = rnd.choice([{'owned': [], 'equipped': {}}, {'owned': {}, 'equipped': None}, {'owned': {}}, {'x': 1}, {'owned': {}, 'equipped': {}}])
+        if rnd.random() < 0.05: raw['data'] = rnd.choice([None, [], 'x', 5, []])
+        if rnd.random() < 0.05: raw = rnd.choice([None, [], 'x', 5, True, {}, {'data': 0}])
+        cases.append(('validateBackup', [raw]))
+        cur = good_state(i + 1000)
+        if rnd.random() < 0.3: cur['scores'] = rnd.choice([5, None, 'x'])
+        cases.append(('restoreInto', [cur, raw]))
+    write('backup_validate', cases, P.batch(cases))
+
+    # ---- ۲) ساخت JSON (با رسانه‌ی خالی؛ رسانه جداگانه تست می‌شود) ----
+    rows = []
+    cs = []
+    for i in range(60):
+        st = good_state(i)
+        st['habits'] = [{**h, 'name': h['name']} for h in st['habits']]
+        if rnd.random() < 0.3:
+            for k in rnd.sample(['theme', 'weekStart', 'profileName', 'avatar', 'pomodoro', 'medals', 'scores', 'tileColors', 'fontSize', 'showHolidays'], rnd.randint(1, 5)): st.pop(k, None)
+        if rnd.random() < 0.2: st['weekStart'] = 0; st['showHolidays'] = False; st['habits'] = []   # مقدارهای falsy
+        st['books'] = []   # رسانه‌ی کتاب از IndexedDB می‌آید؛ اینجا خالی نگه می‌داریم
+        cs.append(('createBackup', [st]))
+        rows.append(st)
+    outs = P.abatch(cs)
+    path, n = dump_gz('backup_create', [{'state': st, 'now': '2026-09-30T08:00:00.000Z', **o} for st, o in zip(rows, outs)])
+    print(f'  backup_create: {len(rows)} مورد → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB]')
+
+    # ---- ۳) رمزنگاری: JS رمز می‌کند، Dart باید باز کند (و خطاها برابر باشد) ----
+    plains = ['{}', 'a', 'روتین پلنر — یادداشتِ خصوصی 🔒 ✓ «نقل» "quote" \\ back\nline\ttab', '{"k":"' + ('متن طولانی ' * 1800) + '"}', '😀' * 120]
+    passes = ['abcdef', 'my-strong-pass-42', 'رمزِ فارسی ۱۲۳۴۵۶', 'p@ss w0rd with spaces', 'x' * 200, '😀🔑', 'é']
+    cs = []
+    for pl in plains:
+        for pw in rnd.sample(passes, 3):
+            cs.append(('encrypt', [pl, pw]))
+    encs = P.abatch(cs)
+    rows = []
+    for (fn, (pl, pw)), o in zip(cs, encs):
+        env = o['ok']
+        rows.append({'plain': pl, 'pass': pw, 'env': env, 'expect': pl})
+        # رمز غلط → null
+        rows.append({'plain': pl, 'pass': pw + 'x', 'env': env, 'expect': None})
+        # دست‌کاری: یک بیتِ داده را عوض کن → null
+        e = json.loads(env); d = bytearray(__import__('base64').b64decode(e['data'])); d[len(d) // 2] ^= 1
+        e['data'] = __import__('base64').b64encode(bytes(d)).decode(); rows.append({'plain': pl, 'pass': pw, 'env': json.dumps(e), 'expect': None})
+        # برچسب کوتاه/خراب
+        e2 = json.loads(env); e2['data'] = 'AAAA'; rows.append({'plain': pl, 'pass': pw, 'env': json.dumps(e2), 'expect': None})
+    # تأیید: JS خودش هم همین انتظارها را دارد
+    chk = P.abatch([('decrypt', [r['env'], r['pass']]) for r in rows])
+    bad = [i for i, (r, c) in enumerate(zip(rows, chk)) if c.get('ok') != r['expect']]
+    assert not bad, f'خروجی طلایی با خودِ JS سازگار نیست: {bad[:5]}'
+    path, n = dump_gz('backup_crypto', rows)
+    print(f'  backup_crypto: {len(rows)} مورد (رمزگشایی موفق و ناموفق) → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB]')
+
+
+MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load, 'backup': m_backup}
 
 
 def main():

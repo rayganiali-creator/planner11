@@ -68,6 +68,20 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                 daysLeft(st, a) { state = st; return window.__rpFn._withClock(a, () => proDaysLeft()); },
                 segments(st, a) { state = st; return window.__rpFn._withClock(a, () => proPurchaseSegments().map(s => ({ pid: s.p.productId, plan: s.plan ? s.plan.id : null, lifetime: !!s.lifetime, unknown: !!s.unknown, from: s.from, to: s.to }))); },
                 ownerMark() { return RP_OWNER_MARK_VALUE; },
+                // --- پشتیبان ---
+                _clone: (x) => (x === undefined ? undefined : JSON.parse(JSON.stringify(x))),
+                validateBackup(raw) { return window.__rpFn._clone(rpValidateBackup(window.__rpFn._clone(raw))); },
+                restoreInto(st, raw) {
+                    raw = window.__rpFn._clone(raw); state = window.__rpFn._clone(st); const v = rpValidateBackup(raw);
+                    if (!v.ok) return { ok: false };
+                    Object.keys(v.next).forEach(k => { state[k] = v.next[k]; });
+                    if (!state.scores || typeof state.scores !== 'object') state.scores = { points: 0, level: 1, streak: 0, lastDate: null, coins: 0, lastPoints: 0 };
+                    rpNormalizeState();
+                    return { ok: true, state: JSON.parse(JSON.stringify(state)), skipped: v.skipped, version: v.version };
+                },
+                async createBackup(st) { state = st; return await createBackupJSON(); },
+                async encrypt(plain, pass) { return await rpEncryptBackup(plain, pass); },
+                async decrypt(envText, pass) { return await rpDecryptBackup(JSON.parse(envText), pass); },
                 coinOps(ops) {   // [['add',x],['remove',y],['sync',z]…] → نتیجه‌ی هر گام و موجودی پایانی
                     const out = [];
                     ops.forEach(([op, x]) => {
