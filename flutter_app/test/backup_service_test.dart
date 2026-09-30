@@ -24,6 +24,7 @@ class _N implements NativeApi {
 }
 
 void main() {
+  handoffTests();
   late Directory dir;
   late AppStore store;
   late AppActions a;
@@ -100,4 +101,33 @@ extension on AppActions {
     (store.state['journal'] as List).add({'id': 'j1', 'text': t, 'createdAt': 1});
     store.save();
   }
+}
+
+void handoffTests() {
+  test('انتقال از نسخه‌ی HTML: وارد می‌شود، تغییر نام می‌دهد، دوباره وارد نمی‌شود، خرابی دست‌نخورده می‌ماند', () async {
+    final dir = Directory.systemTemp.createTempSync('rp_ho');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    // «نسخه‌ی HTML» یک پشتیبان ساخته است
+    final src = AppStore('${dir.path}/src.json')..load();
+    final sa = AppActions(src, ToastBus());
+    sa.saveHabit(HabitForm(sa.todayISO)..name = 'قدیمی');
+    src.state['profileName'] = 'علی';
+    final json = await BackupService(sa, MediaStore('${dir.path}/m0'), _N(), ToastBus()).debugJson();
+    final app = Directory('${dir.path}/app')..createSync();
+    File('${app.path}/rp_handoff.json').writeAsStringSync(json);
+    final store = AppStore('${app.path}/state.json')..load();
+    final a = AppActions(store, ToastBus())..renderAll(); // مثل main: state.json پیش از انتقال ساخته می‌شود
+    final svc = BackupService(a, MediaStore('${app.path}/media'), _N(), ToastBus());
+    expect(await svc.importHandoff(app.path), isTrue);
+    expect(store.state['profileName'], 'علی');
+    expect((store.state['habits'] as List).single['name'], 'قدیمی');
+    expect(File('${app.path}/rp_handoff.json').existsSync(), isFalse);
+    expect(File('${app.path}/rp_handoff.imported.json').existsSync(), isTrue); // کپیِ کامل می‌ماند
+    expect(await svc.importHandoff(app.path), isFalse); // دوباره نه
+    // فایلِ خراب: داده‌ی فعلی دست‌نخورده و فایل سر جایش (برای تلاشِ بعد)
+    File('${app.path}/rp_handoff.json').writeAsStringSync('{broken');
+    expect(await svc.importHandoff(app.path), isFalse);
+    expect(store.state['profileName'], 'علی');
+    expect(File('${app.path}/rp_handoff.json').existsSync(), isTrue);
+  });
 }

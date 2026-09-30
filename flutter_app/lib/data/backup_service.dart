@@ -121,7 +121,7 @@ class BackupService implements FilesService {
   }
 
   /// منطقِ ورود (برای تست هم قابل‌فراخوانی)
-  Future<bool> importFromText(String text, {Future<PasswordChoice?> Function()? ask}) async {
+  Future<bool> importFromText(String text, {Future<PasswordChoice?> Function()? ask, bool quiet = false}) async {
     void err(String fa, String en) => toasts.show(_fa ? fa : en, ms: 4200);
     Object? raw;
     try {
@@ -155,8 +155,26 @@ class BackupService implements FilesService {
     final d = (raw as Map)['data'];
     if (d is Map) await media.restoreFromBackup(d);
     actions.renderAll();
-    toasts.show(_fa ? '✅ اطلاعات با موفقیت بازیابی شد' : '✅ Data restored successfully', ms: 3500);
+    if (!quiet) toasts.show(_fa ? '✅ اطلاعات با موفقیت بازیابی شد' : '✅ Data restored successfully', ms: 3500);
     return true;
+  }
+
+  // ---------------------------------------------------------------- انتقال از نسخه‌ی HTML
+  /// نسخه‌ی HTML (۱٫۰٫۶ به بعد) یک کپیِ کامل در `files/rp_handoff.json` می‌نویسد؛ اولین باز شدنِ نسخه‌ی Flutter
+  /// (تا وقتی واردنشده باشد؛ مستقل از اینکه state.json ساخته شده یا نه) آن را وارد می‌کند. فایل بعد از موفقیت به `.imported.json` تغییر نام می‌دهد
+  /// (پاک نمی‌شود: اگر مشکلی پیش آمد هنوز یک نسخه‌ی کامل از داده‌ها هست).
+  Future<bool> importHandoff(String dirPath) async {
+    final f = File('$dirPath/rp_handoff.json');
+    if (!f.existsSync()) return false;
+    final text = utf8.decode(f.readAsBytesSync(), allowMalformed: true);
+    final ok = await importFromText(text, quiet: true);
+    if (ok) {
+      try {
+        f.renameSync('$dirPath/rp_handoff.imported.json');
+      } catch (_) {}
+      toasts.show(_fa ? '✅ داده‌های نسخه‌ی قبلی برنامه منتقل شد' : '✅ Your data from the previous version was carried over', ms: 5000);
+    }
+    return ok;
   }
 
   // ---------------------------------------------------------------- CSV

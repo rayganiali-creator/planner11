@@ -26,6 +26,7 @@ Future<void> main() async {
   final native = ChannelNativeApi();
   final media = MediaStore('${dir.path}/media');
   final files = BackupService(actions, media, native, toasts);
+  await files.importHandoff(dir.path); // فقط اگر rp_handoff.json (هنوز واردنشده) باشد؛ بعد از موفقیت تغییر نام می‌دهد
   final notifier = LocalNotifier();
   await notifier.init();
   final pro = ProManager(store, native, toasts, notifier);
