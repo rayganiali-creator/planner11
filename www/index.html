@@ -6796,7 +6796,7 @@
             // نسخه‌ی برنامه. روی اندروید مقدار واقعی از خودِ APK خوانده می‌شود (App.getInfo)،
             // پس اگر این عدد یادمان برود به‌روز کنیم، باز هم چیزی که کاربر می‌بیند درست است.
             // در مرورگر (نسخه‌ی تست) همین مقدار نمایش داده می‌شود.
-            const APP_VERSION = { name: '1.0.5', code: 6 };
+            const APP_VERSION = { name: '1.0.6', code: 7 };
             const PREMIUM_UNLOCK_SALT = 'routineplanner-salt-9f3';
             // کدِ مالک دیگر با یک SHA-256 ساده سنجیده نمی‌شود. قبلاً هشِ خام داخل همین فایل بود،
             // پس هرکس APK را باز می‌کرد می‌توانست میلیون‌ها حدس را با یک هشِ ارزان در ثانیه تست کند.
@@ -12934,6 +12934,40 @@
                 return true;
             }
             rpInterval(checkProExpiry, 60000);
+
+            // ============================================================
+            // پلِ انتقال به نسخه‌ی Flutter (نسخه‌ی ۲)
+            // ------------------------------------------------------------
+            // نسخه‌ی بعدی برنامه با فناوری دیگری ساخته شده و حافظه‌ی این نسخه (WebView) را نمی‌بیند.
+            // برای این‌که کاربر هیچ داده‌ای را از دست ندهد، این نسخه یک کپیِ کاملِ داده‌ها (همان قالبِ
+            // فایل پشتیبان؛ شاملِ عکس و صدا) را داخل پوشه‌ی «خصوصیِ» خودِ برنامه می‌نویسد؛ پوشه‌ای که
+            // از برنامه‌های دیگر قابل‌خواندن نیست و به هیچ سروری نمی‌رود. نسخه‌ی جدید فقط همین فایل را
+            // یک بار می‌خواند و وارد می‌کند. هیچ رفتار دیگری عوض نشده است.
+            // ============================================================
+            let rpHandoffVer = -1, rpHandoffBusy = false;
+            async function rpWriteHandoff(force) {
+                if (rpHandoffBusy || !isNativeApp()) return;
+                if (!force && rpHandoffVer === rpDataVersion) return;
+                const FS = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem;
+                if (!FS) return;
+                rpHandoffBusy = true;
+                const ver = rpDataVersion;
+                try {
+                    const text = await createBackupJSON();
+                    try {
+                        await FS.writeFile({ path: 'rp_handoff.tmp', data: text, directory: 'DATA', encoding: 'utf8' });
+                        await FS.rename({ from: 'rp_handoff.tmp', to: 'rp_handoff.json', directory: 'DATA', toDirectory: 'DATA' });
+                    } catch (e) {
+                        await FS.writeFile({ path: 'rp_handoff.json', data: text, directory: 'DATA', encoding: 'utf8' });
+                    }
+                    await FS.writeFile({ path: 'rp_handoff.meta.json', directory: 'DATA', encoding: 'utf8',
+                        data: JSON.stringify({ writtenAt: Date.now(), version: APP_VERSION, bytes: text.length }) });
+                    rpHandoffVer = ver;
+                } catch (e) {} finally { rpHandoffBusy = false; }
+            }
+            setTimeout(() => rpWriteHandoff(true), 4000);
+            rpInterval(() => rpWriteHandoff(false), 60000);
+            document.addEventListener('visibilitychange', () => { if (document.hidden) rpWriteHandoff(false); });
             document.addEventListener('visibilitychange', () => { if (!document.hidden) { checkProExpiry(); rpSyncTrustedTime(); } });
             window.addEventListener('online', () => { rpSyncTrustedTime(); if (isNativeApp()) restorePurchases(); });
 
