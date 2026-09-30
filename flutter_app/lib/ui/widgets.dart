@@ -134,11 +134,11 @@ class RpButton extends StatelessWidget {
           borderRadius: radius,
           child: Ink(
             height: h,
-            padding: EdgeInsets.symmetric(horizontal: small ? 14 : 20),
+            padding: EdgeInsets.symmetric(horizontal: small ? 10 : 20),
             decoration: deco,
             child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
               if (icon != null) ...[Icon(icon, size: small ? 16 : 18, color: fg), const SizedBox(width: 8)],
-              Text(label, style: rpText(small ? RpType.label : RpType.body, weight: 800, color: fg, height: 1.2)),
+              Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(small ? RpType.label : RpType.body, weight: 800, color: fg, height: 1.2))),
             ]),
           ),
         ),

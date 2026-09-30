@@ -6,6 +6,7 @@ import '../data/actions.dart';
 import '../data/app_store.dart';
 import '../ui/tokens.dart';
 import '../features/avatar/avatar_compose.dart';
+import '../data/billing.dart';
 import 'nav.dart';
 import 'shell.dart';
 import 'toast.dart';
@@ -16,7 +17,8 @@ class RoutineApp extends StatelessWidget {
   final ToastBus toasts;
   final AppActions actions;
   final AvData? avData;
-  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.avData});
+  final BillingService? billing;
+  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.avData, this.billing});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,7 @@ class RoutineApp extends StatelessWidget {
         ChangeNotifierProvider<NavController>.value(value: nav),
         Provider<AppActions>.value(value: actions),
         Provider<AvData?>.value(value: avData),
+        Provider<BillingService>.value(value: billing ?? UnavailableBilling(toasts, () => store.state['lang'] != 'en')),
         ListenableProvider<ToastBus>.value(value: toasts),
       ],
       child: Consumer<AppStore>(builder: (context, s, _) {
