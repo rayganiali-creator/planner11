@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../app/i18n.dart';
 import '../../app/nav.dart';
 import '../../core/calendar.dart';
+import '../../core/doc.dart';
 import '../../core/format.dart';
 import '../../core/gameplay.dart';
 import '../../core/habits.dart';
@@ -16,6 +17,8 @@ import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../avatar/avatar_compose.dart';
+import '../avatar/avatar_view.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -62,7 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         _Header(text: clockText(_now, fa: fa)),
         const SizedBox(height: RpSpace.s4),
-        _Stage(day: day, cond: cond, hp: hp, level: (scores['level'] as num?)?.toInt() ?? 1),
+        _Stage(state: st, day: day, cond: cond, hp: hp, level: (scores['level'] as num?)?.toInt() ?? 1),
         const SizedBox(height: RpSpace.s3),
         Row(children: [
           _Stat(icon: LucideIcons.heart, label: 'HP', value: context.n(hp), color: p.hpInk, soft: p.hpSoft),
@@ -137,10 +140,11 @@ class _Header extends StatelessWidget {
 }
 
 class _Stage extends StatelessWidget {
+  final Map state;
   final bool day;
   final String cond;
   final int hp, level;
-  const _Stage({required this.day, required this.cond, required this.hp, required this.level});
+  const _Stage({required this.state, required this.day, required this.cond, required this.hp, required this.level});
   @override
   Widget build(BuildContext context) {
     final p = context.rp;
@@ -157,8 +161,7 @@ class _Stage extends StatelessWidget {
           left: 0, right: 0, bottom: 0,
           child: Container(height: 56, decoration: BoxDecoration(color: p.ground, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(RpRadius.xl)))),
         ),
-        // جای آواتار: رندر پیکسلیِ آواتار در مرحله‌ی بعد (ثبت‌شده در 00-STATUS.md)
-        Center(child: Icon(LucideIcons.user, size: 72, color: p.onPrimary.withValues(alpha: .85))),
+        Center(child: _StageAvatar(state: state, cond: cond)),
         Positioned(
           left: 16, bottom: 12,
           child: RpChip(context.tr('سطح ${context.n(level)}', 'Level $level'), icon: LucideIcons.award),
@@ -237,4 +240,20 @@ class _Btn extends StatelessWidget {
           child: Icon(icon, size: 20, color: on ? Colors.white : color),
         ),
       );
+}
+
+class _StageAvatar extends StatelessWidget {
+  final Map state;
+  final String cond;
+  const _StageAvatar({required this.state, required this.cond});
+  @override
+  Widget build(BuildContext context) {
+    final data = context.read<AvData?>();
+    final av = state['avatar'];
+    final g = av is Map ? av['gender'] as String? : null;
+    if (data == null || g == null) {
+      return Icon(LucideIcons.user, size: 72, color: context.rp.onPrimary.withValues(alpha: .85));
+    }
+    return AvatarView(data: data, gender: g, equipped: data.equippedFor(state as Doc, g), cond: cond, height: 190);
+  }
 }
