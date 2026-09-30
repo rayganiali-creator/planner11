@@ -2,10 +2,10 @@
 // هر تابع با خروجی طلایی JS سنجیده می‌شود (test/habits_test.dart).
 //
 // `state` همان سند JSON است (Map). «امروز» همیشه پارامتر است، نه ساعت سیستم، تا تست‌پذیر باشد.
+import 'doc.dart';
 import 'calendar.dart';
 import 'js_compat.dart';
 
-typedef Doc = Map<String, dynamic>;
 
 const int coinMaxPerOp = 50; // سقف دریافت/کسر سکه در هر عملیات
 

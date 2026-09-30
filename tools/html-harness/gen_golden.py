@@ -495,7 +495,80 @@ def m_backup(P):
     print(f'  backup_crypto: {len(rows)} مورد (رمزگشایی موفق و ناموفق) → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB]')
 
 
-MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load, 'backup': m_backup}
+def m_reminders(P):
+    from datetime import date, datetime
+    from zoneinfo import ZoneInfo
+    rnd = random.Random(20260930 + 5)
+    cases = []
+    # ---- توابع کوچک ----
+    ids = ['habit-h1-d0', 'todo-abc', 'journal-x', 'book-1', 'challenge-deadline-c1', 'challenge-reminder-c1-r59', '', 'ا', 'روتین', '😀'] + \
+          [''.join(rnd.choice('abcdefghijklmnopqrstuvwxyz0123456789-_ابپ') for _ in range(rnd.randint(1, 40))) for _ in range(300)]
+    for i in ids: cases.append(('numericId', [i]))
+    out = []
+    def at(y, mo, d, h, mi): return int(datetime(y, mo, d, h, mi, tzinfo=ZoneInfo(TZNAME)).timestamp() * 1000)
+    # ساعت‌ها: شامل شب‌های تغییر ساعت تابستانی
+    NOWS = [(2026, 9, 30, 10, 0), (2026, 3, 28, 22, 30), (2026, 3, 29, 1, 59), (2026, 10, 24, 23, 59), (2026, 10, 25, 2, 30), (2027, 1, 1, 0, 0), (2026, 6, 15, 8, 0)]
+    rows = []
+    for now in NOWS:
+        P.set_now(*now)
+        ncs = []
+        for hh in (0, 1, 7, 8, 9, 12, 23, 24, 25):
+            for mm in (0, 1, 30, 59):
+                ncs.append(('nextHabitOccurrence', [hh, mm]))
+        for _ in range(60):
+            t = {'id': 't', 'title': 'x'}
+            r = rnd.random()
+            if r < 0.85: t['dueAt'] = at(*now[:3], rnd.randint(0, 23), rnd.choice([0, 15, 30, 59])) + rnd.randint(-5, 30) * 86400000
+            t['repeatMode'] = rnd.choice(['none', 'daily', 'custom', None, 'weird'])
+            if t['repeatMode'] == 'custom' or rnd.random() < 0.1: t['repeatDays'] = rnd.choice([[], [0, 6], list(range(7)), [3], 'x', None])
+            ncs.append(('nextTodo', [t])); ncs.append(('todoToday', [t]))
+        res = P.batch(ncs)
+        for c, o in zip(ncs, res): rows.append({'now': list(now), 'fn': c[0], 'args': c[1], **o})
+    # ---- برنامه‌ریز کامل ----
+    def mk_state(now):
+        nowms = at(*now)
+        st = gen_state(rnd, date(*now[:3]))
+        for h in st['habits']:
+            if rnd.random() < 0.7:
+                h['reminderEnabled'] = rnd.choice([True, True, False])
+                h['reminderTime'] = rnd.choice(['08:30', '00:00', '00:30', '7:5', '23:59', '12', '8:xx', '25:61', 'ab:cd', ' 9:15', '09:60', '', None])
+        st['todos'] = []
+        for i in range(rnd.randint(0, 6)):
+            t = {'id': f'td{i}', 'title': rnd.choice(['کار', 'task "q"', '😀', '']), 'done': rnd.choice([False, False, True])}
+            if rnd.random() < 0.85: t['dueAt'] = nowms + rnd.randint(-3, 40) * 3600000 * rnd.choice([1, 24])
+            t['repeatMode'] = rnd.choice(['none', 'daily', 'custom', None])
+            if t['repeatMode'] == 'custom': t['repeatDays'] = rnd.sample(range(7), rnd.randint(0, 7))
+            st['todos'].append(t)
+        st['journal'] = [{'id': f'j{i}', 'text': rnd.choice(['x' * 200, 'یادداشت ' * 30, 'کوتاه', '', None]), 'remindAt': rnd.choice([None, nowms + 3600000 * rnd.randint(-5, 50), 0])} for i in range(rnd.randint(0, 4))]
+        st['books'] = [{'id': f'b{i}', 'title': rnd.choice(['کتاب', None, 'B']), 'remindAt': rnd.choice([None, nowms + 86400000 * rnd.randint(-2, 9)])} for i in range(rnd.randint(0, 3))]
+        st['challenges'] = []
+        for i in range(rnd.randint(0, 4)):
+            c = {'id': f'c{i}', 'name': rnd.choice(['چالش «ویژه»', 'Run "5k"', 'x']), 'status': rnd.choice(['active', 'active', 'done']),
+                 'kind': rnd.choice(['timed', 'both', 'count']), 'deadlineAt': nowms + rnd.randint(-2, 500) * 3600000}
+            if rnd.random() < 0.7: c['reminderIntervalHours'] = rnd.choice([0.5, 1, 2, 6, 24, 48, 0])
+            st['challenges'].append(c)
+        st['lang'] = rnd.choice(['fa', 'en'])
+        return st
+    for now in NOWS:
+        P.set_now(*now)
+        for _ in range(28):
+            st = mk_state(now)
+            res = P.abatch([('planResync', [st])])[0]
+            rows.append({'now': list(now), 'fn': 'planResync', 'args': [st], **res})
+            if st['challenges']:
+                c = rnd.choice(st['challenges'])
+                res = P.abatch([('planChallenge', [st, c])])[0]
+                rows.append({'now': list(now), 'fn': 'planChallenge', 'args': [st, c], **res})
+            if st['habits']:
+                h = rnd.choice(st['habits']); hh, mm = rnd.choice([(8, 0), (0, 30), (23, 59), (12, 15)])
+                res = P.abatch([('planDaily', [st, h['id'], hh, mm])])[0]
+                rows.append({'now': list(now), 'fn': 'planDaily', 'args': [st, h['id'], hh, mm], **res})
+        rows.append({'now': list(now), 'fn': 'planCancelChallenge', 'args': ['c1'], **P.abatch([('planCancelChallenge', ['c1'])])[0]})
+    path, n = dump_gz('reminders', rows)
+    print(f'  reminders: {len(rows)} مورد → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB فشرده / {round(n / 1024)} KB خام]')
+
+
+MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load, 'backup': m_backup, 'reminders': m_reminders}
 
 
 def main():

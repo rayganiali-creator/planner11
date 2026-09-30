@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 
+import 'doc.dart';
 import 'js_compat.dart';
 import 'state_model.dart';
 

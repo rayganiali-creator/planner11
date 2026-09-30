@@ -1,8 +1,8 @@
 // پورت منطق «حق دسترسی پرو»: پنجره‌ی زمانیِ پلن‌های انباشته، امضای کش، ساعت مطمئن و
 // تشخیص پرو بودن. هر تابع با خروجی طلایی JS سنجیده می‌شود (test/pro_test.dart).
+import 'doc.dart';
 import 'js_compat.dart';
 
-typedef Doc = Map<String, dynamic>;
 
 const String premiumUnlockSalt = 'routineplanner-salt-9f3';
 const String legacyLifetimeProductId = 'premium_unlock';

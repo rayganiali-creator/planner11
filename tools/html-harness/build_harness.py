@@ -68,6 +68,27 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                 daysLeft(st, a) { state = st; return window.__rpFn._withClock(a, () => proDaysLeft()); },
                 segments(st, a) { state = st; return window.__rpFn._withClock(a, () => proPurchaseSegments().map(s => ({ pid: s.p.productId, plan: s.plan ? s.plan.id : null, lifetime: !!s.lifetime, unknown: !!s.unknown, from: s.from, to: s.to }))); },
                 ownerMark() { return RP_OWNER_MARK_VALUE; },
+                // --- یادآوری‌ها: پلاگین اعلانِ جعلی که فراخوانی‌ها را ضبط می‌کند ---
+                async _recordNotifs(fn) {
+                    const log = [];
+                    const fake = {
+                        checkPermissions: async () => ({ display: 'granted' }), requestPermissions: async () => ({ display: 'granted' }),
+                        cancel: async (o) => { log.push(['cancel', o.notifications[0].id]); },
+                        schedule: async (o) => { const n = o.notifications[0]; log.push(['schedule', n.id, n.title, n.body, n.schedule.at.getTime()]); },
+                    };
+                    const old = window.Capacitor;
+                    window.Capacitor = { isNativePlatform: () => true, Plugins: { LocalNotifications: fake } };
+                    try { fn(); await new Promise(r => setTimeout(r, 120)); } finally { window.Capacitor = old; }
+                    return log;
+                },
+                async planResync(st) { state = window.__rpFn._clone(st); return await window.__rpFn._recordNotifs(() => nativeResyncAllReminders()); },
+                async planDaily(st, hid, hh, mm) { state = window.__rpFn._clone(st); return await window.__rpFn._recordNotifs(() => nativeScheduleDailyHabit(hid, 'T', 'B', hh, mm)); },
+                async planChallenge(st, ch) { state = window.__rpFn._clone(st); return await window.__rpFn._recordNotifs(() => nativeScheduleChallengeNotifications(ch)); },
+                async planCancelChallenge(chId) { return await window.__rpFn._recordNotifs(() => nativeCancelChallengeNotifications(chId)); },
+                numericId(str) { return rpNumericId(str); },
+                nextHabitOccurrence(hh, mm) { return rpNextHabitOccurrence(hh, mm); },
+                nextTodo(t) { return computeNextTodoOccurrence(t); },
+                todoToday(t) { return todoAppliesToday(t); },
                 // --- پشتیبان ---
                 _clone: (x) => (x === undefined ? undefined : JSON.parse(JSON.stringify(x))),
                 validateBackup(raw) { return window.__rpFn._clone(rpValidateBackup(window.__rpFn._clone(raw))); },

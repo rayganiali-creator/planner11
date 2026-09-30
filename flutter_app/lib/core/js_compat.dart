@@ -141,3 +141,12 @@ void _quote(StringBuffer b, String s) {
   }
   b.write('"');
 }
+
+final RegExp _intPrefix = RegExp(r'^[+-]?\d+');
+
+/// `parseInt(v, 10)`؛ ناموفق = null (در JS: NaN).
+int? jsParseInt10(Object? v) {
+  final s = jsString(v).trimLeft();
+  final m = _intPrefix.firstMatch(s);
+  return m == null ? null : int.tryParse(m[0]!.replaceFirst('+', ''));
+}

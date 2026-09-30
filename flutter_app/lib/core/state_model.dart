@@ -1,12 +1,12 @@
 // مقدارهای پیش‌فرض، نرمال‌سازی و خطِ لولهی «بارگذاریِ state» — پورت عین‌به‌عینِ بخش STATE و
 // rpNormalizeState از www/index.html. داده‌ی ناقص/خراب هرگز نباید برنامه را بیندازد و
 // هیچ فیلدِ ناشناخته‌ای نباید از بین برود (Object.assign: مقدارهای ذخیره‌شده روی پیش‌فرض می‌نشینند).
+import 'doc.dart';
 import 'dart:convert';
 
 import 'js_compat.dart';
 import 'pro.dart';
 
-typedef Doc = Map<String, dynamic>;
 
 Doc defaultState() => <String, dynamic>{
       'theme': 'light',
