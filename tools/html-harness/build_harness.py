@@ -68,6 +68,38 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                 daysLeft(st, a) { state = st; return window.__rpFn._withClock(a, () => proDaysLeft()); },
                 segments(st, a) { state = st; return window.__rpFn._withClock(a, () => proPurchaseSegments().map(s => ({ pid: s.p.productId, plan: s.plan ? s.plan.id : null, lifetime: !!s.lifetime, unknown: !!s.unknown, from: s.from, to: s.to }))); },
                 ownerMark() { return RP_OWNER_MARK_VALUE; },
+                // --- گیم‌پلی: ثبتِ عادت + مشتق‌سازی (renderDashboard) با ضبطِ toast/پنجره ---
+                runOps(st, ops) {
+                    state = window.__rpFn._clone(st); pointsCacheMap = null;
+                    const ev = [];
+                    const oShow = showToast, oCap = openLevelCapstoneModal, oAll = renderAll;
+                    showToast = (m, d, c) => { ev.push(['toast', c || '', m]); };
+                    openLevelCapstoneModal = (h, lv) => { ev.push(['capstone', h.id, lv.num]); };
+                    renderAll = () => { renderDashboard(); };
+                    try {
+                        ops.forEach(op => {
+                            if (op[0] === 'bin') setBinaryRecord(op[1], op[2], op[3]);
+                            else if (op[0] === 'val') setValueRecord(op[1], op[2], op[3]);
+                            else if (op[0] === 'clear') clearRecord(op[1], op[2]);
+                            else if (op[0] === 'derive') renderDashboard();
+                        });
+                    } finally { showToast = oShow; openLevelCapstoneModal = oCap; renderAll = oAll; }
+                    const out = window.__rpFn._clone(state); delete out.clock;
+                    return { state: out, events: ev };
+                },
+                traceOps(st, ops) {   // عیب‌یابی: وضعیتِ امتیاز/سکه بعد از هر گام
+                    state = window.__rpFn._clone(st); pointsCacheMap = null;
+                    const oShow = showToast, oCap = openLevelCapstoneModal, oAll = renderAll;
+                    showToast = () => {}; openLevelCapstoneModal = () => {}; renderAll = () => { renderDashboard(); };
+                    const tr = [];
+                    try { ops.forEach(op => {
+                        if (op[0] === 'bin') setBinaryRecord(op[1], op[2], op[3]); else if (op[0] === 'val') setValueRecord(op[1], op[2], op[3]);
+                        else if (op[0] === 'clear') clearRecord(op[1], op[2]); else renderDashboard();
+                        tr.push([op[0], state.scores.coins, state.scores.lastPoints, state.scores.points]);
+                    }); } finally { showToast = oShow; openLevelCapstoneModal = oCap; renderAll = oAll; }
+                    return tr;
+                },
+                hpInfo(st) { state = window.__rpFn._clone(st); rpDataVersion++; const hp = computeAvatarHP(); return { hp, cond: [0, 6, 7, 12, 18, 19, 23].map(h => { const o = Date.prototype.getHours; Date.prototype.getHours = () => h; try { return avConditionOf(hp); } finally { Date.prototype.getHours = o; } }) }; },
                 // --- یادآوری‌ها: پلاگین اعلانِ جعلی که فراخوانی‌ها را ضبط می‌کند ---
                 async _recordNotifs(fn) {
                     const log = [];

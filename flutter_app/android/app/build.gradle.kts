@@ -48,7 +48,9 @@ android {
         release {
             signingConfig = if (System.getenv("RP_STORE_FILE") != null)
                 signingConfigs.getByName("release") else signingConfigs.getByName("debug")
+            // مثل نسخه‌ی Capacitor: بدون R8/shrink (Poolakey از reflection استفاده می‌کند؛ بدون قاعده‌ی proguard امن نیست)
             isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

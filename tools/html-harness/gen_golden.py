@@ -568,7 +568,44 @@ def m_reminders(P):
     print(f'  reminders: {len(rows)} مورد → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB فشرده / {round(n / 1024)} KB خام]')
 
 
-MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load, 'backup': m_backup, 'reminders': m_reminders}
+def m_gameplay(P):
+    from datetime import date, timedelta
+    rnd = random.Random(20260930 + 6)
+    cases = []
+    base = date(2026, 9, 30)
+    P.set_now(2026, 9, 30, 10, 0)
+    for si in range(130):
+        st = gen_state(rnd, base)
+        # state در برنامه همیشه از rpNormalizeState گذشته است: روزهای خراب حذف و این کلیدها ساخته‌اند
+        st['records'] = {k: v for k, v in st['records'].items() if isinstance(v, dict)}
+        for k in ('levelToastSent', 'reasons', 'triggers', 'habitNotes'): st.setdefault(k, {})
+        for h in st['habits']:
+            if rnd.random() < 0.8: h['rewardPoints'] = rnd.choice([50, 50, 40, 25, 100, 10])
+            if rnd.random() < 0.3: h['unlockedStage'] = rnd.choice([1, 2])
+        st['scores'] = {'coins': rnd.choice([0, 0, 950, 999, 1990, 2000, 7000]), 'lastPoints': rnd.choice([0, 0, 10, 600]),
+                        'points': 0, 'level': 1, 'streak': 0}
+        if rnd.random() < 0.3: st['scores']['accountLevelToastSent'] = {'1': True}
+        if rnd.random() < 0.3: st['levelToastSent'] = {f"{h['id']}_level_1": True for h in st['habits'][:2]}
+        st['reasons'] = {h['id']: {(base - timedelta(days=rnd.randint(0, 8))).isoformat(): {'text': 'r'}} for h in st['habits'][:3]} if rnd.random() < 0.5 else {}
+        hids = [h['id'] for h in st['habits']]
+        typ = {h['id']: h['type'] for h in st['habits']}
+        ops = []
+        for _ in range(rnd.randint(8, 40)):
+            iso = (base - timedelta(days=rnd.randint(0, 12))).isoformat()
+            hid = rnd.choice(hids + ['nope'])
+            k = rnd.random()
+            if k < 0.55 and typ.get(hid, 'binary') == 'binary': ops.append(['bin', iso, hid, rnd.choice(['success', 'success', 'fail'])])
+            elif k < 0.75: ops.append(['val', iso, hid, rnd.choice([3, '7', 12.5, 'abc', 0, 45])])
+            elif k < 0.85: ops.append(['clear', iso, hid])
+            elif k < 0.92: ops.append(['bin', iso, hid, 'success'])
+            else: ops.append(['derive'])
+        ops.append(['derive'])
+        cases.append(('runOps', [st, ops]))
+        cases.append(('hpInfo', [st]))
+    write('gameplay', cases, P.batch(cases))
+
+
+MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load, 'backup': m_backup, 'reminders': m_reminders, 'gameplay': m_gameplay}
 
 
 def main():
