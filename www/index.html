@@ -4686,6 +4686,11 @@
         .rp-confirm-ico { font-size: 34px; margin-bottom: 4px; }
         .rp-confirm p { font-size: calc(14px * var(--font-scale)); line-height: 1.9; margin: 6px 0 4px; }
         #rpConfirmYes.danger { background: linear-gradient(180deg, #ef6b5f, #d9463b); box-shadow: 0 6px 14px rgba(217, 70, 59, .3); }
+        .app-version-row {
+            margin-top: 10px; text-align: center; color: var(--text-muted);
+            font-size: calc(11.5px * var(--font-scale)); line-height: 1.8;
+            border-top: 1px dashed var(--border); padding-top: 9px;
+        }
         .rp-pass-desc { font-size: calc(12.5px * var(--font-scale)); color: var(--text-muted); line-height: 1.9; text-align: center; margin: 4px 0 12px; }
         #rpPassBackdrop input[type=password] {
             width: 100%; margin-bottom: 8px; padding: 11px 13px; border-radius: 12px;
@@ -5481,6 +5486,7 @@
                     <h3 data-fa="تماس با ما" data-en="Contact Us">تماس با ما</h3>
                     <p class="field-hint" style="margin-bottom:8px" data-fa="برای ارتباط با توسعه‌دهنده:" data-en="To reach the developer:">برای ارتباط با توسعه‌دهنده:</p>
                     <a href="mailto:manseyed2000@gmail.com" class="glass-btn" style="width:100%;display:block;box-sizing:border-box;text-align:center;text-decoration:none" dir="ltr">✉️ manseyed2000@gmail.com</a>
+                    <div class="app-version-row" id="appVersionRow">—</div>
                 </div>
 
                 <div class="settings-section">
@@ -6787,6 +6793,10 @@
             // این‌ها زودتر از بقیه تعریف می‌شن (نه پایین‌تر، کنار خودِ UI کد مخفی) چون
             // recomputeTrustedPremiumFlag همین پایین‌تر، هنگام لود اولیه‌ی state هم صدا
             // زده می‌شه و باید این مقادیر از قبل آماده باشن.
+            // نسخه‌ی برنامه. روی اندروید مقدار واقعی از خودِ APK خوانده می‌شود (App.getInfo)،
+            // پس اگر این عدد یادمان برود به‌روز کنیم، باز هم چیزی که کاربر می‌بیند درست است.
+            // در مرورگر (نسخه‌ی تست) همین مقدار نمایش داده می‌شود.
+            const APP_VERSION = { name: '1.0.5', code: 6 };
             const PREMIUM_UNLOCK_SALT = 'routineplanner-salt-9f3';
             // کدِ مالک دیگر با یک SHA-256 ساده سنجیده نمی‌شود. قبلاً هشِ خام داخل همین فایل بود،
             // پس هرکس APK را باز می‌کرد می‌توانست میلیون‌ها حدس را با یک هشِ ارزان در ثانیه تست کند.
@@ -11558,6 +11568,7 @@
                 if (isActive('view-todo')) renderTodos();
                 if (isActive('view-library')) renderLibrary();
                 if (isActive('view-purchases')) renderPurchases();
+                renderAppVersion();
                 renderDashboard();
                 if (isActive('view-dashboard')) renderDashboardExtras();
                 updateProfileUI();
@@ -12162,6 +12173,7 @@
                 if (['dashboard', 'habits', 'month', 'year'].includes(viewName)) markViewRendered(viewName);
                 if (viewName === 'library') renderLibrary();
                 if (viewName === 'purchases') renderPurchases();
+                if (viewName === 'settings') renderAppVersion();
                 document.getElementById('tabsPickerBackdrop').classList.remove('open');
             }
 
@@ -12992,6 +13004,22 @@
                     // آفلاین یا خطای اتصال: کشِ معتبر قبلی (با ساعت مطمئن) معیاره؛ فقط انقضا چک می‌شه
                     checkProExpiry();
                 }
+            }
+
+            // نسخه‌ی نصب‌شده را نشان می‌دهد تا هم کاربر و هم پشتیبانی بدانند دقیقاً کدام
+            // بیلد روی گوشی است. روی اندروید از خودِ بسته خوانده می‌شود، نه از این فایل.
+            async function renderAppVersion() {
+                const row = document.getElementById('appVersionRow');
+                if (!row) return;
+                let name = APP_VERSION.name, code = APP_VERSION.code;
+                try {
+                    const A = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+                    if (A && A.getInfo) { const i = await A.getInfo(); if (i && i.version) { name = i.version; code = i.build; } }
+                } catch (e) {}
+                const fa = state.lang === 'fa';
+                row.textContent = fa
+                    ? ('نسخه‌ی برنامه: ' + toPersianDigits(name) + '  ·  کد نسخه: ' + toPersianDigits(code))
+                    : ('App version: ' + name + '  ·  build: ' + code);
             }
 
             // ============================================================
