@@ -1,12 +1,13 @@
 // تست تفاضلی: خروجی Dart باید دقیقاً همان خروجیِ JS (golden/calendar.json) باشد.
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:routine_planner/core/calendar.dart';
 
+import 'golden_loader.dart';
+
 void main() {
-  final rows = (jsonDecode(File('test/golden/calendar.json').readAsStringSync()) as List).cast<Map<String, dynamic>>();
+  final rows = (loadGolden('calendar') as List).cast<Map<String, dynamic>>();
 
   Object? run(String fn, List a) {
     switch (fn) {

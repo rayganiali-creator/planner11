@@ -24,6 +24,38 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                 // --- state (برای توابعی که از state می‌خوانند) ---
                 setState(s) { state = s; pointsCacheMap = null; },
                 getState() { return JSON.parse(JSON.stringify(state)); },
+                // --- منطق عادت/امتیاز/streak (بر اساس state فعلی و «امروزِ» ثابتِ مرورگر) ---
+                _h: (hid) => state.habits.find(x => x.id === hid),
+                habitAppliesOnISO_id(hid, iso) { return habitAppliesOnISO(window.__rpFn._h(hid), iso); },
+                applicableIds(iso) { return applicableHabitsForISO(iso).map(h => h.id); },
+                habitSuccessOnISO_id(hid, iso) { return habitSuccessOnISO(window.__rpFn._h(hid), iso); },
+                dayStats_all(iso) { return dayStatsAll(iso); },
+                dayStats_perm(iso) { return dayStats(iso, h => h.permanent !== false); },
+                getStatusFromRecord_id(value, hid) { return getStatusFromRecord(value, window.__rpFn._h(hid)); },
+                getRecordPoints_id(value, hid) { return getRecordPoints(value, window.__rpFn._h(hid)); },
+                getHabitRewardPoints_id(hid) { return getHabitRewardPoints(window.__rpFn._h(hid)); },
+                computeAllHabitPoints() { pointsCacheMap = null; return computeAllHabitPoints(); },
+                computeTotalPoints() { pointsCacheMap = null; return computeTotalPoints(); },
+                level_habit(points, hid) { return getLevelFromPoints(points, habitActiveThresholds(window.__rpFn._h(hid))); },
+                level_base(points) { return getLevelFromPoints(points); },
+                stageCount_id(hid) { return habitUnlockedStageCount(window.__rpFn._h(hid)); },
+                computeStreak() { return computeStreak(); },
+                computePermanentStreak() { return computePermanentStreak(); },
+                computeHabitStreak_id(hid) { return computeHabitStreak(window.__rpFn._h(hid)); },
+                computeHabitBestRecord_id(hid) { return computeHabitBestRecord(window.__rpFn._h(hid)); },
+                collectSeries(range) { return collectSeries(range); },
+                getTotalStats(range) { return getTotalStats(range); },
+                getWeekStart_iso() { return dateToISO(getWeekStart(startOfDay(new Date()))); },
+                getAccountLevelFromCoins(c) { return getAccountLevelFromCoins(c); },
+                coinOps(ops) {   // [['add',x],['remove',y],['sync',z]…] → نتیجه‌ی هر گام و موجودی پایانی
+                    const out = [];
+                    ops.forEach(([op, x]) => {
+                        if (op === 'add') out.push(addCoins(x)); else if (op === 'remove') out.push(removeCoins(x));
+                        else { syncCoinsFromPoints(x); out.push(null); }
+                        out.push(state.scores.coins); out.push(state.scores.lastPoints);
+                    });
+                    return out;
+                },
             };
 '''
 s = s.replace(ANCHOR, HOOK + ANCHOR, 1)
