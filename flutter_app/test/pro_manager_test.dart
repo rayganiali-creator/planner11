@@ -41,6 +41,8 @@ class FakeNative implements NativeApi {
 }
 
 class Rec implements Notifier {
+  @override
+  Future<void> resyncAll(dynamic state, DateTime now) async {}
   final calls = <String>[];
   @override
   Future<void> scheduleOnce(String id, String title, String body, int atMs) async => calls.add('sched $id $atMs');

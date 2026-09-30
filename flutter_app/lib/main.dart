@@ -9,9 +9,9 @@ import 'app/toast.dart';
 import 'data/actions.dart';
 import 'data/app_store.dart';
 import 'data/backup_service.dart';
+import 'data/local_notifier.dart';
 import 'data/media_store.dart';
 import 'data/native_api.dart';
-import 'data/notifier.dart';
 import 'data/pro_manager.dart';
 import 'features/avatar/avatar_compose.dart';
 
@@ -26,19 +26,26 @@ Future<void> main() async {
   final native = ChannelNativeApi();
   final media = MediaStore('${dir.path}/media');
   final files = BackupService(actions, media, native, toasts);
-  final pro = ProManager(store, native, toasts, NoopNotifier());
+  final notifier = LocalNotifier();
+  await notifier.init();
+  final pro = ProManager(store, native, toasts, notifier);
+  final sync = ReminderSync(store, notifier)..syncNow(); // مثل nativeResyncAllReminders هنگام باز شدن
   // همان رفتارِ HTML: بازیابیِ خرید هنگام بالا آمدن، هر دقیقه بررسیِ پایانِ دوره، و هنگام برگشت به برنامه
   pro.restore();
   Timer.periodic(const Duration(minutes: 1), (_) => pro.checkProExpiry());
-  WidgetsBinding.instance.addObserver(_Resume(pro));
-  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, avData: avData, billing: pro, files: files));
+  WidgetsBinding.instance.addObserver(_Resume(pro, sync));
+  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, avData: avData, billing: pro, files: files, notifier: notifier));
 }
 
 class _Resume extends WidgetsBindingObserver {
   final ProManager pro;
-  _Resume(this.pro);
+  final ReminderSync sync;
+  _Resume(this.pro, this.sync);
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) pro.checkProExpiry();
+    if (state == AppLifecycleState.resumed) {
+      pro.checkProExpiry();
+      sync.syncNow();
+    }
   }
 }

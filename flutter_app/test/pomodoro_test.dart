@@ -11,6 +11,8 @@ import 'package:routine_planner/data/notifier.dart';
 import 'package:routine_planner/data/pomodoro_ops.dart';
 
 class _Rec implements Notifier {
+  @override
+  Future<void> resyncAll(dynamic state, DateTime now) async {}
   final calls = <String>[];
   @override
   Future<void> scheduleOnce(String id, String title, String body, int atMs) async => calls.add('sched $id $atMs');
