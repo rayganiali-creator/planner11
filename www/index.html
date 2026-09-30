@@ -4686,6 +4686,15 @@
         .rp-confirm-ico { font-size: 34px; margin-bottom: 4px; }
         .rp-confirm p { font-size: calc(14px * var(--font-scale)); line-height: 1.9; margin: 6px 0 4px; }
         #rpConfirmYes.danger { background: linear-gradient(180deg, #ef6b5f, #d9463b); box-shadow: 0 6px 14px rgba(217, 70, 59, .3); }
+        .rp-pass-desc { font-size: calc(12.5px * var(--font-scale)); color: var(--text-muted); line-height: 1.9; text-align: center; margin: 4px 0 12px; }
+        #rpPassBackdrop input[type=password] {
+            width: 100%; margin-bottom: 8px; padding: 11px 13px; border-radius: 12px;
+            border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text);
+            font-family: inherit; font-size: calc(13.5px * var(--font-scale)); direction: ltr; text-align: start;
+        }
+        #rpPassBackdrop input[type=password]:focus { outline: none; border-color: var(--primary); }
+        .rp-pass-err { color: var(--fail); font-size: calc(12px * var(--font-scale)); min-height: 16px; text-align: center; line-height: 1.5; margin-bottom: 6px; }
+        #rpPassBackdrop { z-index: 810; }
         #rpConfirmBackdrop { z-index: 800; }
 
         /* راهنمای نمودارهای دایره‌ای */
@@ -6064,6 +6073,22 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="rpPassBackdrop">
+        <div class="modal" style="max-width:380px">
+            <div style="font-size:40px;text-align:center;margin-bottom:2px">🔐</div>
+            <h3 id="rpPassTitle" style="text-align:center;margin-bottom:2px"></h3>
+            <p class="rp-pass-desc" id="rpPassDesc"></p>
+            <input type="password" id="rpPassInput" autocomplete="off" spellcheck="false">
+            <input type="password" id="rpPassInput2" autocomplete="off" spellcheck="false">
+            <div class="rp-pass-err" id="rpPassErr"></div>
+            <button type="button" class="glass-btn sm" id="rpPassSkip" style="width:100%"></button>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="rpPassCancel" data-fa="انصراف" data-en="Cancel">انصراف</button>
+                <button class="btn-confirm" id="rpPassOk" data-fa="تأیید" data-en="Confirm">تأیید</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-backdrop" id="rpConfirmBackdrop">
         <div class="modal rp-confirm">
             <div class="rp-confirm-ico" id="rpConfirmIco">❓</div>
@@ -6763,11 +6788,17 @@
             // recomputeTrustedPremiumFlag همین پایین‌تر، هنگام لود اولیه‌ی state هم صدا
             // زده می‌شه و باید این مقادیر از قبل آماده باشن.
             const PREMIUM_UNLOCK_SALT = 'routineplanner-salt-9f3';
-            const PREMIUM_UNLOCK_HASH = '93b059bdfe8555bbd80de6c4dba97fc081229d2e52714bbcdf99a8c741419a64';
-            // این مقدار فقط یک نشانه‌ی داخلیه (نه رمز جدید) که از خودِ هش بالا مشتق می‌شه؛
-            // به‌جای یک true/false ساده که هرکسی می‌تونه توی localStorage بسازه، وضعیت مالک
-            // این مقدارِ خاص رو لازم داره که فقط بعد از عبور واقعی از چک هش قابل‌تولیده.
-            const RP_OWNER_MARK_VALUE = PREMIUM_UNLOCK_HASH.slice(0, 12) + '-ok';
+            // کدِ مالک دیگر با یک SHA-256 ساده سنجیده نمی‌شود. قبلاً هشِ خام داخل همین فایل بود،
+            // پس هرکس APK را باز می‌کرد می‌توانست میلیون‌ها حدس را با یک هشِ ارزان در ثانیه تست کند.
+            // حالا مقدارِ ذخیره‌شده خروجیِ PBKDF2-HMAC-SHA256 با ۳۰۰٬۰۰۰ تکرار است؛ یعنی هر حدس
+            // باید همان ۳۰۰٬۰۰۰ تکرار را بپردازد و حمله‌ی brute-force عملاً چند مرتبه گران‌تر می‌شود.
+            const PREMIUM_UNLOCK_KDF_SALT = 'rp-owner-kdf-v2';
+            const PREMIUM_UNLOCK_KDF_ITER = 300000;
+            const PREMIUM_UNLOCK_KEY = 'a9d28d7b025b30e436344ceaa0e8b673273f3591230c040a07e97021df5e71bc';
+            // نشانه‌ی داخلیِ وضعیت مالک. صادقانه: این تضمینِ امنیتی نیست — روی دستگاهی که کاربر
+            // به حافظه‌ی برنامه دسترسی کامل دارد، هر علامتی قابلِ جعل است. تنها منبعِ واقعیِ
+            // اعتبارِ پرداختی، رسیدِ خودِ کافه‌بازار است (proCache و امضایش).
+            const RP_OWNER_MARK_VALUE = PREMIUM_UNLOCK_KEY.slice(0, 12) + '-ok';
             // پریمیوم همیشه از این تابع دوباره محاسبه می‌شه، نه از مقدار خامِ ذخیره‌شده —
             // یعنی دستکاری مستقیمِ isPremium توی داده‌ی ذخیره‌شده به‌تنهایی بی‌اثره.
             function recomputeTrustedPremiumFlag() {
@@ -11253,6 +11284,127 @@
                 return { success: sS, fail: fS };
             }
 
+            // ============================================================
+            // رمزگذاری فایل پشتیبان
+            // ------------------------------------------------------------
+            // فایل پشتیبان همه‌چیزِ کاربر را دارد: یادداشت‌های شخصی، ژورنال رفتاری، عکس‌ها و
+            // یادداشت‌های صوتی. تا حالا JSON خام بود، پس اگر کاربر آن را در پیام‌رسانی می‌فرستاد
+            // یا جایی جا می‌گذاشت، هرکسی بازش می‌کرد همه‌چیز را می‌خواند. حالا می‌شود با رمزِ
+            // خودِ کاربر قفلش کرد: کلید با PBKDF2 (۳۰۰٬۰۰۰ تکرار، نمکِ تصادفیِ هر فایل) ساخته
+            // و محتوا با AES-GCM رمز می‌شود. رمز هیچ‌جا ذخیره نمی‌شود — گم شود، فایل باز نمی‌شود.
+            // فایل‌های پشتیبانِ قدیمیِ بدون رمز همچنان خوانده می‌شوند.
+            // ============================================================
+            const RP_ENC_ITER = 300000;
+            function rpB64(u8) {
+                let out = '';
+                for (let i = 0; i < u8.length; i += 0x8000) out += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+                return btoa(out);
+            }
+            function rpUnB64(str) {
+                const bin = atob(str), u8 = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+                return u8;
+            }
+            function rpCryptoReady() { return !!(window.crypto && crypto.subtle && crypto.getRandomValues); }
+            async function rpBackupKey(pass, saltU8, iterations) {
+                const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+                return crypto.subtle.deriveKey(
+                    { name: 'PBKDF2', salt: saltU8, iterations: iterations, hash: 'SHA-256' },
+                    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+            }
+            async function rpEncryptBackup(plainText, pass) {
+                const salt = crypto.getRandomValues(new Uint8Array(16));
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const key = await rpBackupKey(pass, salt, RP_ENC_ITER);
+                const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv },
+                    key, new TextEncoder().encode(plainText));
+                return JSON.stringify({
+                    rpEncrypted: 1, app: 'routine-planner', createdAt: new Date().toISOString(),
+                    kdf: { name: 'PBKDF2', hash: 'SHA-256', iterations: RP_ENC_ITER, salt: rpB64(salt) },
+                    cipher: 'AES-GCM', iv: rpB64(iv), data: rpB64(new Uint8Array(ct))
+                }, null, 2);
+            }
+            // رمز غلط یا فایل دست‌کاری‌شده → null (برچسبِ احراز اصالتِ AES-GCM خودش می‌گیردش)
+            async function rpDecryptBackup(env, pass) {
+                try {
+                    const it = Math.min(2000000, Math.max(1, parseInt((env.kdf && env.kdf.iterations) || RP_ENC_ITER, 10)));
+                    const key = await rpBackupKey(pass, rpUnB64(env.kdf.salt), it);
+                    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: rpUnB64(env.iv) }, key, rpUnB64(env.data));
+                    return new TextDecoder().decode(pt);
+                } catch (e) { return null; }
+            }
+
+            // ---- پنجره‌ی رمز (هم برای گذاشتن رمز، هم برای وارد کردنش) ----
+            let _rpPassResolve = null;
+            function rpAskPassword(mode) {
+                const fa = state.lang === 'fa', setMode = mode === 'set';
+                const back = document.getElementById('rpPassBackdrop');
+                if (_rpPassResolve) { const r = _rpPassResolve; _rpPassResolve = null; r(null); }
+                document.getElementById('rpPassTitle').textContent = setMode
+                    ? (fa ? 'رمزگذاری فایل پشتیبان' : 'Encrypt the backup')
+                    : (fa ? 'این فایل رمز دارد' : 'This backup is encrypted');
+                document.getElementById('rpPassDesc').textContent = setMode
+                    ? (fa ? 'یک رمز بگذار تا فایل پشتیبان قفل شود. بدون این رمز هیچ‌کس — حتی خودت — نمی‌تواند بازش کند، پس جایی امن نگهش دار.'
+                          : 'Set a password to lock the backup file. Without it nobody — not even you — can open it, so keep it somewhere safe.')
+                    : (fa ? 'رمزی که هنگام ساختن این فایل گذاشتی را وارد کن.' : 'Enter the password you set when this backup was created.');
+                const i1 = document.getElementById('rpPassInput'), i2 = document.getElementById('rpPassInput2');
+                i1.value = ''; i2.value = '';
+                i1.placeholder = fa ? 'رمز عبور' : 'Password';
+                i2.placeholder = fa ? 'تکرار رمز عبور' : 'Repeat password';
+                i2.style.display = setMode ? '' : 'none';
+                document.getElementById('rpPassErr').textContent = '';
+                const skip = document.getElementById('rpPassSkip');
+                skip.style.display = setMode ? '' : 'none';
+                skip.textContent = fa ? 'بدون رمز ذخیره کن' : 'Save without a password';
+                back.classList.add('open');
+                setTimeout(() => i1.focus(), 60);
+                return new Promise(res => { _rpPassResolve = res; });
+            }
+            function _rpPassClose(v) {
+                const r = _rpPassResolve; _rpPassResolve = null;
+                document.getElementById('rpPassBackdrop').classList.remove('open');
+                document.getElementById('rpPassInput').value = '';
+                document.getElementById('rpPassInput2').value = '';
+                if (r) r(v);
+            }
+            function _rpPassSubmit() {
+                const fa = state.lang === 'fa';
+                const setMode = document.getElementById('rpPassInput2').style.display !== 'none';
+                const a = document.getElementById('rpPassInput').value;
+                const err = document.getElementById('rpPassErr');
+                if (!a) { err.textContent = fa ? 'رمز را وارد کن.' : 'Enter a password.'; return; }
+                if (setMode) {
+                    if (a.length < 6) { err.textContent = fa ? 'رمز باید دست‌کم ۶ نویسه باشد.' : 'Use at least 6 characters.'; return; }
+                    if (a !== document.getElementById('rpPassInput2').value) {
+                        err.textContent = fa ? 'دو رمز یکی نیستند.' : 'The two passwords do not match.'; return;
+                    }
+                }
+                _rpPassClose({ pass: a });
+            }
+            document.getElementById('rpPassOk').addEventListener('click', _rpPassSubmit);
+            document.getElementById('rpPassSkip').addEventListener('click', () => _rpPassClose({ plain: true }));
+            document.getElementById('rpPassCancel').addEventListener('click', () => _rpPassClose(null));
+            document.getElementById('rpPassBackdrop').addEventListener('click', function(e) { if (e.target === this) _rpPassClose(null); });
+            ['rpPassInput', 'rpPassInput2'].forEach(id => document.getElementById(id)
+                .addEventListener('keydown', e => { if (e.key === 'Enter') _rpPassSubmit(); }));
+            new MutationObserver(() => { if (!document.getElementById('rpPassBackdrop').classList.contains('open') && _rpPassResolve) _rpPassClose(null); })
+                .observe(document.getElementById('rpPassBackdrop'), { attributes: true, attributeFilter: ['class'] });
+
+            // متنِ نهاییِ فایل پشتیبان: اول رمز را از کاربر می‌پرسد. null یعنی انصراف.
+            async function rpBackupPayload() {
+                const fa = state.lang === 'fa';
+                const jsonStr = await createBackupJSON();
+                if (!rpCryptoReady()) return { text: jsonStr, enc: false };
+                const choice = await rpAskPassword('set');
+                if (!choice) return null;
+                if (choice.plain) return { text: jsonStr, enc: false };
+                try { return { text: await rpEncryptBackup(jsonStr, choice.pass), enc: true }; }
+                catch (e) {
+                    showToast(fa ? 'رمزگذاری انجام نشد؛ فایل بدون رمز ساخته شد.' : 'Encryption failed; the backup was saved unencrypted.', 4000);
+                    return { text: jsonStr, enc: false };
+                }
+            }
+
             async function createBackupJSON() {
                 // عکس‌های کتاب‌ها توی IndexedDBان، نه توی state معمولی؛ برای این‌که پشتیبان
                 // واقعاً کامل باشه (طبق درخواست)، این‌جا هم جمعشون می‌کنیم و توی همون JSON
@@ -12176,11 +12328,13 @@
             }
 
             document.getElementById('exportDataBtn').addEventListener('click', async () => {
-                const jsonStr = await createBackupJSON();
+                const payload = await rpBackupPayload();
+                if (!payload) return;
+                const jsonStr = payload.text;
                 const now = new Date(),
                     dStr = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() +
                     '-' + now.getHours() + '-' + now.getMinutes();
-                const fileName = 'RoutinePlanner-Backup-' + dStr + '.json';
+                const fileName = 'RoutinePlanner-Backup-' + (payload.enc ? 'ENC-' : '') + dStr + '.json';
                 const preview = document.getElementById('jsonPreview');
                 if (isNativeApp()) {
                     rpSaveText(jsonStr, fileName, 'application/json').then(ok => {
@@ -12208,13 +12362,16 @@
             });
 
             document.getElementById('shareDataBtn').addEventListener('click', async () => {
-                const jsonStr = await createBackupJSON();
+                const payload = await rpBackupPayload();
+                if (!payload) return;
+                const jsonStr = payload.text;
+                const shareName = 'RoutinePlanner-Backup' + (payload.enc ? '-ENC' : '') + '.json';
                 if (isNativeApp()) {
-                    nativeSaveBackup(jsonStr, 'RoutinePlanner-Backup.json');
+                    nativeSaveBackup(jsonStr, shareName);
                     return;
                 }
                 const blob = new Blob([jsonStr], { type: 'application/json' }),
-                    file = new File([blob], 'RoutinePlanner-Backup.json', { type: 'application/json' });
+                    file = new File([blob], shareName, { type: 'application/json' });
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                     navigator.share({ title: 'Routine Planner Backup', text: 'Backup data', files: [file] })
                         .catch(() => {});
@@ -12243,6 +12400,27 @@
                         showToast(fa ? '❌ فایل پشتیبان خوانده نشد (JSON معتبر نیست). داده‌ی فعلی دست‌نخورده ماند.'
                                      : '❌ Could not read the backup (invalid JSON). Your current data is untouched.', 4200);
                         e.target.value = ''; return;
+                    }
+                    // فایلِ رمزدار: اول رمز، بعد اعتبارسنجی. رمزِ غلط هیچ تغییری در داده نمی‌دهد.
+                    if (raw && raw.rpEncrypted) {
+                        if (!rpCryptoReady()) {
+                            showToast(fa ? '❌ این فایل رمز دارد و این دستگاه رمزگشایی را پشتیبانی نمی‌کند.'
+                                         : '❌ This backup is encrypted and this device cannot decrypt it.', 4200);
+                            e.target.value = ''; return;
+                        }
+                        const c = await rpAskPassword('enter');
+                        if (!c || !c.pass) { e.target.value = ''; return; }
+                        const plain = await rpDecryptBackup(raw, c.pass);
+                        if (plain === null) {
+                            showToast(fa ? '❌ رمز درست نیست (یا فایل خراب است). داده‌ی فعلی دست‌نخورده ماند.'
+                                         : '❌ Wrong password (or the file is damaged). Your current data is untouched.', 4200);
+                            e.target.value = ''; return;
+                        }
+                        try { raw = JSON.parse(plain); }
+                        catch (err) {
+                            showToast(fa ? '❌ محتوای فایل پس از رمزگشایی سالم نبود.' : '❌ The decrypted content was not valid.', 4200);
+                            e.target.value = ''; return;
+                        }
                     }
                     const v = rpValidateBackup(raw);
                     if (!v.ok) {
@@ -13042,11 +13220,11 @@
             // هیچ دکمه یا متنی این قابلیت رو لو نمی‌ده؛ فقط با ۷ بار ضربه‌ی سریع
             // روی آیکون 🔒 بالای همین پنجره، کادر وارد کردن کد ظاهر می‌شه.
             //
-            // برخلاف نسخه‌ی قبلی، خودِ کد اینجا به‌صورت متن ساده نوشته نشده؛ فقط
-            // هش (SHA-256 نمک‌دار) اون ذخیره شده، پس با دیدن سورس کد هم کد واقعی
-            // به‌سادگی قابل خوندن نیست. همچنین بعد از چند بار کد اشتباه، چند ثانیه
-            // قفل موقت می‌خوره تا حدس زدن پشت‌سرهم عملاً بی‌فایده باشه.
-            // (PREMIUM_UNLOCK_SALT / PREMIUM_UNLOCK_HASH / RP_OWNER_MARK_VALUE بالای
+            // خودِ کد اینجا نوشته نشده؛ فقط خروجیِ PBKDF2-HMAC-SHA256 با ۳۰۰٬۰۰۰ تکرار
+            // ذخیره شده. یعنی حتی با دیکامپایل کردنِ APK، هر حدس باید همان ۳۰۰٬۰۰۰ تکرار
+            // را بپردازد و حمله‌ی فرهنگ‌لغتی چند مرتبه گران‌تر می‌شود. علاوه بر این، بعد از
+            // ۵ بار کد اشتباه ۳۰ ثانیه قفل موقت می‌خورد.
+            // (PREMIUM_UNLOCK_SALT / PREMIUM_UNLOCK_KEY / RP_OWNER_MARK_VALUE بالای
             // فایل، کنار STORAGE_KEY، تعریف شدن تا موقع لود اولیه‌ی state هم در دسترس باشن.)
             // ============================================================
             let premiumTapCount = 0;
@@ -13092,7 +13270,21 @@
             let premiumUnlockLockedUntil = 0;
             async function sha256Hex(text) {
                 const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                return rpHex(new Uint8Array(buf));
+            }
+            function rpHex(u8) { return Array.from(u8).map(b => b.toString(16).padStart(2, '0')).join(''); }
+            // کلیدِ ۲۵۶ بیتی از یک رشته‌ی دلخواه. هم برای کدِ مالک و هم برای رمزِ فایلِ پشتیبان.
+            async function rpDeriveBits(pass, salt, iterations) {
+                const enc = new TextEncoder();
+                const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
+                return crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations: iterations, hash: 'SHA-256' }, base, 256);
+            }
+            // مقایسه‌ی ثابت‌زمان تا طولِ تطابق از روی زمانِ پاسخ لو نرود
+            function rpEqConst(a, b) {
+                if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+                let d = 0;
+                for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+                return d === 0;
             }
             async function tryPremiumUnlockCode() {
                 const input = document.getElementById('premiumCodeInput');
@@ -13106,8 +13298,18 @@
                     return;
                 }
                 const val = (input.value || '').trim();
-                const hash = await sha256Hex(PREMIUM_UNLOCK_SALT + val);
-                if (val && hash === PREMIUM_UNLOCK_HASH) {
+                const btn = document.getElementById('premiumCodeSubmitBtn');
+                const btnLabel = btn ? btn.textContent : '';
+                if (btn) { btn.disabled = true; btn.textContent = state.lang === 'fa' ? 'بررسی…' : 'Checking…'; }
+                let key = '';
+                try {
+                    // PBKDF2 روی گوشی چند صدم تا چند دهم ثانیه طول می‌کشد — برای کاربر بی‌اثر،
+                    // برای کسی که میلیون‌ها حدس می‌زند کمرشکن.
+                    key = val ? rpHex(new Uint8Array(await rpDeriveBits(
+                        await sha256Hex(PREMIUM_UNLOCK_SALT + val), PREMIUM_UNLOCK_KDF_SALT, PREMIUM_UNLOCK_KDF_ITER))) : '';
+                } catch (err) { key = ''; }
+                if (btn) { btn.disabled = false; btn.textContent = btnLabel; }
+                if (val && rpEqConst(key, PREMIUM_UNLOCK_KEY)) {
                     premiumUnlockAttempts = 0;
                     state.__rpOwnerMark = RP_OWNER_MARK_VALUE;
                     recomputeTrustedPremiumFlag();
