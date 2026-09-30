@@ -10,6 +10,7 @@ import '../data/actions.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/calendar/calendar_screens.dart';
 import '../features/habits/habits_screen.dart';
+import '../features/journal/journal_screen.dart';
 import '../features/purchases/purchases_screen.dart';
 import '../features/todo/todo_screen.dart';
 import '../ui/tokens.dart';
@@ -101,6 +102,7 @@ class _ShellState extends State<Shell> {
         AppView.habits => const HabitsScreen(),
         AppView.purchases => const PurchasesScreen(),
         AppView.todo => const TodoScreen(),
+        AppView.journal => const JournalScreen(),
         AppView.month => const MonthScreen(),
         AppView.year => const YearScreen(),
         _ => _Soon(view: v),
