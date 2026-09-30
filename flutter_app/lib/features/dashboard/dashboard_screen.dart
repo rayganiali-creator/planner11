@@ -18,6 +18,7 @@ import '../../data/app_store.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import '../avatar/avatar_compose.dart';
+import '../challenges/challenges_sheet.dart';
 import '../avatar/avatar_view.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -97,6 +98,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ]),
         ),
+        const SizedBox(height: RpSpace.s3),
+        _ChallengesCard(state: st),
         const SizedBox(height: RpSpace.s4),
         SectionHeader(
           context.tr('عادت‌های امروز', "Today's habits"),
@@ -256,5 +259,26 @@ class _StageAvatar extends StatelessWidget {
       return Icon(LucideIcons.user, size: 72, color: context.rp.onPrimary.withValues(alpha: .85));
     }
     return AvatarView(data: data, gender: g, equipped: data.equippedFor(state as Doc, g), cond: cond, height: 190);
+  }
+}
+
+class _ChallengesCard extends StatelessWidget {
+  final Map state;
+  const _ChallengesCard({required this.state});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    final active = ((state['challenges'] as List?) ?? const []).where((c) => c is Map && (c['status'] == 'active' || c['status'] == 'pending_review')).length;
+    return AppCard(
+      onTap: () => showChallenges(context, tab: 'active'),
+      child: Row(children: [
+        Icon(LucideIcons.trophy, color: p.goldInk),
+        const SizedBox(width: RpSpace.s3),
+        Expanded(child: Text(context.tr('چالش‌ها', 'Challenges'), style: rpText(RpType.bodyL, weight: 800, color: p.text))),
+        Text(active == 0 ? context.tr('چالش فعالی نیست', 'None active') : context.tr('${context.n(active)} فعال', '$active active'), style: rpText(RpType.label, weight: 600, color: p.muted)),
+        const SizedBox(width: 6),
+        Icon(LucideIcons.chevronLeft, size: 18, color: p.muted),
+      ]),
+    );
   }
 }

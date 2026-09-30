@@ -31,6 +31,8 @@ void main() {
     expect(find.text('ورزش'), findsOneWidget);
 
     final iso = actions.todayISO;
+    await tester.ensureVisible(find.byIcon(LucideIcons.check));
+    await tester.pump();
     await tester.tap(find.byIcon(LucideIcons.check));
     await tester.pump(const Duration(milliseconds: 400));
     expect(((store.state['records'] as Map)[iso] as Map)['h1'], 'success');

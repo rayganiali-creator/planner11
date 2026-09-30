@@ -1,4 +1,5 @@
 // پوسته: صفحه‌ی فعلی + نوار ناوبری شناور + منوی + (Action Grid) + Back اندروید.
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../data/actions.dart';
+import '../data/challenge_ops.dart';
+import '../features/challenges/challenges_sheet.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/calendar/calendar_screens.dart';
 import '../features/habits/habits_screen.dart';
@@ -27,9 +30,43 @@ class Shell extends StatefulWidget {
 }
 
 class _ShellState extends State<Shell> {
+  Timer? _chTimer;
+  final List<String> _checkins = [];
+  bool _checkinOpen = false;
+
+  void _tickChallenges() {
+    final a = context.read<AppActions>();
+    _checkins.addAll(a.checkChallengeDeadlines());
+    _nextCheckin();
+  }
+
+  Future<void> _nextCheckin() async {
+    if (_checkinOpen || _checkins.isEmpty || !mounted) return;
+    final a = context.read<AppActions>();
+    final id = _checkins.first;
+    final c = a.challenges.where((x) => x['id'] == id).firstOrNull;
+    if (c == null || c['status'] != 'pending_review') {
+      _checkins.removeAt(0);
+      return _nextCheckin();
+    }
+    _checkinOpen = true;
+    await showChallengeCheckin(context, c);
+    _checkins.remove(id);
+    _checkinOpen = false;
+    if (mounted) Future.delayed(const Duration(milliseconds: 500), _nextCheckin);
+  }
+
+  @override
+  void dispose() {
+    _chTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tickChallenges());
+    _chTimer = Timer.periodic(const Duration(seconds: 20), (_) => _tickChallenges());
     // پنجره‌ی «سطح استادی» (ادامه‌ی مرحله‌ی بعد؟) — هر وقت ثبتی به سقفِ مرحله برسد
     context.read<AppActions>().onCapstone = (hid, level) => _capstone(hid, level);
   }
@@ -211,17 +248,19 @@ class GlassNav extends StatelessWidget {
 
 // ---------------------------------------------------------------- منوی + (Action Grid)
 Future<void> showActionGrid(BuildContext context) {
+  final root = context;
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     barrierColor: const Color(0x85060E0D),
-    builder: (_) => const _ActionGridSheet(),
+    builder: (_) => _ActionGridSheet(rootContext: root),
   );
 }
 
 class _ActionGridSheet extends StatelessWidget {
-  const _ActionGridSheet();
+  final BuildContext rootContext;
+  const _ActionGridSheet({required this.rootContext});
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +307,11 @@ class _ActionGridSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(RpRadius.lg),
                   onTap: () {
                     Navigator.pop(context);
-                    if (view != null) nav.go(view);
+                    if (view != null) {
+                      nav.go(view);
+                    } else if (label == context.tr('چالش‌ها', 'Challenges')) {
+                      showChallenges(rootContext);
+                    }
                   },
                   child: Ink(
                     decoration: BoxDecoration(color: p.surface2, borderRadius: BorderRadius.circular(RpRadius.lg), border: Border.all(color: p.line)),
