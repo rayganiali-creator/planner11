@@ -248,7 +248,165 @@ def m_habits(P):
     print(f'  habits: {len(rows)} مورد روی {len(states)} state ({errs} استثنا) → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB فشرده / {round(n / 1024)} KB خام]')
 
 
-MODULES = {'calendar': m_calendar, 'habits': m_habits}
+def m_pro(P):
+    rnd = random.Random(20260930 + 2)
+    PIDS = ['rp_pro_1m', 'rp_pro_2m', 'rp_pro_3m', 'rp_pro_6m', 'premium_unlock', 'pro_1m', 'unknown_x', None, 5]
+    T0 = 1790000000000
+
+    def purchase():
+        pid = rnd.choice(PIDS)
+        p = {'productId': pid, 'purchaseToken': rnd.choice(['tok' + str(rnd.randint(0, 999)), 'توکن-' + str(rnd.randint(0, 9)), 'a"b\\c', '', None])}
+        r = rnd.random()
+        if r < 0.85: p['purchaseTime'] = T0 + rnd.randint(0, 120) * 86400000 + rnd.choice([0, 0, 1, 12345])
+        elif r < 0.92: p['purchaseTime'] = 0
+        elif r < 0.96: p['purchaseTime'] = None
+        return p
+
+    cases = []
+    for _ in range(700):
+        n = rnd.randint(0, 6)
+        ps = [purchase() for _ in range(n)]
+        if rnd.random() < 0.3 and ps:          # زمان‌های برابر → آزمونِ پایداریِ مرتب‌سازی
+            t = ps[0].get('purchaseTime', T0)
+            for q in ps[1:]: q['purchaseTime'] = t
+        cases.append(('proWindow', [ps]))
+    # امضا: کش‌های گوناگون
+    caches = []
+    for _ in range(500):
+        ps = [purchase() for _ in range(rnd.randint(0, 4))]
+        c = {'isPro': rnd.choice([True, False]), 'expiresAt': rnd.choice([None, 0, T0 + 86400000 * rnd.randint(-50, 400)]), 'purchases': ps}
+        if rnd.random() < 0.1: c['legacyUntil'] = rnd.choice([0, 12345, T0])
+        if rnd.random() < 0.1: del c['purchases']
+        caches.append(c)
+        cases.append(('rpSig_obj', [c]))
+    # ساعت‌ها
+    def clk(now, scenario):
+        if scenario == 0: return {'date': now, 'perf': 5000.5, 'sess': None, 'trust': None}
+        if scenario == 1: return {'date': now, 'perf': 9000, 'sess': {'eff': now - 3000, 'perf': 2000}, 'trust': None}
+        if scenario == 2: return {'date': now - 500000, 'perf': 7000, 'sess': {'eff': now - 100, 'perf': 7000}, 'trust': None}
+        return {'date': now - 9e7, 'perf': 4000, 'sess': None, 'trust': {'server': now, 'perf': 1000}}
+    for _ in range(150):
+        now = T0 + rnd.randint(0, 200) * 86400000 + rnd.randint(0, 86399999)
+        a = clk(now, rnd.randint(0, 3))
+        for last in (None, 0, now - 1000, now + 5000000):
+            st = {'clock': {'lastSeen': last} if last is not None else {}}
+            cases.append(('rpNowWith', [st, a]))
+    cases.append(('rpNowWith', [{}, clk(T0, 0)]))
+    # تشخیص پرو + روز مانده + خط‌زمانی
+    def build_state():
+        ps = [purchase() for _ in range(rnd.randint(0, 4))]
+        w = P.call('proWindow', [ps])
+        c = {'isPro': rnd.choice([True, True, True, False, None]), 'expiresAt': w['expiresAt'], 'purchases': ps,
+             'checkedAt': T0}
+        if rnd.random() < 0.85:
+            c['purchaseToken'] = rnd.choice(['t1', None, ''])
+        r = rnd.random()
+        if r < 0.65: c['sig'] = P.call('rpSig_obj', [c])
+        elif r < 0.8: c['sig'] = 'wrong'
+        elif r < 0.9: c['sig'] = None
+        if rnd.random() < 0.1: c['expiresAt'] = None
+        st = {'proCache': rnd.choice([c, c, c, None, {}, 'x']), 'clock': {'lastSeen': rnd.choice([0, T0])}}
+        if rnd.random() < 0.15: st['__rpOwnerMark'] = rnd.choice([P.call('ownerMark', []), 'nope'])
+        st['isPremium'] = rnd.choice([True, False])
+        return st
+    states = [build_state() for _ in range(450)]
+    for st in states:
+        now = T0 + rnd.randint(0, 260) * 86400000 + rnd.randint(0, 86399999)
+        a = clk(now, rnd.randint(0, 3))
+        cases.append(('recomputePremium', [st, a]))
+        cases.append(('daysLeft', [dict(st, isPremium=True), a]))
+        cases.append(('daysLeft', [dict(st, isPremium=False), a]))
+        cases.append(('segments', [st, a]))
+    write('pro', cases, P.batch(cases))
+
+
+STORAGE_KEY = 'alshadow-v14-level-colors'
+
+
+def load_case(P, raw, y=2026, mo=9, d=30, h=10, mi=0):
+    """یک بارگذاریِ واقعیِ صفحه با یک localStorage مشخص؛ state را درست پس از خطِ لوله‌ی بارگذاری برمی‌گرداند."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    pg = P.ctx.new_page()
+    try:
+        if raw is not None:
+            pg.add_init_script(f"try{{localStorage.setItem({json.dumps(STORAGE_KEY)}, {json.dumps(raw)});}}catch(e){{}}")
+        pg.clock.set_fixed_time(datetime(y, mo, d, h, mi, tzinfo=ZoneInfo(TZNAME)))
+        pg.goto(f'http://127.0.0.1:{PORT}/index.html')
+        pg.wait_for_function('window.__rpLoaded !== undefined', timeout=20000)
+        out = pg.evaluate('window.__rpLoaded')
+        now_ms = pg.evaluate('Date.now()')
+        return out, now_ms
+    finally:
+        pg.close()
+
+
+def m_load(P):
+    rnd = random.Random(20260930 + 3)
+    T_NOW = 1790762400000
+    raws = [None, '', '{bad json', 'null', '5', '[1,2]', '"ab"', 'true', '{}', '{"habits":"x","records":[],"scores":5,"avatar":7}']
+    base_keys = ['theme', 'lang', 'bgColor', 'accentTheme', 'tileColors', 'habits', 'records', 'journal', 'todos', 'books', 'scores',
+                 'weekStart', 'showHolidays', 'calendarType', 'fontSize', 'bgPattern', 'tileShape', 'tileEffect', 'bgPatternOpacity',
+                 'themeIntensity', 'profileName', 'reasons', 'triggers', 'triggerType', 'levelToastSent', 'levelReachedColor',
+                 'masteryColor', 'customUrgeSuggestions', 'urgeHiddenIds', 'habitNotes', 'onboardingDone', 'langChosen',
+                 'avatar', 'termsAcceptedVersion', 'termsAcceptedAt', 'challenges', 'medals', 'behaviorJournal', 'pomodoro']
+    WRONG = [None, 5, 'x', [], {}, True, [1, 2], {'a': 1}, 0, '']
+    from datetime import date
+    for i in range(150):
+        today = date(2026, 9, 30)
+        st = gen_state(rnd, today)
+        st.update({'theme': rnd.choice(['light', 'dark']), 'profileName': rnd.choice(['کاربر', 'علی', '', None]),
+                   'onboardingDone': rnd.choice([True, False]), 'unknown_future_field': {'k': [1, 2, {'z': None}]},
+                   'scores': {'points': rnd.choice([0, 120, '300', None, 'x']), 'level': rnd.choice([1, 3, '2', 'abc']),
+                              'streak': rnd.choice([0, 4]), 'coins': rnd.choice([0, 550, '70', None, 1.5]), 'lastPoints': rnd.choice([0, 40, None])}})
+        r = rnd.random()
+        if r < 0.45:   # خرابی‌های هدفمند
+            for _ in range(rnd.randint(1, 4)):
+                k = rnd.choice(base_keys)
+                st[k] = rnd.choice(WRONG)
+        if rnd.random() < 0.3:  # عادت/کار/کتاب بی‌شناسه و تکراری
+            st['habits'] = (st['habits'] if isinstance(st.get('habits'), list) else []) + [{'name': 'بی‌شناسه'}, None, 5, [], {'id': ''}, {'id': 0}]
+            st['todos'] = [{'id': 't1', 'title': 'x'}, {'title': 'noid'}, 7]
+            st['books'] = [{'id': 'b1'}, None]
+            st['challenges'] = [{'id': 'c1'}, {'x': 1}]
+            st['journal'] = [{'text': 'a'}, None, 5, 'str', [], {}]
+        if rnd.random() < 0.25:  # فیلدهای مرده
+            for k in ('coins', 'level', 'calorie', 'vows'): st[k] = rnd.choice([1, {'a': 1}, 'x'])
+        if rnd.random() < 0.25 and isinstance(st.get('records'), dict):  # روزهای خراب
+            st['records']['2026-01-01'] = rnd.choice([None, 5, 'x', [], [1]])
+        if rnd.random() < 0.3:  # حذف کلیدهای پیش‌فرض (نسخه‌های قدیمی)
+            for k in rnd.sample(base_keys, rnd.randint(1, 10)): st.pop(k, None)
+        if rnd.random() < 0.2:
+            st['avatar'] = rnd.choice([{'gender': 'male'}, {'owned': [], 'equipped': 5}, {'owned': {}, 'equipped': {'male': 5}},
+                                       {'owned': {'a': True}, 'equipped': {'male': {}, 'female': []}}])
+        if rnd.random() < 0.15:
+            st['tileColors'] = rnd.choice([{'fail': '#fff'}, {'success': ''}, {'success': '#000', 'fail': '#111'}])
+        # پرو: کش معتبر/نامعتبر/منقضی + نشانه‌ی مالک
+        if rnd.random() < 0.6:
+            ps = [{'productId': rnd.choice(['rp_pro_1m', 'rp_pro_3m', 'rp_pro_6m', 'premium_unlock']), 'purchaseToken': 'tk' + str(i),
+                   'purchaseTime': T_NOW + rnd.randint(-200, 20) * 86400000}]
+            w = P.call('proWindow', [ps])
+            c = {'isPro': rnd.choice([True, True, False]), 'expiresAt': w['expiresAt'], 'purchases': ps, 'purchaseToken': 'tk' + str(i), 'checkedAt': T_NOW}
+            c['sig'] = P.call('rpSig_obj', [c]) if rnd.random() < 0.75 else 'bad'
+            st['proCache'] = c
+        if rnd.random() < 0.1: st['__rpOwnerMark'] = rnd.choice([P.call('ownerMark', []), 'nope'])
+        if rnd.random() < 0.15: st['clock'] = {'lastSeen': rnd.choice([0, T_NOW - 10**7, T_NOW + 10**9]), 'lastSync': 0}
+        # رکوردهای قدیمیِ عددی/زمانی برای آزمونِ migrateTargetSnapshots
+        if isinstance(st.get('habits'), list) and isinstance(st.get('records'), dict):
+            for h in st['habits']:
+                if isinstance(h, dict) and h.get('type') in ('numeric', 'timer') and rnd.random() < 0.7:
+                    st['records']['2026-09-28'] = {**(st['records'].get('2026-09-28') if isinstance(st['records'].get('2026-09-28'), dict) else {}),
+                                                   h['id']: rnd.choice([5, '7', 2.5, {'value': '3'}, {'value': 4, 'targetAtTime': 9}, None, True, [1]])}
+        raws.append(json.dumps(st, ensure_ascii=False))
+    rows = []
+    for raw in raws:
+        out, now_ms = load_case(P, raw)
+        rows.append({'raw': raw, 'nowMs': now_ms, 'ok': out})
+    path, n = dump_gz('load', rows)
+    print(f'  load: {len(rows)} مورد بارگذاریِ واقعیِ صفحه → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB فشرده / {round(n / 1024)} KB خام]')
+
+
+MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load}
 
 
 def main():

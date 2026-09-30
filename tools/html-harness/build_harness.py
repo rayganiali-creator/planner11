@@ -11,6 +11,12 @@ out = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '/tmp/harness/index.htm
 s = io.open(ROOT / 'www' / 'index.html', encoding='utf-8').read()
 
 ANCHOR = '            const HELP_CONTENT = {'
+# لحظه‌ی پایانِ خطِ لوله‌ی بارگذاریِ state (قبل از هر کدِ دیگری که ممکن است state را عوض کند)
+LOADED_ANCHOR = '''            rpInitClock(); // برای نصب تازه (بدون داده‌ی ذخیره‌شده) هم ساعت مطمئن مقداردهی بشه
+            recomputeTrustedPremiumFlag();
+'''
+assert s.count(LOADED_ANCHOR) == 1, 'لنگر بارگذاری پیدا نشد'
+s = s.replace(LOADED_ANCHOR, LOADED_ANCHOR + "            window.__rpLoaded = { state: JSON.parse(JSON.stringify(state)), repaired: !!_rpStateWasRepaired };   // فقط تست\\n", 1)
 assert s.count(ANCHOR) == 1, 'لنگر درج پیدا نشد'
 
 HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): توابع خالص برای گرفتنِ خروجی طلایی =====
@@ -47,6 +53,21 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                 getTotalStats(range) { return getTotalStats(range); },
                 getWeekStart_iso() { return dateToISO(getWeekStart(startOfDay(new Date()))); },
                 getAccountLevelFromCoins(c) { return getAccountLevelFromCoins(c); },
+                // --- پرو: ساعت قابل‌کنترل (Date.now / performance.now / لنگرها) ---
+                _withClock(a, fn) {
+                    const od = Date.now, op = performance.now;
+                    Date.now = () => a.date; performance.now = () => a.perf;
+                    const os = rpSessionAnchor, ot = rpTrustedAnchor;
+                    rpSessionAnchor = a.sess || null; rpTrustedAnchor = a.trust || null;
+                    try { return fn(); } finally { Date.now = od; performance.now = op; rpSessionAnchor = os; rpTrustedAnchor = ot; }
+                },
+                rpNowWith(st, a) { state = st; return window.__rpFn._withClock(a, () => rpNow()); },
+                proWindow(purchases) { const w = computeProWindow(purchases); return { lifetime: w.lifetime, expiresAt: w.expiresAt, list: w.list }; },
+                rpSig_obj(o) { return rpSig(o); },
+                recomputePremium(st, a) { state = st; return window.__rpFn._withClock(a, () => { recomputeTrustedPremiumFlag(); return state.isPremium; }); },
+                daysLeft(st, a) { state = st; return window.__rpFn._withClock(a, () => proDaysLeft()); },
+                segments(st, a) { state = st; return window.__rpFn._withClock(a, () => proPurchaseSegments().map(s => ({ pid: s.p.productId, plan: s.plan ? s.plan.id : null, lifetime: !!s.lifetime, unknown: !!s.unknown, from: s.from, to: s.to }))); },
+                ownerMark() { return RP_OWNER_MARK_VALUE; },
                 coinOps(ops) {   // [['add',x],['remove',y],['sync',z]…] → نتیجه‌ی هر گام و موجودی پایانی
                     const out = [];
                     ops.forEach(([op, x]) => {

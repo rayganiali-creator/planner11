@@ -42,6 +42,7 @@ double jsToNumber(Object? v) {
     if (t == '-Infinity') return double.negativeInfinity;
     return double.tryParse(t) ?? double.nan;
   }
+  if (v is List) return jsToNumber(jsString(v)); // Number([]) = 0 ، Number([5]) = 5 ، Number([1,2]) = NaN
   return double.nan;
 }
 

@@ -9,25 +9,6 @@ import 'package:routine_planner/core/habits.dart';
 
 import 'golden_loader.dart';
 
-bool deepEq(Object? a, Object? b) {
-  if (a is num && b is num) return a == b || (a.isNaN && b.isNaN);
-  if (a is List && b is List) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (!deepEq(a[i], b[i])) return false;
-    }
-    return true;
-  }
-  if (a is Map && b is Map) {
-    if (a.length != b.length) return false;
-    for (final k in a.keys) {
-      if (!b.containsKey(k) || !deepEq(a[k], b[k])) return false;
-    }
-    return true;
-  }
-  return a == b;
-}
-
 Map lvl(LevelDef l) => {'num': l.num, 'minPoints': l.minPoints, 'labelFa': l.labelFa, 'labelEn': l.labelEn, 'icon': l.icon, 'isCapstone': l.isCapstone};
 
 Map lvlFromJs(Map m) => {
