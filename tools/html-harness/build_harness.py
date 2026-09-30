@@ -51,6 +51,17 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                 computeHabitStreak_id(hid) { return computeHabitStreak(window.__rpFn._h(hid)); },
                 computeHabitBestRecord_id(hid) { return computeHabitBestRecord(window.__rpFn._h(hid)); },
                 collectSeries(range) { return collectSeries(range); },
+                smart(range, lang) {
+                    const oldLang = state.lang; state.lang = lang; saRange = range;
+                    const cur = saCompute(saPeriod(0)), prev = saCompute(saPeriod(1));
+                    const strip = t => String(t).replace(/<\/?bdi>/g, '');
+                    const pack = r => ({ succ: r.succ, fail: r.fail, rate: r.rate, perfect: r.perfect, zero: r.zero, activeDays: r.activeDays, dueDays: r.dueDays,
+                        recovery: r.recovery, recN: r.recN, consistency: r.consistency, byWeekday: r.byWeekday.map(w => [w.s, w.f]),
+                        byHabit: Object.fromEntries(Object.entries(r.byHabit).map(([k, h]) => [k, { s: h.s, f: h.f, best: h.best, name: h.name }])),
+                        trig: JSON.parse(JSON.stringify(r.trig)), failReasons: r.failReasons, winReasons: r.winReasons, series: r.series });
+                    const res = { cur: pack(cur), prev: pack(prev), insights: saInsights(cur, prev).map(x => ({ level: x.level, ico: x.ico, t: strip(x.t), s: strip(x.s), w: x.w })) };
+                    state.lang = oldLang; return res;
+                },
                 getTotalStats(range) { return getTotalStats(range); },
                 getWeekStart_iso() { return dateToISO(getWeekStart(startOfDay(new Date()))); },
                 getAccountLevelFromCoins(c) { return getAccountLevelFromCoins(c); },

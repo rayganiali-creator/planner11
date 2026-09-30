@@ -11,6 +11,7 @@ import '../../ui/charts.dart';
 import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
 import '../onboarding/onboarding.dart';
+import 'smart_card.dart';
 import '../../ui/widgets.dart';
 
 String weeklyReport(Map st, DateTime today, bool fa) {
@@ -119,6 +120,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
         const SizedBox(height: RpSpace.s3),
         AppCard(child: Text(weeklyReport(st, now, fa), style: rpText(RpType.body, weight: 600, color: p.text, height: 1.9))),
+        const SizedBox(height: RpSpace.s3),
+        const SmartCard(),
       ],
     );
   }

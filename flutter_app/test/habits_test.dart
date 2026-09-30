@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:routine_planner/core/calendar.dart';
 import 'package:routine_planner/core/habits.dart';
+import 'package:routine_planner/core/smart.dart';
 
 import 'golden_loader.dart';
 
@@ -69,6 +70,26 @@ void main() {
         return computeHabitStreak(st, findHabit(st, a[0]), now);
       case 'computeHabitBestRecord_id':
         return computeHabitBestRecord(st, findHabit(st, a[0]));
+      case 'smart':
+        {
+          final st2 = Map<String, dynamic>.from(st);
+          final rg = a[0] as String;
+          final fa = a[1] == 'fa';
+          final cur = saCompute(st2, saPeriod(rg, 0, now)), prev = saCompute(st2, saPeriod(rg, 1, now));
+          Map pack(SaResult r) => {
+                'succ': r.succ, 'fail': r.fail, 'rate': r.rate, 'perfect': r.perfect, 'zero': r.zero, 'activeDays': r.activeDays, 'dueDays': r.dueDays,
+                'recovery': r.recovery, 'recN': r.recN, 'consistency': r.consistency, 'byWeekday': r.byWeekday,
+                'byHabit': {for (final e in r.byHabit.entries) e.key: {'s': e.value.s, 'f': e.value.f, 'best': e.value.best, 'name': e.value.name}},
+                'trig': {for (final e in r.trig.entries) e.key: {'name': e.value.name, 'type': e.value.type, 's': e.value.s, 'f': e.value.f, 'reasons': e.value.reasons}},
+                'failReasons': r.failReasons, 'winReasons': r.winReasons,
+                'series': [for (final x in r.series) {'iso': x.iso, 'rate': x.rate}],
+              };
+          return {
+            'cur': pack(cur),
+            'prev': pack(prev),
+            'insights': [for (final x in saInsights(cur, prev, fa)) {'level': x.level, 'ico': x.ico, 't': x.t, 's': x.s, 'w': x.w}],
+          };
+        }
       case 'collectSeries':
         final s = collectSeries(st, a[0], now);
         return {'labels': s.labels, 'values': s.values};

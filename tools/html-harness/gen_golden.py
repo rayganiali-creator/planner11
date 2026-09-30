@@ -192,6 +192,16 @@ def m_habits(P):
     for si in range(110):
         today = date(2026, 1, 1) + timedelta(days=rnd.randint(0, 460))
         st = gen_state(rnd, today)
+        # دلیل‌ها و محرک‌ها برای تحلیل هوشمند
+        _isos = sorted(st['records'].keys())
+        _R = ['خسته بودم', 'وقت نداشتم', 'گوشی', 'استرس', 'مهمان', 'بی‌حوصله', 'tired', 'busy', 'نامشخص']
+        st['reasons'] = {}; st['triggers'] = {}
+        for h in st['habits']:
+            if rnd.random() < 0.7:
+                for iso in rnd.sample(_isos, min(len(_isos), rnd.randint(0, 25))):
+                    st['reasons'].setdefault(h['id'], {})[iso] = {'status': rnd.choice(['fail', 'fail', 'success']), 'reason': rnd.choice(_R + ['(بدون دلیل)']), 'timestamp': 1}
+            if rnd.random() < 0.7:
+                st['triggers'][h['id']] = [{'trigger': rnd.choice(['قهوه', 'تنهایی', 'ورزش', 'خواب خوب']), 'date': rnd.choice(_isos), 'type': rnd.choice(['trigger', 'incentive']), 'id': 't'} for _ in range(rnd.randint(1, 30))]
         states.append(st)
         hids = [h['id'] for h in st['habits']]
         nows = [(today.year, today.month, today.day, 10, 0), (today.year, today.month, today.day, 0, 30),
@@ -220,6 +230,7 @@ def m_habits(P):
             add(si, now, 'getWeekStart_iso', [])
             for rg in ('week', 'month', 'year'):
                 add(si, now, 'collectSeries', [rg])
+                add(si, now, 'smart', [rg, rnd.choice(['fa', 'en'])])
                 add(si, now, 'getTotalStats', [rg])
             for iso in isos:
                 add(si, now, 'dayStats_all', [iso])

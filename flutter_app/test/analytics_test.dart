@@ -12,6 +12,7 @@ import 'package:routine_planner/data/habit_ops.dart';
 import 'package:routine_planner/features/analytics/analytics_screen.dart';
 
 void main() {
+  smartTests();
   test('گزارش هفتگی: آستانه‌ی ۷۰٪ و متن', () {
     final st = defaultState();
     final now = DateTime(2026, 9, 30, 12);
@@ -44,6 +45,51 @@ void main() {
       expect(find.byType(CustomPaint), findsWidgets);
     }
     expect(find.textContaining('این هفته'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+}
+
+void smartTests() {
+  testWidgets('تحلیل هوشمند (پرو): همه‌ی بخش‌ها با داده‌ی واقعی بدون سرریز؛ ژورنال رفتاری', (tester) async {
+    tester.view.physicalSize = const Size(1080, 9000);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    final dir = Directory.systemTemp.createTempSync('rp_sm');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final store = AppStore('${dir.path}/s.json')..load();
+    final toasts = ToastBus();
+    final a = AppActions(store, toasts);
+    store.state['isPremium'] = true;
+    final old = DateTime.now().subtract(const Duration(days: 40)).toIso8601String().substring(0, 10);
+    a.saveHabit(HabitForm(old)..name = 'ورزش');
+    a.saveHabit(HabitForm(old)..name = 'مطالعه');
+    final hs = (store.state['habits'] as List).cast<Map>();
+    final now = a.today;
+    // سی روز سابقه: ورزش اغلب شکست با علت «خسته بودم» و محرک «تنهایی»
+    for (int i = 1; i <= 25; i++) {
+      final iso = '${now.subtract(Duration(days: i)).toIso8601String().substring(0, 10)}';
+      final rec = (store.state['records'] as Map).putIfAbsent(iso, () => <String, dynamic>{}) as Map;
+      rec[hs[0]['id']] = i % 3 == 0 ? 'success' : 'fail';
+      rec[hs[1]['id']] = i % 5 == 0 ? 'fail' : 'success';
+      if (i % 3 != 0) {
+        ((store.state['reasons'] as Map).putIfAbsent(hs[0]['id'], () => <String, dynamic>{}) as Map)[iso] = {'status': 'fail', 'reason': 'خسته بودم', 'timestamp': 1};
+        ((store.state['triggers'] as Map).putIfAbsent(hs[0]['id'], () => <Map>[]) as List).add({'trigger': 'تنهایی', 'date': iso, 'type': 'trigger', 'id': 't$i'});
+      }
+    }
+    store.save();
+    final nav = NavController()..go(AppView.analytics);
+    await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: a));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.scrollUntilVisible(find.textContaining('تحلیل رفتار هوشمند'), 400, scrollable: find.byType(Scrollable).first);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('مانع اصلی', skipOffstage: false), findsWidgets); // «خسته بودم» مانع اصلی شد
+    await tester.ensureVisible(find.text('ثبت یادداشت', skipOffstage: false));
+    await tester.pump();
+    await tester.enterText(find.widgetWithText(TextField, '').last, 'باید زودتر بخوابم');
+    await tester.tap(find.text('ثبت یادداشت'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect((store.state['behaviorJournal'] as Map)['خسته بودم'].single['text'], 'باید زودتر بخوابم');
+    await tester.pump(const Duration(seconds: 5));
     await tester.pumpWidget(const SizedBox());
   });
 }
