@@ -10,6 +10,7 @@ import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../data/habit_ops.dart';
 import '../../ui/tokens.dart';
+import '../onboarding/onboarding.dart';
 import '../../ui/widgets.dart';
 import '../record_flow.dart';
 import '../../data/media_store.dart';
@@ -30,7 +31,7 @@ class HabitsScreen extends StatelessWidget {
       ListView(
         padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
         children: [
-          Text(context.tr('عادت‌ها', 'Habits'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+          Row(children: [Expanded(child: Text(context.tr('عادت‌ها', 'Habits'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('habits')]),
           const SizedBox(height: RpSpace.s3),
           if (habits.isEmpty)
             AppCard(child: Text(context.tr('هنوز عادتی ندارید. با دکمه‌ی پایین یکی بسازید.', 'No habits yet. Create one below.'), style: rpText(RpType.body, weight: 500, color: p.muted))),

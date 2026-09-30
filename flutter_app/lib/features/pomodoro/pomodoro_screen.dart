@@ -13,6 +13,7 @@ import '../../data/app_store.dart';
 import '../../data/notifier.dart';
 import '../../data/pomodoro_ops.dart';
 import '../../ui/tokens.dart';
+import '../onboarding/onboarding.dart';
 import '../../ui/widgets.dart';
 
 String pomoFmt(int ms, bool fa) {
@@ -61,7 +62,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
       children: [
-        Text(context.tr('پومودورو', 'Pomodoro'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('پومودورو', 'Pomodoro'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('pomodoro')]),
         const SizedBox(height: RpSpace.s4),
         Wrap(alignment: WrapAlignment.center, spacing: 8, children: [
           for (final ph in const ['focus', 'short', 'long'])

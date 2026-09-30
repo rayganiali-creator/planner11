@@ -10,6 +10,7 @@ import '../../data/app_store.dart';
 import '../../ui/charts.dart';
 import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
+import '../onboarding/onboarding.dart';
 import '../../ui/widgets.dart';
 
 String weeklyReport(Map st, DateTime today, bool fa) {
@@ -61,7 +62,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
       children: [
-        Text(context.tr('تحلیل', 'Analytics'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('تحلیل', 'Analytics'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('progress')]),
         const SizedBox(height: RpSpace.s3),
         Wrap(spacing: 8, children: [
           for (final r in const [('week', 'هفته', 'Week'), ('month', 'ماه', 'Month'), ('year', 'سال', 'Year')])

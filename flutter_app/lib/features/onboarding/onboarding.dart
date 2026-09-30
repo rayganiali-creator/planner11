@@ -223,3 +223,14 @@ Future<void> showHelp(BuildContext context, AppTexts t, String key) {
     ),
   );
 }
+
+class HelpButton extends StatelessWidget {
+  final String helpKey;
+  const HelpButton(this.helpKey, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    final t = context.read<AppTexts?>();
+    if (t == null) return const SizedBox.shrink();
+    return IconButton(tooltip: context.tr('راهنما', 'Help'), icon: Icon(Icons.help_outline, color: context.rp.muted), onPressed: () => showHelp(context, t, helpKey));
+  }
+}

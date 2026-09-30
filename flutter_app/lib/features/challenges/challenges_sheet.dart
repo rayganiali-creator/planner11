@@ -13,6 +13,7 @@ import '../../data/challenge_ops.dart';
 import '../../data/notifier.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../onboarding/onboarding.dart';
 import '../todo/todo_screen.dart' show pickDateTime;
 
 String formatCountdown(int ms, bool fa) {
@@ -118,6 +119,8 @@ class _SheetState extends State<_Sheet> {
           child: Row(children: [
             for (final t in const [('create', 'ساخت', 'Create'), ('active', 'فعال', 'Active'), ('history', 'تاریخچه', 'History')])
               Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ChoiceChip(label: Text(context.isFa ? t.$2 : t.$3), selected: tab == t.$1, onSelected: (_) => setState(() => tab = t.$1))),
+            const Spacer(),
+            const HelpButton('challenge'),
           ]),
         ),
         Expanded(

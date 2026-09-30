@@ -14,6 +14,7 @@ import '../../data/app_store.dart';
 import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../onboarding/onboarding.dart';
 import '../record_flow.dart';
 
 const _faWdShort = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
@@ -135,6 +136,7 @@ class _MonthScreenState extends State<MonthScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
       children: [
+        const Align(alignment: AlignmentDirectional.centerEnd, child: HelpButton('calendar')),
         Row(children: [
           IconButton(onPressed: () => move(-1), icon: Icon(LucideIcons.chevronRight, color: p.text), tooltip: context.tr('ماه قبل', 'Previous')),
           Expanded(
