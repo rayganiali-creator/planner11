@@ -20,6 +20,7 @@ import '../../ui/widgets.dart';
 import '../avatar/avatar_compose.dart';
 import '../challenges/challenges_sheet.dart';
 import '../record_flow.dart';
+import '../avatar/avatar_panel.dart';
 import '../avatar/avatar_view.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -256,9 +257,15 @@ class _StageAvatar extends StatelessWidget {
     final av = state['avatar'];
     final g = av is Map ? av['gender'] as String? : null;
     if (data == null || g == null) {
-      return Icon(LucideIcons.user, size: 72, color: context.rp.onPrimary.withValues(alpha: .85));
+      return GestureDetector(
+        onTap: () => showAvatarPanel(context),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(LucideIcons.user, size: 72, color: context.rp.onPrimary.withValues(alpha: .85)),
+          Text(context.tr('آواتار خودت را بساز', 'Create your avatar'), style: rpText(RpType.label, weight: 700, color: context.rp.onPrimary)),
+        ]),
+      );
     }
-    return AvatarView(data: data, gender: g, equipped: data.equippedFor(state as Doc, g), cond: cond, height: 190);
+    return GestureDetector(onTap: () => showAvatarPanel(context), child: AvatarView(data: data, gender: g, equipped: data.equippedFor(state as Doc, g), cond: cond, height: 190));
   }
 }
 
