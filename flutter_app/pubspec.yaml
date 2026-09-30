@@ -68,6 +68,7 @@ flutter:
 
   assets:
     - assets/avatar_data.json
+    - assets/texts.json
     - assets/avatar/base/
     - assets/avatar/sleep/
     - assets/avatar/hands/

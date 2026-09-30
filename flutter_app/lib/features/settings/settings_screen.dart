@@ -8,6 +8,7 @@ import '../../data/files_service.dart';
 import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../onboarding/onboarding.dart';
 
 const levelColors = ['#146B69', '#D4A017', '#2E7D32', '#1D5DAD', '#6C3FA6', '#C62828', '#E65100', '#B03A5B', '#00897B', '#F9A825'];
 
@@ -134,6 +135,20 @@ class SettingsScreen extends StatelessWidget {
           Wrap(spacing: 8, children: [
             for (final f in const [('small', 'کوچک', 'Small'), ('medium', 'متوسط', 'Medium'), ('large', 'بزرگ', 'Large')])
               ChoiceChip(label: Text(fa ? f.$2 : f.$3), selected: (st['fontSize'] ?? 'medium') == f.$1, onSelected: (_) => set('fontSize', f.$1)),
+          ]),
+        ),
+        section(
+          context.tr('راهنمای استفاده', 'How to use'),
+          Column(children: [
+            RpButton(context.tr('🎓 نمایش دوباره‌ی آموزش اولیه', '🎓 Show onboarding tutorial again'), kind: BtnKind.tonal, onTap: () {
+              final t = context.read<AppTexts?>();
+              if (t != null) showOnboarding(context, t);
+            }),
+            const SizedBox(height: 8),
+            RpButton(context.tr('📜 قوانین و شرایط استفاده', '📜 Terms of Use'), kind: BtnKind.tonal, onTap: () {
+              final t = context.read<AppTexts?>();
+              if (t != null) showTerms(context, t, viewOnly: true);
+            }),
           ]),
         ),
         section(

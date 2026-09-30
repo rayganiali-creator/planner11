@@ -11,6 +11,7 @@ import '../data/actions.dart';
 import '../data/challenge_ops.dart';
 import '../features/challenges/challenges_sheet.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/onboarding/onboarding.dart';
 import '../features/urge/urge_sheet.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/calendar/calendar_screens.dart';
@@ -67,7 +68,11 @@ class _ShellState extends State<Shell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tickChallenges());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tickChallenges();
+      final texts = context.read<AppTexts?>();
+      if (texts != null) runFirstRunFlow(context, texts);
+    });
     _chTimer = Timer.periodic(const Duration(seconds: 20), (_) => _tickChallenges());
     // پنجره‌ی «سطح استادی» (ادامه‌ی مرحله‌ی بعد؟) — هر وقت ثبتی به سقفِ مرحله برسد
     context.read<AppActions>().onCapstone = (hid, level) => _capstone(hid, level);

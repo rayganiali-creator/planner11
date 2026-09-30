@@ -69,7 +69,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(store.state['fontSize'], 'large');
     Future<void> tapText(String t) async {
-      await tester.ensureVisible(find.text(t));
+      final sc = find.byType(Scrollable).first;
+      await tester.drag(sc, const Offset(0, 6000)); // به بالا
+      await tester.pump();
+      await tester.scrollUntilVisible(find.text(t), 300, scrollable: sc);
       await tester.pump();
       await tester.tap(find.text(t));
       await tester.pump(const Duration(milliseconds: 200));

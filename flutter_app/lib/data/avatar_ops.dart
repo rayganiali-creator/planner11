@@ -34,6 +34,8 @@ class AvatarState {
 }
 
 extension AvatarOps on AppActions {
+  String? get avStateGender => avState().gender;
+
   AvatarState avState() {
     final s = store.state;
     if (s['avatar'] is! Map) s['avatar'] = <String, dynamic>{};

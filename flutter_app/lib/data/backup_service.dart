@@ -169,6 +169,12 @@ class BackupService implements FilesService {
     final text = utf8.decode(f.readAsBytesSync(), allowMalformed: true);
     final ok = await importFromText(text, quiet: true);
     if (ok) {
+      // کاربرِ قبلی است: زبان/آموزش را دوباره نپرس (این فیلدها داخل فایل پشتیبان نیستند)
+      final st = actions.store.state;
+      st['langChosen'] = true;
+      st['onboardingDone'] = true;
+      st['onboardingVersion'] = 3;
+      actions.store.save();
       try {
         f.renameSync('$dirPath/rp_handoff.imported.json');
       } catch (_) {}
