@@ -12,6 +12,7 @@ import '../data/challenge_ops.dart';
 import '../features/challenges/challenges_sheet.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/urge/urge_sheet.dart';
+import '../features/analytics/analytics_screen.dart';
 import '../features/calendar/calendar_screens.dart';
 import '../features/habits/habits_screen.dart';
 import '../features/journal/journal_screen.dart';
@@ -148,6 +149,7 @@ class _ShellState extends State<Shell> {
         AppView.library => const LibraryScreen(),
         AppView.pomodoro => const PomodoroScreen(),
         AppView.settings => const SettingsScreen(),
+        AppView.analytics => const AnalyticsScreen(),
         AppView.month => const MonthScreen(),
         AppView.year => const YearScreen(),
       };
@@ -278,7 +280,7 @@ class _ActionGridSheet extends StatelessWidget {
       (LucideIcons.timer, p.xpSoft, p.xpInk, context.tr('پومودورو', 'Pomodoro'), AppView.pomodoro),
       (LucideIcons.trophy, p.goldSoft, p.goldInk, context.tr('چالش‌ها', 'Challenges'), null),
       (LucideIcons.zap, p.hpSoft, p.hpInk, context.tr('لحظه‌ی وسوسه', 'Urge Moment'), null),
-      (LucideIcons.chartColumn, p.blueSoft, p.blueInk, context.tr('تحلیل', 'Analytics'), AppView.habits),
+      (LucideIcons.chartColumn, p.blueSoft, p.blueInk, context.tr('تحلیل', 'Analytics'), AppView.analytics),
       (LucideIcons.settings, p.okSoft, p.okInk, context.tr('تنظیمات', 'Settings'), AppView.settings),
     ];
     return SafeArea(

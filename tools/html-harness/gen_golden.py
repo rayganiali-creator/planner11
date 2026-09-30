@@ -199,6 +199,7 @@ def m_habits(P):
         for now in nows:
             isos = [(today + timedelta(days=rnd.randint(-70, 6))).isoformat() for _ in range(6)] + [today.isoformat()]
             for hid in hids:
+                add(si, now, 'habitProgressPct_id', [hid])
                 add(si, now, 'computeHabitStreak_id', [hid])
                 add(si, now, 'computeHabitBestRecord_id', [hid])
                 add(si, now, 'stageCount_id', [hid])

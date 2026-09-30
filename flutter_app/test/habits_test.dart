@@ -63,6 +63,8 @@ void main() {
         return computeStreak(st, now);
       case 'computePermanentStreak':
         return computePermanentStreak(st, now);
+      case 'habitProgressPct_id':
+        return habitProgressPct(st, findHabit(st, a[0]), now);
       case 'computeHabitStreak_id':
         return computeHabitStreak(st, findHabit(st, a[0]), now);
       case 'computeHabitBestRecord_id':

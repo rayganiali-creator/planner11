@@ -509,3 +509,30 @@ Series collectSeries(Doc state, String range, DateTime todayIn) {
   }
   return (success: sS, fail: fS);
 }
+
+/// درصدِ پیشرفتِ کارتِ هر عادت: موفقیت ÷ روزهای ثبت‌شده؛ عادت دائمی فقط ۳۰ روزِ اخیر (habitProgressPct در HTML)
+int habitProgressPct(Doc state, Map h, DateTime todayIn) {
+  final today = startOfDay(todayIn);
+  final permanent = h['permanent'] != false;
+  final windowStart = addDays(today, -29);
+  // JS: new Date('YYYY-MM-DD') = نیمه‌شبِ UTC (نه محلی). عمداً همان رفتار حفظ شده: عادتی که «امروز» ساخته شده
+  // تا ساعتِ ۰۰:۰۰ محلی هنوز در پنجره نیست (d ≤ today نادرست می‌شود) و در مناطقِ غرب از UTC یک روز عقب می‌افتد.
+  final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch('${h['createdAt']}');
+  if (m == null) return 0;
+  final created = DateTime.utc(int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!)).toLocal();
+  var d = (permanent && created.isBefore(windowStart)) ? windowStart : created;
+  int total = 0, succ = 0;
+  while (!d.isAfter(today)) {
+    final iso = dateToISO(d);
+    if (habitAppliesOnISO(h, iso)) {
+      final r = habitSuccessOnISO(state, h, iso);
+      if (r != null) {
+        total++;
+        if (r) succ++;
+      }
+    }
+    // JS: setDate(getDate()+1) ساعتِ روز را نگه می‌دارد؛ پس «امروز» برای عادتِ بیرون از پنجره‌ی ۳۰روزه (۰۲:۰۰ محلی) هرگز شمرده نمی‌شود
+    d = DateTime(d.year, d.month, d.day + 1, d.hour, d.minute, d.second, d.millisecond);
+  }
+  return total > 0 ? jsRound(succ / total * 100) : 0;
+}

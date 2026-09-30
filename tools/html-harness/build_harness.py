@@ -47,6 +47,7 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                 stageCount_id(hid) { return habitUnlockedStageCount(window.__rpFn._h(hid)); },
                 computeStreak() { return computeStreak(); },
                 computePermanentStreak() { return computePermanentStreak(); },
+                habitProgressPct_id(hid) { return habitProgressPct(window.__rpFn._h(hid)); },
                 computeHabitStreak_id(hid) { return computeHabitStreak(window.__rpFn._h(hid)); },
                 computeHabitBestRecord_id(hid) { return computeHabitBestRecord(window.__rpFn._h(hid)); },
                 collectSeries(range) { return collectSeries(range); },
