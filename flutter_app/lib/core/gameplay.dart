@@ -14,14 +14,16 @@ class GameEvent {
   final String? text;
   final String? habitId;
   final int? level;
-  const GameEvent.toast(this.cls, String this.text, {this.level})
+  final int ms; // مدتِ نمایشِ toast
+  const GameEvent.toast(this.cls, String this.text, {this.level, this.ms = 3500})
       : kind = 'toast',
         habitId = null;
   const GameEvent.capstone(String this.habitId, int this.level)
       : kind = 'capstone',
         cls = null,
-        text = null;
-  List<Object?> toJson() => kind == 'toast' ? ['toast', cls, text] : ['capstone', habitId, level];
+        text = null,
+        ms = 0;
+  List<Object?> toJson() => kind == 'toast' ? ['toast', cls, text, ms] : ['capstone', habitId, level];
 }
 
 /// نتیجه‌ی یک ثبت. [rendered] = آیا در JS بعدِ آن renderAll() (یعنی مشتق‌سازیِ سکه/سطح/streak + ذخیره)
@@ -72,6 +74,7 @@ List<GameEvent> checkLevelUp(Doc state, String hid) {
         'level-toast-mastery',
         fa ? '🎉$icon تبریک! شما عادت «$name» را در بالاترین سطح فعلی به اتمام رساندید! 🎉' : '🎉$icon Congratulations! You reached the highest current level for "$name"! 🎉',
         level: cur.num,
+        ms: 5000,
       )
     ];
   }
@@ -81,6 +84,7 @@ List<GameEvent> checkLevelUp(Doc state, String hid) {
       'level-toast-up',
       fa ? '🎉 تبریک! شما به $label در عادت «$name» رسیدید! 🎉' : '🎉 Congratulations! You reached $label for "$name"! 🎉',
       level: cur.num,
+      ms: 4000,
     )
   ];
 }
@@ -187,7 +191,7 @@ List<GameEvent> applyDerived(Doc state, DateTime today) {
   if (level > 0 && !jsTruthy(sent['$level'])) {
     sent['$level'] = true;
     final fa = _fa(state);
-    events.add(GameEvent.toast('level-toast-up', fa ? '🎉 تبریک! به سطح ${toPersianDigits(level)} حساب رسیدید!' : '🎉 Congratulations! You reached account level $level!', level: level));
+    events.add(GameEvent.toast('level-toast-up', fa ? '🎉 تبریک! به سطح ${toPersianDigits(level)} حساب رسیدید!' : '🎉 Congratulations! You reached account level $level!', level: level, ms: 4500));
   }
   scores['level'] = level;
   scores['streak'] = computeStreak(state, today);

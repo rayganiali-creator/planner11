@@ -73,7 +73,7 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                     state = window.__rpFn._clone(st); pointsCacheMap = null;
                     const ev = [];
                     const oShow = showToast, oCap = openLevelCapstoneModal, oAll = renderAll;
-                    showToast = (m, d, c) => { ev.push(['toast', c || '', m]); };
+                    showToast = (m, d, c) => { ev.push(['toast', c || '', m, d]); };
                     openLevelCapstoneModal = (h, lv) => { ev.push(['capstone', h.id, lv.num]); };
                     renderAll = () => { renderDashboard(); };
                     try {
@@ -87,6 +87,7 @@ HOOK = r'''            // ===== فقط ابزار تست (tools/html-harness): �
                     const out = window.__rpFn._clone(state); delete out.clock;
                     return { state: out, events: ev };
                 },
+                clockText(lang) { state.lang = lang; renderClock(); return document.getElementById('clockText').textContent; },
                 traceOps(st, ops) {   // عیب‌یابی: وضعیتِ امتیاز/سکه بعد از هر گام
                     state = window.__rpFn._clone(st); pointsCacheMap = null;
                     const oShow = showToast, oCap = openLevelCapstoneModal, oAll = renderAll;

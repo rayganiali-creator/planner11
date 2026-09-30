@@ -605,7 +605,22 @@ def m_gameplay(P):
     write('gameplay', cases, P.batch(cases))
 
 
-MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load, 'backup': m_backup, 'reminders': m_reminders, 'gameplay': m_gameplay}
+def m_format(P):
+    from datetime import date, timedelta
+    rnd = random.Random(20260930 + 7)
+    rows = []
+    days = [date(2026, 1, 1) + timedelta(days=i) for i in range(0, 730, 3)] + [date(2026, 3, 20), date(2026, 3, 21), date(2027, 3, 21), date(2026, 3, 29), date(2026, 10, 25), date(2025, 12, 31)]
+    for d in days:
+        h, mi = rnd.choice([(0, 0), (0, 5), (9, 7), (12, 30), (23, 59), (7, 0), (19, 0)])
+        P.set_now(d.year, d.month, d.day, h, mi)
+        for lang in ('fa', 'en'):
+            P.call('setState', [{'lang': lang}])
+            rows.append({'now': [d.year, d.month, d.day, h, mi], 'fn': 'clockText', 'args': [lang], 'ok': P.call('clockText', [lang])})
+    path, n = dump_gz('format', rows)
+    print(f'  format: {len(rows)} مورد → {path.relative_to(ROOT)}  [{round(path.stat().st_size / 1024)} KB]')
+
+
+MODULES = {'calendar': m_calendar, 'habits': m_habits, 'pro': m_pro, 'load': m_load, 'backup': m_backup, 'reminders': m_reminders, 'gameplay': m_gameplay, 'format': m_format}
 
 
 def main():
