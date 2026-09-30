@@ -8,7 +8,7 @@ import 'js_compat.dart';
 import 'pro.dart';
 
 
-/// literalهای تو در تو در Dart نوعِ دقیق می‌گیرند (مثلاً Map<String,int?>)؛ برای رفتارِ JS باید همه dynamic باشند.
+/// literalهای تو در تو در Dart نوعِ دقیق می‌گیرند (مثلاً `Map<String,int?>`)؛ برای رفتارِ JS باید همه dynamic باشند.
 Doc defaultState() => jsonDecode(jsonEncode(_defaultStateLiteral())) as Map<String, dynamic>;
 
 Doc _defaultStateLiteral() => <String, dynamic>{
