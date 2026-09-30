@@ -5,6 +5,7 @@ import '../core/calendar.dart';
 import '../core/gameplay.dart';
 import '../core/habits.dart';
 import 'app_store.dart';
+import 'media_store.dart';
 
 typedef CapstoneHandler = void Function(String habitId, int level);
 
@@ -12,6 +13,8 @@ class AppActions {
   final AppStore store;
   final ToastBus toasts;
   CapstoneHandler? onCapstone;
+  /// عکس/صدا؛ با حذفِ عادت/کتاب پاک می‌شوند (main آن را می‌گذارد)
+  MediaStore? media;
   DateTime Function() clock;
   AppActions(this.store, this.toasts, {DateTime Function()? clock}) : clock = clock ?? DateTime.now;
 

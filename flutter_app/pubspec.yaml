@@ -44,6 +44,9 @@ dependencies:
   share_plus: ^13.3.0
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
+  image_picker: ^1.2.3
+  record: ^7.1.1
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:

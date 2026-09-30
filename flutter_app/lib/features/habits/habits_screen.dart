@@ -12,6 +12,8 @@ import '../../data/habit_ops.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import '../record_flow.dart';
+import '../../data/media_store.dart';
+import '../media/media_widgets.dart';
 
 class HabitsScreen extends StatelessWidget {
   const HabitsScreen({super.key});
@@ -91,6 +93,7 @@ class _HabitCard extends StatelessWidget {
               icon: Icon(LucideIcons.ellipsisVertical, color: p.muted, size: 20),
               onSelected: (v) async {
                 if (v == 'edit') showHabitEditor(context, habit);
+                if (v == 'notes') _notesSheet(context, habit);
                 if (v == 'down') {
                   actions.moveHabitDown(index);
                 }
@@ -110,6 +113,7 @@ class _HabitCard extends StatelessWidget {
               },
               itemBuilder: (_) => [
                 PopupMenuItem(value: 'edit', child: Text(fa ? 'ویرایش' : 'Edit')),
+                PopupMenuItem(value: 'notes', child: Text(fa ? 'یادداشت و عکس' : 'Notes & photos')),
                 PopupMenuItem(value: 'down', child: Text(fa ? 'انتقال به پایین' : 'Move down')),
                 PopupMenuItem(value: 'del', child: Text(fa ? 'حذف' : 'Delete')),
               ],
@@ -315,4 +319,40 @@ class _EditorState extends State<_Editor> {
       ]),
     );
   }
+}
+
+/// یادداشتِ متنی + عکس‌های هر عادت (habitNotes مثل HTML: متنِ خالی ← حذفِ کلید)
+void _notesSheet(BuildContext context, Map habit) {
+  final store = context.read<AppStore>();
+  final id = habit['id'] as String;
+  final notes = store.state['habitNotes'] is Map ? store.state['habitNotes'] as Map : (store.state['habitNotes'] = <String, dynamic>{}) as Map;
+  final c = TextEditingController(text: '${notes[id] ?? ''}');
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: context.rp.surface,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(RpSpace.s4), children: [
+        Text('${habit['name']}', style: rpText(RpType.title, weight: 800, color: ctx.rp.text)),
+        const SizedBox(height: RpSpace.s3),
+        TextField(controller: c, maxLines: 5, decoration: InputDecoration(labelText: ctx.tr('یادداشت', 'Notes'))),
+        const SizedBox(height: RpSpace.s3),
+        PhotoStrip(kind: PhotoKind.habit, ownerId: id),
+        const SizedBox(height: RpSpace.s4),
+        RpButton(ctx.tr('ذخیره', 'Save'), onTap: () {
+          final v = c.text;
+          if (v.trim().isNotEmpty) {
+            notes[id] = v;
+          } else {
+            notes.remove(id);
+          }
+          store.save();
+          Navigator.pop(ctx);
+        }),
+      ]),
+    ),
+  );
 }

@@ -4,6 +4,7 @@ import 'dart:math';
 import '../core/calendar.dart';
 import '../core/habits.dart';
 import 'actions.dart';
+import 'media_store.dart';
 import 'habit_ops.dart' show newHabitId;
 
 const int freeBookLimit = 3;
@@ -36,7 +37,7 @@ extension LibraryOps on AppActions {
   bool get canAddBook => store.state['isPremium'] == true || books.where((b) => b['completed'] != true).length < freeBookLimit;
 
   /// برمی‌گرداند: null = موفق، وگرنه کلیدِ خطا ('title' | 'pages')
-  String? saveBook({String? editingId, required String title, required String author, required String summary, required int? totalPages, required String reward}) {
+  String? saveBook({String? editingId, String? newId, required String title, required String author, required String summary, required int? totalPages, required String reward}) {
     final t = title.trim();
     if (t.isEmpty) return 'title';
     if (totalPages == null || totalPages <= 0) return 'pages';
@@ -57,7 +58,7 @@ extension LibraryOps on AppActions {
       }
     } else {
       books.add({
-        'id': newHabitId(),
+        'id': newId ?? newHabitId(),
         'title': t,
         'author': author.trim(),
         'summary': summary.trim(),
@@ -76,6 +77,8 @@ extension LibraryOps on AppActions {
 
   void deleteBook(String id) {
     store.state['books'] = books.where((b) => b['id'] != id).toList();
+    media?.deleteAllPhotos(PhotoKind.book, id);
+    media?.deleteAllVoices(id);
     store.save();
   }
 

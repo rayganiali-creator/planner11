@@ -25,6 +25,7 @@ Future<void> main() async {
   final avData = await AvData.load();
   final native = ChannelNativeApi();
   final media = MediaStore('${dir.path}/media');
+  actions.media = media;
   final files = BackupService(actions, media, native, toasts);
   await files.importHandoff(dir.path); // فقط اگر rp_handoff.json (هنوز واردنشده) باشد؛ بعد از موفقیت تغییر نام می‌دهد
   final notifier = LocalNotifier();
@@ -35,7 +36,7 @@ Future<void> main() async {
   pro.restore();
   Timer.periodic(const Duration(minutes: 1), (_) => pro.checkProExpiry());
   WidgetsBinding.instance.addObserver(_Resume(pro, sync));
-  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, avData: avData, billing: pro, files: files, notifier: notifier));
+  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, avData: avData, billing: pro, files: files, notifier: notifier, media: media));
 }
 
 class _Resume extends WidgetsBindingObserver {

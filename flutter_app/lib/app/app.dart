@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,7 @@ import '../ui/tokens.dart';
 import '../features/avatar/avatar_compose.dart';
 import '../data/billing.dart';
 import '../data/files_service.dart';
+import '../data/media_store.dart';
 import '../data/notifier.dart';
 import 'nav.dart';
 import 'nav_key.dart';
@@ -24,7 +27,8 @@ class RoutineApp extends StatelessWidget {
   final BillingService? billing;
   final Notifier? notifier;
   final FilesService? files;
-  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.avData, this.billing, this.notifier, this.files});
+  final MediaStore? media;
+  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.avData, this.billing, this.notifier, this.files, this.media});
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +39,7 @@ class RoutineApp extends StatelessWidget {
         Provider<AppActions>.value(value: actions),
         Provider<AvData?>.value(value: avData),
         Provider<Notifier>.value(value: notifier ?? NoopNotifier()),
+        Provider<MediaStore>.value(value: media ?? MediaStore('${Directory.systemTemp.path}/rp_media_fallback')),
         Provider<FilesService>.value(value: files ?? UnavailableFiles(toasts, () => store.state['lang'] != 'en')),
         Provider<BillingService>.value(value: billing ?? UnavailableBilling(toasts, () => store.state['lang'] != 'en')),
         ListenableProvider<ToastBus>.value(value: toasts),

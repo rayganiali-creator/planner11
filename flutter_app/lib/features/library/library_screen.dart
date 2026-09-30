@@ -9,7 +9,10 @@ import '../../data/app_store.dart';
 import '../../data/library_ops.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../../data/media_store.dart';
 import '../journal/journal_screen.dart' show fmtDateTime, showReminderPicker;
+import '../media/media_widgets.dart';
+import '../../data/habit_ops.dart' show newHabitId;
 
 String libraryLevelLabel(int completed, bool fa) {
   final n = libraryLevelNum(completed);
@@ -164,6 +167,7 @@ class _BookCard extends StatelessWidget {
             ),
             RpChip(done ? context.tr('✅ تمام‌شده', '✅ Completed') : context.tr('📖 در حال خواندن', '📖 Reading'), tone: done ? ChipTone.ok : ChipTone.primary),
           ]),
+          Padding(padding: const EdgeInsets.only(top: 8), child: PhotoStrip(kind: PhotoKind.book, ownerId: '${b['id']}', editable: false, placeholder: true)),
           if ('${b['summary'] ?? ''}'.isNotEmpty)
             Padding(padding: const EdgeInsets.only(top: 6), child: Text('${b['summary']}', style: rpText(RpType.body, weight: 500, color: p.muted, height: 1.8))),
           const SizedBox(height: RpSpace.s3),
@@ -274,11 +278,15 @@ void _bookComplete(BuildContext context, Map b) {
 
 void _bookEditor(BuildContext context, Map? b) {
   final a = context.read<AppActions>();
+  // کتابِ جدید: شناسه از همین حالا ساخته می‌شود تا قبل از ثبتِ نهایی هم بشود عکس/صدا اضافه کرد (مثل HTML)
+  final draftId = b == null ? newHabitId() : null;
+  var saved = false;
   final title = TextEditingController(text: '${b?['title'] ?? ''}');
   final author = TextEditingController(text: '${b?['author'] ?? ''}');
   final summary = TextEditingController(text: '${b?['summary'] ?? ''}');
   final pages = TextEditingController(text: b?['totalPages'] != null ? '${b!['totalPages']}' : '');
   final reward = TextEditingController(text: '${b?['reward'] ?? ''}');
+  final mediaStore = context.read<MediaStore>();
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -294,15 +302,20 @@ void _bookEditor(BuildContext context, Map? b) {
         TextField(controller: summary, maxLines: 3, decoration: InputDecoration(labelText: ctx.tr('خلاصه', 'Summary'))),
         TextField(controller: pages, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: ctx.tr('تعداد صفحات', 'Total pages'))),
         TextField(controller: reward, decoration: InputDecoration(labelText: ctx.tr('پاداش پس از اتمام', 'Reward on completion'))),
+        const SizedBox(height: 12),
+        PhotoStrip(kind: PhotoKind.book, ownerId: (b?['id'] ?? draftId) as String),
+        const SizedBox(height: 8),
+        VoiceList(bookId: (b?['id'] ?? draftId) as String),
         const SizedBox(height: RpSpace.s4),
         Row(children: [
           Expanded(child: RpButton(ctx.tr('انصراف', 'Cancel'), kind: BtnKind.ghost, onTap: () => Navigator.pop(ctx))),
           const SizedBox(width: RpSpace.s3),
           Expanded(
             child: RpButton(ctx.tr('ذخیره', 'Save'), onTap: () {
-              final err = a.saveBook(editingId: b?['id'] as String?, title: title.text, author: author.text, summary: summary.text, totalPages: int.tryParse(pages.text.trim()), reward: reward.text);
+              final err = a.saveBook(editingId: b?['id'] as String?, newId: draftId, title: title.text, author: author.text, summary: summary.text, totalPages: int.tryParse(pages.text.trim()), reward: reward.text);
               if (err == 'title') return a.toasts.show(ctx.tr('⚠️ نام کتاب را وارد کن', '⚠️ Please enter the book title'));
               if (err == 'pages') return a.toasts.show(ctx.tr('⚠️ تعداد صفحات معتبر وارد کن', '⚠️ Please enter a valid page count'));
+              saved = true;
               Navigator.pop(ctx);
               a.toasts.show(ctx.tr('✅ کتاب ثبت شد', '✅ Book saved'));
             }),
@@ -310,5 +323,11 @@ void _bookEditor(BuildContext context, Map? b) {
         ]),
       ]),
     ),
-  );
+  ).then((_) {
+    // انصراف بدون ثبت: عکس/صدای یتیمِ همان پیش‌نویس پاک می‌شود
+    if (draftId != null && !saved) {
+      mediaStore.deleteAllPhotos(PhotoKind.book, draftId);
+      mediaStore.deleteAllVoices(draftId);
+    }
+  });
 }

@@ -6,6 +6,7 @@ import '../core/gameplay.dart';
 import '../core/habits.dart';
 import '../core/js_compat.dart';
 import 'actions.dart';
+import 'media_store.dart';
 
 const int freeHabitLimit = 3;
 
@@ -124,6 +125,7 @@ extension HabitOps on AppActions {
     }
     final sent = s['levelToastSent'];
     if (sent is Map) sent.removeWhere((k, _) => '$k'.startsWith('${id}_level_'));
+    media?.deleteAllPhotos(PhotoKind.habit, id);
     store.save();
     renderAll();
   }
