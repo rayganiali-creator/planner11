@@ -11,6 +11,7 @@ import '../data/billing.dart';
 import '../data/files_service.dart';
 import '../data/notifier.dart';
 import 'nav.dart';
+import 'nav_key.dart';
 import 'shell.dart';
 import 'toast.dart';
 
@@ -42,6 +43,7 @@ class RoutineApp extends StatelessWidget {
         final fa = s.state['lang'] != 'en';
         final dark = s.state['theme'] == 'dark';
         return MaterialApp(
+          navigatorKey: rpNavKey,
           title: 'روتین پلنر',
           debugShowCheckedModeBanner: false,
           theme: buildRpTheme(dark ? Brightness.dark : Brightness.light, palette: paletteFromState(s.state)),

@@ -116,3 +116,8 @@
 - انجام شد: `NativeBridge.kt` (MethodChannel «rp/native»، همان قراردادِ پلاگین Capacitor: connect/purchase/consume/getPurchasedProducts/saveToDownloads، همان کلید عمومی RSA و همان کدهای خطا) و `MainActivity` روی `FlutterFragmentActivity` (Poolakey به activityResultRegistry نیاز دارد)؛ Poolakey 2.2.0 + jitpack در Gradle.
 - `ProManager` (Dart): خرید، بازیابی، پایانِ دوره (خاموش‌شدنِ پرو + مصرفِ خریدها)، جمعِ پلن‌ها، اعتبارِ مالک دست‌نخورده؛ با NativeApi جعلی تست شد (۷۵ روز، لغو، آفلاین، استرداد، انقضا).
 - **هنوز روی دستگاه/بازار آزموده نشده.** اولین ساختِ CI باید نشان دهد Kotlin/Poolakey کامپایل می‌شود؛ تست واقعیِ خرید نیاز به نصب از بازار دارد.
+
+## به‌روزرسانی: پشتیبان‌گیری/بازیابی/CSV واقعی
+- انجام شد: `BackupService` — خروجی (پرسشِ رمزِ اختیاری، ذخیره در Downloads با MediaStore؛ اگر نشد اشتراک)، اشتراک‌گذاری، ورود (تأیید ← انتخاب فایل ← رمز ← اعتبارسنجی ← جایگزینیِ یک‌جا؛ هر خطا هیچ‌چیز را عوض نمی‌کند)، CSV (BOM + CRLF، عیناً ستون‌های HTML). تست: رفت‌وبرگشتِ کامل بین دو «برنامه»، رمز درست/غلط/انصراف، JSON خراب، فایل بی‌ربط.
+- وابستگی‌های تازه: `file_picker`، `share_plus`.
+- هنوز: خروجی PDF (نیاز به قلمِ فارسی و چینشِ راست‌به‌چپ در PDF)، آزمونِ واقعی روی دستگاه (Downloads/Share/انتخابگر فایل).

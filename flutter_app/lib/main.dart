@@ -8,6 +8,8 @@ import 'app/nav.dart';
 import 'app/toast.dart';
 import 'data/actions.dart';
 import 'data/app_store.dart';
+import 'data/backup_service.dart';
+import 'data/media_store.dart';
 import 'data/native_api.dart';
 import 'data/notifier.dart';
 import 'data/pro_manager.dart';
@@ -21,12 +23,15 @@ Future<void> main() async {
   final toasts = ToastBus();
   final actions = AppActions(store, toasts)..renderAll(); // renderAll() اولیه‌ی نسخه‌ی HTML
   final avData = await AvData.load();
-  final pro = ProManager(store, ChannelNativeApi(), toasts, NoopNotifier());
+  final native = ChannelNativeApi();
+  final media = MediaStore('${dir.path}/media');
+  final files = BackupService(actions, media, native, toasts);
+  final pro = ProManager(store, native, toasts, NoopNotifier());
   // همان رفتارِ HTML: بازیابیِ خرید هنگام بالا آمدن، هر دقیقه بررسیِ پایانِ دوره، و هنگام برگشت به برنامه
   pro.restore();
   Timer.periodic(const Duration(minutes: 1), (_) => pro.checkProExpiry());
   WidgetsBinding.instance.addObserver(_Resume(pro));
-  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, avData: avData, billing: pro));
+  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, avData: avData, billing: pro, files: files));
 }
 
 class _Resume extends WidgetsBindingObserver {
