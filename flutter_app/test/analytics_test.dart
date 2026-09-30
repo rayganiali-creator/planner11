@@ -67,7 +67,7 @@ void smartTests() {
     final now = a.today;
     // سی روز سابقه: ورزش اغلب شکست با علت «خسته بودم» و محرک «تنهایی»
     for (int i = 1; i <= 25; i++) {
-      final iso = '${now.subtract(Duration(days: i)).toIso8601String().substring(0, 10)}';
+      final iso = now.subtract(Duration(days: i)).toIso8601String().substring(0, 10);
       final rec = (store.state['records'] as Map).putIfAbsent(iso, () => <String, dynamic>{}) as Map;
       rec[hs[0]['id']] = i % 3 == 0 ? 'success' : 'fail';
       rec[hs[1]['id']] = i % 5 == 0 ? 'fail' : 'success';

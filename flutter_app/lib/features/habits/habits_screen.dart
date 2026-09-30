@@ -13,6 +13,7 @@ import '../../ui/tokens.dart';
 import '../onboarding/onboarding.dart';
 import '../../ui/widgets.dart';
 import '../record_flow.dart';
+import 'habit_charts_sheet.dart';
 import '../../data/media_store.dart';
 import '../media/media_widgets.dart';
 
@@ -95,6 +96,7 @@ class _HabitCard extends StatelessWidget {
               onSelected: (v) async {
                 if (v == 'edit') showHabitEditor(context, habit);
                 if (v == 'notes') _notesSheet(context, habit);
+                if (v == 'charts') showHabitCharts(context, habit);
                 if (v == 'down') {
                   actions.moveHabitDown(index);
                 }
@@ -115,6 +117,7 @@ class _HabitCard extends StatelessWidget {
               itemBuilder: (_) => [
                 PopupMenuItem(value: 'edit', child: Text(fa ? 'ویرایش' : 'Edit')),
                 PopupMenuItem(value: 'notes', child: Text(fa ? 'یادداشت و عکس' : 'Notes & photos')),
+                PopupMenuItem(value: 'charts', child: Text(fa ? '📊 نمودارهای عادت' : '📊 Habit charts')),
                 PopupMenuItem(value: 'down', child: Text(fa ? 'انتقال به پایین' : 'Move down')),
                 PopupMenuItem(value: 'del', child: Text(fa ? 'حذف' : 'Delete')),
               ],
