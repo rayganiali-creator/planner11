@@ -131,6 +131,7 @@ class _Header extends StatelessWidget {
         tooltip: context.tr('تم', 'Theme'),
         onPressed: () {
           store.state['theme'] = dark ? 'light' : 'dark';
+          store.state['themeIntensity'] = dark ? 0 : 100; // مثل دکمه‌ی تم در HTML
           store.save();
         },
         icon: Icon(dark ? LucideIcons.sun : LucideIcons.moon, color: p.text),

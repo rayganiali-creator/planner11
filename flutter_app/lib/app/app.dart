@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 
 import '../data/actions.dart';
 import '../data/app_store.dart';
+import '../ui/custom_theme.dart';
 import '../ui/tokens.dart';
 import '../features/avatar/avatar_compose.dart';
 import '../data/billing.dart';
+import '../data/files_service.dart';
 import '../data/notifier.dart';
 import 'nav.dart';
 import 'shell.dart';
@@ -20,7 +22,8 @@ class RoutineApp extends StatelessWidget {
   final AvData? avData;
   final BillingService? billing;
   final Notifier? notifier;
-  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.avData, this.billing, this.notifier});
+  final FilesService? files;
+  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.avData, this.billing, this.notifier, this.files});
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +34,7 @@ class RoutineApp extends StatelessWidget {
         Provider<AppActions>.value(value: actions),
         Provider<AvData?>.value(value: avData),
         Provider<Notifier>.value(value: notifier ?? NoopNotifier()),
+        Provider<FilesService>.value(value: files ?? UnavailableFiles(toasts, () => store.state['lang'] != 'en')),
         Provider<BillingService>.value(value: billing ?? UnavailableBilling(toasts, () => store.state['lang'] != 'en')),
         ListenableProvider<ToastBus>.value(value: toasts),
       ],
@@ -40,9 +44,8 @@ class RoutineApp extends StatelessWidget {
         return MaterialApp(
           title: 'روتین پلنر',
           debugShowCheckedModeBanner: false,
-          theme: buildRpTheme(Brightness.light),
-          darkTheme: buildRpTheme(Brightness.dark),
-          themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+          theme: buildRpTheme(dark ? Brightness.dark : Brightness.light, palette: paletteFromState(s.state)),
+          themeMode: ThemeMode.light, // رنگ‌ها را paletteFromState تعیین می‌کند (شدتِ روشن/تاریک، لهجه، پس‌زمینه)
           locale: Locale(fa ? 'fa' : 'en'),
           supportedLocales: const [Locale('fa'), Locale('en')],
           localizationsDelegates: const [
@@ -50,9 +53,12 @@ class RoutineApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          builder: (context, child) => Directionality(
-            textDirection: fa ? TextDirection.rtl : TextDirection.ltr,
-            child: Stack(children: [child!, ToastHost(bus: toasts)]),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(switch (s.state['fontSize']) { 'small' => 0.8, 'large' => 1.2, _ => 1.0 })),
+            child: Directionality(
+              textDirection: fa ? TextDirection.rtl : TextDirection.ltr,
+              child: Stack(children: [child!, ToastHost(bus: toasts)]),
+            ),
           ),
           home: const Shell(),
         );

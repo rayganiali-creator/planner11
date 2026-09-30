@@ -11,6 +11,7 @@ import '../../core/doc.dart';
 import '../../core/habits.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
+import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 
@@ -62,9 +63,9 @@ class DayPie extends CustomPainter {
 class _Colors {
   final Color ok, bad, neutral;
   _Colors(Doc st, RpPalette p)
-      : ok = _hex((st['tileColors'] as Map?)?['success'], p.ok),
-        bad = _hex((st['tileColors'] as Map?)?['fail'], p.bad),
-        neutral = _hex((st['tileColors'] as Map?)?['neutral'], p.line);
+      : ok = tileColor(_hex((st['tileColors'] as Map?)?['success'], p.ok), st['theme'] == 'dark'),
+        bad = tileColor(_hex((st['tileColors'] as Map?)?['fail'], p.bad), st['theme'] == 'dark'),
+        neutral = tileColor(_hex((st['tileColors'] as Map?)?['neutral'], p.line), st['theme'] == 'dark');
 }
 
 ({DateTime first, int len}) _monthInfo(bool jalali, int y, int m) {

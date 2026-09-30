@@ -107,8 +107,8 @@ TextStyle rpText(double size, {int weight = 500, Color? color, double height = 1
       height: height,
     );
 
-ThemeData buildRpTheme(Brightness b) {
-  final p = b == Brightness.dark ? RpPalette.dark : RpPalette.light;
+ThemeData buildRpTheme(Brightness b, {RpPalette? palette}) {
+  final p = palette ?? (b == Brightness.dark ? RpPalette.dark : RpPalette.light);
   final scheme = ColorScheme(
     brightness: b, primary: p.primary, onPrimary: p.onPrimary, secondary: p.gold, onSecondary: p.onGold,
     error: p.bad, onError: p.onOk, surface: p.surface, onSurface: p.text,

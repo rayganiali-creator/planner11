@@ -14,6 +14,7 @@ import '../features/journal/journal_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/pomodoro/pomodoro_screen.dart';
 import '../features/purchases/purchases_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/todo/todo_screen.dart';
 import '../ui/tokens.dart';
 import 'i18n.dart';
@@ -94,7 +95,8 @@ class _ShellState extends State<Shell> {
             child: KeyedSubtree(key: ValueKey(nav.current), child: _page(nav.current)),
           ),
         ),
-        bottomNavigationBar: const GlassNav(),
+        // نوار ناوبری اندازه‌ی ثابت دارد؛ با «فونت بزرگ» فقط متنِ صفحه‌ها بزرگ می‌شود (وگرنه سرریز می‌کرد)
+        bottomNavigationBar: MediaQuery.withClampedTextScaling(maxScaleFactor: 1.0, child: const GlassNav()),
       ),
     );
   }
@@ -107,31 +109,10 @@ class _ShellState extends State<Shell> {
         AppView.journal => const JournalScreen(),
         AppView.library => const LibraryScreen(),
         AppView.pomodoro => const PomodoroScreen(),
+        AppView.settings => const SettingsScreen(),
         AppView.month => const MonthScreen(),
         AppView.year => const YearScreen(),
-        _ => _Soon(view: v),
       };
-}
-
-/// جای صفحه‌هایی که هنوز Migration نشده‌اند (رسماً در گزارش وضعیت ثبت است).
-class _Soon extends StatelessWidget {
-  final AppView view;
-  const _Soon({required this.view});
-  @override
-  Widget build(BuildContext context) {
-    final p = context.rp;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(LucideIcons.hammer, size: 40, color: p.muted),
-          const SizedBox(height: 12),
-          Text(context.tr('این صفحه هنوز به نسخه‌ی جدید منتقل نشده است.', 'This page has not been migrated yet.'),
-              textAlign: TextAlign.center, style: rpText(RpType.body, weight: 600, color: p.muted)),
-        ]),
-      ),
-    );
-  }
 }
 
 // ---------------------------------------------------------------- نوار ناوبری
