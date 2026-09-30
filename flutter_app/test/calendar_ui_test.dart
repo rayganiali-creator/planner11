@@ -35,6 +35,8 @@ void main() {
         await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 3));
         expect(find.text('ورزش'), findsOneWidget);
         await tester.tap(find.byIcon(LucideIcons.check));
+        await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 3));
+        await tester.tap(find.text('رد شدن')); // پنجره‌ی «چرا؟»
         await tester.pump(const Duration(milliseconds: 300));
         expect(((store.state['records'] as Map)[a.todayISO] as Map)[(store.state['habits'] as List).first['id']], 'success');
         await tester.pumpWidget(const SizedBox());

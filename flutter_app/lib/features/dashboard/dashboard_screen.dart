@@ -19,6 +19,7 @@ import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import '../avatar/avatar_compose.dart';
 import '../challenges/challenges_sheet.dart';
+import '../record_flow.dart';
 import '../avatar/avatar_view.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -206,7 +207,6 @@ class _HabitRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.rp;
     final store = context.watch<AppStore>();
-    final actions = context.read<AppActions>();
     final ok = habitSuccessOnISO(store.state, habit, iso);
     final binary = habit['type'] == 'binary';
     final id = habit['id'] as String;
@@ -217,9 +217,9 @@ class _HabitRow extends StatelessWidget {
         child: Row(children: [
           Expanded(child: Text('${habit['name'] ?? ''}', style: rpText(RpType.body, weight: 700, color: p.text))),
           if (binary) ...[
-            _Btn(icon: LucideIcons.x, on: ok == false, color: p.badInk, soft: p.badSoft, onTap: () => ok == false ? actions.clear(iso, id) : actions.setBinary(iso, id, 'fail')),
+            _Btn(icon: LucideIcons.x, on: ok == false, color: p.badInk, soft: p.badSoft, onTap: () => recordBinaryFlow(context, id, iso, 'fail', alreadyActive: ok == false)),
             const SizedBox(width: RpSpace.s2),
-            _Btn(icon: LucideIcons.check, on: ok == true, color: p.okInk, soft: p.okSoft, onTap: () => ok == true ? actions.clear(iso, id) : actions.setBinary(iso, id, 'success')),
+            _Btn(icon: LucideIcons.check, on: ok == true, color: p.okInk, soft: p.okSoft, onTap: () => recordBinaryFlow(context, id, iso, 'success', alreadyActive: ok == true)),
           ] else
             Icon(ok == true ? LucideIcons.circleCheck : LucideIcons.circle, color: ok == true ? p.okInk : p.muted),
         ]),

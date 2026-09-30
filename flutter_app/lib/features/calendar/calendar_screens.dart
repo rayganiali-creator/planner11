@@ -14,6 +14,7 @@ import '../../data/app_store.dart';
 import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../record_flow.dart';
 
 const _faWdShort = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 
@@ -388,7 +389,6 @@ class _RowState extends State<_Row> {
     final h = widget.habit;
     final id = h['id'] as String;
     final raw = widget.raw;
-    final a = widget.actions;
     Widget btn(IconData icon, bool on, Color col, Color soft, VoidCallback t) => Padding(
           padding: const EdgeInsetsDirectional.only(start: 8),
           child: GestureDetector(
@@ -399,16 +399,15 @@ class _RowState extends State<_Row> {
     final Widget actions;
     if (h['type'] == 'binary') {
       actions = Row(mainAxisSize: MainAxisSize.min, children: [
-        btn(LucideIcons.check, raw == 'success', p.okInk, p.okSoft, () => a.setBinary(widget.iso, id, 'success')),
-        btn(LucideIcons.x, raw == 'fail', p.badInk, p.badSoft, () => a.setBinary(widget.iso, id, 'fail')),
+        btn(LucideIcons.check, raw == 'success', p.okInk, p.okSoft, () => recordBinaryFlow(context, id, widget.iso, 'success', alreadyActive: raw == 'success')),
+        btn(LucideIcons.x, raw == 'fail', p.badInk, p.badSoft, () => recordBinaryFlow(context, id, widget.iso, 'fail', alreadyActive: raw == 'fail')),
       ]);
     } else {
       actions = Row(mainAxisSize: MainAxisSize.min, children: [
         SizedBox(width: 80, child: TextField(controller: c, enabled: !widget.future, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(isDense: true))),
         btn(LucideIcons.check, false, p.okInk, p.okSoft, () {
           final v = double.tryParse(c.text.trim());
-          if (v == null) return a.clear(widget.iso, id);
-          a.setValue(widget.iso, id, v == v.roundToDouble() ? v.toInt() : v);
+          recordValueFlow(context, id, widget.iso, v == null ? null : (v == v.roundToDouble() ? v.toInt() : v));
         }),
       ]);
     }

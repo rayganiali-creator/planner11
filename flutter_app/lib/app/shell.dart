@@ -11,6 +11,7 @@ import '../data/actions.dart';
 import '../data/challenge_ops.dart';
 import '../features/challenges/challenges_sheet.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/urge/urge_sheet.dart';
 import '../features/calendar/calendar_screens.dart';
 import '../features/habits/habits_screen.dart';
 import '../features/journal/journal_screen.dart';
@@ -311,6 +312,8 @@ class _ActionGridSheet extends StatelessWidget {
                       nav.go(view);
                     } else if (label == context.tr('چالش‌ها', 'Challenges')) {
                       showChallenges(rootContext);
+                    } else if (label == context.tr('لحظه‌ی وسوسه', 'Urge Moment')) {
+                      showUrge(rootContext);
                     }
                   },
                   child: Ink(

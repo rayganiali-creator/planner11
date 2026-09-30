@@ -11,6 +11,7 @@ import '../../data/app_store.dart';
 import '../../data/habit_ops.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../record_flow.dart';
 
 class HabitsScreen extends StatelessWidget {
   const HabitsScreen({super.key});
@@ -139,10 +140,10 @@ class _HabitCard extends StatelessWidget {
               Text(context.tr('امروز سررسید ندارد', 'Not due today'), style: rpText(RpType.label, weight: 500, color: p.muted))
             else if (type == 'binary') ...[
               _Mark(icon: LucideIcons.x, on: ok == false && _hasRecord(st, iso, id), color: p.badInk, soft: p.badSoft,
-                  onTap: () => (ok == false && _hasRecord(st, iso, id)) ? actions.clear(iso, id) : actions.setBinary(iso, id, 'fail')),
+                  onTap: () => recordBinaryFlow(context, id, iso, 'fail', alreadyActive: ok == false && _hasRecord(st, iso, id))),
               const SizedBox(width: RpSpace.s2),
               _Mark(icon: LucideIcons.check, on: ok == true, color: p.okInk, soft: p.okSoft,
-                  onTap: () => ok == true ? actions.clear(iso, id) : actions.setBinary(iso, id, 'success')),
+                  onTap: () => recordBinaryFlow(context, id, iso, 'success', alreadyActive: ok == true)),
             ] else
               OutlinedButton.icon(
                 onPressed: () => _askValue(context, habit, iso),
@@ -185,8 +186,8 @@ class _HabitCard extends StatelessWidget {
     if (r == null) return;
     if (r == '__clear') return actions.clear(iso, h['id'] as String);
     final v = double.tryParse(r.replaceAll('٫', '.'));
-    if (v == null) return;
-    actions.setValue(iso, h['id'] as String, v == v.roundToDouble() ? v.toInt() : v);
+    if (v == null || !context.mounted) return;
+    await recordValueFlow(context, h['id'] as String, iso, v == v.roundToDouble() ? v.toInt() : v);
   }
 }
 

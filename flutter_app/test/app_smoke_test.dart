@@ -34,6 +34,8 @@ void main() {
     await tester.ensureVisible(find.byIcon(LucideIcons.check));
     await tester.pump();
     await tester.tap(find.byIcon(LucideIcons.check));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 3));
+    await tester.tap(find.text('رد شدن')); // پنجره‌ی «چرا؟»
     await tester.pump(const Duration(milliseconds: 400));
     expect(((store.state['records'] as Map)[iso] as Map)['h1'], 'success');
     expect(File('${dir.path}/state.json').existsSync(), isTrue);
