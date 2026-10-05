@@ -1,17 +1,37 @@
 'use strict';
 // ===== ویرایشگر پیکسلی قطعه: قلم، پاک‌کن، خط، مستطیل، چندضلعی، سطل، انتخاب/جابه‌جایی/کپی/پیست/تکثیر، وارونه/چرخش، تغییر اندازه، Undo/Redo =====
 
+function packRGBA(r, g, b, a) { return a === 0 ? 0 : (((a << 24) | (r << 16) | (g << 8) | b) >>> 0); }
+function unpackRGBA(v) { return [(v >> 16) & 255, (v >> 8) & 255, v & 255, v >>> 24]; }
 function openPixelEditor(fam, part) {
-  const E = { w: part.w, h: part.h, px: new Uint8Array(part.px), tool: 'pencil', slot: 1, size: 1, fill: false, zoom: 16, sel: null, clip: null, hist: [], redo: [], poly: [], drag: null, floating: null };
   const variant = varOf(fam, S.varId);
+  const imgId = (variant.overrides[part.id] || {}).img || part.img;
+  const isImg = !!imgId, Arr = isImg ? Uint32Array : Uint8Array;
+  let srcImg = null;
+  if (isImg) {
+    const e = imgCache.get(P.images[imgId]);
+    if (!(e && e.ok)) { loadImage(P.images[imgId]).then(() => openPixelEditor(fam, part)); return null; }
+    srcImg = e.img;
+  }
+  const E = { w: part.w, h: part.h, px: new Arr(part.px), tool: 'pencil', slot: 1, size: 1, fill: false, zoom: 16, sel: null, clip: null, hist: [], redo: [], poly: [], drag: null, floating: null };
+  if (isImg) {
+    E.w = srcImg.width; E.h = srcImg.height;
+    const tc = mkCanvas(E.w, E.h), tx = tc.getContext('2d'); tx.drawImage(srcImg, 0, 0);
+    const dta = tx.getImageData(0, 0, E.w, E.h).data; E.px = new Uint32Array(E.w * E.h);
+    const freq = new Map();
+    for (let i = 0; i < E.px.length; i++) { const v = packRGBA(dta[i * 4], dta[i * 4 + 1], dta[i * 4 + 2], dta[i * 4 + 3]); E.px[i] = v; if (v) freq.set(v, (freq.get(v) || 0) + 1); }
+    E.colors = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 30).map(e => e[0]);
+    E.slot = E.colors[0] || packRGBA(0, 0, 0, 255);
+    E.zoom = clamp(Math.floor(560 / Math.max(E.w, E.h)), 3, 16);
+  }
   const cv = h('canvas', { width: 10, height: 10 });
   const ctx = cv.getContext('2d');
   const prev = h('canvas', { width: 10, height: 10, style: { width: '100%', imageRendering: 'pixelated', border: '1px solid var(--line)' } });
   const info = h('div', { class: 'muted' });
-  const pushH = () => { E.hist.push({ w: E.w, h: E.h, px: new Uint8Array(E.px) }); if (E.hist.length > 100) E.hist.shift(); E.redo = []; };
-  const undoE = () => { if (!E.hist.length) return; E.redo.push({ w: E.w, h: E.h, px: new Uint8Array(E.px) }); const s = E.hist.pop(); Object.assign(E, { w: s.w, h: s.h, px: s.px, sel: null }); draw(); };
-  const redoE = () => { if (!E.redo.length) return; E.hist.push({ w: E.w, h: E.h, px: new Uint8Array(E.px) }); const s = E.redo.pop(); Object.assign(E, { w: s.w, h: s.h, px: s.px, sel: null }); draw(); };
-  const colorOf = s => (s ? slotColor(fam, variant, fam.slots[s - 1].id, part.id) : null);
+  const pushH = () => { E.hist.push({ w: E.w, h: E.h, px: new Arr(E.px) }); if (E.hist.length > 100) E.hist.shift(); E.redo = []; };
+  const undoE = () => { if (!E.hist.length) return; E.redo.push({ w: E.w, h: E.h, px: new Arr(E.px) }); const s = E.hist.pop(); Object.assign(E, { w: s.w, h: s.h, px: s.px, sel: null }); draw(); };
+  const redoE = () => { if (!E.redo.length) return; E.hist.push({ w: E.w, h: E.h, px: new Arr(E.px) }); const s = E.redo.pop(); Object.assign(E, { w: s.w, h: s.h, px: s.px, sel: null }); draw(); };
+  const colorOf = s => { if (!s) return null; if (isImg) { const [r, g, b, a] = unpackRGBA(s); return `rgba(${r},${g},${b},${a / 255})`; } return slotColor(fam, variant, fam.slots[s - 1].id, part.id); };
   const inb = (x, y) => x >= 0 && y >= 0 && x < E.w && y < E.h;
   const put = (x, y, v) => { if (inb(x, y)) E.px[y * E.w + x] = v; };
   const get = (x, y) => (inb(x, y) ? E.px[y * E.w + x] : 0);
@@ -35,7 +55,7 @@ function openPixelEditor(fam, part) {
     if (E.drag && E.drag.preview) { ctx.globalAlpha = 0.6; for (const [x, y] of E.drag.preview) { ctx.fillStyle = val() ? colorOf(val()) : '#ff4444'; ctx.fillRect(x * z, y * z, z, z); } ctx.globalAlpha = 1; }
     // پیش‌نمایش واقعی
     prev.width = E.w; prev.height = E.h; const pc = prev.getContext('2d'), im = pc.createImageData(E.w, E.h);
-    for (let i = 0; i < E.px.length; i++) if (E.px[i]) { const c = hexToRgb(colorOf(E.px[i])); im.data.set([c[0], c[1], c[2], 255], i * 4); }
+    for (let i = 0; i < E.px.length; i++) if (E.px[i]) { if (isImg) im.data.set(unpackRGBA(E.px[i]), i * 4); else { const c = hexToRgb(colorOf(E.px[i])); im.data.set([c[0], c[1], c[2], 255], i * 4); } }
     pc.putImageData(im, 0, 0);
     info.textContent = `${E.w}×${E.h} px · ابزار: ${E.tool}${E.sel ? ` · انتخاب ${E.sel.w}×${E.sel.h}` : ''}`;
   }
@@ -53,7 +73,7 @@ function openPixelEditor(fam, part) {
   const inSel = (x, y) => E.sel && x >= E.sel.x && y >= E.sel.y && x < E.sel.x + E.sel.w && y < E.sel.y + E.sel.h;
   function liftSel() { // بالا بردنِ ناحیه‌ی انتخابی به‌صورت شناور
     if (E.floating || !E.sel) return; pushH();
-    const s = E.sel, f = { x: s.x, y: s.y, w: s.w, h: s.h, px: new Uint8Array(s.w * s.h) };
+    const s = E.sel, f = { x: s.x, y: s.y, w: s.w, h: s.h, px: new Arr(s.w * s.h) };
     for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) { f.px[y * s.w + x] = get(s.x + x, s.y + y); put(s.x + x, s.y + y, 0); }
     E.floating = f;
   }
@@ -94,34 +114,34 @@ function openPixelEditor(fam, part) {
   function closePoly() { if (E.poly.length < 2) { E.poly = []; return; } pushH(); polyPts(E.poly, E.fill).forEach(([x, y]) => put(x, y, E.slot)); E.poly = []; draw(); }
 
   // ---- عملیات
-  const region = () => (E.floating ? { x: E.floating.x, y: E.floating.y, w: E.floating.w, h: E.floating.h, px: E.floating.px, f: true } : E.sel ? (() => { const s = E.sel, px = new Uint8Array(s.w * s.h); for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) px[y * s.w + x] = get(s.x + x, s.y + y); return { ...s, px }; })() : null);
-  const doCopy = () => { const r = region(); if (r) { E.clip = { w: r.w, h: r.h, px: new Uint8Array(r.px) }; toast('کپی شد'); } };
-  const doPaste = () => { if (!E.clip) return; if (E.floating) dropFloat(); pushH(); E.floating = { x: 0, y: 0, w: E.clip.w, h: E.clip.h, px: new Uint8Array(E.clip.px) }; E.sel = { x: 0, y: 0, w: E.clip.w, h: E.clip.h }; E.tool = 'select'; renderTools(); draw(); };
-  const doDup = () => { const r = region(); if (!r) return; E.clip = { w: r.w, h: r.h, px: new Uint8Array(r.px) }; if (E.floating) dropFloat(); pushH(); E.floating = { x: r.x + 2, y: r.y + 2, w: r.w, h: r.h, px: new Uint8Array(r.px) }; E.sel = { x: r.x + 2, y: r.y + 2, w: r.w, h: r.h }; draw(); };
+  const region = () => (E.floating ? { x: E.floating.x, y: E.floating.y, w: E.floating.w, h: E.floating.h, px: E.floating.px, f: true } : E.sel ? (() => { const s = E.sel, px = new Arr(s.w * s.h); for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) px[y * s.w + x] = get(s.x + x, s.y + y); return { ...s, px }; })() : null);
+  const doCopy = () => { const r = region(); if (r) { E.clip = { w: r.w, h: r.h, px: new Arr(r.px) }; toast('کپی شد'); } };
+  const doPaste = () => { if (!E.clip) return; if (E.floating) dropFloat(); pushH(); E.floating = { x: 0, y: 0, w: E.clip.w, h: E.clip.h, px: new Arr(E.clip.px) }; E.sel = { x: 0, y: 0, w: E.clip.w, h: E.clip.h }; E.tool = 'select'; renderTools(); draw(); };
+  const doDup = () => { const r = region(); if (!r) return; E.clip = { w: r.w, h: r.h, px: new Arr(r.px) }; if (E.floating) dropFloat(); pushH(); E.floating = { x: r.x + 2, y: r.y + 2, w: r.w, h: r.h, px: new Arr(r.px) }; E.sel = { x: r.x + 2, y: r.y + 2, w: r.w, h: r.h }; draw(); };
   const doDel = () => { if (E.floating) { E.floating = null; E.sel = null; draw(); return; } if (E.sel) { pushH(); for (let y = 0; y < E.sel.h; y++) for (let x = 0; x < E.sel.w; x++) put(E.sel.x + x, E.sel.y + y, 0); draw(); } };
   const transform = (kind) => {
     pushH();
     const r = region(); const target = r ? { w: r.w, h: r.h, px: r.px } : { w: E.w, h: E.h, px: E.px };
-    let out = { w: target.w, h: target.h, px: new Uint8Array(target.px) };
+    let out = { w: target.w, h: target.h, px: new Arr(target.px) };
     if (kind === 'fh') for (let y = 0; y < target.h; y++) for (let x = 0; x < target.w; x++) out.px[y * target.w + x] = target.px[y * target.w + target.w - 1 - x];
     if (kind === 'fv') for (let y = 0; y < target.h; y++) for (let x = 0; x < target.w; x++) out.px[y * target.w + x] = target.px[(target.h - 1 - y) * target.w + x];
-    if (kind === 'rot') { out = { w: target.h, h: target.w, px: new Uint8Array(target.px.length) }; for (let y = 0; y < target.h; y++) for (let x = 0; x < target.w; x++) out.px[x * out.w + (target.h - 1 - y)] = target.px[y * target.w + x]; }
+    if (kind === 'rot') { out = { w: target.h, h: target.w, px: new Arr(target.px.length) }; for (let y = 0; y < target.h; y++) for (let x = 0; x < target.w; x++) out.px[x * out.w + (target.h - 1 - y)] = target.px[y * target.w + x]; }
     if (r) { if (!E.floating) { for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) put(r.x + x, r.y + y, 0); E.floating = { x: r.x, y: r.y, ...out }; } else Object.assign(E.floating, out); E.sel = { x: E.floating.x, y: E.floating.y, w: E.floating.w, h: E.floating.h }; }
     else { E.w = out.w; E.h = out.h; E.px = out.px; }
     draw();
   };
-  const resize = () => {
-    const w = clamp(num(prompt('عرض جدید', E.w), E.w), 1, 96), hh = clamp(num(prompt('ارتفاع جدید', E.h), E.h), 1, 144);
-    const ox = num(prompt('جابه‌جاییِ محتوا در X (پیکسل)', 0), 0), oy = num(prompt('جابه‌جاییِ محتوا در Y (پیکسل)', 0), 0);
-    pushH(); const px = new Uint8Array(w * hh);
+  const resize = async () => {
+    const w = clamp(num(await askText('عرض جدید', E.w), E.w), 1, 256), hh = clamp(num(await askText('ارتفاع جدید', E.h), E.h), 1, 256);
+    const ox = num(await askText('جابه‌جاییِ محتوا در X (پیکسل)', 0), 0), oy = num(await askText('جابه‌جاییِ محتوا در Y (پیکسل)', 0), 0);
+    pushH(); const px = new Arr(w * hh);
     for (let y = 0; y < E.h; y++) for (let x = 0; x < E.w; x++) { const nx = x + ox, ny = y + oy; if (nx >= 0 && ny >= 0 && nx < w && ny < hh) px[ny * w + nx] = E.px[y * E.w + x]; }
     E.w = w; E.h = hh; E.px = px; E.sel = null; draw();
   };
 
   const TOOLS = [['pencil', '✏ قلم'], ['eraser', '⌫ پاک‌کن'], ['line', '／ خط'], ['rect', '▭ مستطیل'], ['polygon', '⬠ چندضلعی'], ['fill', '🪣 سطل'], ['select', '⬚ انتخاب/جابه‌جایی'], ['picker', '💧 قطره‌چکان']];
   const tools = h('div', { class: 'tools' }), pal = h('div', { class: 'pal' });
-  function renderTools() { tools.replaceChildren(...TOOLS.map(([k, l]) => h('button', { class: E.tool === k ? 'on' : '', onclick: () => { if (E.floating) dropFloat(); E.tool = k; E.poly = []; renderTools(); draw(); } }, l))); }
-  function renderPal() { pal.replaceChildren(...fam.slots.map((sl, i) => h('div', { class: 'sw' + (E.slot === i + 1 ? ' sel' : ''), title: `${i + 1}: ${sl.name}`, style: { background: colorOf(i + 1) }, onclick: () => { E.slot = i + 1; if (E.tool === 'eraser') E.tool = 'pencil'; renderTools(); renderPal(); } }))); }
+  function renderTools() { setKids(tools, TOOLS.map(([k, l]) => h('button', { class: E.tool === k ? 'on' : '', onclick: () => { if (E.floating) dropFloat(); E.tool = k; E.poly = []; renderTools(); draw(); } }, l))); }
+  function renderPal() { if (isImg) return setKids(pal, [...E.colors.map(v => h('div', { class: 'sw' + (E.slot === v ? ' sel' : ''), style: { background: colorOf(v) }, onclick: () => { E.slot = v; if (E.tool === 'eraser') E.tool = 'pencil'; renderTools(); renderPal(); } })), h('input', { type: 'color', value: '#' + unpackRGBA(E.slot).slice(0, 3).map(n => n.toString(16).padStart(2, '0')).join(''), title: 'رنگ دلخواه', onchange: e => { const c = hexToRgb(e.target.value); E.slot = packRGBA(c[0], c[1], c[2], 255); if (!E.colors.includes(E.slot)) E.colors.unshift(E.slot); if (E.tool === 'eraser') E.tool = 'pencil'; renderTools(); renderPal(); } })]); setKids(pal, fam.slots.map((sl, i) => h('div', { class: 'sw' + (E.slot === i + 1 ? ' sel' : ''), title: `${i + 1}: ${sl.name}`, style: { background: colorOf(i + 1) }, onclick: () => { E.slot = i + 1; if (E.tool === 'eraser') E.tool = 'pencil'; renderTools(); renderPal(); } }))); }
   const keyH = e => {
     if (e.target.tagName === 'INPUT') return;
     const k = e.key.toLowerCase();
@@ -138,16 +158,25 @@ function openPixelEditor(fam, part) {
   const close = save => {
     if (E.floating) dropFloat();
     document.removeEventListener('keydown', keyH, true); bg.remove();
-    if (save) { part.w = E.w; part.h = E.h; part.px = E.px; invalidateCache(); commit('pixels'); }
+    if (save && isImg) {
+      const c = mkCanvas(E.w, E.h), cx = c.getContext('2d'), im = cx.createImageData(E.w, E.h);
+      for (let i = 0; i < E.px.length; i++) if (E.px[i]) im.data.set(unpackRGBA(E.px[i]), i * 4);
+      cx.putImageData(im, 0, 0);
+      const url = c.toDataURL('image/png'), id = 'img_' + newId('e');
+      P.images[id] = url; imgCache.set(url, { img: c, ok: true });
+      const ov = variant.overrides[part.id];
+      if (ov && ov.img) ov.img = id; else part.img = id;
+      part.w = E.w; part.h = E.h; invalidateCache(); commit('pixels');
+    } else if (save) { part.w = E.w; part.h = E.h; part.px = E.px; invalidateCache(); commit('pixels'); }
   };
   const bg = h('div', { class: 'modal-bg' }, h('div', { class: 'modal' },
-    h('h3', {}, h('span', { class: 'grow' }, `ویرایش پیکسلی — ${fam.name} / ${part.name}`), btn('لغو', () => close(false)), ' ', btn('✓ ذخیره', () => close(true), 'primary')),
+    h('h3', {}, h('span', { class: 'grow' }, `ویرایش پیکسلی — ${fam.name} / ${part.name}${isImg ? ' (تصویر رنگی)' : ''}`), btn('لغو', () => close(false)), ' ', btn('✓ ذخیره', () => close(true), 'primary')),
     h('div', { class: 'mb' }, h('div', { id: 'pe' },
       h('div', {}, tools, h('hr'), h('div', { class: 'row' }, h('label', {}, 'ضخامت'), selIn('1', [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']], v => (E.size = +v))), h('label', { class: 'row' }, chkIn(false, v => (E.fill = v)), ' پر (مستطیل/چندضلعی)'), h('hr'),
         h('div', { class: 'row wrap' }, btn('↶', undoE, 'ib', 'Undo'), btn('↷', redoE, 'ib', 'Redo'), btn('⧉ کپی', doCopy), btn('📋 پیست', doPaste), btn('⧉⧉ تکثیر', doDup), btn('🗑 حذف انتخاب', doDel)),
         h('div', { class: 'row wrap' }, btn('⇋ H', () => transform('fh'), '', 'وارونه افقی'), btn('⇅ V', () => transform('fv'), '', 'وارونه عمودی'), btn('⟳ 90°', () => transform('rot'), '', 'چرخش'), btn('⤢ اندازه', resize), btn('پاک‌کردن همه', () => { pushH(); E.px.fill(0); draw(); }, 'danger'))),
       h('div', { style: { overflow: 'auto', maxHeight: '70vh' } }, cv),
-      h('div', {}, h('b', {}, 'رنگ‌ها (Slot)'), pal, h('div', { class: 'row' }, h('label', {}, 'زوم'), rangeIn(E.zoom, v => { E.zoom = v; draw(); }, 4, 32, 2)), h('b', {}, 'پیش‌نمایش'), prev, info,
+      h('div', {}, h('b', {}, isImg ? 'رنگ‌ها' : 'رنگ‌ها (Slot)'), pal, h('div', { class: 'row' }, h('label', {}, 'زوم'), rangeIn(E.zoom, v => { E.zoom = v; draw(); }, 4, 32, 2)), h('b', {}, 'پیش‌نمایش'), prev, info,
         h('div', { class: 'muted' }, 'Ctrl+Z/Y، Ctrl+C/V/D، Delete، چندضلعی: کلیک‌ها + دوبل‌کلیک/Enter'))))));
   document.addEventListener('keydown', keyH, true);
   document.body.append(bg);

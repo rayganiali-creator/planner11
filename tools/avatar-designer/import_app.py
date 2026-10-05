@@ -16,8 +16,8 @@ def img_id(path, size=None):
     images[k] = 'data:image/png;base64,' + base64.b64encode(raw).decode()
     return k, im.size
 LAYERS = [('pet', 'حیوان'), ('petgear', 'تجهیزات حیوان'), ('capeback', 'شنل (پشت)'), ('body', 'بدن'), ('shoes', 'کفش'), ('pants', 'شلوار'), ('clothes', 'لباس'),
-          ('armor', 'زره'), ('cape', 'شنل'), ('sleep', 'خواب'), ('hair', 'مو'), ('hijab', 'روسری'), ('condition', 'وضعیت (مریض/زخمی)'),
-          ('hat', 'کلاه'), ('helmet', 'کلاه‌خود'), ('sword', 'شمشیر'), ('shield', 'سپر'), ('hands', 'دست‌ها'), ('mouth', 'دهان (Mood)'), ('effect', 'افکت')]
+          ('armor', 'زره'), ('cape', 'شنل'), ('sleep', 'خواب'), ('hair', 'مو'), ('hijab', 'روسری'), ('mouth', 'دهان (Mood)'), ('condition', 'وضعیت (مریض/زخمی)'),
+          ('hat', 'کلاه'), ('helmet', 'کلاه‌خود'), ('sword', 'شمشیر'), ('shield', 'سپر'), ('hands', 'دست‌ها'), ('effect', 'افکت')]
 chars = {'male': {'id': 'char_male', 'name': 'Character 01 — مرد', 'notes': ''}, 'female': {'id': 'char_female', 'name': 'Character 02 — زن', 'notes': ''}}
 fams = []
 def geom(x, y, flip=False): return {'x': x, 'y': y, 'scale': 1, 'rotation': 0, 'opacity': 1, 'flipX': bool(flip), 'flipY': False}
@@ -82,6 +82,33 @@ for it in d['items']:
             br = it['backFit'][gdr]
             family(f"{it['id']}#{gdr}#back", f"{it.get('n', it['id'])} — پشت ({'♂' if gdr == 'male' else '♀'})", 'capeback', gdr, it['backFiles'][gdr], (br[2], br[3]), top(br), 'top-center', {**meta, 'gender': gdr, 'appKind': 'cape_back'})
 
+
+# ---- دهن‌ها (۷ Mood) — پیکسلی؛ یک خانواده برای هر Mood، مشترک بین دو کاراکتر؛ جایگاهِ زن با Override هندسه
+MOUTHS = {  # 1=لب 2=داخل دهان 3=زبان 4=دندان
+    'neutral':   ['.1111.'],
+    'happy':     ['1.....1', '.11111.'],
+    'sad':       ['.11111.', '1.....1'],
+    'angry':     ['1111111', '1414141', '1111111'],
+    'surprised': ['.11.', '1221', '1221', '.11.'],
+    'tired':     ['1111', '1221', '.11.'],
+    'excited':   ['1111111', '1444441', '.12321.', '..111..'],
+}
+MOOD_FA = {'neutral': 'خنثی', 'happy': 'شاد', 'sad': 'غمگین', 'angry': 'عصبانی', 'surprised': 'متعجب', 'tired': 'خسته', 'excited': 'هیجان‌زده'}
+MOUTH_POS = {'male': (88, 55), 'female': (89, 72)}  # مرکزِ افقی و بالای دهان روی بوم ۱۸۰×۱۸۶ (زیر چشم‌ها، روی چانه‌ی هر بدن)
+moods = {}
+for mood, rows in MOUTHS.items():
+    w, h = len(rows[0]), len(rows)
+    fid = f'mouth_{mood}'
+    f = {'id': fid, 'name': f'دهان — {MOOD_FA[mood]} ({mood})', 'category': 'mouth', 'characterIds': [], 'anchor': 'top-center', 'tags': ['mood:' + mood],
+         'slots': [{'id': 's1', 'name': 'لب', 'color': '#a04a4a'}, {'id': 's2', 'name': 'داخل دهان', 'color': '#5a2222'}, {'id': 's3', 'name': 'زبان', 'color': '#d96a7c'}, {'id': 's4', 'name': 'دندان', 'color': '#ffffff'}],
+         'parts': [{'id': fid + ':main', 'name': 'mouth', 'w': w, 'h': h, 'dx': 0, 'dy': 0, 'scale': 1, 'rotation': 0, 'flipX': False, 'flipY': False, 'visible': True, 'rows': [r.replace('.', '0') for r in rows]}],
+         'variants': [{'id': fid + '#v0', 'name': 'Natural', 'colors': {}, 'overrides': {}},
+                      {'id': fid + '#v1', 'name': 'Dark lip', 'colors': {'s1': '#5a2a2a'}, 'overrides': {}},
+                      {'id': fid + '#v2', 'name': 'Pink', 'colors': {'s1': '#c4566e', 's3': '#f08aa0'}, 'overrides': {}}],
+         'geometry': {'*': geom(*MOUTH_POS['male']), 'char_female': {'x': MOUTH_POS['female'][0], 'y': MOUTH_POS['female'][1]}}, 'meta': {'appKind': 'mouth', 'mood': mood}}
+    fams.append(f)
+    moods[mood] = {'familyId': fid, 'variantId': fid + '#v0'}
+
 def bg(name, t, c1, c2, pat='none', pc='#ffffff', ps=8, po=0.1, vig=0, scan=0, noise=0):
     return {'id': 'bg_' + name.lower().replace(' ', '_'), 'name': name, 'type': t, 'color': c1, 'color2': c2, 'angle': 0, 'pattern': {'kind': pat, 'color': pc, 'size': ps, 'opacity': po}, 'image': None, 'x': 0, 'y': 0, 'scale': 1, 'opacity': 1, 'effects': {'vignette': vig, 'scanlines': scan, 'noise': noise}}
 bgs = [bg('Day', 'gradient', '#bfe3ff', '#eaf6ff'), bg('Night', 'gradient', '#101a3a', '#2a2f5e', 'dots', '#ffffff', 10, 0.08, 0.3), bg('Soft Gray', 'gradient', '#e8eaf0', '#b8bdca', vig=0.1),
@@ -91,18 +118,18 @@ byid = {f['id']: f for f in fams}
 eq = {}
 def put(cat, fid):
     eq['L_' + cat] = {'familyId': fid, 'variantId': byid[fid]['variants'][0]['id']}
-put('body', 'base_male'); put('pants', 'pants/pants_01#male'); put('clothes', 'clothes/top_01#male'); put('hair', 'hair/hair_01#male'); put('shoes', 'shoes/shoes_01#male'); put('sword', 'sword/weapon_01#male'); put('hands', 'hands_male'); put('pet', 'pets/01_cat')
+put('body', 'base_male'); put('pants', 'pants/pants_01#male'); put('clothes', 'clothes/top_01#male'); put('hair', 'hair/hair_01#male'); put('shoes', 'shoes/shoes_01#male'); put('sword', 'sword/weapon_01#male'); put('hands', 'hands_male'); put('pet', 'pets/01_cat'); put('mouth', 'mouth_neutral')
 proj = {
     'format': 'rp-avatar-project', 'version': 1, 'id': 'proj_app_avatar', 'name': 'آواتار فعلی اپ (Routine Planner)', 'createdAt': 0, 'updatedAt': 0,
     'canvas': {'w': W, 'h': H, 'safe': {'x': OFFX, 'y': 0, 'w': 130, 'h': H}},
     'characters': list(chars.values()), 'families': fams,
     'layers': [{'id': 'L_' + c, 'name': n, 'category': c, 'visible': True, 'locked': False} for c, n in LAYERS],
-    'moods': {}, 'backgrounds': bgs,
+    'moods': moods, 'backgrounds': bgs,
     'scene': {'characterId': 'char_male', 'mood': 'neutral', 'equipped': eq, 'backgroundId': bgs[0]['id'], 'bgVisible': True,
               'shadow': {'on': True, 'color': '#000000', 'opacity': 0.26, 'w': 60, 'h': 10, 'x': OFFX + 65, 'y': 182}, 'ground': {'on': False, 'color': '#3a4a3a', 'opacity': 1, 'height': 16},
               'lighting': {'on': False, 'color': '#ffe9b0', 'angle': 45, 'opacity': 0.18}, 'glow': {'on': False, 'color': '#9fb0ff', 'radius': 60, 'opacity': 0.25, 'x': 90, 'y': 100}},
     'view': {'zoom': 3, 'panX': 0, 'panY': 0, 'grid': 10, 'snap': True, 'showGrid': False, 'showRuler': True, 'showSafe': True, 'showCenter': True, 'showLayerBoxes': False, 'guides': []},
     'images': images,
 }
-open(f'{here}/src/10-appseed.js', 'w', encoding='utf8').write("'use strict';\n// تولیدشده توسط import_app.py — آواتار واقعیِ اپ\nconst APP_SEED = " + json.dumps(proj, ensure_ascii=False, separators=(',', ':')) + ';\n')
+open(f'{here}/src/10-appseed.js', 'w', encoding='utf8').write("'use strict';\n// تولیدشده توسط import_app.py — آواتار واقعیِ اپ\nconst APP_SEED = " + json.dumps(proj, ensure_ascii=False, separators=(',', ':')) + ';\nfunction seedProject() { const p = deserialize(APP_SEED); p.createdAt = p.updatedAt = Date.now(); return p; }\n')
 print(len(fams), 'families,', len(images), 'images,', os.path.getsize(f'{here}/src/10-appseed.js') // 1024, 'KB')

@@ -11,7 +11,7 @@ const colIn = (v, fn) => h('input', { type: 'color', value: /^#[0-9a-f]{6}$/i.te
 const selIn = (v, opts, fn) => h('select', { onchange: e => fn(e.target.value) }, opts.map(([val, lab]) => h('option', { value: val, selected: val === v }, lab)));
 const rangeIn = (v, fn, min, max, step) => h('input', { type: 'range', value: v, min, max, step, onchange: e => fn(num(e.target.value, v)) });
 function tabs(cur, list, fn) { return h('div', { class: 'tabs' }, list.map(([k, l]) => h('button', { class: cur === k ? 'on' : '', onclick: () => fn(k) }, l))); }
-function paint(el, build) { const st = el.scrollTop; el.replaceChildren(...[].concat(build()).flat(Infinity).filter(Boolean)); el.scrollTop = st; }
+function paint(el, build) { const st = el.scrollTop; setKids(el, build()); el.scrollTop = st; }
 function thumb(fam, variant, size = 36) {
   const c = h('canvas', { class: 'thumb', width: size, height: size });
   const s = familySprite(fam, variant || fam.variants[0]);
@@ -20,6 +20,20 @@ function thumb(fam, variant, size = 36) {
 }
 
 // ---- عملیات مشترک
+/** تعویض کاراکتر: آیتم‌های ناسازگار با معادلِ همان آیتم برای کاراکترِ جدید عوض می‌شوند (بدن/دست همیشه) */
+function setCharacter(id) {
+  P.scene.characterId = id;
+  for (const L of P.layers) {
+    const e = P.scene.equipped[L.id], f = e && famById(e.familyId);
+    if (!f || compatible(f, id)) continue;
+    const vi = Math.max(0, f.variants.findIndex(v => v.id === e.variantId));
+    let m = f.meta && f.meta.appItemId ? P.families.find(x => x !== f && x.meta && x.meta.appItemId === f.meta.appItemId && x.category === f.category && compatible(x, id)) : null;
+    if (!m && ['body', 'hands', 'sleep'].includes(f.category)) m = P.families.find(x => x.category === f.category && x.characterIds.includes(id));
+    if (m) P.scene.equipped[L.id] = { familyId: m.id, variantId: (m.variants[vi] || m.variants[0]).id }; else delete P.scene.equipped[L.id];
+  }
+  const sf = selFam(); if (sf && !compatible(sf, id)) { S.famId = null; S.partId = null; }
+  commit('char');
+}
 function selectFam(fam, varId) {
   S.famId = fam.id; S.partId = null;
   const L = layerOfFam(fam.id);
@@ -68,8 +82,8 @@ function dupFamily(f) {
   c.variants = f.variants.map(v => { const nv = clone(v); nv.id = newId('var'); nv.overrides = Object.fromEntries(Object.entries(v.overrides || {}).map(([k, o]) => [idMap[k] || k, o])); return nv; });
   P.families.splice(P.families.indexOf(f) + 1, 0, c); S.famId = c.id; commit('dupFamily');
 }
-function delFamily(f) {
-  if (!confirm(`«${f.name}» و همه‌ی واریانت‌هایش حذف شود؟`)) return;
+async function delFamily(f) {
+  if (!(await askSure(`«${f.name}» و همه‌ی واریانت‌هایش حذف شود؟`, 'حذف'))) return;
   P.families = P.families.filter(x => x !== f);
   for (const k of Object.keys(P.scene.equipped)) if (P.scene.equipped[k].familyId === f.id) delete P.scene.equipped[k];
   for (const m of Object.keys(P.moods)) if (P.moods[m].familyId === f.id) delete P.moods[m];
@@ -105,11 +119,11 @@ function assetsList() {
 function charsList() {
   return [
     h('div', { class: 'pb' }, btn('＋ کاراکتر جدید', () => { const c = { id: newId('char'), name: 'Character ' + String(P.characters.length + 1).padStart(2, '0'), notes: '' }; P.characters.push(c); P.scene.characterId = c.id; commit('addChar'); }, 'primary')),
-    h('div', { class: 'list' }, P.characters.map(c => h('div', { class: 'item' + (P.scene.characterId === c.id ? ' sel' : ''), onclick: () => { P.scene.characterId = c.id; commit('selChar'); } },
+    h('div', { class: 'list' }, P.characters.map(c => h('div', { class: 'item' + (P.scene.characterId === c.id ? ' sel' : ''), onclick: () => setCharacter(c.id) },
       h('span', { class: 'nm' }, h('input', { type: 'text', value: c.name, style: { width: '100%' }, onclick: e => e.stopPropagation(), onchange: e => { c.name = e.target.value; commit('renChar'); } }),
         h('small', {}, `${P.families.filter(f => f.characterIds.includes(c.id)).length} Asset اختصاصی · ${P.families.filter(f => !f.characterIds.length).length} مشترک`)),
       btn('⧉', e => { e.stopPropagation(); dupChar(c); }, 'ib', 'تکثیر'),
-      btn('🗑', e => { e.stopPropagation(); if (P.characters.length > 1 && confirm('کاراکتر حذف شود؟')) { delChar(c); } else if (P.characters.length <= 1) toast('حداقل یک کاراکتر لازم است'); }, 'ib danger', 'حذف')))),
+      btn('🗑', async e => { e.stopPropagation(); if (P.characters.length <= 1) return toast('حداقل یک کاراکتر لازم است'); if (await askSure('کاراکتر حذف شود؟', 'حذف')) delChar(c); }, 'ib danger', 'حذف')))),
     h('div', { class: 'pb muted' }, 'Assetهای اختصاصیِ هر کاراکتر را در بازرس (Character Compatibility) تعیین کنید؛ Assetِ بدون محدودیت بین همه‌ی کاراکترها مشترک است.'),
   ];
 }
@@ -133,18 +147,18 @@ function renderRight() {
 function layersPanel() {
   const ls = [...P.layers].reverse();
   return [
-    h('div', { class: 'pb' }, btn('＋ لایه', () => { const n = prompt('نام لایه', 'لایه جدید'); if (n) { P.layers.push({ id: 'L_' + newId('c'), name: n, category: 'accessory', visible: true, locked: false }); commit('addLayer'); } })),
+    h('div', { class: 'pb' }, btn('＋ لایه', async () => { const n = await askText('نام لایه', 'لایه جدید'); if (n) { P.layers.push({ id: 'L_' + newId('c'), name: n, category: 'accessory', visible: true, locked: false }); commit('addLayer'); } })),
     h('div', { class: 'list' }, ls.map(L => {
       const eq = P.scene.equipped[L.id], fam = eq && famById(eq.familyId), i = P.layers.indexOf(L);
       return h('div', { class: 'item' + (fam && S.famId === fam.id ? ' sel' : ''), onclick: () => { if (fam) selectFam(fam, eq.variantId); } },
         btn(L.visible ? '👁' : '⌀', e => { e.stopPropagation(); L.visible = !L.visible; commit('vis'); }, 'ib', 'نمایش/مخفی'),
         btn(L.locked ? '🔒' : '🔓', e => { e.stopPropagation(); L.locked = !L.locked; commit('lock'); }, 'ib', 'قفل'),
         fam ? thumb(fam, varOf(fam, eq.variantId), 28) : h('span', { class: 'thumb', style: { width: '28px', height: '28px' } }),
-        h('span', { class: 'nm', ondblclick: e => { e.stopPropagation(); const n = prompt('نام لایه', L.name); if (n) { L.name = n; commit('renLayer'); } } }, L.name, h('br'), h('small', {}, fam ? fam.name : '— خالی —')),
+        h('span', { class: 'nm', ondblclick: async e => { e.stopPropagation(); const n = await askText('نام لایه', L.name); if (n) { L.name = n; commit('renLayer'); } } }, L.name, h('br'), h('small', {}, fam ? fam.name : '— خالی —')),
         btn('▲', e => { e.stopPropagation(); if (i < P.layers.length - 1) { [P.layers[i], P.layers[i + 1]] = [P.layers[i + 1], P.layers[i]]; commit('zup'); } }, 'ib', 'بالاتر'),
         btn('▼', e => { e.stopPropagation(); if (i > 0) { [P.layers[i], P.layers[i - 1]] = [P.layers[i - 1], P.layers[i]]; commit('zdn'); } }, 'ib', 'پایین‌تر'),
         btn('⧉', e => { e.stopPropagation(); const n = { ...L, id: 'L_' + newId('c'), name: L.name + ' کپی' }; P.layers.splice(i + 1, 0, n); if (eq) P.scene.equipped[n.id] = { ...eq }; commit('dupLayer'); }, 'ib', 'تکثیر لایه'),
-        btn('🗑', e => { e.stopPropagation(); if (confirm('لایه حذف شود؟')) { P.layers.splice(i, 1); delete P.scene.equipped[L.id]; commit('delLayer'); } }, 'ib danger', 'حذف'));
+        btn('🗑', async e => { e.stopPropagation(); if (await askSure('لایه حذف شود؟', 'حذف')) { P.layers.splice(i, 1); delete P.scene.equipped[L.id]; commit('delLayer'); } }, 'ib danger', 'حذف'));
     })),
   ];
 }
@@ -196,7 +210,7 @@ function liveFields() {
 const BTABS = [['parts', 'Parts'], ['variants', 'Variants'], ['moods', 'Moods'], ['bg', 'Background'], ['scene', 'Shadow/Ground/Light'], ['previews', 'Previews']];
 function renderBottom() {
   paint($('#bottombody'), () => ({ parts: partsTab, variants: variantsTab, moods: moodsTab, bg: bgTab, scene: sceneTab, previews: previewsTab }[S.bottomTab])());
-  $('#bottomtabs').replaceChildren(...BTABS.map(([k, l]) => h('button', { class: S.bottomTab === k ? 'on' : '', onclick: () => { S.bottomTab = k; renderBottom(); } }, l)));
+  setKids($('#bottomtabs'), BTABS.map(([k, l]) => h('button', { class: S.bottomTab === k ? 'on' : '', onclick: () => { S.bottomTab = k; renderBottom(); } }, l)));
 }
 function needFam() { return h('div', { class: 'muted' }, 'ابتدا یک Asset را انتخاب کنید.'); }
 function partsTab() {
@@ -211,15 +225,14 @@ function partsTab() {
       btn('▲', e => { e.stopPropagation(); if (i) { [f.parts[i], f.parts[i - 1]] = [f.parts[i - 1], f.parts[i]]; invalidateCache(); commit('porder'); } }, 'ib'),
       btn('▼', e => { e.stopPropagation(); if (i < f.parts.length - 1) { [f.parts[i], f.parts[i + 1]] = [f.parts[i + 1], f.parts[i]]; invalidateCache(); commit('porder'); } }, 'ib'))));
   const actions = h('div', { class: 'row wrap' },
-    btn('＋ قطعه', () => { const w = num(prompt('عرض', 16), 16), hh = num(prompt('ارتفاع', 16), 16); const p = newPart('part' + (f.parts.length + 1), clamp(w, 1, 96), clamp(hh, 1, 144), -Math.floor(w / 2), -hh); f.parts.push(p); S.partId = p.id; invalidateCache(); commit('addPart'); }),
+    btn('＋ قطعه', async () => { const w = num(await askText('عرض (پیکسل)', 16), 16), hh = num(await askText('ارتفاع (پیکسل)', 16), 16); const p = newPart('part' + (f.parts.length + 1), clamp(w, 1, 96), clamp(hh, 1, 144), -Math.floor(w / 2), -hh); f.parts.push(p); S.partId = p.id; invalidateCache(); commit('addPart'); }),
     btn('⧉ تکثیر', () => { if (!pt) return; const c = { ...clone({ ...pt, px: [] }), id: newId('part'), px: new Uint8Array(pt.px), name: pt.name + '2', dx: pt.dx + 2, dy: pt.dy + 2 }; f.parts.push(c); S.partId = c.id; invalidateCache(); commit('dupPart'); }),
     btn('🗑 حذف', () => { if (!pt) return; f.parts = f.parts.filter(p => p !== pt); S.partId = null; invalidateCache(); commit('delPart'); }, 'danger'),
-    btn('✎ ویرایش پیکسلی', () => { if (!pt) return; if (pt.img) return toast('این قطعه تصویری (PNG) است؛ با «جایگزینی تصویر» عوضش کنید'); openPixelEditor(f, pt); }, 'primary'),
+    btn('✎ ویرایش پیکسلی', () => { if (pt) openPixelEditor(f, pt); else toast('اول یک قطعه انتخاب کنید'); }, 'primary'),
     btn('🖼 جایگزینی تصویر', () => pt && pickImage(im => { pt.img = im.id; pt.w = im.w; pt.h = im.h; invalidateCache(); commit('img'); })),
     btn('🖼 تصویر این Variant', () => pt && pickImage(im => { (variant.overrides[pt.id] || (variant.overrides[pt.id] = {})).img = im.id; invalidateCache(); commit('varimg'); })),
     btn('✂ برش به محتوا', () => { if (pt && !pt.img) { cropPart(pt); invalidateCache(); commit('crop'); } }),
-    btn('⑂ تقسیم (اجزای جدا)', () => { if (pt && !pt.img) { splitPart(f, pt); invalidateCache(); commit('split'); } }),
-    btn('⇄ جایگزینی (از قطعه‌ی دیگر)', () => { if (!pt) return; const others = P.families.flatMap(x => x.parts.map(p => ({ x, p }))).filter(o => o.p !== pt); const n = prompt('نامِ قطعه‌ی منبع:\n' + others.map(o => o.x.name + '/' + o.p.name).join('\n')); const m = others.find(o => o.x.name + '/' + o.p.name === n); if (m) { pt.w = m.p.w; pt.h = m.p.h; pt.px = new Uint8Array(m.p.px); invalidateCache(); commit('replacePart'); } }));
+    btn('⑂ تقسیم (اجزای جدا)', () => { if (pt && !pt.img) { splitPart(f, pt); invalidateCache(); commit('split'); } }));
   const fields = !pt ? h('div', { class: 'muted' }, 'قطعه‌ای انتخاب نشده (روی صحنه هم می‌توانید قطعه را جابه‌جا کنید).') : h('div', { class: 'grid2' },
     row('نام', txtIn(pt.name, upd(v => (pt.name = v)))), row('Part ID', h('input', { type: 'text', value: pt.id, readonly: true })),
     row('X', numIn(pt.dx, upd(v => (pt.dx = Math.round(v))))), row('Y', numIn(pt.dy, upd(v => (pt.dy = Math.round(v))))),
@@ -272,7 +285,7 @@ function variantsTab() {
         btn('↺', () => { delete cur.colors[sl.id]; commit('slotReset'); }, 'ib', 'برگرداندن به پایه')))),
       row(null, btn('＋ Slot رنگ', () => { if (f.slots.length >= 35) return; const id = 's' + (Math.max(0, ...f.slots.map(s => +s.id.slice(1))) + 1); f.slots.push({ id, name: 'رنگ ' + (f.slots.length + 1), color: '#888888' }); commit('addSlot'); }),
         btn('🗑 آخرین Slot', () => { if (f.slots.length > 1) { const s = f.slots.pop(); const n = f.slots.length; for (const p of f.parts) for (let i = 0; i < p.px.length; i++) if (p.px[i] > n) p.px[i] = 0; delete cur.colors[s.id]; invalidateCache(); commit('delSlot'); } }, 'danger')),
-      h('div', { class: 'row wrap' }, h('b', {}, 'Base Geometry:'), ...Object.entries(f.geometry).map(([k, g]) => h('span', { class: 'chip' }, (k === '*' ? 'مشترک' : (charById(k) || { name: k }).name), ` x${g.x ?? '·'} y${g.y ?? '·'} s${g.scale ?? '·'} r${g.rotation ?? '·'}`, k === '*' ? null : btn('×', () => { delete f.geometry[k]; commit('delGeom'); }, 'ib', 'حذف override'))))));
+      h('div', { class: 'row wrap' }, h('b', {}, 'Base Geometry:'), ...Object.entries(f.geometry).map(([k, g]) => h('span', { class: 'chip' }, (k === '*' ? 'مشترک' : (charById(k) || { name: k }).name), ` x${g.x == null ? '·' : g.x} y${g.y == null ? '·' : g.y} s${g.scale == null ? '·' : g.scale} r${g.rotation == null ? '·' : g.rotation}`, k === '*' ? null : btn('×', () => { delete f.geometry[k]; commit('delGeom'); }, 'ib', 'حذف override'))))));
 }
 function moodsTab() {
   const mouths = P.families.filter(f => f.category === 'mouth');

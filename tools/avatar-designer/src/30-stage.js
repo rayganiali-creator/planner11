@@ -6,7 +6,7 @@ const ST = { cv: null, ctx: null, off: null, pointers: new Map(), pinch: null };
 const RULER = 18;
 
 const selFam = () => (S.famId ? famById(S.famId) : null);
-const selPart = () => { const f = selFam(); return f ? f.parts.find(p => p.id === S.partId) || null : null; };
+const selPart = () => { const f = selFam(); return f ? f.parts.find(p => p.id === S.partId) || f.parts[0] || null : null; };
 function layerOfFam(famId) { for (const L of P.layers) { const e = P.scene.equipped[L.id]; if (e && e.familyId === famId) return L; } return null; }
 function toScreen(x, y) { const v = P.view; return [v.panX + x * v.zoom, v.panY + y * v.zoom]; }
 function toScene(sx, sy) { const v = P.view; return [(sx - v.panX) / v.zoom, (sy - v.panY) / v.zoom]; }

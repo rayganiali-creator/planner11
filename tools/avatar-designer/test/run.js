@@ -14,7 +14,7 @@ const assert = require('assert');
 
   // seed (آواتار واقعی اپ)
   const c0 = await ev(() => ({ ch: P.characters.length, fam: P.families.length, im: Object.keys(P.images).length, va: P.families.reduce((n, f) => n + f.variants.length, 0), items: sceneItems().length, layers: P.layers.length }));
-  A('app seed counts', c0.ch === 2 && c0.fam === 251 && c0.im > 250 && c0.va > 270 && c0.items >= 7);
+  A('app seed counts', c0.ch === 2 && c0.fam === 258 && c0.im > 250 && c0.va > 270 && c0.items >= 7);
   A('stage draws pixels', await ev(() => { const d = ST.cv.getContext('2d').getImageData(0, 0, ST.cv.width, ST.cv.height).data; let n = 0; for (let i = 0; i < d.length; i += 4 * 97) if (d[i] > 60) n++; return n > 50; }));
   A('body variants share geometry & differ', await ev(() => { const f = famById('base_male'); const g = JSON.stringify(geomFor(f, P.scene.characterId)); return f.variants.length === 5 && JSON.stringify(geomFor(f, P.scene.characterId)) === g && familySprite(f, f.variants[0]).canvas.toDataURL() !== familySprite(f, f.variants[3]).canvas.toDataURL(); }));
   // parity با منطق ترکیبِ اپ (Python مستقل از Studio)
@@ -32,12 +32,13 @@ const assert = require('assert');
     console.log(out.trim()); A(`${g}: Studio render == app compose rules`, /PARITY OK/.test(out));
   }
   await ev(async () => { await startProject(seedProject()); });
-  // mood: دو دهان می‌سازیم و نگاشت می‌کنیم؛ فقط لایه‌ی mouth عوض شود
-  A('mood swaps only mouth', await ev(() => {
-    const mk = (nm, col) => { const f = newFamily(nm, 'mouth'); const p = newPart('m', 6, 2, -3, 0); p.px.fill(1); f.parts.push(p); f.slots[0].color = col; f.anchor = 'top-center'; f.geometry['*'] = newGeometry(90, 60); P.families.push(f); return f; };
-    const a = mk('mouth-n', '#ff0000'), b = mk('mouth-h', '#00ff00'); P.moods.neutral = { familyId: a.id, variantId: a.variants[0].id }; P.moods.happy = { familyId: b.id, variantId: b.variants[0].id };
-    P.scene.equipped.L_mouth = { familyId: a.id, variantId: a.variants[0].id }; P.scene.mood = 'neutral'; const x = sceneItems(); P.scene.mood = 'happy'; const y = sceneItems();
-    const diff = x.filter((it, i) => it.fam.id !== y[i].fam.id).map(i => i.layer.category); return diff.length === 1 && diff[0] === 'mouth'; }));
+  await ev(async () => { await startProject(seedProject()); });
+  // تعویض کاراکتر: آواتار زن/مرد هر دو با لباس معادل بارگذاری می‌شوند
+  A('switch character swaps equipped items', await ev(() => { setCharacter('char_female'); const f = sceneItems().map(i => i.fam.id); const okF = f.includes('base_female') && f.includes('hair/hair_01#female') === false && sceneItems().length >= 6 && sceneItems().every(i => compatible(i.fam, 'char_female')); const clothesF = sceneItems().some(i => i.layer.category === 'clothes'); setCharacter('char_male'); const m = sceneItems().map(i => i.fam.id); return okF && clothesF && m.includes('base_male') && m.includes('shoes/shoes_01#male'); }));
+  // Mood: ۷ دهنِ طراحی‌شده؛ فقط لایه‌ی mouth عوض شود و دهن روی صورتِ هر دو کاراکتر بنشیند
+  A('7 moods mapped to 7 mouth families', await ev(() => Object.keys(P.moods).length === 7 && MOODS.every(([m]) => famById(P.moods[m].familyId).category === 'mouth')));
+  A('mood swaps only mouth layer', await ev(() => { P.scene.mood = 'neutral'; const x = sceneItems(); P.scene.mood = 'happy'; const y = sceneItems(); const d = x.filter((it, i) => it.fam.id !== y[i].fam.id).map(i => i.layer.category); P.scene.mood = 'neutral'; return x.length === y.length && d.length === 1 && d[0] === 'mouth'; }));
+  A('mouths differ per mood & sit on both faces', await ev(() => { const urls = new Set(); let ok = true; for (const cid of ['char_male', 'char_female']) { setCharacter(cid); const base = sceneItems().find(i => i.layer.category === 'body'), bq = itemQuad(base); for (const [m] of MOODS) { P.scene.mood = m; invalidateCache(); const it = sceneItems().find(i => i.layer.category === 'mouth'); if (!it) { ok = false; continue; } const q = itemQuad(it); const cx = (q[0][0] + q[2][0]) / 2, cy = (q[0][1] + q[2][1]) / 2; const bw = bq[1][0] - bq[0][0], bh = bq[2][1] - bq[0][1]; ok = ok && cx > bq[0][0] + bw * 0.25 && cx < bq[0][0] + bw * 0.75 && cy > bq[0][1] + bh * 0.1 && cy < bq[0][1] + bh * 0.3; urls.add(cid + m + it.spr.canvas.toDataURL()); } } setCharacter('char_male'); P.scene.mood = 'neutral'; invalidateCache(); return ok && urls.size === 14; }));
   // ویرایش هندسه، Undo/Redo، درگ با ماوس
   const sw = await ev(() => { P.scene.mood = 'neutral'; const f = famById('sword/weapon_01#male'); selectFam(f); return JSON.stringify(geomFor(f, P.scene.characterId)); });
   await ev(() => { const f = selFam(); const g = geomFor(f, P.scene.characterId); setGeom(f, { x: g.x + 6, y: g.y - 3 }); commit('t'); });
@@ -61,6 +62,37 @@ const assert = require('assert');
   await pg.click('#pe .tools button:nth-child(4)'); await pg.mouse.move(box.x + cell * 3.5, box.y + cell * 4.5); await pg.mouse.down(); await pg.mouse.move(box.x + cell * 7.5, box.y + cell * 7.5, { steps: 3 }); await pg.mouse.up();
   await pg.click('.modal h3 button.primary');
   A('pixel editor saved drawing', await ev(() => { const f = P.families[P.families.length - 1], p = f.parts[0]; return p.px[2 * p.w + 2] > 0 && p.px[2 * p.w + 6] > 0; }));
+  // ویرایش پیکسلیِ تصویرِ واقعی (PNG) — مو
+  A('pixel-edit a real PNG part', await (async () => {
+    await ev(() => { startProject(seedProject()); }); await pg.waitForTimeout(800);
+    await ev(() => { const f = famById('hair/hair_01#male'); selectFam(f); S.bottomTab = 'parts'; renderBottom(); });
+    const before = await ev(() => { const f = selFam(); return [f.parts[0].img, familySprite(f, f.variants[0]).canvas.toDataURL(), Object.keys(P.images).length]; });
+    await pg.click('text=ویرایش پیکسلی'); await pg.waitForSelector('#pe canvas');
+    const bx = await (await pg.$('#pe canvas')).boundingBox(); const dims = await ev(() => [document.querySelector('#pe canvas').width, document.querySelector('#pe canvas').height]);
+    const cell = bx.width / (dims[0] / (dims[0] / bx.width * 1)) ; // fallback below
+    const wcells = await ev(() => { const f = selFam(); return f.parts[0].w; });
+    const cs = bx.width / wcells;
+    await pg.click('#pe .pal input[type=color]', { force: true }).catch(() => {});
+    await ev(() => { const i = document.querySelector('#pe .pal input[type=color]'); i.value = '#ff0000'; i.dispatchEvent(new Event('change')); });
+    await pg.mouse.move(bx.x + cs * 10.5, bx.y + cs * 10.5); await pg.mouse.down(); await pg.mouse.move(bx.x + cs * 14.5, bx.y + cs * 10.5, { steps: 4 }); await pg.mouse.up();
+    await pg.click('.modal h3 button.primary'); await pg.waitForTimeout(300);
+    const after = await ev(() => { const f = selFam(); const c = familySprite(f, f.variants[0]); const x = 10 - c.ox, y = 10 - c.oy; const d = c.canvas.getContext('2d').getImageData(x, y, 1, 1).data; return [f.parts[0].img, c.canvas.toDataURL(), Object.keys(P.images).length, Array.from(d)]; });
+    return after[0] !== before[0] && after[1] !== before[1] && after[2] === before[2] + 1 && after[3][0] === 255 && after[3][1] === 0 && after[3][3] === 255;
+  })());
+  // محیط سندباکس (مثل پیش‌نمایش داخل اپ): بدون localStorage/IndexedDB/prompt/confirm هم باید کار کند
+  const sb = await b.newPage({ viewport: { width: 1300, height: 800 } }); const sbErr = []; sb.on('pageerror', e => sbErr.push(e.message));
+  await sb.setContent('<iframe id=f sandbox="allow-scripts" style="width:1280px;height:780px;border:0"></iframe>');
+  await sb.evaluate(h => { document.getElementById('f').srcdoc = h; }, fs.readFileSync(path.resolve(__dirname, '../dist/avatar-designer.html'), 'utf8'));
+  const fr = await (async () => { for (let i = 0; i < 60; i++) { const f = sb.frames()[1]; if (f && await f.evaluate(() => typeof P !== 'undefined' && P && document.querySelectorAll('#left .item').length > 0).catch(() => false)) return f; await sb.waitForTimeout(300); } return null; })();
+  A('sandboxed iframe loads (storage blocked)', !!fr && sbErr.length === 0);
+  if (fr) {
+    A('sandbox: characters & avatar rendered', await fr.evaluate(() => P.characters.length === 2 && sceneItems().length >= 8 && document.querySelectorAll('#toolbar button').length > 10));
+    await fr.click('text=New'); A('sandbox: in-app dialog (no confirm())', await fr.evaluate(() => !!document.querySelector('.modal-bg')));
+    await fr.click('.modal-bg button >> text=لغو');
+    await fr.click('text=Characters'); await fr.click('text=＋ کاراکتر جدید'); A('sandbox: add character works', await fr.evaluate(() => P.characters.length === 3));
+    await fr.click('text=Layers'); await fr.click('text=＋ لایه'); await fr.fill('.modal-bg input', 'تست'); await fr.click('.modal-bg button >> text=تأیید'); A('sandbox: add layer via dialog', await fr.evaluate(() => P.layers.some(l => l.name === 'تست')));
+  }
+  await sb.close();
   // پایداری: reload بعد از ذخیره
   await ev(() => saveNow()); const fam0 = await ev(() => P.families.length); await pg.reload(); await pg.waitForFunction(() => typeof P !== 'undefined' && P && P.families.length > 0 && document.querySelector('#left .item'));
   A('persists across reload (IndexedDB)', await ev(n => P.families.length === n && Object.keys(P.images).length > 250, fam0));

@@ -17,6 +17,34 @@ function h(tag, attrs, ...kids) {
   for (const c of kids.flat(Infinity)) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(c)); }
   return e;
 }
+// ---- ذخیره‌ی امن: در پیش‌نمایش‌های محدود (iframe سندباکس، WebView) localStorage/IndexedDB ممکن است ممنوع باشد
+const MEM = new Map();
+const LS = {
+  ok: (() => { try { localStorage.setItem('ad:t', '1'); localStorage.removeItem('ad:t'); return true; } catch (e) { return false; } })(),
+  get(k) { try { return this.ok ? localStorage.getItem(k) : (MEM.has(k) ? MEM.get(k) : null); } catch (e) { return MEM.has(k) ? MEM.get(k) : null; } },
+  set(k, v) { try { if (this.ok) return localStorage.setItem(k, v); } catch (e) { /* quota */ } MEM.set(k, v); },
+  remove(k) { try { if (this.ok) localStorage.removeItem(k); } catch (e) { /* */ } MEM.delete(k); },
+  keys() { try { return this.ok ? Object.keys(localStorage) : [...MEM.keys()]; } catch (e) { return [...MEM.keys()]; } },
+};
+function setKids(el, kids) { while (el.firstChild) el.removeChild(el.firstChild); for (const k of [].concat(kids).flat(Infinity)) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k)); }
+// ---- دیالوگ‌های داخل‌برنامه (prompt/confirm در پیش‌نمایش‌های سندباکس کار نمی‌کنند)
+function dialog(build) {
+  return new Promise(res => {
+    const bg = h('div', { class: 'modal-bg', style: { zIndex: 80 } });
+    const done = v => { bg.remove(); res(v); };
+    bg.append(build(done)); document.body.append(bg);
+    const i = bg.querySelector('input'); if (i) { i.focus(); i.select(); }
+  });
+}
+const askText = (msg, def = '') => dialog(done => {
+  const inp = h('input', { type: 'text', value: String(def), style: { width: '100%' }, onkeydown: e => { if (e.key === 'Enter') done(inp.value); if (e.key === 'Escape') done(null); } });
+  return h('div', { class: 'modal', style: { minWidth: 'min(380px,100%)' } }, h('div', { class: 'mb' }, h('div', { style: { whiteSpace: 'pre-wrap', marginBottom: '8px' } }, msg), inp, h('div', { class: 'row', style: { marginTop: '10px' } }, h('button', { class: 'primary', onclick: () => done(inp.value) }, 'تأیید'), h('button', { onclick: () => done(null) }, 'لغو'))));
+});
+const askSure = (msg, ok = 'تأیید') => dialog(done => h('div', { class: 'modal', style: { minWidth: 'min(380px,100%)' } }, h('div', { class: 'mb' }, h('div', { style: { whiteSpace: 'pre-wrap', marginBottom: '10px' } }, msg), h('div', { class: 'row' }, h('button', { class: 'primary', onclick: () => done(true) }, ok), h('button', { onclick: () => done(false) }, 'لغو')))));
+const askChoice = (msg, a, b) => dialog(done => h('div', { class: 'modal', style: { minWidth: 'min(380px,100%)' } }, h('div', { class: 'mb' }, h('div', { style: { whiteSpace: 'pre-wrap', marginBottom: '10px' } }, msg), h('div', { class: 'row wrap' }, h('button', { class: 'primary', onclick: () => done('a') }, a), h('button', { onclick: () => done('b') }, b), h('button', { onclick: () => done(null) }, 'لغو')))));
+function showError(msg) { let e = $('#errbar'); if (!e) { e = h('div', { id: 'errbar', onclick: () => e.remove() }); document.body.append(e); } e.textContent = '⚠ ' + msg + ' (برای بستن کلیک کنید)'; }
+window.addEventListener('error', ev => showError(ev.message || 'خطا'));
+window.addEventListener('unhandledrejection', ev => showError((ev.reason && ev.reason.message) || String(ev.reason)));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const num = (v, d = 0) => { const n = parseFloat(v); return Number.isFinite(n) ? n : d; };
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -137,32 +165,34 @@ const DB = {
     if (this.db) return this.db;
     try {
       this.db = await new Promise((res, rej) => {
+        const t = setTimeout(() => rej(new Error('idb timeout')), 2500);
         const r = indexedDB.open('avatar-designer', 1);
         r.onupgradeneeded = () => r.result.createObjectStore('projects', { keyPath: 'id' });
-        r.onsuccess = () => res(r.result);
-        r.onerror = () => rej(r.error);
+        r.onsuccess = () => { clearTimeout(t); res(r.result); };
+        r.onerror = () => { clearTimeout(t); rej(r.error); };
+        r.onblocked = () => { clearTimeout(t); rej(new Error('blocked')); };
       });
     } catch (e) { this.db = 'ls'; }
     return this.db;
   },
   async put(rec) {
     const db = await this.open();
-    if (db === 'ls') { localStorage.setItem('ad:' + rec.id, JSON.stringify(rec)); return; }
+    if (db === 'ls') { LS.set('ad:p:' + rec.id, JSON.stringify(rec)); return; }
     await new Promise((res, rej) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').put(rec); tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
   },
   async get(id) {
     const db = await this.open();
-    if (db === 'ls') return JSON.parse(localStorage.getItem('ad:' + id) || 'null');
+    if (db === 'ls') return JSON.parse(LS.get('ad:p:' + id) || 'null');
     return new Promise((res, rej) => { const r = db.transaction('projects').objectStore('projects').get(id); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); });
   },
   async all() {
     const db = await this.open();
-    if (db === 'ls') return Object.keys(localStorage).filter(k => k.startsWith('ad:')).map(k => JSON.parse(localStorage.getItem(k)));
+    if (db === 'ls') return LS.keys().filter(k => k.startsWith('ad:p:')).map(k => JSON.parse(LS.get(k)));
     return new Promise((res, rej) => { const r = db.transaction('projects').objectStore('projects').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
   },
   async del(id) {
     const db = await this.open();
-    if (db === 'ls') { localStorage.removeItem('ad:' + id); return; }
+    if (db === 'ls') { LS.remove('ad:p:' + id); return; }
     await new Promise((res, rej) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').delete(id); tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
   },
 };
@@ -170,6 +200,6 @@ let saveTimer = null;
 function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
 async function saveNow() {
   if (!P) return;
-  try { await DB.put({ id: P.id, name: P.name, updatedAt: P.updatedAt, json: JSON.stringify(serialize(P)) }); localStorage.setItem('ad:current', P.id); setStatus('ذخیره شد ✓'); } catch (e) { setStatus('خطا در ذخیره: ' + e.message); }
+  try { await DB.put({ id: P.id, name: P.name, updatedAt: P.updatedAt, json: JSON.stringify(serialize(P)) }); LS.set('ad:current', P.id); setStatus('ذخیره شد ✓'); } catch (e) { setStatus('خطا در ذخیره: ' + e.message); }
 }
 function setStatus(t) { const s = $('#status'); if (s) s.textContent = t; }
