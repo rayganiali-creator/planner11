@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../calendar/tile_style.dart';
 import '../../app/i18n.dart';
 import '../../data/app_store.dart';
 import '../../data/files_service.dart';
@@ -57,6 +58,18 @@ class SettingsScreen extends StatelessWidget {
             SizedBox(width: 44, child: Text(context.n('$intensity${fa ? '٪' : '%'}'), textAlign: TextAlign.end, style: rpText(RpType.label, weight: 800, color: p.text))),
           ]),
           hint: context.tr('با این اسلایدر می‌توانی میزان روشن یا تاریک بودن پس‌زمینه را دقیقاً از صفر تا صد تنظیم کنی.', 'Use this slider to set exactly how light or dark the background is, from 0 to 100.'),
+        ),
+        section(
+          context.tr('شکل کاشی‌ها (۲۰+ شکل)', 'Tile Shapes (20+)'),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final t in tileShapes) _ChoiceBtn(key: ValueKey('shape-${t.id}'), label: fa ? t.fa : t.en, active: (st['tileShape'] ?? 'round') == t.id, onTap: () => set('tileShape', t.id)),
+          ]),
+        ),
+        section(
+          context.tr('جلوه کاشی‌ها (۱۵+ جلوه)', 'Tile Effects (15+)'),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final t in tileEffects) _ChoiceBtn(key: ValueKey('effect-${t.id}'), label: fa ? t.fa : t.en, active: (st['tileEffect'] ?? 'none') == t.id, onTap: () => set('tileEffect', t.id)),
+          ]),
         ),
         section(
           context.tr('رنگ پس‌زمینه (طیف کامل)', 'Background (full spectrum)'),
@@ -230,3 +243,26 @@ Future<Color?> showColorPicker(BuildContext context, Color initial) {
   );
 }
 
+
+class _ChoiceBtn extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  const _ChoiceBtn({super.key, required this.label, required this.active, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: active ? p.primary : p.surface2,
+          borderRadius: BorderRadius.circular(RpRadius.sm),
+          border: Border.all(color: active ? p.primary : p.line),
+        ),
+        child: Text(label, style: rpText(RpType.label, weight: 700, color: active ? p.onPrimary : p.text)),
+      ),
+    );
+  }
+}

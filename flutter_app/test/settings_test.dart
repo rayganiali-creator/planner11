@@ -65,9 +65,6 @@ void main() {
     final nav = NavController()..go(AppView.settings);
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: a));
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(find.text('بزرگ'));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(store.state['fontSize'], 'large');
     Future<void> tapText(String t) async {
       final sc = find.byType(Scrollable).first;
       await tester.drag(sc, const Offset(0, 6000)); // به بالا
@@ -78,6 +75,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
     }
 
+    await tapText('بزرگ');
+    expect(store.state['fontSize'], 'large');
+    await tapText('قلب');
+    expect(store.state['tileShape'], 'heart');
+    await tapText('نئون');
+    expect(store.state['tileEffect'], 'neon');
     await tapText('یکشنبه');
     await tapText('میلادی');
     await tapText('آبی');

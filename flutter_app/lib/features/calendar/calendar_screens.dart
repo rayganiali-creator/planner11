@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import 'tile_style.dart';
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
 import '../../core/doc.dart';
@@ -28,13 +29,15 @@ Color _hex(Object? v, Color fallback) {
 class DayPie extends CustomPainter {
   final DayStats s;
   final Color ok, bad, neutral;
-  DayPie(this.s, this.ok, this.bad, this.neutral);
+  final TileStyle style;
+  DayPie(this.s, this.ok, this.bad, this.neutral, [this.style = const TileStyle()]);
   @override
   void paint(Canvas c, Size size) {
     final r = Rect.fromLTWH(0, 0, size.width, size.height);
-    final rr = RRect.fromRectAndRadius(r, Radius.circular(size.shortestSide * .28));
+    final path = tilePath(style.shape, size);
+    style.paintOuter(c, path);
     c.save();
-    c.clipRRect(rr);
+    c.clipPath(path);
     if (s.total == 0) {
       c.drawRect(r, Paint()..color = neutral);
     } else if (s.success == s.total) {
@@ -55,12 +58,26 @@ class DayPie extends CustomPainter {
       seg(s.success, ok);
       seg(s.fail, bad);
     }
+    if (style.hasInner) {
+      final ir = r.deflate(size.shortestSide * .15);
+      final ip = tilePath(style.shape, ir.size).shift(ir.topLeft);
+      style.paintInner(c, ip, ir, false);
+    }
+    style.paintOverlay(c, path, r);
     c.restore();
   }
 
   @override
-  bool shouldRepaint(DayPie o) => o.s != s || o.ok != ok || o.bad != bad || o.neutral != neutral;
+  bool shouldRepaint(DayPie o) => o.s != s || o.ok != ok || o.bad != bad || o.neutral != neutral || o.style != style;
 }
+
+TileStyle tileStyleOf(Doc st, RpPalette p) => TileStyle(
+      shape: (st['tileShape'] as String?) ?? 'round',
+      effect: (st['tileEffect'] as String?) ?? 'none',
+      accent: p.gold,
+      primary: p.primary,
+      border: p.line,
+    );
 
 class _Colors {
   final Color ok, bad, neutral;
@@ -198,7 +215,7 @@ class _Tile extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(RpRadius.sm), border: isToday ? Border.all(color: p.primary, width: 2) : null),
             child: CustomPaint(
-              painter: DayPie(stats, cols.ok, cols.bad, cols.neutral),
+              painter: DayPie(stats, cols.ok, cols.bad, cols.neutral, tileStyleOf(st, p)),
               child: Center(
                 child: Text(
                   fa ? toPersianDigits(num) : '$num',
@@ -298,7 +315,7 @@ class _MiniMonth extends StatelessWidget {
                 child: Opacity(
                   opacity: d.isAfter(today) ? .5 : 1,
                   child: CustomPaint(
-                    painter: DayPie(stats, cols.ok, cols.bad, cols.neutral),
+                    painter: DayPie(stats, cols.ok, cols.bad, cols.neutral, tileStyleOf(st, p)),
                     child: Center(child: Text(fa ? toPersianDigits(dn) : '$dn', style: rpText(RpType.caption, weight: 600, color: st['showHolidays'] == true && d.weekday == DateTime.friday ? p.badInk : p.text).copyWith(fontSize: 9))),
                   ),
                 ),
