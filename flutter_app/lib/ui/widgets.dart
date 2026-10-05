@@ -211,3 +211,6 @@ class _RingPainter extends CustomPainter {
   @override
   bool shouldRepaint(_RingPainter o) => o.v != v || o.fg != fg || o.bg != bg;
 }
+
+/// فاصله‌ی پایین فهرست‌ها: بالاتر از نوار ناوبری شناور (با دکمه‌ی «+») و نوار سیستم، تا آخرین ردیف کاملاً دیده شود.
+double rpBottomPad(BuildContext context) => 170 + MediaQuery.viewPaddingOf(context).bottom;

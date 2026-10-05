@@ -45,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
     Color col(Object? v, Color f) => parseHex(v) ?? f;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
         Text(context.tr('تنظیمات', 'Settings'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
         const SizedBox(height: RpSpace.s3),

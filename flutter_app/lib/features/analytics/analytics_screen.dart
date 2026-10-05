@@ -61,7 +61,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final labels = series.labels.map((l) => fa ? toPersianDigits(l) : l).toList();
     final total = totals.success + totals.fail;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
         Row(children: [Expanded(child: Text(context.tr('تحلیل', 'Analytics'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('progress')]),
         const SizedBox(height: RpSpace.s3),

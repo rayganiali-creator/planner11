@@ -36,7 +36,7 @@ Future<void> showGenderPicker(BuildContext context) {
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: Column(children: [
-                    if (data != null) AvatarView(data: data, gender: g.$1, equipped: const {}, cond: 'ok', height: 150),
+                    if (data != null) AvatarView(data: data, gender: g.$1, equipped: const {}, cond: 'ok', height: 80),
                     const SizedBox(height: 6),
                     Text(ctx.isFa ? g.$2 : g.$3, style: rpText(RpType.bodyL, weight: 800, color: p.text)),
                   ]),
@@ -150,13 +150,18 @@ class _PanelState extends State<_Panel> {
         ]),
       ),
       Container(
-        height: 210,
+        height: 120,
         margin: const EdgeInsets.symmetric(horizontal: RpSpace.s4),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(RpRadius.lg), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [p.skyTop, p.skyBottom])),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
-          AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 190, mode: 'noPet'),
-          if (preview.values.any((id) => d.items[id]?.kind == 'pet')) AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 190, mode: 'petOnly'),
-        ]),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(RpRadius.lg), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [avatarSky(isDay(now.hour)).top, avatarSky(isDay(now.hour)).bottom])),
+        // حیوان همیشه سمتِ راستِ آواتار است (راست‌چین/چپ‌چین فرقی نمی‌کند)
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
+            AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'noPet'),
+            if (preview.values.any((id) => d.items[id]?.kind == 'pet')) AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'petOnly'),
+          ]),
+        ),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: RpSpace.s4, vertical: RpSpace.s2),
@@ -176,15 +181,21 @@ class _PanelState extends State<_Panel> {
             ),
         ]),
       ),
-      SizedBox(
-        height: 44,
-        child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: RpSpace.s4), children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: RpSpace.s4),
+        child: Wrap(spacing: 6, runSpacing: 0, children: [
           for (final c in cats)
-            Padding(padding: const EdgeInsetsDirectional.only(end: 6), child: ChoiceChip(label: Text('${c.icon} ${fa ? c.fa : c.en}'), selected: cat == c.key, onSelected: (_) => setState(() {
-                  cat = c.key;
-                  sel = null;
-                  armed = false;
-                }))),
+            ChoiceChip(
+              key: ValueKey('cat-${c.key}'),
+              visualDensity: VisualDensity.compact,
+              label: Text('${c.icon} ${fa ? c.fa : c.en}'),
+              selected: cat == c.key,
+              onSelected: (_) => setState(() {
+                cat = c.key;
+                sel = null;
+                armed = false;
+              }),
+            ),
         ]),
       ),
       Expanded(

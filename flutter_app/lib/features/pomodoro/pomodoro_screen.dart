@@ -60,7 +60,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     final pro = a.store.state['isPremium'] == true;
     final done = (((st['cycle'] as num?) ?? 0).toInt()) % 4;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
         Row(children: [Expanded(child: Text(context.tr('پومودورو', 'Pomodoro'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('pomodoro')]),
         const SizedBox(height: RpSpace.s4),

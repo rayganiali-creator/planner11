@@ -7,7 +7,9 @@ import '../../app/i18n.dart';
 import '../../core/calendar.dart';
 import '../../core/pro.dart';
 import '../../data/app_store.dart';
+import '../../app/toast.dart';
 import '../../data/billing.dart';
+import '../../data/owner_unlock.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 
@@ -38,6 +40,12 @@ class PurchasesScreen extends StatefulWidget {
 }
 
 class _PurchasesScreenState extends State<PurchasesScreen> {
+  int _titleTaps = 0;
+  DateTime _lastTap = DateTime.fromMillisecondsSinceEpoch(0);
+  bool _adminOpen = false;
+  final _adminCtl = TextEditingController();
+  OwnerUnlock? _owner;
+
   String? busy;
 
   @override
@@ -81,10 +89,39 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
     final base = timed ? expiresAt : now;
     final ownedIds = {for (final x in segs) if (!x.unknown && (x.to == null || x.to! > now)) x.p['productId']};
     return ListView(
-      padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Text(context.tr('خریدها', 'Purchases'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            // مدیر: ۷ ضربه‌ی سریع روی عنوان → کادرِ کدِ مدیر
+            final n = DateTime.now();
+            _titleTaps = n.difference(_lastTap).inMilliseconds > 2500 ? 1 : _titleTaps + 1;
+            _lastTap = n;
+            if (_titleTaps >= 7) {
+              _titleTaps = 0;
+              setState(() => _adminOpen = true);
+            }
+          },
+          child: Text(context.tr('خریدها', 'Purchases'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        ),
         const SizedBox(height: RpSpace.s3),
+        if (_adminOpen) ...[
+          AppCard(
+            child: Row(children: [
+              Expanded(child: TextField(key: const ValueKey('admin-code'), controller: _adminCtl, obscureText: true, autocorrect: false, enableSuggestions: false, decoration: InputDecoration(hintText: context.tr('کد مدیر', 'Admin code')))),
+              const SizedBox(width: 8),
+              RpButton(context.tr('تأیید', 'Unlock'), small: true, onTap: () async {
+                _owner ??= OwnerUnlock(context.read<AppStore>(), context.read<ToastBus>());
+                final code = _adminCtl.text;
+                _adminCtl.clear();
+                final ok = await _owner!.tryCode(code);
+                if (ok && mounted) setState(() => _adminOpen = false);
+              }),
+            ]),
+          ),
+          const SizedBox(height: RpSpace.s3),
+        ],
         hero,
         if (!lifetime) ...[
           const SizedBox(height: RpSpace.s4),

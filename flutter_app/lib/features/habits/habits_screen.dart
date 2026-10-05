@@ -32,7 +32,7 @@ class HabitsScreen extends StatelessWidget {
     final iso = dateToISO(startOfDay(now));
     return Stack(children: [
       ListView(
-        padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
+        padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
         children: [
           Row(children: [Expanded(child: Text(context.tr('عادت‌ها', 'Habits'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('habits')]),
           const SizedBox(height: RpSpace.s3),
@@ -311,7 +311,23 @@ class _EditorState extends State<_Editor> {
         TextFormField(initialValue: f.punishmentText, decoration: InputDecoration(labelText: fa ? 'تنبیه' : 'Punishment'), onChanged: (v) => f.punishmentText = v),
         SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(fa ? 'یادآوری روزانه' : 'Daily reminder'), value: f.reminderEnabled, onChanged: (v) => setState(() => f.reminderEnabled = v)),
         if (f.reminderEnabled)
-          TextFormField(initialValue: f.reminderTime, decoration: const InputDecoration(labelText: 'HH:MM'), onChanged: (v) => f.reminderTime = v),
+          ListTile(
+            key: const ValueKey('habit-reminder-time'),
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(LucideIcons.clock),
+            title: Text(fa ? 'ساعت یادآوری' : 'Reminder time'),
+            trailing: Text(fa ? toPersianDigits(f.reminderTime) : f.reminderTime, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+            onTap: () async {
+              final parts = f.reminderTime.split(':');
+              final cur = TimeOfDay(hour: int.tryParse(parts.first) ?? 8, minute: parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0);
+              final t = await showTimePicker(
+                context: context,
+                initialTime: cur,
+                builder: (c, child) => MediaQuery(data: MediaQuery.of(c).copyWith(alwaysUse24HourFormat: true), child: child!),
+              );
+              if (t != null) setState(() => f.reminderTime = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}');
+            },
+          ),
         const SizedBox(height: RpSpace.s4),
         Row(children: [
           Expanded(child: RpButton(fa ? 'انصراف' : 'Cancel', kind: BtnKind.ghost, onTap: () => Navigator.pop(context))),

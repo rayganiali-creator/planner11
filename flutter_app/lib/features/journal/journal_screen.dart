@@ -136,7 +136,7 @@ class _JournalScreenState extends State<JournalScreen> {
     final all = [...entries]..sort((x, y) => ((y['createdAt'] as num?) ?? 0).compareTo((x['createdAt'] as num?) ?? 0));
     final nowMs = DateTime.now().millisecondsSinceEpoch;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
         Text(context.tr('ژورنال', 'Journal'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
         const SizedBox(height: RpSpace.s3),

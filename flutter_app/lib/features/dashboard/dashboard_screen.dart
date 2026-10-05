@@ -64,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final habits = applicableHabitsForISO(st, iso);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 120),
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
         _Header(text: clockText(_now, fa: fa)),
         const SizedBox(height: RpSpace.s4),
@@ -156,18 +156,19 @@ class _Stage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.rp;
+    final sky = avatarSky(day);
     return Container(
-      height: 220,
+      height: 130,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(RpRadius.xl),
-        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [p.skyTop, p.skyBottom]),
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [sky.top, sky.bottom]),
         boxShadow: RpShadow.e2(context.rpBrightness),
       ),
       child: Stack(children: [
-        Positioned(top: 16, right: 20, child: Icon(day ? LucideIcons.sun : LucideIcons.moon, size: 28, color: day ? p.gold : p.skyBottom)),
+        Positioned(top: 16, right: 20, child: Icon(day ? LucideIcons.sun : LucideIcons.moon, size: 28, color: day ? p.gold : const Color(0xFFE8EEF8))),
         Positioned(
           left: 0, right: 0, bottom: 0,
-          child: Container(height: 56, decoration: BoxDecoration(color: p.ground, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(RpRadius.xl)))),
+          child: Container(height: 30, decoration: BoxDecoration(color: sky.ground, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(RpRadius.xl)))),
         ),
         Center(child: _StageAvatar(state: state, cond: cond)),
         Positioned(
@@ -267,7 +268,7 @@ class _StageAvatar extends StatelessWidget {
         ]),
       );
     }
-    return GestureDetector(onTap: () => showAvatarPanel(context), child: AvatarView(data: data, gender: g, equipped: data.equippedFor(state as Doc, g), cond: cond, height: 190));
+    return GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => showAvatarPanel(context), child: AvatarView(data: data, gender: g, equipped: data.equippedFor(state as Doc, g), cond: cond, height: 105));
   }
 }
 

@@ -80,7 +80,7 @@ class _TodoScreenState extends State<TodoScreen> {
     final done = todos.where((t) => t['done'] == true).length;
     final nowMs = now.millisecondsSinceEpoch;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 140),
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
         Text(context.tr('کارها', 'To-Do'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
         const SizedBox(height: RpSpace.s3),

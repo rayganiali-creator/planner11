@@ -96,3 +96,9 @@ class _P extends CustomPainter {
   @override
   bool shouldRepaint(_P o) => o.img != img || o.src != src;
 }
+
+/// پس‌زمینه‌ی صحنه‌ی آواتار: فقط به ساعتِ روز بستگی دارد (نه به حالت روشن/تاریک برنامه).
+/// روز: آسمانِ ملایم (نه خیلی روشن)؛ شب: آسمانِ تیره.
+({Color top, Color bottom, Color ground}) avatarSky(bool day) => day
+    ? (top: const Color(0xFF8DBBD3), bottom: const Color(0xFFCFE3DC), ground: const Color(0xFF4E8F86))
+    : (top: const Color(0xFF0A1B36), bottom: const Color(0xFF1B4A5E), ground: const Color(0xFF082C2A));

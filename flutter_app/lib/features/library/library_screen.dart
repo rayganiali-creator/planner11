@@ -60,7 +60,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final nowMs = DateTime.now().millisecondsSinceEpoch;
     return Stack(children: [
       ListView(
-        padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, 150),
+        padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
         children: [
           Text(context.tr('کتابخانه', 'Library'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
           const SizedBox(height: RpSpace.s3),
