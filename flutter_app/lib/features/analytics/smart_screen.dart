@@ -1,5 +1,5 @@
-// «تحلیل رفتار هوشمند» (پرو): KPIها، روند، نقشه‌ی روزهای هفته، رتبه‌ی عادت‌ها، اثر محرک/مشوق، علت‌ها،
-// الگوها و پیشنهادها، ژورنال رفتاری. محاسبه: core/smart.dart (با JS سنجیده شده).
+// «تحلیل هوشمند» (پرو): امتیاز و داوری، تمرکزِ امروز، عادت‌های در خطر، بینش‌ها و بخش‌های کشوییِ جزئیات
+// (روند، روزهای هفته، رتبه‌ها، محرک/مشوق، علت‌ها، ژورنال رفتاری). محاسبه: core/smart.dart (با JS سنجیده شده) + core/smart_extras.dart.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,19 +7,22 @@ import '../../app/i18n.dart';
 import '../../core/date_fmt.dart';
 import '../../core/calendar.dart';
 import '../../core/smart.dart';
+import '../../core/smart_extras.dart';
+import '../../app/nav.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../ui/charts.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 
-class SmartCard extends StatefulWidget {
-  const SmartCard({super.key});
+class SmartScreen extends StatefulWidget {
+  const SmartScreen({super.key});
   @override
-  State<SmartCard> createState() => _SmartCardState();
+  State<SmartScreen> createState() => _SmartScreenState();
 }
 
-class _SmartCardState extends State<SmartCard> {
+class _SmartScreenState extends State<SmartScreen> {
   String range = 'month';
   String? journalReason;
   final note = TextEditingController();
@@ -34,14 +37,25 @@ class _SmartCardState extends State<SmartCard> {
     String N(Object n) => fa ? toPersianDigits(n) : '$n';
     final pct = fa ? '٪' : '%';
     if (st['isPremium'] != true) {
-      return AppCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('⭐ ${context.tr('تحلیل رفتار هوشمند — پرو', 'Smart behavior analytics — Pro')}', style: rpText(RpType.body, weight: 800, color: p.goldInk)),
-          const SizedBox(height: 6),
-          Text(context.tr('شاخص‌های کلیدی با مقایسه‌ی بازه‌ها، روند روزانه، نقشه‌ی روزهای هفته، رتبه‌بندی عادت‌ها، اثر هر محرک و مشوق، ارتباط محرک با علت شکست، الگوها و پیشنهادها و ژورنال رفتاری.',
-              'Key metrics with period comparison, daily trend, weekday heatmap, habit ranking, trigger impact, trigger–reason links, patterns with suggestions, and a behavioral journal.'), style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.8)),
-        ]),
-      );
+      return ListView(padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)), children: [
+        Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        const SizedBox(height: RpSpace.s3),
+        AppCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [Icon(LucideIcons.brain, color: p.goldInk), const SizedBox(width: 8), Text(context.tr('ویژه‌ی نسخه‌ی پرو', 'Pro feature'), style: rpText(RpType.bodyL, weight: 800, color: p.goldInk))]),
+            const SizedBox(height: 8),
+            for (final t in [
+              context.tr('امتیاز کلی و داوریِ هوشمند از رفتارت', 'An overall score and smart verdict on your behavior'),
+              context.tr('تمرکزِ امروز: کدام عادت بیشترین نیاز را دارد', 'Today’s focus: the habit that needs you most'),
+              context.tr('عادت‌های در خطر و بینش‌های مرتب‌شده', 'Habits at risk and ranked insights'),
+              context.tr('روند، روزهای هفته، اثر محرک و مشوق، علت‌ها', 'Trend, weekdays, trigger & incentive impact, reasons'),
+            ])
+              Padding(padding: const EdgeInsets.only(bottom: 4), child: Row(children: [Icon(LucideIcons.check, size: 14, color: p.okInk), const SizedBox(width: 8), Expanded(child: Text(t, style: rpText(RpType.label, weight: 500, color: p.muted)))])),
+            const SizedBox(height: RpSpace.s3),
+            RpButton(context.tr('مشاهده‌ی پلن‌ها', 'See plans'), onTap: () => context.read<NavController>().go(AppView.purchases)),
+          ]),
+        ),
+      ]);
     }
     final now = a.today;
     final cur = saCompute(st, saPeriod(range, 0, now)), prev = saCompute(st, saPeriod(range, 1, now));
@@ -126,37 +140,143 @@ class _SmartCardState extends State<SmartCard> {
     final journal = journalReason == null ? <Map>[] : ((bj[journalReason] as List?) ?? const []).cast<Map>().reversed.toList();
     final wdNames = fa ? saWdFa : saWdEn.map((e) => e.substring(0, 3)).toList();
 
+    final bestWd = () {
+      int bi = -1;
+      double br = -1;
+      for (int i = 0; i < 7; i++) {
+        final w = cur.byWeekday[i];
+        final n = w[0] + w[1];
+        if (n >= 2 && w[0] / n > br) {
+          br = w[0] / n;
+          bi = i;
+        }
+      }
+      return bi < 0 ? null : '${fa ? saWdFa[bi] : saWdEn[bi]} · ${N(jsR(br * 100))}$pct';
+    }();
+    String? sumFor(String ico, String title) {
+      if (ico == '📈') return cur.rate == null ? null : '${N(jsR(cur.rate! * 100))}$pct';
+      if (ico == '🗓️') return bestWd;
+      if (ico == '🏅' && habits.isNotEmpty && !title.contains('پیروزی') && !title.contains('succeeded')) return habits.first.name;
+      if (ico == '⚡') return impacts.isEmpty ? null : N(impacts.length);
+      if (ico == '📓') return reasonsList.isEmpty ? null : N(reasonsList.length);
+      return null;
+    }
+
     Widget section(String ico, String title, String sub, Widget child) => Padding(
-          padding: const EdgeInsets.only(top: RpSpace.s4),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('$ico $title', style: rpText(RpType.body, weight: 800, color: p.text)),
-            Text(sub, style: rpText(RpType.caption, weight: 500, color: p.muted)),
-            const SizedBox(height: RpSpace.s2),
-            child,
-          ]),
+          padding: const EdgeInsets.only(top: RpSpace.s3),
+          child: RpCollapsible(
+            key: ValueKey('smart-$ico-$title'),
+            persistKey: 'smart$ico',
+            title: '$ico $title',
+            summary: sumFor(ico, title),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(sub, style: rpText(RpType.caption, weight: 500, color: p.muted)),
+              const SizedBox(height: RpSpace.s2),
+              child,
+            ]),
+          ),
         );
     Widget empty(String t) => Text(t, style: rpText(RpType.label, weight: 500, color: p.muted));
 
-    return AppCard(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('🧠 ${context.tr('تحلیل رفتار هوشمند', 'Smart behavior analytics')}', style: rpText(RpType.bodyL, weight: 800, color: p.text)),
-        const SizedBox(height: 8),
+    final score = smartScore(cur);
+    final iso = dateToISO(startOfDay(now));
+    final focus = focusHabitToday(st, cur, iso);
+    final risk = atRiskHabits(cur, prev);
+    final topReason = (cur.failReasons.entries.toList()..sort((x, y) => y.value.compareTo(x.value))).map((e) => e.key).firstOrNull;
+    Widget insightCard(SaInsight x) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(color: x.level == 'good' ? p.okSoft : x.level == 'bad' ? p.badSoft : p.goldSoft, borderRadius: BorderRadius.circular(RpRadius.md)),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(x.ico, style: const TextStyle(fontSize: 22)),
+            const SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(x.t, style: rpText(RpType.body, weight: 800, color: p.text, height: 1.6)), Text(x.s, style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7))])),
+          ]),
+        );
+    final scoreColor = score == null ? p.muted : (score >= 65 ? p.okInk : score >= 40 ? p.goldInk : p.badInk);
+
+    return ListView(
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
+      children: [
+        Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        const SizedBox(height: RpSpace.s2),
         Wrap(spacing: 8, children: [
           for (final r in const [('week', 'هفتگی', 'Week'), ('month', 'ماهانه', 'Month'), ('year', 'سالانه', 'Year')])
-            ChoiceChip(label: Text(fa ? r.$2 : r.$3), selected: range == r.$1, onSelected: (_) => setState(() => range = r.$1)),
+            ChoiceChip(key: ValueKey('range-${r.$1}'), label: Text(fa ? r.$2 : r.$3), selected: range == r.$1, onSelected: (_) => setState(() => range = r.$1)),
         ]),
         const SizedBox(height: RpSpace.s3),
-        Row(children: [
-          kpi('✅', context.tr('نرخ موفقیت', 'Success rate'), pc(cur.rate), delta(cur.rate, prev.rate)),
-          const SizedBox(width: 6),
-          kpi('🌟', context.tr('روزهای کامل', 'Perfect days'), N(cur.perfect), delta(perfectRate(cur), perfectRate(prev))),
-        ]),
-        const SizedBox(height: 6),
-        Row(children: [
-          kpi('🔁', context.tr('تاب‌آوری', 'Resilience'), pc(cur.recovery), delta(cur.recovery, prev.recovery), context.tr('برگشت پس از شکست', 'comeback after a miss')),
-          const SizedBox(width: 6),
-          kpi('📆', context.tr('ثبات', 'Consistency'), pc(cur.consistency), delta(cur.consistency, prev.consistency), context.tr('روزهای ثبت‌شده', 'days with entries')),
-        ]),
+        // امتیاز و داوری
+        AppCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              RpRing(value: (score ?? 0) / 100, size: 84, center: Text(score == null ? '—' : N(score), key: const ValueKey('smart-score'), style: rpText(RpType.title, weight: 900, color: scoreColor))),
+              const SizedBox(width: RpSpace.s4),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(context.tr('امتیاز رفتار', 'Behavior score'), style: rpText(RpType.caption, weight: 700, color: p.muted)),
+                  Text(score == null ? context.tr('چند روز ثبت بیشتر لازم است.', 'A few more days of data are needed.') : smartVerdict(score, fa), style: rpText(RpType.bodyL, weight: 800, color: p.text, height: 1.5)),
+                  const SizedBox(height: 2),
+                  Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 6, children: [Text(context.tr('نسبت به بازه‌ی قبل', 'vs. previous'), style: rpText(RpType.caption, weight: 500, color: p.muted)), delta(cur.rate, prev.rate)]),
+                ]),
+              ),
+            ]),
+            const SizedBox(height: RpSpace.s3),
+            IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              kpi('✅', context.tr('موفقیت', 'Success'), pc(cur.rate), delta(cur.rate, prev.rate)),
+              const SizedBox(width: 6),
+              kpi('🌟', context.tr('روز کامل', 'Perfect days'), N(cur.perfect), delta(perfectRate(cur), perfectRate(prev))),
+            ])),
+            const SizedBox(height: 6),
+            IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              kpi('🔁', context.tr('تاب‌آوری', 'Resilience'), pc(cur.recovery), delta(cur.recovery, prev.recovery), context.tr('برگشت پس از شکست', 'comeback after a miss')),
+              const SizedBox(width: 6),
+              kpi('📆', context.tr('ثبات', 'Consistency'), pc(cur.consistency), delta(cur.consistency, prev.consistency), context.tr('روزهای ثبت‌شده', 'days with entries')),
+            ])),
+          ]),
+        ),
+        const SizedBox(height: RpSpace.s3),
+        // تمرکز امروز
+        AppCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [Icon(LucideIcons.crosshair, size: 18, color: p.primary), const SizedBox(width: 8), Text(context.tr('تمرکزِ امروز', 'Today’s focus'), style: rpText(RpType.body, weight: 800, color: p.text))]),
+            const SizedBox(height: 6),
+            if (focus == null)
+              Text(context.tr('همه‌ی عادت‌های امروز ثبت شده‌اند 🎉', 'Everything due today is logged 🎉'), style: rpText(RpType.body, weight: 500, color: p.muted))
+            else ...[
+              Text('${focus['name']}', key: const ValueKey('smart-focus'), style: rpText(RpType.bodyL, weight: 800, color: p.text)),
+              const SizedBox(height: 2),
+              Text(saSuggestion(topReason, fa), style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7)),
+            ],
+          ]),
+        ),
+        if (risk.isNotEmpty) ...[
+          const SizedBox(height: RpSpace.s3),
+          AppCard(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [Icon(LucideIcons.triangleAlert, size: 18, color: p.badInk), const SizedBox(width: 8), Text(context.tr('عادت‌های در خطر', 'Habits at risk'), style: rpText(RpType.body, weight: 800, color: p.text))]),
+              const SizedBox(height: 6),
+              for (final r in risk)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(children: [
+                    Expanded(child: Text(r.name, style: rpText(RpType.body, weight: 700, color: p.text))),
+                    Text('${N(jsR(r.before * 100))}$pct ← ${N(jsR(r.now * 100))}$pct', style: rpText(RpType.caption, weight: 800, color: p.badInk)),
+                  ]),
+                ),
+            ]),
+          ),
+        ],
+        const SizedBox(height: RpSpace.s3),
+        // بینش‌ها: ۳ مورد برتر، بقیه کشویی
+        Text(context.tr('بینش‌ها', 'Insights'), style: rpText(RpType.body, weight: 800, color: p.text)),
+        const SizedBox(height: RpSpace.s2),
+        if (insights.isEmpty)
+          empty(context.tr('برای کشف الگو، چند روز ثبت بیشتر لازم است.', 'A few more days of data are needed.'))
+        else ...[
+          for (final x in insights.take(3)) insightCard(x),
+          if (insights.length > 3)
+            RpCollapsible(key: const ValueKey('smart-more-insights'), persistKey: 'smartMore', title: context.tr('بینش‌های بیشتر', 'More insights'), summary: N(insights.length - 3), card: false, child: Column(children: [for (final x in insights.skip(3)) insightCard(x)])),
+        ],
         section('📈', range == 'year' ? context.tr('روند ماهانه', 'Monthly trend') : range == 'month' ? context.tr('روند ۳۰ روز اخیر', 'Last 30 days') : context.tr('روند هفته', 'This week'),
             range == 'year' ? context.tr('میانگین نرخ موفقیت در هر ماه', 'Average success rate per month') : context.tr('نرخ موفقیت هر روز', 'Daily success rate'),
             cur.series.any((x) => x.rate != null) ? Directionality(textDirection: TextDirection.ltr, child: RpBarChart(labels: labels, values: values, color: p.primary, height: 150)) : empty(context.tr('در این بازه ثبتی وجود ندارد.', 'No entries in this period.'))),
@@ -249,22 +369,6 @@ class _SmartCardState extends State<SmartCard> {
                         ]),
                       ),
                   ])),
-        section('💡', context.tr('الگوها و پیشنهادها', 'Patterns & suggestions'), context.tr('به ترتیب اهمیت', 'Sorted by importance'),
-            insights.isEmpty
-                ? empty(context.tr('برای کشف الگو، چند روز ثبت بیشتر لازم است.', 'A few more days of data are needed.'))
-                : Column(children: [
-                    for (final x in insights)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: x.level == 'good' ? p.okSoft : x.level == 'bad' ? p.badSoft : p.goldSoft, borderRadius: BorderRadius.circular(RpRadius.md)),
-                        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(x.ico, style: const TextStyle(fontSize: 22)),
-                          const SizedBox(width: 10),
-                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(x.t, style: rpText(RpType.body, weight: 800, color: p.text, height: 1.6)), Text(x.s, style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7))])),
-                        ]),
-                      ),
-                  ])),
         section('📓', context.tr('ژورنال رفتاری', 'Behavioral journal'), context.tr('یادداشت عمیق درباره‌ی علت‌ها', 'Reflect deeply on reasons'),
             reasonsList.isEmpty
                 ? empty(context.tr('هنوز دلیلی ثبت نشده.', 'No reasons recorded yet.'))
@@ -288,7 +392,7 @@ class _SmartCardState extends State<SmartCard> {
                         child: Text('${dateNumeric(DateTime.fromMillisecondsSinceEpoch((j['at'] as num).toInt()), jalali: jal, fa: fa)} — ${j['text']}', style: rpText(RpType.label, weight: 500, color: p.text, height: 1.7)),
                       ),
                   ])),
-      ]),
+      ],
     );
   }
 }

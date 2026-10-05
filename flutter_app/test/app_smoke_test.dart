@@ -28,7 +28,9 @@ void main() {
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: actions));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('روتین پلنر'), findsWidgets);
-    expect(find.text('ورزش', findRichText: true, skipOffstage: false), findsWidgets);
+    nav.go(AppView.habits); // ثبتِ عادت فقط در تبِ عادت‌ها (خانه دیگر فهرستِ ثبت ندارد)
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('ورزش'), findsWidgets);
 
     final iso = actions.todayISO;
     await tester.scrollUntilVisible(find.byIcon(LucideIcons.check), 300, scrollable: find.byType(Scrollable).first);
@@ -40,8 +42,10 @@ void main() {
     expect(((store.state['records'] as Map)[iso] as Map)['h1'], 'success');
     expect(File('${dir.path}/state.json').existsSync(), isTrue);
 
-    nav.go(AppView.habits);
+    nav.go(AppView.month);
     await tester.pump(const Duration(milliseconds: 400));
+    expect(nav.handleBack(), isTrue);
+    expect(nav.current, AppView.habits);
     expect(nav.handleBack(), isTrue);
     expect(nav.current, AppView.dashboard);
     expect(nav.handleBack(), isFalse);

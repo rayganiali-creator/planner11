@@ -55,7 +55,7 @@ Future<void> showGenderPicker(BuildContext context) {
                             child: AvatarScene(
                               daylight: daylight,
                               radius: BorderRadius.circular(RpRadius.lg),
-                              child: Align(alignment: const Alignment(0, .95), child: data == null ? const SizedBox.shrink() : AvatarView(data: data, gender: g.$1, equipped: const {}, cond: 'ok', height: 108)),
+                              child: Align(alignment: const Alignment(0, .95), child: data == null ? const SizedBox.shrink() : AvatarView(data: data, gender: g.$1, equipped: const {}, cond: 'ok', height: 112, cropToContent: true)),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -175,22 +175,16 @@ class _PanelState extends State<_Panel> {
         ]),
       ),
       SizedBox(
-        height: 124,
+        height: 96,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: RpSpace.s4),
           child: AvatarScene(
             daylight: daylightAt(now),
             radius: BorderRadius.circular(RpRadius.lg),
-            // حیوان همیشه سمتِ راستِ آواتار است (راست‌چین/چپ‌چین فرقی نمی‌کند)
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Align(
-                alignment: const Alignment(0, .95),
-                child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'noPet'),
-                  if (preview.values.any((id) => d.items[id]?.kind == 'pet')) AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'petOnly'),
-                ]),
-              ),
+            // آواتار و حیوانِ همراه در یک ترکیب (حیوان همیشه سمتِ راستِ آواتار)؛ حاشیه‌ی شفاف بریده می‌شود تا کادر را پر کند
+            child: Align(
+              alignment: const Alignment(0, .9),
+              child: AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 86, cropToContent: true),
             ),
           ),
         ),

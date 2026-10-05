@@ -16,6 +16,7 @@ import '../features/dashboard/dashboard_screen.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/urge/urge_sheet.dart';
 import '../features/analytics/analytics_screen.dart';
+import '../features/analytics/smart_screen.dart';
 import '../features/calendar/calendar_screens.dart';
 import '../features/habits/habits_screen.dart';
 import '../features/journal/journal_screen.dart';
@@ -133,7 +134,7 @@ class _ShellState extends State<Shell> {
         if (!nav.handleBack()) SystemNavigator.pop();
       },
       child: Scaffold(
-        extendBody: true,
+        // نوار ناوبری محتوا را نمی‌پوشاند: بدنه بالای آن تمام می‌شود و آخرِ هر صفحه همیشه دیده می‌شود
         body: SafeArea(
           bottom: false,
           child: AnimatedSwitcher(
@@ -162,6 +163,7 @@ class _ShellState extends State<Shell> {
         AppView.pomodoro => const PomodoroScreen(),
         AppView.settings => const SettingsScreen(),
         AppView.analytics => const AnalyticsScreen(),
+        AppView.smart => const SmartScreen(),
         AppView.month => const MonthScreen(),
         AppView.year => const YearScreen(),
       };
@@ -292,6 +294,7 @@ class _ActionGridSheet extends StatelessWidget {
       (LucideIcons.timer, p.xpSoft, p.xpInk, context.tr('پومودورو', 'Pomodoro'), AppView.pomodoro),
       (LucideIcons.trophy, p.goldSoft, p.goldInk, context.tr('چالش‌ها', 'Challenges'), null),
       (LucideIcons.zap, p.hpSoft, p.hpInk, context.tr('لحظه‌ی وسوسه', 'Urge Moment'), null),
+      (LucideIcons.brain, p.xpSoft, p.xpInk, context.tr('تحلیل هوشمند', 'Smart Analysis'), AppView.smart),
       (LucideIcons.chartColumn, p.blueSoft, p.blueInk, context.tr('تحلیل', 'Analytics'), AppView.analytics),
       (LucideIcons.settings, p.okSoft, p.okInk, context.tr('تنظیمات', 'Settings'), AppView.settings),
     ];
@@ -304,7 +307,7 @@ class _ActionGridSheet extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           boxShadow: RpShadow.e3(context.rpBrightness),
         ),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Center(child: Container(width: 42, height: 5, decoration: BoxDecoration(color: p.line, borderRadius: BorderRadius.circular(9)))),
           const SizedBox(height: 14),
           Text(context.tr('انتخاب صفحه', 'Choose a Tab'), style: rpText(RpType.title, weight: 800, color: p.text)),
@@ -346,7 +349,7 @@ class _ActionGridSheet extends StatelessWidget {
                 ),
             ],
           ),
-        ]),
+        ])),
       ),
     );
   }

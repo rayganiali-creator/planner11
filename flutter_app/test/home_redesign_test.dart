@@ -15,7 +15,7 @@ void main() {
   late AvData data;
   setUpAll(() async => data = await AvData.load());
 
-  Future<(AppStore, AppActions, String)> boot(WidgetTester tester, {int hour = 12, bool gender = true}) async {
+  Future<(AppStore, AppActions, String)> boot(WidgetTester tester, {int hour = 12, bool gender = true, AppView view = AppView.dashboard}) async {
     tester.view.physicalSize = const Size(1080, 2200);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -29,7 +29,7 @@ void main() {
       {'id': 'h1', 'name': 'Salavat', 'type': 'numeric', 'numericTarget': 100, 'numericUnit': 'x', 'reward': 10, 'direction': 'more', 'permanent': true, 'start': '2025-01-01'},
       {'id': 'h2', 'name': 'Run', 'type': 'binary', 'reward': 10, 'permanent': true, 'start': '2025-01-01'},
     ];
-    await tester.pumpWidget(RoutineApp(store: store, nav: NavController(), toasts: a.toasts, actions: a, avData: data));
+    await tester.pumpWidget(RoutineApp(store: store, nav: NavController()..go(view), toasts: a.toasts, actions: a, avData: data));
     await tester.pump(const Duration(milliseconds: 500));
     return (store, a, path);
   }
@@ -39,13 +39,13 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   }
 
-  testWidgets('خانه: ثبتِ مستقیمِ مقدار برای عادت عددی (و عادت دوحالتی مثل قبل)', (tester) async {
-    final (store, _, _) = await boot(tester);
+  testWidgets('تب عادت‌ها: ثبتِ درجای مقدار برای عادت عددی (و عادت دوحالتی دکمه دارد)', (tester) async {
+    final (store, _, _) = await boot(tester, view: AppView.habits);
     await tester.scrollUntilVisible(find.byKey(const ValueKey('value-h1')), 200, scrollable: find.byType(Scrollable).first);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -150));
     await tester.pump(const Duration(milliseconds: 300));
-    // دکمه‌های عادت دوحالتی هنوز هستند
-    expect(find.byKey(const ValueKey('value-h2')), findsNothing);
+    expect(find.byKey(const ValueKey('value-h2')), findsNothing); // عادت دوحالتی ورودیِ عددی ندارد
+    expect(find.text('انجام شد'), findsWidgets);
     await tester.enterText(find.byKey(const ValueKey('value-h1')), '۲۵'); // رقم فارسی هم پذیرفته می‌شود
     await tester.tap(find.byKey(const ValueKey('save-h1')));
     await tester.pump(const Duration(milliseconds: 500));
@@ -57,22 +57,28 @@ void main() {
     await drain(tester);
   });
 
-  testWidgets('خانه: «پیشرفت عادت‌ها» آکاردئون است؛ پیش‌فرض بسته و وضعیت ذخیره می‌شود', (tester) async {
-    final (store, a, path) = await boot(tester);
-    final toggle = find.byKey(const ValueKey('habits-progress-toggle'));
+  testWidgets('خانه: «پیشرفت عادت‌ها» و «چالش‌ها» کشویی‌اند؛ پیش‌فرض بسته و وضعیت ذخیره می‌شود', (tester) async {
+    final (store, _, path) = await boot(tester);
+    // فهرستِ «عادت‌های امروز» از خانه حذف شده
+    expect(find.text('عادت‌های امروز'), findsNothing);
+    final toggle = find.text('پیشرفت عادت‌ها');
     await tester.scrollUntilVisible(toggle, 200, scrollable: find.byType(Scrollable).first);
     expect(find.textContaining('۳۰ روز اخیر'), findsNothing); // بسته: فقط ردیف مینیمال
     await tester.tap(toggle);
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.textContaining('۳۰ روز اخیر'), findsWidgets);
-    expect(store.state['homeProgressOpen'], true);
-    // پس از راه‌اندازیِ دوباره هنوز باز است
+    expect(((store.state['uiOpen'] as Map)['homeProgress']), true);
     final again = AppStore(path)..load();
-    expect(again.state['homeProgressOpen'], true);
+    expect((again.state['uiOpen'] as Map)['homeProgress'], true); // پس از راه‌اندازیِ دوباره هم باز است
     await tester.tap(toggle);
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.textContaining('۳۰ روز اخیر'), findsNothing);
-    expect(a.store.state['homeProgressOpen'], false);
+    expect(((store.state['uiOpen'] as Map)['homeProgress']), false);
+    // چالش‌ها: بسته → باز
+    expect(find.text('مدیریت چالش‌ها'), findsNothing);
+    await tester.tap(find.text('چالش‌ها'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('مدیریت چالش‌ها'), findsOneWidget);
     await drain(tester);
   });
 
@@ -105,8 +111,13 @@ void main() {
       store.state['habits'] = [
         {'id': 'h1', 'name': 'صلوات بسیار طولانی برای آزمون سرریز', 'type': 'numeric', 'numericTarget': 1000, 'numericUnit': 'بار', 'permanent': true, 'start': '2025-01-01'},
       ];
-      await tester.pumpWidget(RoutineApp(store: store, nav: NavController(), toasts: a.toasts, actions: a, avData: data));
+      final nav = NavController();
+      await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: a.toasts, actions: a, avData: data));
       await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull);
+      nav.go(AppView.habits);
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.scrollUntilVisible(find.byKey(const ValueKey('value-h1')), 200, scrollable: find.byType(Scrollable).first);
       await tester.pump(const Duration(milliseconds: 300));
       expect(tester.takeException(), isNull);

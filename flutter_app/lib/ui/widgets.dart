@@ -1,6 +1,9 @@
 // اجزای پایه‌ی Design System — همه از tokens.dart می‌خوانند.
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
+import '../data/app_store.dart';
 import 'tokens.dart';
 
 class AppCard extends StatelessWidget {
@@ -24,7 +27,7 @@ class AppCard extends StatelessWidget {
             color: p.surface,
             borderRadius: BorderRadius.circular(RpRadius.lg),
             border: Border.all(color: p.line),
-            boxShadow: RpShadow.e2(b),
+            boxShadow: RpShadow.e1(b),
           ),
           child: child,
         ),
@@ -212,5 +215,87 @@ class _RingPainter extends CustomPainter {
   bool shouldRepaint(_RingPainter o) => o.v != v || o.fg != fg || o.bg != bg;
 }
 
-/// فاصله‌ی پایین فهرست‌ها: بالاتر از نوار ناوبری شناور (با دکمه‌ی «+») و نوار سیستم، تا آخرین ردیف کاملاً دیده شود.
-double rpBottomPad(BuildContext context) => 170 + MediaQuery.viewPaddingOf(context).bottom;
+/// فاصله‌ی پایین فهرست‌ها (نوار ناوبری دیگر روی محتوا نمی‌افتد؛ فقط کمی هوا زیرِ آخرین ردیف).
+double rpBottomPad(BuildContext context) => 28;
+
+
+/// بخشِ کشویی (آکاردئون): ردیفِ مینیمالِ عنوان + خلاصه + فلش؛ با ضربه باز/بسته می‌شود (انیمیشن نرم).
+/// اگر [persistKey] بدهید وضعیتِ باز/بسته در state['uiOpen'] ذخیره می‌شود.
+class RpCollapsible extends StatefulWidget {
+  final String title;
+  final String? summary;
+  final IconData? icon;
+  final Widget child;
+  final String? persistKey;
+  final bool initiallyOpen;
+  final bool card; // داخل کارت (پیش‌فرض) یا بی‌قاب
+  const RpCollapsible({super.key, required this.title, required this.child, this.summary, this.icon, this.persistKey, this.initiallyOpen = false, this.card = true});
+  @override
+  State<RpCollapsible> createState() => _RpCollapsibleState();
+}
+
+class _RpCollapsibleState extends State<RpCollapsible> {
+  late bool open = widget.initiallyOpen;
+  bool _loaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loaded) {
+      _loaded = true;
+      final k = widget.persistKey;
+      if (k != null) {
+        final st = _stateOf(context);
+        final m = st?['uiOpen'];
+        if (m is Map && m[k] is bool) open = m[k] as bool;
+      }
+    }
+  }
+
+  static Map? _stateOf(BuildContext context) {
+    try {
+      return context.read<AppStore>().state;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _toggle() {
+    setState(() => open = !open);
+    final k = widget.persistKey;
+    if (k == null) return;
+    try {
+      final store = context.read<AppStore>();
+      if (store.state['uiOpen'] is! Map) store.state['uiOpen'] = <String, dynamic>{};
+      (store.state['uiOpen'] as Map)[k] = open;
+      store.save();
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    final header = InkWell(
+      borderRadius: BorderRadius.circular(RpRadius.lg),
+      onTap: _toggle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: RpSpace.s4, vertical: RpSpace.s3),
+        child: Row(children: [
+          if (widget.icon != null) ...[Icon(widget.icon, size: 18, color: p.muted), const SizedBox(width: 10)],
+          Expanded(child: Text(widget.title, style: rpText(RpType.body, weight: 800, color: p.text))),
+          if (widget.summary != null && !open)
+            Flexible(child: Padding(padding: const EdgeInsetsDirectional.only(end: 8), child: Text(widget.summary!, maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.label, weight: 600, color: p.muted)))),
+          AnimatedRotation(turns: open ? .5 : 0, duration: RpMotion.fast, child: Icon(Icons.keyboard_arrow_down_rounded, size: 22, color: p.muted)),
+        ]),
+      ),
+    );
+    final body = AnimatedSize(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: open ? Padding(padding: const EdgeInsets.fromLTRB(RpSpace.s4, 0, RpSpace.s4, RpSpace.s4), child: widget.child) : const SizedBox(width: double.infinity),
+    );
+    final col = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [header, body]);
+    return widget.card ? AppCard(padding: EdgeInsets.zero, child: col) : col;
+  }
+}

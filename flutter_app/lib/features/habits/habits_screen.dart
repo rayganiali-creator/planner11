@@ -1,4 +1,7 @@
-// صفحه‌ی عادت‌ها: فهرست با سطح/پیشرفت/استریک/بهترین رکورد، ثبتِ امروز، ویرایش، حذف، جابه‌جایی و عادتِ جدید.
+// صفحه‌ی عادت‌ها: کارت‌های مینیمال (سکه‌ی دریافتی، استریک، رکورد)، ثبت امروز (دوحالتی یا ورودی عددی درجا)،
+// فلشِ بازشو برای یادداشت/عکس/سطح‌ها، ویرایش، حذف، جابه‌جایی و عادتِ جدید.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -30,45 +33,66 @@ class HabitsScreen extends StatelessWidget {
     final habits = (st['habits'] as List).cast<Map>();
     final now = actions.today;
     final iso = dateToISO(startOfDay(now));
-    return Stack(children: [
-      ListView(
-        padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
-        children: [
-          Row(children: [Expanded(child: Text(context.tr('عادت‌ها', 'Habits'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('habits')]),
-          const SizedBox(height: RpSpace.s3),
-          if (habits.isEmpty)
-            AppCard(child: Text(context.tr('هنوز عادتی ندارید. با دکمه‌ی پایین یکی بسازید.', 'No habits yet. Create one below.'), style: rpText(RpType.body, weight: 500, color: p.muted))),
-          for (int i = 0; i < habits.length; i++) _HabitCard(habit: habits[i], index: i, iso: iso, now: now),
-        ],
-      ),
-      Positioned(
-        left: RpSpace.s4, right: RpSpace.s4, bottom: 104,
-        child: RpButton(context.tr('عادت جدید', 'New habit'),
-          icon: LucideIcons.plus,
-          onTap: () {
-            if (!actions.canCreateHabit()) {
-              context.read<AppActions>().toasts.show(
-                  context.tr('⭐ در نسخه‌ی رایگان حداکثر ۳ عادت فعال می‌توانید داشته باشید. برای عادت‌های نامحدود، پرو را تهیه کنید.', '⭐ The free plan allows up to 3 active habits. Get Pro for unlimited habits.'),
-                  ms: 3400);
-              return;
-            }
-            showHabitEditor(context, null);
-          },
-        ),
-      ),
-    ]);
+    return ListView(
+      padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
+      children: [
+        Row(children: [
+          Expanded(child: Text(context.tr('عادت‌ها', 'Habits'), style: rpText(RpType.titleL, weight: 800, color: p.text))),
+          HelpButton('habits'),
+          const SizedBox(width: 4),
+          FilledButton.icon(
+            key: const ValueKey('new-habit'),
+            style: FilledButton.styleFrom(visualDensity: VisualDensity.compact, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RpRadius.sm))),
+            icon: const Icon(LucideIcons.plus, size: 16),
+            label: Text(context.tr('عادت جدید', 'New habit')),
+            onPressed: () {
+              if (!actions.canCreateHabit()) {
+                actions.toasts.show(context.tr('⭐ در نسخه‌ی رایگان حداکثر ۳ عادت فعال می‌توانید داشته باشید. برای عادت‌های نامحدود، پرو را تهیه کنید.', '⭐ The free plan allows up to 3 active habits. Get Pro for unlimited habits.'), ms: 3400);
+                return;
+              }
+              showHabitEditor(context, null);
+            },
+          ),
+        ]),
+        const SizedBox(height: RpSpace.s3),
+        if (habits.isEmpty) AppCard(child: Text(context.tr('هنوز عادتی ندارید. با «عادت جدید» یکی بسازید.', 'No habits yet. Create one with “New habit”.'), style: rpText(RpType.body, weight: 500, color: p.muted))),
+        for (int i = 0; i < habits.length; i++) _HabitCard(key: ValueKey('hc-${habits[i]['id']}'), habit: habits[i], index: i, iso: iso, now: now),
+      ],
+    );
   }
 }
 
-class _HabitCard extends StatelessWidget {
+class _HabitCard extends StatefulWidget {
   final Map habit;
   final int index;
   final String iso;
   final DateTime now;
-  const _HabitCard({required this.habit, required this.index, required this.iso, required this.now});
+  const _HabitCard({super.key, required this.habit, required this.index, required this.iso, required this.now});
+  @override
+  State<_HabitCard> createState() => _HabitCardState();
+}
+
+class _HabitCardState extends State<_HabitCard> {
+  bool open = false;
+
+  Widget _stat(BuildContext context, IconData icon, Color color, String value, String label, String tip) {
+    final p = context.rp;
+    return Tooltip(
+      message: tip,
+      triggerMode: TooltipTriggerMode.tap,
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(value, style: rpText(RpType.label, weight: 800, color: p.text)),
+        const SizedBox(width: 3),
+        Text(label, style: rpText(RpType.caption, weight: 600, color: p.muted)),
+      ]),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final habit = widget.habit, iso = widget.iso, now = widget.now;
     final p = context.rp;
     final store = context.read<AppStore>();
     final actions = context.read<AppActions>();
@@ -79,8 +103,7 @@ class _HabitCard extends StatelessWidget {
     final levels = habitActiveThresholds(habit);
     final cur = getLevelFromPoints(pts, levels);
     final next = levels.where((l) => l.minPoints > pts).firstOrNull;
-    final prevMin = cur.minPoints;
-    final prog = next == null ? 1.0 : ((pts - prevMin) / (next.minPoints - prevMin)).clamp(0.0, 1.0).toDouble();
+    final prog = next == null ? 1.0 : ((pts - cur.minPoints) / (next.minPoints - cur.minPoints)).clamp(0.0, 1.0).toDouble();
     final streak = computeHabitStreak(st, habit, now);
     final best = computeHabitBestRecord(st, habit);
     final applies = habitAppliesOnISO(habit, iso);
@@ -89,19 +112,26 @@ class _HabitCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: RpSpace.s3),
       child: AppCard(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s2, RpSpace.s3),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             Expanded(child: Text('${habit['name'] ?? ''}', style: rpText(RpType.bodyL, weight: 800, color: p.text))),
             RpChip(cur.icon.isNotEmpty ? '${cur.icon} ${fa ? cur.labelFa : cur.labelEn}' : (fa ? cur.labelFa : cur.labelEn)),
+            IconButton(
+              key: ValueKey('expand-$id'),
+              tooltip: context.tr('یادداشت و عکس', 'Notes & photos'),
+              visualDensity: VisualDensity.compact,
+              iconSize: 20,
+              onPressed: () => setState(() => open = !open),
+              icon: AnimatedRotation(turns: open ? .5 : 0, duration: RpMotion.fast, child: Icon(Icons.keyboard_arrow_down_rounded, color: p.muted)),
+            ),
             PopupMenuButton<String>(
-              icon: Icon(LucideIcons.ellipsisVertical, color: p.muted, size: 20),
+              padding: EdgeInsets.zero,
+              icon: Icon(LucideIcons.ellipsisVertical, color: p.muted, size: 18),
               onSelected: (v) async {
                 if (v == 'edit') showHabitEditor(context, habit);
-                if (v == 'notes') _notesSheet(context, habit);
                 if (v == 'charts') showHabitCharts(context, habit);
-                if (v == 'down') {
-                  actions.moveHabitDown(index);
-                }
+                if (v == 'down') actions.moveHabitDown(widget.index);
                 if (v == 'del') {
                   final okDel = await showDialog<bool>(
                     context: context,
@@ -118,107 +148,276 @@ class _HabitCard extends StatelessWidget {
               },
               itemBuilder: (_) => [
                 PopupMenuItem(value: 'edit', child: Text(fa ? 'ویرایش' : 'Edit')),
-                PopupMenuItem(value: 'notes', child: Text(fa ? 'یادداشت و عکس' : 'Notes & photos')),
                 PopupMenuItem(value: 'charts', child: Text(fa ? '📊 نمودارهای عادت' : '📊 Habit charts')),
                 PopupMenuItem(value: 'down', child: Text(fa ? 'انتقال به پایین' : 'Move down')),
                 PopupMenuItem(value: 'del', child: Text(fa ? 'حذف' : 'Delete')),
               ],
             ),
           ]),
-          const SizedBox(height: RpSpace.s2),
-          _LevelStrip(state: st, habit: habit, cur: cur),
-          const SizedBox(height: RpSpace.s2),
-          RpProgressBar(value: prog, colors: [p.primary, p.primary2]),
-          const SizedBox(height: 6),
-          Text(
-            next == null
-                ? context.tr('${context.n(pts.round())} امتیاز · به بالاترین سطحِ این مرحله رسیدید', '${pts.round()} pts · top level of this stage')
-                : context.tr('${context.n(pts.round())} / ${context.n(next.minPoints)} امتیاز', '${pts.round()} / ${next.minPoints} pts'),
-            style: rpText(RpType.label, weight: 500, color: p.muted),
+          const SizedBox(height: 2),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: RpSpace.s2),
+            child: Wrap(spacing: 14, runSpacing: 4, children: [
+              _stat(context, LucideIcons.coins, p.goldInk, context.n(pts.round()), context.tr('سکه', 'coins'), context.tr('مجموع سکه‌ای که تا امروز از این عادت گرفته‌ای', 'Total coins you have earned from this habit')),
+              _stat(context, LucideIcons.flame, p.fire, context.n(streak), context.tr('روز پیاپی', 'day streak'), context.tr('چند روزِ پشت‌سرهم این عادت را موفق انجام داده‌ای', 'Consecutive days you completed this habit')),
+              if (best != null) _stat(context, LucideIcons.trophy, p.goldInk, context.n(best), context.tr('رکورد', 'best'), context.tr('بلندترین رشته‌ی روزهای پیاپیِ موفقِ این عادت', 'Your longest streak of successful days for this habit')),
+            ]),
           ),
           const SizedBox(height: RpSpace.s2),
-          Row(children: [
-            Icon(LucideIcons.flame, size: 16, color: p.fire),
-            const SizedBox(width: 4),
-            Text(context.n(streak), style: rpText(RpType.label, weight: 700, color: p.fire)),
-            const SizedBox(width: RpSpace.s4),
-            if (best != null) ...[
-              Icon(LucideIcons.trophy, size: 16, color: p.goldInk),
-              const SizedBox(width: 4),
-              Text(context.n(best), style: rpText(RpType.label, weight: 700, color: p.goldInk)),
-            ],
-            const Spacer(),
-            if (!applies)
-              Text(context.tr('امروز سررسید ندارد', 'Not due today'), style: rpText(RpType.label, weight: 500, color: p.muted))
-            else if (type == 'binary') ...[
-              _Mark(icon: LucideIcons.x, on: ok == false && _hasRecord(st, iso, id), color: p.badInk, soft: p.badSoft,
-                  onTap: () => recordBinaryFlow(context, id, iso, 'fail', alreadyActive: ok == false && _hasRecord(st, iso, id))),
-              const SizedBox(width: RpSpace.s2),
-              _Mark(icon: LucideIcons.check, on: ok == true, color: p.okInk, soft: p.okSoft,
-                  onTap: () => recordBinaryFlow(context, id, iso, 'success', alreadyActive: ok == true)),
-            ] else
-              OutlinedButton.icon(
-                onPressed: () => _askValue(context, habit, iso),
-                icon: Icon(ok == true ? LucideIcons.circleCheck : LucideIcons.pencil, size: 16),
-                label: Text(_valueLabel(context, st, iso, habit)),
-              ),
-          ]),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: RpSpace.s2),
+            child: Row(children: [
+              Expanded(child: RpProgressBar(value: prog, colors: [p.primary, p.primary2], height: 6)),
+              const SizedBox(width: 8),
+              Text(next == null ? context.tr('سطح نهایی', 'Max') : '${context.n(pts.round())}/${context.n(next.minPoints)}', style: rpText(RpType.caption, weight: 600, color: p.muted)),
+            ]),
+          ),
+          const SizedBox(height: RpSpace.s3),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: RpSpace.s2),
+            child: !applies
+                ? Text(context.tr('امروز سررسید ندارد', 'Not due today'), style: rpText(RpType.label, weight: 500, color: p.muted))
+                : type == 'binary'
+                    ? Row(children: [
+                        Expanded(child: _BinaryBtn(icon: LucideIcons.x, label: context.tr('نشد', 'Missed'), on: ok == false && _hasRecord(st, iso, id), color: p.badInk, soft: p.badSoft, onTap: () => recordBinaryFlow(context, id, iso, 'fail', alreadyActive: ok == false && _hasRecord(st, iso, id)))),
+                        const SizedBox(width: RpSpace.s2),
+                        Expanded(child: _BinaryBtn(icon: LucideIcons.check, label: context.tr('انجام شد', 'Done'), on: ok == true, color: p.okInk, soft: p.okSoft, onTap: () => recordBinaryFlow(context, id, iso, 'success', alreadyActive: ok == true))),
+                      ])
+                    : _InlineValue(habit: habit, iso: iso, state: st),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: open
+                ? Padding(
+                    padding: const EdgeInsetsDirectional.only(top: RpSpace.s3, end: RpSpace.s2),
+                    child: _HabitDetails(habit: habit, cur: cur),
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
         ]),
       ),
     );
   }
 
   static bool _hasRecord(Map st, String iso, String id) => ((st['records'] as Map?)?[iso] as Map?)?.containsKey(id) ?? false;
-
-  static String _valueLabel(BuildContext context, Map st, String iso, Map h) {
-    final raw = ((st['records'] as Map?)?[iso] as Map?)?[h['id']];
-    final v = raw is Map ? raw['value'] : raw;
-    final unit = h['type'] == 'timer' ? context.tr('دقیقه', 'min') : '${h['numericUnit'] ?? ''}';
-    if (v == null) return context.tr('ثبت مقدار', 'Log value');
-    return '${context.n(v)} $unit';
-  }
-
-  Future<void> _askValue(BuildContext context, Map h, String iso) async {
-    final actions = context.read<AppActions>();
-    final fa = context.isFa;
-    final raw = ((actions.store.state['records'] as Map?)?[iso] as Map?)?[h['id']];
-    final cur = raw is Map ? raw['value'] : raw;
-    final c = TextEditingController(text: cur == null ? '' : '$cur');
-    final r = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('${h['name']}'),
-        content: TextField(controller: c, autofocus: true, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, '__clear'), child: Text(fa ? 'پاک کردن' : 'Clear')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, c.text), child: Text(fa ? 'ثبت' : 'Save')),
-        ],
-      ),
-    );
-    if (r == null) return;
-    if (r == '__clear') return actions.clear(iso, h['id'] as String);
-    final v = double.tryParse(r.replaceAll('٫', '.'));
-    if (v == null || !context.mounted) return;
-    await recordValueFlow(context, h['id'] as String, iso, v == v.roundToDouble() ? v.toInt() : v);
-  }
 }
 
-class _Mark extends StatelessWidget {
+class _BinaryBtn extends StatelessWidget {
   final IconData icon;
+  final String label;
   final bool on;
   final Color color, soft;
   final VoidCallback onTap;
-  const _Mark({required this.icon, required this.on, required this.color, required this.soft, required this.onTap});
+  const _BinaryBtn({required this.icon, required this.label, required this.on, required this.color, required this.soft, required this.onTap});
   @override
   Widget build(BuildContext context) => GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: RpMotion.fast,
-          width: 44, height: 44,
+          height: 42,
           decoration: BoxDecoration(color: on ? color : soft, borderRadius: BorderRadius.circular(RpRadius.sm)),
-          child: Icon(icon, size: 20, color: on ? Colors.white : color),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(icon, size: 18, color: on ? Colors.white : color),
+            const SizedBox(width: 6),
+            Text(label, style: rpText(RpType.label, weight: 800, color: on ? Colors.white : color)),
+          ]),
         ),
       );
+}
+
+/// ثبتِ مقدارِ عادت‌های عددی/زمانی درجا (همان مسیر recordValueFlow: «چرا؟»، پاداش/تنبیه، استریک، سکه)
+class _InlineValue extends StatefulWidget {
+  final Map habit;
+  final String iso;
+  final Doc state;
+  const _InlineValue({required this.habit, required this.iso, required this.state});
+  @override
+  State<_InlineValue> createState() => _InlineValueState();
+}
+
+class _InlineValueState extends State<_InlineValue> {
+  final _c = TextEditingController();
+  final _f = FocusNode();
+
+  num? get _cur {
+    final raw = ((widget.state['records'] as Map?)?[widget.iso] as Map?)?[widget.habit['id']];
+    final v = raw is Map ? raw['value'] : raw; // مثل JS رشته ذخیره می‌شود
+    return v is num ? v : (v == null ? null : num.tryParse('$v'));
+  }
+
+  String _fmt(num v) => v == v.roundToDouble() ? '${v.toInt()}' : '$v';
+
+  @override
+  void initState() {
+    super.initState();
+    final v = _cur;
+    if (v != null) _c.text = _fmt(v);
+  }
+
+  @override
+  void didUpdateWidget(_InlineValue o) {
+    super.didUpdateWidget(o);
+    if (!_f.hasFocus) {
+      final v = _cur;
+      final t = v == null ? '' : _fmt(v);
+      if (_c.text != t) _c.text = t;
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    _f.dispose();
+    super.dispose();
+  }
+
+  static num? parseNumber(String raw) {
+    const fa = '۰۱۲۳۴۵۶۷۸۹', ar = '٠١٢٣٤٥٦٧٨٩';
+    final b = StringBuffer();
+    for (final ch in raw.trim().split('')) {
+      final i = fa.indexOf(ch), k = ar.indexOf(ch);
+      b.write(i >= 0 ? '$i' : k >= 0 ? '$k' : (ch == '٫' || ch == ',' || ch == '،') ? '.' : ch);
+    }
+    final v = double.tryParse(b.toString());
+    if (v == null || v.isNaN || v.isInfinite || v < 0) return null;
+    return v == v.roundToDouble() ? v.toInt() : v;
+  }
+
+  Future<void> _save() async {
+    final actions = context.read<AppActions>();
+    _f.unfocus();
+    if (_c.text.trim().isEmpty) {
+      if (_cur != null) actions.clear(widget.iso, widget.habit['id'] as String);
+      return;
+    }
+    final v = parseNumber(_c.text);
+    if (v == null) {
+      actions.toasts.show(context.tr('عدد معتبر وارد کن', 'Enter a valid number'), ms: 2000);
+      return;
+    }
+    await recordValueFlow(context, widget.habit['id'] as String, widget.iso, v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    final h = widget.habit;
+    final ok = habitSuccessOnISO(widget.state, h, widget.iso);
+    final timer = h['type'] == 'timer';
+    final unit = timer ? context.tr('دقیقه', 'min') : '${h['numericUnit'] ?? ''}';
+    final target = timer ? h['timerTarget'] : h['numericTarget'];
+    final cur = _cur;
+    final caption = [
+      cur != null ? context.n(_fmt(cur)) : context.tr('ثبت نشده', 'Not logged'),
+      if (target is num) '/ ${context.n(_fmt(target))}',
+      unit,
+    ].where((e) => e.isNotEmpty).join(' ');
+    return Row(children: [
+      Expanded(child: Text(caption, style: rpText(RpType.label, weight: 700, color: ok == true ? p.okInk : p.muted))),
+      SizedBox(
+        width: 84,
+        height: 42,
+        child: TextField(
+          key: ValueKey('value-${h['id']}'),
+          controller: _c,
+          focusNode: _f,
+          textAlign: TextAlign.center,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _save(),
+          style: rpText(RpType.bodyL, weight: 800, color: p.text),
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: p.surface2,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            hintText: '0',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(RpRadius.sm), borderSide: BorderSide.none),
+          ),
+        ),
+      ),
+      const SizedBox(width: RpSpace.s2),
+      GestureDetector(
+        key: ValueKey('save-${h['id']}'),
+        onTap: _save,
+        child: AnimatedContainer(
+          duration: RpMotion.fast,
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(color: ok == true ? p.okInk : p.okSoft, borderRadius: BorderRadius.circular(RpRadius.sm)),
+          child: Icon(LucideIcons.check, size: 20, color: ok == true ? Colors.white : p.okInk),
+        ),
+      ),
+    ]);
+  }
+}
+
+/// بخشِ بازشدنیِ کارت: سطح‌ها، یادداشت (ذخیره‌ی خودکار) و عکس‌ها
+class _HabitDetails extends StatefulWidget {
+  final Map habit;
+  final LevelDef cur;
+  const _HabitDetails({required this.habit, required this.cur});
+  @override
+  State<_HabitDetails> createState() => _HabitDetailsState();
+}
+
+class _HabitDetailsState extends State<_HabitDetails> {
+  late final AppStore store = context.read<AppStore>();
+  late final String id = widget.habit['id'] as String;
+  late final TextEditingController c = TextEditingController(text: '${_notes[id] ?? ''}');
+  Timer? _t;
+
+  Map get _notes => store.state['habitNotes'] is Map ? store.state['habitNotes'] as Map : (store.state['habitNotes'] = <String, dynamic>{}) as Map;
+
+  void _flush() {
+    _t?.cancel();
+    final v = c.text;
+    if (v.trim().isNotEmpty) {
+      _notes[id] = v;
+    } else {
+      _notes.remove(id);
+    }
+    store.save();
+  }
+
+  @override
+  void dispose() {
+    if (_t?.isActive ?? false) _flush();
+    c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _LevelStrip(state: store.state, habit: widget.habit, cur: widget.cur),
+      const SizedBox(height: RpSpace.s3),
+      TextField(
+        key: ValueKey('notes-$id'),
+        controller: c,
+        maxLines: 4,
+        minLines: 2,
+        onChanged: (_) {
+          _t?.cancel();
+          _t = Timer(const Duration(milliseconds: 700), _flush);
+        },
+        onTapOutside: (_) {
+          if (_t?.isActive ?? false) _flush();
+        },
+        decoration: InputDecoration(
+          hintText: context.tr('یادداشت…', 'Notes…'),
+          filled: true,
+          fillColor: p.surface2,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(RpRadius.sm), borderSide: BorderSide.none),
+        ),
+      ),
+      const SizedBox(height: RpSpace.s3),
+      PhotoStrip(kind: PhotoKind.habit, ownerId: id),
+    ]);
+  }
 }
 
 // ---------------------------------------------------------------- ویرایشگر
@@ -249,70 +448,98 @@ class _EditorState extends State<_Editor> {
   late final name = TextEditingController(text: f.name);
   late final unit = TextEditingController(text: f.numericUnit);
 
-  Widget _seg<T>(String label, T value, T group, void Function(T) on) => ChoiceChip(label: Text(label), selected: value == group, onSelected: (_) => setState(() => on(value)));
+  /// دکمه‌های قرص‌شکلِ هم‌عرض (segmented)
+  Widget _segRow<T>(List<(String, T)> opts, T group, void Function(T) on) {
+    final p = context.rp;
+    return Row(children: [
+      for (int i = 0; i < opts.length; i++) ...[
+        if (i > 0) const SizedBox(width: 6),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => setState(() => on(opts[i].$2)),
+            child: AnimatedContainer(
+              duration: RpMotion.fast,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: opts[i].$2 == group ? p.primarySoft : p.surface2, borderRadius: BorderRadius.circular(RpRadius.sm), border: Border.all(color: opts[i].$2 == group ? p.primary : Colors.transparent, width: 1.5)),
+              child: Text(opts[i].$1, style: rpText(RpType.label, weight: 800, color: opts[i].$2 == group ? p.primary : p.muted)),
+            ),
+          ),
+        ),
+      ],
+    ]);
+  }
+
+  Widget _label(String t) => Padding(padding: const EdgeInsets.only(top: RpSpace.s4, bottom: 6), child: Text(t, style: rpText(RpType.caption, weight: 800, color: context.rp.muted)));
+
+  InputDecoration _dec(String hint, {String? label}) {
+    final p = context.rp;
+    return InputDecoration(labelText: label, hintText: hint, filled: true, fillColor: p.surface2, isDense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), border: OutlineInputBorder(borderRadius: BorderRadius.circular(RpRadius.sm), borderSide: BorderSide.none));
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = context.rp;
     final fa = context.isFa;
     final days = fa ? ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const prio = [('gold', Color(0xFFE0B13E)), ('green', Color(0xFF3FA35A)), ('yellow', Color(0xFFE6C84A)), ('red', Color(0xFFD9534F))];
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: ListView(padding: const EdgeInsets.all(RpSpace.s4), shrinkWrap: true, children: [
+      child: ListView(padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, RpSpace.s4), shrinkWrap: true, children: [
+        Center(child: Container(width: 42, height: 5, decoration: BoxDecoration(color: p.line, borderRadius: BorderRadius.circular(9)))),
+        const SizedBox(height: RpSpace.s3),
         Text(widget.editingId == null ? (fa ? 'عادت جدید' : 'New Habit') : (fa ? 'ویرایش عادت' : 'Edit Habit'), style: rpText(RpType.title, weight: 800, color: p.text)),
         const SizedBox(height: RpSpace.s3),
-        TextField(controller: name, decoration: InputDecoration(labelText: fa ? 'نام عادت' : 'Habit name'), onChanged: (v) => f.name = v),
-        const SizedBox(height: RpSpace.s3),
-        Text(fa ? 'نوع' : 'Type', style: rpText(RpType.label, weight: 700, color: p.muted)),
-        Wrap(spacing: 8, children: [
-          _seg(fa ? 'انجام/نشد' : 'Yes/No', 'binary', f.type, (v) => f.type = v),
-          _seg(fa ? 'عددی' : 'Number', 'numeric', f.type, (v) => f.type = v),
-          _seg(fa ? 'زمانی' : 'Timer', 'timer', f.type, (v) => f.type = v),
-        ]),
+        TextField(controller: name, style: rpText(RpType.bodyL, weight: 700, color: p.text), decoration: _dec(fa ? 'نام عادت' : 'Habit name'), onChanged: (v) => f.name = v),
+        _label(fa ? 'نوع' : 'Type'),
+        _segRow<String>([(fa ? 'انجام / نشد' : 'Yes / No', 'binary'), (fa ? 'عددی' : 'Number', 'numeric'), (fa ? 'زمانی' : 'Timer', 'timer')], f.type, (v) => f.type = v),
         if (f.type == 'numeric') ...[
-          TextFormField(initialValue: '${f.numericTarget}', keyboardType: TextInputType.number, decoration: InputDecoration(labelText: fa ? 'هدف' : 'Target'), onChanged: (v) => f.numericTarget = double.tryParse(v) ?? 1),
-          TextField(controller: unit, decoration: InputDecoration(labelText: fa ? 'واحد' : 'Unit'), onChanged: (v) => f.numericUnit = v),
-        ],
-        if (f.type == 'timer')
-          TextFormField(initialValue: '${f.timerTarget}', keyboardType: TextInputType.number, decoration: InputDecoration(labelText: fa ? 'هدف (دقیقه)' : 'Target (min)'), onChanged: (v) => f.timerTarget = double.tryParse(v) ?? 30),
-        if (f.type != 'binary') ...[
-          const SizedBox(height: RpSpace.s2),
-          Wrap(spacing: 8, children: [
-            _seg(fa ? 'بیشتر بهتر' : 'More is better', 'more', f.direction, (v) => f.direction = v),
-            _seg(fa ? 'کمتر بهتر' : 'Less is better', 'less', f.direction, (v) => f.direction = v),
+          _label(fa ? 'هدف' : 'Goal'),
+          Row(children: [
+            Expanded(child: TextFormField(initialValue: '${f.numericTarget}', keyboardType: TextInputType.number, decoration: _dec(fa ? 'هدف' : 'Target'), onChanged: (v) => f.numericTarget = double.tryParse(v) ?? 1)),
+            const SizedBox(width: 8),
+            Expanded(child: TextField(controller: unit, decoration: _dec(fa ? 'واحد' : 'Unit'), onChanged: (v) => f.numericUnit = v)),
           ]),
         ],
-        const SizedBox(height: RpSpace.s3),
-        Text(fa ? 'اولویت' : 'Priority', style: rpText(RpType.label, weight: 700, color: p.muted)),
-        Wrap(spacing: 8, children: [
-          for (final pr in const [('gold', '🥇'), ('green', '🟢'), ('yellow', '🟡'), ('red', '🔴')]) _seg(pr.$2, pr.$1, f.priority, (v) => f.priority = v),
-        ]),
-        const SizedBox(height: RpSpace.s3),
-        Text(fa ? 'برنامه' : 'Schedule', style: rpText(RpType.label, weight: 700, color: p.muted)),
-        Wrap(spacing: 8, children: [
-          _seg(fa ? 'هر روز' : 'Daily', 'daily', f.scheduleMode, (v) => f.scheduleMode = v),
-          _seg(fa ? 'روزهای خاص' : 'Custom days', 'custom', f.scheduleMode, (v) => f.scheduleMode = v),
-        ]),
-        if (f.scheduleMode == 'custom')
+        if (f.type == 'timer') ...[_label(fa ? 'هدف (دقیقه)' : 'Goal (minutes)'), TextFormField(initialValue: '${f.timerTarget}', keyboardType: TextInputType.number, decoration: _dec(fa ? 'دقیقه' : 'Minutes'), onChanged: (v) => f.timerTarget = double.tryParse(v) ?? 30)],
+        if (f.type != 'binary') ...[
+          const SizedBox(height: RpSpace.s2),
+          _segRow<String>([(fa ? 'بیشتر بهتر' : 'More is better', 'more'), (fa ? 'کمتر بهتر' : 'Less is better', 'less')], f.direction, (v) => f.direction = v),
+        ],
+        _label(fa ? 'برنامه' : 'Schedule'),
+        _segRow<String>([(fa ? 'هر روز' : 'Daily', 'daily'), (fa ? 'روزهای خاص' : 'Custom days', 'custom')], f.scheduleMode, (v) => f.scheduleMode = v),
+        if (f.scheduleMode == 'custom') ...[
+          const SizedBox(height: RpSpace.s2),
           Wrap(spacing: 6, children: [
             for (int d = 0; d < 7; d++)
               FilterChip(
+                visualDensity: VisualDensity.compact,
                 label: Text(days[d]),
                 selected: f.activeDays.contains(d),
                 onSelected: (s) => setState(() => s ? f.activeDays.add(d) : f.activeDays.remove(d)),
               ),
           ]),
-        SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(fa ? 'دائمی' : 'Permanent'), value: f.permanent, onChanged: (v) => setState(() => f.permanent = v)),
-        if (!f.permanent)
-          TextFormField(initialValue: '${f.durationDays}', keyboardType: TextInputType.number, decoration: InputDecoration(labelText: fa ? 'تعداد روز' : 'Days'), onChanged: (v) => f.durationDays = int.tryParse(v) ?? 1),
-        TextFormField(initialValue: '${f.rewardPoints}', keyboardType: TextInputType.number, decoration: InputDecoration(labelText: fa ? 'امتیاز پاداش (حداکثر ۵۰)' : 'Reward points (max 50)'), onChanged: (v) => f.rewardPoints = int.tryParse(v) ?? 10),
-        TextFormField(initialValue: f.weeklyGoal?.toString() ?? '', keyboardType: TextInputType.number, decoration: InputDecoration(labelText: fa ? 'هدف هفتگی (اختیاری)' : 'Weekly goal (optional)'), onChanged: (v) => f.weeklyGoal = int.tryParse(v.trim())),
-        TextFormField(initialValue: f.rewardText, decoration: InputDecoration(labelText: fa ? 'پاداش' : 'Reward'), onChanged: (v) => f.rewardText = v),
-        TextFormField(initialValue: f.punishmentText, decoration: InputDecoration(labelText: fa ? 'تنبیه' : 'Punishment'), onChanged: (v) => f.punishmentText = v),
-        SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(fa ? 'یادآوری روزانه' : 'Daily reminder'), value: f.reminderEnabled, onChanged: (v) => setState(() => f.reminderEnabled = v)),
+        ],
+        const SizedBox(height: RpSpace.s2),
+        SwitchListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(fa ? 'دائمی' : 'Permanent'), value: f.permanent, onChanged: (v) => setState(() => f.permanent = v)),
+        if (!f.permanent) TextFormField(initialValue: '${f.durationDays}', keyboardType: TextInputType.number, decoration: _dec(fa ? 'تعداد روز' : 'Days'), onChanged: (v) => f.durationDays = int.tryParse(v) ?? 1),
+        _label(fa ? 'اولویت' : 'Priority'),
+        Row(children: [
+          for (final pr in prio)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 12),
+              child: GestureDetector(
+                onTap: () => setState(() => f.priority = pr.$1),
+                child: AnimatedContainer(duration: RpMotion.fast, width: 34, height: 34, decoration: BoxDecoration(color: pr.$2, shape: BoxShape.circle, border: Border.all(color: f.priority == pr.$1 ? p.text : Colors.transparent, width: 3))),
+              ),
+            ),
+        ]),
+        const SizedBox(height: RpSpace.s2),
+        SwitchListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(fa ? 'یادآوری روزانه' : 'Daily reminder'), value: f.reminderEnabled, onChanged: (v) => setState(() => f.reminderEnabled = v)),
         if (f.reminderEnabled)
           ListTile(
             key: const ValueKey('habit-reminder-time'),
+            dense: true,
             contentPadding: EdgeInsets.zero,
             leading: const Icon(LucideIcons.clock),
             title: Text(fa ? 'ساعت یادآوری' : 'Reminder time'),
@@ -328,57 +555,35 @@ class _EditorState extends State<_Editor> {
               if (t != null) setState(() => f.reminderTime = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}');
             },
           ),
+        const SizedBox(height: RpSpace.s2),
+        RpCollapsible(
+          key: const ValueKey('editor-more'),
+          card: false,
+          title: fa ? 'پاداش، تنبیه و هدف هفتگی' : 'Reward, punishment & weekly goal',
+          icon: LucideIcons.gift,
+          child: Column(children: [
+            TextFormField(initialValue: '${f.rewardPoints}', keyboardType: TextInputType.number, decoration: _dec(fa ? 'امتیاز پاداش (حداکثر ۵۰)' : 'Reward points (max 50)'), onChanged: (v) => f.rewardPoints = int.tryParse(v) ?? 10),
+            const SizedBox(height: 8),
+            TextFormField(initialValue: f.rewardText, decoration: _dec(fa ? 'پاداش' : 'Reward'), onChanged: (v) => f.rewardText = v),
+            const SizedBox(height: 8),
+            TextFormField(initialValue: f.punishmentText, decoration: _dec(fa ? 'تنبیه' : 'Punishment'), onChanged: (v) => f.punishmentText = v),
+            const SizedBox(height: 8),
+            TextFormField(initialValue: f.weeklyGoal?.toString() ?? '', keyboardType: TextInputType.number, decoration: _dec(fa ? 'هدف هفتگی (اختیاری)' : 'Weekly goal (optional)'), onChanged: (v) => f.weeklyGoal = int.tryParse(v.trim())),
+          ]),
+        ),
         const SizedBox(height: RpSpace.s4),
         Row(children: [
           Expanded(child: RpButton(fa ? 'انصراف' : 'Cancel', kind: BtnKind.ghost, onTap: () => Navigator.pop(context))),
           const SizedBox(width: RpSpace.s3),
           Expanded(
-            child: RpButton(fa ? 'ذخیره' : 'Save',
-              onTap: () {
-                if (widget.actions.saveHabit(f, editingId: widget.editingId) != null) Navigator.pop(context);
-              },
-            ),
+            child: RpButton(fa ? 'ذخیره' : 'Save', onTap: () {
+              if (widget.actions.saveHabit(f, editingId: widget.editingId) != null) Navigator.pop(context);
+            }),
           ),
         ]),
       ]),
     );
   }
-}
-
-/// یادداشتِ متنی + عکس‌های هر عادت (habitNotes مثل HTML: متنِ خالی ← حذفِ کلید)
-void _notesSheet(BuildContext context, Map habit) {
-  final store = context.read<AppStore>();
-  final id = habit['id'] as String;
-  final notes = store.state['habitNotes'] is Map ? store.state['habitNotes'] as Map : (store.state['habitNotes'] = <String, dynamic>{}) as Map;
-  final c = TextEditingController(text: '${notes[id] ?? ''}');
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
-    builder: (ctx) => Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-      child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(RpSpace.s4), children: [
-        Text('${habit['name']}', style: rpText(RpType.title, weight: 800, color: ctx.rp.text)),
-        const SizedBox(height: RpSpace.s3),
-        TextField(controller: c, maxLines: 5, decoration: InputDecoration(labelText: ctx.tr('یادداشت', 'Notes'))),
-        const SizedBox(height: RpSpace.s3),
-        PhotoStrip(kind: PhotoKind.habit, ownerId: id),
-        const SizedBox(height: RpSpace.s4),
-        RpButton(ctx.tr('ذخیره', 'Save'), onTap: () {
-          final v = c.text;
-          if (v.trim().isNotEmpty) {
-            notes[id] = v;
-          } else {
-            notes.remove(id);
-          }
-          store.save();
-          Navigator.pop(ctx);
-        }),
-      ]),
-    ),
-  );
 }
 
 /// buildLevelDisplay: پیپ‌های سطح‌های همین مرحله + پیپ سرآمد، با رنگ‌های قابل‌تنظیم

@@ -86,7 +86,11 @@ void main() {
     final nav = NavController();
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: a));
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(find.text('چالش‌ها'));
+    await tester.tap(find.text('چالش‌ها')); // بخشِ کشوییِ خانه باز می‌شود
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.scrollUntilVisible(find.text('مدیریت چالش‌ها'), 200, scrollable: find.byType(Scrollable).first);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('مدیریت چالش‌ها'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 3));
     await tester.tap(find.text('ساخت'));
     await tester.pump(const Duration(milliseconds: 300));

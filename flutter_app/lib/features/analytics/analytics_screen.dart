@@ -2,7 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
 import '../../app/i18n.dart';
+import '../../app/nav.dart';
 import '../../core/calendar.dart';
 import '../../core/habits.dart';
 import '../../data/actions.dart';
@@ -11,7 +14,6 @@ import '../../ui/charts.dart';
 import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
 import '../onboarding/onboarding.dart';
-import 'smart_card.dart';
 import '../../ui/widgets.dart';
 
 String weeklyReport(Map st, DateTime today, bool fa) {
@@ -121,7 +123,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         const SizedBox(height: RpSpace.s3),
         AppCard(child: Text(weeklyReport(st, now, fa), style: rpText(RpType.body, weight: 600, color: p.text, height: 1.9))),
         const SizedBox(height: RpSpace.s3),
-        const SmartCard(),
+        _SmartLink(),
       ],
     );
   }
@@ -152,4 +154,20 @@ class _Legend extends StatelessWidget {
         Expanded(child: Text(label, style: rpText(RpType.body, weight: 600, color: context.rp.text))),
         Text(value, style: rpText(RpType.body, weight: 800, color: context.rp.text)),
       ]);
+}
+
+class _SmartLink extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    return AppCard(
+      onTap: () => context.read<NavController>().go(AppView.smart),
+      child: Row(children: [
+        Icon(LucideIcons.brain, color: p.xpInk),
+        const SizedBox(width: 12),
+        Expanded(child: Text(context.tr('تحلیل هوشمند رفتار', 'Smart behavior analysis'), style: rpText(RpType.body, weight: 800, color: p.text))),
+        Icon(context.isFa ? LucideIcons.chevronLeft : LucideIcons.chevronRight, size: 18, color: p.muted),
+      ]),
+    );
+  }
 }

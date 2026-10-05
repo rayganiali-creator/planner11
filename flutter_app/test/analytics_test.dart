@@ -77,14 +77,20 @@ void smartTests() {
       }
     }
     store.save();
-    final nav = NavController()..go(AppView.analytics);
+    final nav = NavController()..go(AppView.smart);
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: a));
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.scrollUntilVisible(find.textContaining('تحلیل رفتار هوشمند'), 400, scrollable: find.byType(Scrollable).first);
-    await tester.pump(const Duration(milliseconds: 300));
+    // امتیاز، داوری و تمرکزِ امروز
+    expect(find.byKey(const ValueKey('smart-score')), findsOneWidget);
+    expect(find.byKey(const ValueKey('smart-focus')), findsOneWidget); // امروز ثبت نشده ← ضعیف‌ترین عادت
     expect(find.textContaining('مانع اصلی', skipOffstage: false), findsWidgets); // «خسته بودم» مانع اصلی شد
+    // بخش‌های کشویی: بسته‌اند، با ضربه باز می‌شوند
+    expect(find.text('نقشه‌ی روزهای هفته'), findsNothing);
+    await tester.ensureVisible(find.textContaining('ژورنال رفتاری', skipOffstage: false));
+    await tester.tap(find.textContaining('ژورنال رفتاری'));
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.ensureVisible(find.text('ثبت یادداشت', skipOffstage: false));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.enterText(find.widgetWithText(TextField, '').last, 'باید زودتر بخوابم');
     await tester.tap(find.text('ثبت یادداشت'));
     await tester.pump(const Duration(milliseconds: 300));
