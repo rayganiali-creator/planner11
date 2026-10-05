@@ -64,7 +64,6 @@ class BadgeEmblem extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.rp;
     final n = badgeArt(def);
-    final crown = n % 8 == 0;
     Widget img = Image.asset('assets/badges/badge_${n.toString().padLeft(2, '0')}.png', width: size, height: size, fit: BoxFit.contain, filterQuality: FilterQuality.medium, gaplessPlayback: true, excludeFromSemantics: true);
     if (state != AchState.unlocked) {
       img = Opacity(opacity: state == AchState.near ? 0.62 : 0.34, child: ColorFiltered(colorFilter: _gray, child: img));
@@ -76,7 +75,7 @@ class BadgeEmblem extends StatelessWidget {
           dimension: size,
           child: Stack(alignment: Alignment.center, children: [
             img,
-            if (state == AchState.near) CustomPaint(size: Size.square(size), painter: _ArcPainter(ratio, p.primary, crown ? 0.80 : 0.95)),
+            if (state == AchState.near) CustomPaint(size: Size.square(size), painter: _ArcPainter(ratio, p.primary, 0.95)),
           ]),
         ),
       ),
