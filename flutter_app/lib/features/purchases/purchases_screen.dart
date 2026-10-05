@@ -4,7 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
-import '../../core/calendar.dart';
+import '../../core/date_fmt.dart';
 import '../../core/pro.dart';
 import '../../data/app_store.dart';
 import '../../app/toast.dart';
@@ -16,21 +16,8 @@ import '../../ui/widgets.dart';
 String purDateLabel(num? ts, {required bool fa, required bool jalali, bool withTime = false}) {
   if (ts == null || ts == 0) return '—';
   final d = DateTime.fromMillisecondsSinceEpoch(ts.toInt());
-  String out;
-  if (jalali) {
-    final j = toJalaali(d.year, d.month, d.day);
-    final mon = fa ? persianMonths[j.jm - 1] : jalaliMonthsEn[j.jm - 1];
-    out = '${fa ? toPersianDigits(j.jd) : j.jd} $mon ${fa ? toPersianDigits(j.jy) : j.jy}';
-  } else if (fa) {
-    out = '${toPersianDigits(d.year)}/${toPersianDigits(pad2(d.month))}/${toPersianDigits(pad2(d.day))}';
-  } else {
-    out = '${enMonths[d.month - 1]} ${d.day}, ${d.year}';
-  }
-  if (withTime) {
-    final t = '${pad2(d.hour)}:${pad2(d.minute)}';
-    out += ' — ${fa ? toPersianDigits(t) : t}';
-  }
-  return out;
+  final out = dateLabel(d, jalali: jalali, fa: fa);
+  return withTime ? '$out — ${timeLabel(d, fa: fa)}' : out;
 }
 
 class PurchasesScreen extends StatefulWidget {
@@ -55,7 +42,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
     final p = context.rp;
     final st = store.state;
     final fa = context.isFa;
-    final jalali = st['calendarType'] == 'jalali';
+    final jalali = isJalali(st);
     String d(num? t, [bool time = false]) => purDateLabel(t, fa: fa, jalali: jalali, withTime: time);
     final segs = proPurchaseSegments(st);
     final now = store.rpNow();

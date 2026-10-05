@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'tile_style.dart';
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
+import '../../core/date_fmt.dart';
 import '../../core/doc.dart';
 import '../../core/habits.dart';
 import '../../data/actions.dart';
@@ -357,13 +358,7 @@ class _DaySheet extends StatelessWidget {
     final st = store.state;
     final iso = dateToISO(date);
     final future = date.isAfter(startOfDay(actions.today));
-    String title;
-    if (fa) {
-      final j = toJalaali(date.year, date.month, date.day);
-      title = '${persianWeekdays[jsWeekdayToPersianIndex(jsWeekday(date))]}، ${toPersianDigits(j.jd)} ${persianMonths[j.jm - 1]} ${toPersianDigits(j.jy)}';
-    } else {
-      title = '${enWeekdays[jsWeekday(date)]}, ${enMonths[date.month - 1]} ${date.day}, ${date.year}';
-    }
+    final title = dateLabel(date, jalali: isJalali(st), fa: fa, weekday: true);
     final app = applicableHabitsForISO(st, iso);
     final rec = (st['records'] as Map?)?[iso] as Map? ?? const {};
     return ListView(

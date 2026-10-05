@@ -4,24 +4,16 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
-import '../../core/calendar.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
+import '../../core/date_fmt.dart';
 import '../../data/journal_ops.dart';
 import '../../data/notifier.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import '../todo/todo_screen.dart' show pickDateTime;
 
-String fmtDateTime(int ms, bool fa) {
-  final d = DateTime.fromMillisecondsSinceEpoch(ms);
-  final t = '${pad2(d.hour)}:${pad2(d.minute)}';
-  if (fa) {
-    final j = toJalaali(d.year, d.month, d.day);
-    return toPersianDigits('${j.jd} ${persianMonths[j.jm - 1]} — $t');
-  }
-  return '${enMonths[d.month - 1]} ${d.day} — $t';
-}
+String fmtDateTime(int ms, bool fa, bool jalali) => dateTimeLabel(DateTime.fromMillisecondsSinceEpoch(ms), jalali: jalali, fa: fa);
 
 /// پنجره‌ی انتخابِ یادآوری؛ برای یادداشت و کتاب مشترک است
 Future<void> showReminderPicker(BuildContext context, String kind, Map item) {
@@ -74,7 +66,7 @@ class _ReminderSheetState extends State<_ReminderSheet> {
                 }
               : null,
           icon: const Icon(LucideIcons.alarmClock, size: 16),
-          label: Text(fmtDateTime(at, fa)),
+          label: Text(fmtDateTime(at, fa, isJalali(widget.actions.store.state))),
         ),
         const SizedBox(height: RpSpace.s2),
         Wrap(spacing: 8, children: [
@@ -101,7 +93,7 @@ class _ReminderSheetState extends State<_ReminderSheet> {
                       return;
                     }
                     Navigator.pop(context);
-                    widget.actions.toasts.show(context.tr('⏰ یادآوری ثبت شد: ${fmtDateTime(at, true)}', '⏰ Reminder set: ${fmtDateTime(at, false)}'), ms: 3000, cls: 'toast-success');
+                    widget.actions.toasts.show(context.tr('⏰ یادآوری ثبت شد: ${fmtDateTime(at, true, isJalali(widget.actions.store.state))}', '⏰ Reminder set: ${fmtDateTime(at, false, isJalali(widget.actions.store.state))}'), ms: 3000, cls: 'toast-success');
                   }
                 : null),
           ),
@@ -173,14 +165,14 @@ class _JournalScreenState extends State<JournalScreen> {
               padding: const EdgeInsets.only(bottom: RpSpace.s2),
               child: AppCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('📅 ${fmtFull((e['createdAt'] as num).toInt(), fa)}', style: rpText(RpType.label, weight: 600, color: p.muted)),
+                  Text('📅 ${fmtFull((e['createdAt'] as num).toInt(), fa, isJalali(store.state))}', style: rpText(RpType.label, weight: 600, color: p.muted)),
                   const SizedBox(height: 6),
                   if (editing == e['id'])
                     _Edit(entry: e, onDone: () => setState(() => editing = null), actions: a)
                   else ...[
                     Text('${e['text']}', style: rpText(RpType.body, weight: 500, color: p.text, height: 1.9)),
                     if (e['remindAt'] is num && (e['remindAt'] as num) > nowMs)
-                      Padding(padding: const EdgeInsets.only(top: 6), child: Text('⏰ ${context.tr('یادآوری: ', 'Reminder: ')}${fmtDateTime((e['remindAt'] as num).toInt(), fa)}', style: rpText(RpType.label, weight: 600, color: p.goldInk))),
+                      Padding(padding: const EdgeInsets.only(top: 6), child: Text('⏰ ${context.tr('یادآوری: ', 'Reminder: ')}${fmtDateTime((e['remindAt'] as num).toInt(), fa, isJalali(store.state))}', style: rpText(RpType.label, weight: 600, color: p.goldInk))),
                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                       IconButton(icon: Icon(LucideIcons.alarmClock, size: 18, color: p.muted), tooltip: context.tr('یادآوری', 'Reminder'), onPressed: () => showReminderPicker(context, 'journal', e)),
                       IconButton(icon: Icon(LucideIcons.pencil, size: 18, color: p.muted), tooltip: context.tr('ویرایش', 'Edit'), onPressed: () => setState(() => editing = e['id'] as String)),
@@ -213,15 +205,7 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 }
 
-String fmtFull(int ms, bool fa) {
-  final d = DateTime.fromMillisecondsSinceEpoch(ms);
-  final ts = '${pad2(d.hour)}:${pad2(d.minute)}';
-  if (fa) {
-    final j = toJalaali(d.year, d.month, d.day);
-    return '${toPersianDigits(j.jd)} ${persianMonths[j.jm - 1]} ${toPersianDigits(j.jy)} — ${toPersianDigits(ts)}';
-  }
-  return '${enMonths[d.month - 1]} ${d.day}, ${d.year} — $ts';
-}
+String fmtFull(int ms, bool fa, bool jalali) => dateTimeLabel(DateTime.fromMillisecondsSinceEpoch(ms), jalali: jalali, fa: fa, withYear: true);
 
 class _Edit extends StatefulWidget {
   final Map entry;

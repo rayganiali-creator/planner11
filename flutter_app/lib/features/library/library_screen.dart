@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
+import '../../core/date_fmt.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../data/library_ops.dart';
@@ -185,7 +186,7 @@ class _BookCard extends StatelessWidget {
             OutlinedButton(onPressed: onToggleHistory, child: Text(context.tr('🕒 تاریخچه', '🕒 History'))),
             OutlinedButton(
               onPressed: () => showReminderPicker(context, 'book', b),
-              child: Text('⏰ ${remindAt != null && remindAt > nowMs ? fmtDateTime(remindAt, fa) : context.tr('یادآوری', 'Reminder')}'),
+              child: Text('⏰ ${remindAt != null && remindAt > nowMs ? fmtDateTime(remindAt, fa, isJalali(context.read<AppStore>().state)) : context.tr('یادآوری', 'Reminder')}'),
             ),
             OutlinedButton(onPressed: () => _bookEditor(context, b), child: Text(context.tr('✏️ ویرایش', '✏️ Edit'))),
             OutlinedButton(
@@ -213,7 +214,7 @@ class _BookCard extends StatelessWidget {
                   : Column(children: [
                       for (final h in hist)
                         Row(children: [
-                          Expanded(child: Text('${h['dateLabel'] ?? ''}', style: rpText(RpType.label, weight: 500, color: p.muted))),
+                          Expanded(child: Text(h['date'] is num ? dateNumeric(DateTime.fromMillisecondsSinceEpoch((h['date'] as num).toInt()), jalali: isJalali(context.read<AppStore>().state), fa: context.isFa) : '${h['dateLabel'] ?? ''}', style: rpText(RpType.label, weight: 500, color: p.muted))),
                           Text(context.tr('صفحه ${context.n(h['pagesRead'])}', 'page ${h['pagesRead']}'), style: rpText(RpType.label, weight: 700, color: p.text)),
                         ]),
                     ]),

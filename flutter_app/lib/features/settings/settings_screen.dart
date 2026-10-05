@@ -136,11 +136,12 @@ class SettingsScreen extends StatelessWidget {
               ChoiceChip(label: Text(context.tr('یکشنبه', 'Sunday')), selected: ((st['weekStart'] as num?) ?? 0) == 1, onSelected: (_) => set('weekStart', 1)),
             ]),
             SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(context.tr('نمایش روزهای تعطیل', 'Show holidays')), value: st['showHolidays'] == true, onChanged: (v) => set('showHolidays', v)),
-            Text(context.tr('نوع تقویم', 'Calendar Type'), style: rpText(RpType.label, weight: 700, color: p.muted)),
+            Text(context.tr('نوع تقویم (پیش‌فرض: جلالی)', 'Calendar Type (default: Jalali)'), style: rpText(RpType.label, weight: 700, color: p.muted)),
             Wrap(spacing: 8, children: [
-              ChoiceChip(label: Text(context.tr('شمسی', 'Jalali')), selected: st['calendarType'] != 'gregorian', onSelected: (_) => set('calendarType', 'jalali')),
+              ChoiceChip(label: Text(context.tr('جلالی', 'Jalali')), selected: st['calendarType'] != 'gregorian', onSelected: (_) => set('calendarType', 'jalali')),
               ChoiceChip(label: Text(context.tr('میلادی', 'Gregorian')), selected: st['calendarType'] == 'gregorian', onSelected: (_) => set('calendarType', 'gregorian')),
             ]),
+            Text(context.tr('همه‌ی تاریخ‌ها، انتخابگرهای تاریخ، یادآورها و گزارش‌ها از این تقویم پیروی می‌کنند.', 'All dates, date pickers, reminders and reports follow this calendar.'), style: rpText(RpType.caption, weight: 500, color: p.muted)),
           ]),
         ),
         section(

@@ -9,6 +9,7 @@ import 'package:routine_planner/data/actions.dart';
 import 'package:routine_planner/data/app_store.dart';
 import 'package:routine_planner/data/avatar_ops.dart';
 import 'package:routine_planner/features/avatar/avatar_compose.dart';
+import 'package:routine_planner/features/avatar/avatar_panel.dart' show AvThumb;
 import 'package:routine_planner/features/avatar/avatar_view.dart';
 
 void main() {
@@ -42,6 +43,11 @@ void main() {
       final expectNames = [for (final it in data.items.values) if (it.category == sample && it.compatible('male')) it.name];
       expect(expectNames, isNotEmpty);
       expect(find.text(expectNames.first!), findsWidgets, reason: sample);
+      // هر کارتِ نمایش‌داده‌شده فقط از همین دسته است (ریشه‌ی باگِ تصویرِ قاطی: State قدیمیِ AvThumb)
+      final thumbs = tester.widgetList<AvThumb>(find.byType(AvThumb)).toList();
+      expect(thumbs, isNotEmpty);
+      expect(thumbs.every((t) => t.item.category == sample), isTrue, reason: '${[for (final t in thumbs) t.item.category]}');
+      expect(thumbs.every((t) => t.key == ValueKey('thumb-${t.item.id}-male')), isTrue);
     }
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpWidget(const SizedBox());

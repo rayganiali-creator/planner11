@@ -4,7 +4,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
-import '../../core/calendar.dart';
+import '../../core/date_fmt.dart';
+import '../shared/date_picker.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../data/notifier.dart';
@@ -15,15 +16,8 @@ import '../../ui/widgets.dart';
 const _faWd = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 const _enWd = ['Sa', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr'];
 
-String formatDueLabel(int dueAt, {required bool fa}) {
-  final d = DateTime.fromMillisecondsSinceEpoch(dueAt);
-  final hh = pad2(d.hour), mm = pad2(d.minute);
-  if (fa) {
-    final j = toJalaali(d.year, d.month, d.day);
-    return '${toPersianDigits(j.jd)} ${persianMonths[j.jm - 1]} - ${toPersianDigits(hh)}:${toPersianDigits(mm)}';
-  }
-  return '${d.month}/${d.day} - $hh:$mm';
-}
+String formatDueLabel(int dueAt, {required bool fa, required bool jalali}) =>
+    dateTimeLabel(DateTime.fromMillisecondsSinceEpoch(dueAt), jalali: jalali, fa: fa, sep: ' - ');
 
 String todoRepeatSummary(Map t, bool fa) {
   final m = t['repeatMode'];
@@ -37,9 +31,13 @@ String todoRepeatSummary(Map t, bool fa) {
 Future<int?> pickDateTime(BuildContext context, int? initial) async {
   final now = DateTime.now();
   final init = initial != null ? DateTime.fromMillisecondsSinceEpoch(initial) : now;
-  final d = await showDatePicker(context: context, initialDate: init, firstDate: DateTime(now.year - 1), lastDate: DateTime(now.year + 5));
+  final d = await pickDate(context, init, first: DateTime(now.year - 1), last: DateTime(now.year + 5));
   if (d == null || !context.mounted) return null;
-  final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(init));
+  final t = await showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.fromDateTime(init),
+    builder: (c, child) => MediaQuery(data: MediaQuery.of(c).copyWith(alwaysUse24HourFormat: true), child: child!),
+  );
   if (t == null) return null;
   return DateTime(d.year, d.month, d.day, t.hour, t.minute).millisecondsSinceEpoch;
 }
@@ -103,7 +101,7 @@ class _TodoScreenState extends State<TodoScreen> {
                   if (v != null) setState(() => due = v);
                 },
                 icon: const Icon(LucideIcons.alarmClock, size: 16),
-                label: Text(due == null ? context.tr('زمان', 'Time') : formatDueLabel(due!, fa: fa)),
+                label: Text(due == null ? context.tr('زمان', 'Time') : formatDueLabel(due!, fa: fa, jalali: isJalali(store.state))),
               ),
               ChoiceChip(label: Text(context.tr('همه‌روزه', 'Daily')), selected: repeat == 'daily', onSelected: (s) => setState(() => repeat = s ? 'daily' : 'none')),
               RpButton(context.tr('افزودن', 'Add'), small: true, icon: LucideIcons.plus, onTap: () {
@@ -209,7 +207,7 @@ class _TodoCard extends StatelessWidget {
           if (dueAt != null)
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 36),
-              child: Text('⏰ ${formatDueLabel(dueAt, fa: fa)}', style: rpText(RpType.label, weight: 600, color: overdue ? p.badInk : soon ? p.fire : p.muted)),
+              child: Text('⏰ ${formatDueLabel(dueAt, fa: fa, jalali: isJalali(context.read<AppStore>().state))}', style: rpText(RpType.label, weight: 600, color: overdue ? p.badInk : soon ? p.fire : p.muted)),
             ),
           if (rep.isNotEmpty)
             Padding(padding: const EdgeInsetsDirectional.only(start: 36), child: Text('🔁 $rep', style: rpText(RpType.label, weight: 500, color: p.muted))),
@@ -288,7 +286,7 @@ class _TodoEditorState extends State<_TodoEditor> {
               if (v != null) setState(() => due = v);
             },
             icon: const Icon(LucideIcons.alarmClock, size: 16),
-            label: Text(due == null ? context.tr('بدون زمان', 'No time') : formatDueLabel(due!, fa: fa)),
+            label: Text(due == null ? context.tr('بدون زمان', 'No time') : formatDueLabel(due!, fa: fa, jalali: isJalali(widget.actions.store.state))),
           ),
           if (due != null) IconButton(icon: const Icon(LucideIcons.x, size: 18), onPressed: () => setState(() => due = null)),
         ]),

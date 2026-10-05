@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
+import '../../core/date_fmt.dart';
 import '../../core/calendar.dart';
 import '../../core/smart.dart';
 import '../../data/actions.dart';
@@ -68,7 +69,7 @@ class _SmartCardState extends State<SmartCard> {
     // روند (سال = میانگینِ هر ماه)
     List<String> labels;
     List<int?> values;
-    final jal = st['calendarType'] == 'jalali';
+    final jal = isJalali(st);
     if (range == 'year') {
       final b = <String, ({String lab, double s, int n})>{};
       for (final x in cur.series) {
@@ -284,7 +285,7 @@ class _SmartCardState extends State<SmartCard> {
                     for (final j in journal)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text('${DateTime.fromMillisecondsSinceEpoch((j['at'] as num).toInt()).toString().substring(0, 10)} — ${j['text']}', style: rpText(RpType.label, weight: 500, color: p.text, height: 1.7)),
+                        child: Text('${dateNumeric(DateTime.fromMillisecondsSinceEpoch((j['at'] as num).toInt()), jalali: jal, fa: fa)} — ${j['text']}', style: rpText(RpType.label, weight: 500, color: p.text, height: 1.7)),
                       ),
                   ])),
       ]),

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
+import '../../core/date_fmt.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../data/challenge_ops.dart';
@@ -351,12 +352,5 @@ class _SheetState extends State<_Sheet> {
     ];
   }
 
-  String _date(int ms, bool fa) {
-    final d = DateTime.fromMillisecondsSinceEpoch(ms);
-    if (fa) {
-      final j = toJalaali(d.year, d.month, d.day);
-      return toPersianDigits('${j.jy}/${j.jm}/${j.jd}');
-    }
-    return '${d.month}/${d.day}/${d.year}';
-  }
+  String _date(int ms, bool fa) => dateNumeric(DateTime.fromMillisecondsSinceEpoch(ms), jalali: isJalali(context.read<AppStore>().state), fa: fa);
 }

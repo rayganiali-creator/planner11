@@ -12,38 +12,63 @@ import '../../data/avatar_ops.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import 'avatar_compose.dart';
+import 'avatar_scene.dart';
 import 'avatar_view.dart';
 
 Future<void> showGenderPicker(BuildContext context) {
   final a = context.read<AppActions>();
   final data = context.read<AvData?>();
+  final daylight = daylightAt(a.today);
   return showDialog<void>(
     context: context,
     builder: (ctx) {
       final p = ctx.rp;
-      return AlertDialog(
+      return Dialog(
         backgroundColor: p.surface,
-        title: Text(ctx.tr('آواتار خودت را بساز', 'Create your avatar'), style: rpText(RpType.title, weight: 800, color: p.text)),
-        content: Row(mainAxisSize: MainAxisSize.min, children: [
-          for (final g in const [('male', 'مرد', 'Male'), ('female', 'زن', 'Female')])
-            Expanded(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(RpRadius.md),
-                onTap: () {
-                  a.chooseGender(g.$1);
-                  Navigator.pop(ctx);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(children: [
-                    if (data != null) AvatarView(data: data, gender: g.$1, equipped: const {}, cond: 'ok', height: 80),
-                    const SizedBox(height: 6),
-                    Text(ctx.isFa ? g.$2 : g.$3, style: rpText(RpType.bodyL, weight: 800, color: p.text)),
-                  ]),
-                ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RpRadius.xl)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s4, RpSpace.s4, RpSpace.s3),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(ctx.tr('آواتار خودت را بساز', 'Create your avatar'), textAlign: TextAlign.center, style: rpText(RpType.bodyL, weight: 800, color: p.text)),
+              const SizedBox(height: 2),
+              Text(ctx.tr('یکی را انتخاب کن؛ بعداً هم می‌شود عوضش کرد.', 'Pick one — you can switch later.'), textAlign: TextAlign.center, style: rpText(RpType.caption, weight: 500, color: p.muted)),
+              const SizedBox(height: RpSpace.s3),
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: Row(children: [
+                  for (final g in const [('male', 'مرد', 'Male'), ('female', 'زن', 'Female')]) ...[
+                    if (g.$1 == 'female') const SizedBox(width: RpSpace.s3),
+                    Expanded(
+                      child: GestureDetector(
+                        key: ValueKey('gender-${g.$1}'),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          a.chooseGender(g.$1);
+                          Navigator.pop(ctx);
+                        },
+                        child: Column(mainAxisSize: MainAxisSize.min, children: [
+                          AspectRatio(
+                            aspectRatio: 1,
+                            child: AvatarScene(
+                              daylight: daylight,
+                              radius: BorderRadius.circular(RpRadius.lg),
+                              child: Align(alignment: const Alignment(0, .95), child: data == null ? const SizedBox.shrink() : AvatarView(data: data, gender: g.$1, equipped: const {}, cond: 'ok', height: 108)),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Directionality(textDirection: Directionality.of(ctx), child: Text(ctx.isFa ? g.$2 : g.$3, style: rpText(RpType.body, weight: 800, color: p.text))),
+                        ]),
+                      ),
+                    ),
+                  ],
+                ]),
               ),
-            ),
-        ]),
+            ]),
+          ),
+        ),
       );
     },
   );
@@ -149,18 +174,25 @@ class _PanelState extends State<_Panel> {
           IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
         ]),
       ),
-      Container(
-        height: 120,
-        margin: const EdgeInsets.symmetric(horizontal: RpSpace.s4),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(RpRadius.lg), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [avatarSky(isDay(now.hour)).top, avatarSky(isDay(now.hour)).bottom])),
-        // حیوان همیشه سمتِ راستِ آواتار است (راست‌چین/چپ‌چین فرقی نمی‌کند)
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
-            AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'noPet'),
-            if (preview.values.any((id) => d.items[id]?.kind == 'pet')) AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'petOnly'),
-          ]),
+      SizedBox(
+        height: 124,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: RpSpace.s4),
+          child: AvatarScene(
+            daylight: daylightAt(now),
+            radius: BorderRadius.circular(RpRadius.lg),
+            // حیوان همیشه سمتِ راستِ آواتار است (راست‌چین/چپ‌چین فرقی نمی‌کند)
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Align(
+                alignment: const Alignment(0, .95),
+                child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
+                  AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'noPet'),
+                  if (preview.values.any((id) => d.items[id]?.kind == 'pet')) AvatarView(data: d, gender: g, equipped: preview, cond: cond, height: 110, mode: 'petOnly'),
+                ]),
+              ),
+            ),
+          ),
         ),
       ),
       Padding(
@@ -211,6 +243,7 @@ class _PanelState extends State<_Panel> {
             children: [
               for (final it in list)
                 _Card(
+                  key: ValueKey('card-${it.id}-$g'),
                   item: it,
                   gender: g,
                   selected: sel == it.id,
@@ -276,7 +309,7 @@ class _Card extends StatelessWidget {
   final String gender, tag;
   final bool selected, equippedNow, locked;
   final VoidCallback onTap;
-  const _Card({required this.item, required this.gender, required this.selected, required this.onTap, required this.tag, required this.equippedNow, required this.locked});
+  const _Card({super.key, required this.item, required this.gender, required this.selected, required this.onTap, required this.tag, required this.equippedNow, required this.locked});
   @override
   Widget build(BuildContext context) {
     final p = context.rp;
@@ -293,7 +326,7 @@ class _Card extends StatelessWidget {
             border: Border.all(color: selected ? p.primary : (equippedNow ? p.okInk : p.line), width: selected || equippedNow ? 2 : 1),
           ),
           child: Column(children: [
-            Expanded(child: AvThumb(item: item, gender: gender)),
+            Expanded(child: AvThumb(key: ValueKey('thumb-${item.id}-$gender'), item: item, gender: gender)),
             Text(item.name ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.caption, weight: 700, color: p.text, height: 1.3)),
             Text(tag, maxLines: 2, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, style: rpText(9, weight: 600, color: p.muted, height: 1.3)),
           ]),
@@ -317,16 +350,32 @@ class AvThumb extends StatefulWidget {
 class _AvThumbState extends State<AvThumb> {
   ui.Image? img;
   ui.Rect? box;
+  String? _src;
+
   @override
   void initState() {
     super.initState();
     _load();
   }
 
+  // ریشه‌ی باگِ «تصویرِ آیتم‌ها با عوض‌شدن دسته قاطی می‌شود»: State با همان جایگاه در شبکه دوباره استفاده می‌شد و تصویرِ قبلی می‌ماند
+  @override
+  void didUpdateWidget(AvThumb o) {
+    super.didUpdateWidget(o);
+    if (o.item.id != widget.item.id || o.gender != widget.gender) {
+      setState(() {
+        img = null;
+        box = null;
+      });
+      _load();
+    }
+  }
+
   Future<void> _load() async {
     final src = widget.item.assetFor(widget.gender);
+    _src = src;
     final im = await avLoadImg(src);
-    if (im == null || !mounted) return;
+    if (im == null || !mounted || _src != src) return;
     var bb = _bbox[src];
     if (bb == null) {
       final bd = (await im.toByteData(format: ui.ImageByteFormat.rawRgba))!.buffer.asUint8List();
@@ -344,7 +393,7 @@ class _AvThumbState extends State<AvThumb> {
       bb = x1 < 0 ? ui.Rect.fromLTWH(0, 0, im.width.toDouble(), im.height.toDouble()) : ui.Rect.fromLTWH(x0.toDouble(), y0.toDouble(), (x1 - x0 + 1).toDouble(), (y1 - y0 + 1).toDouble());
       _bbox[src] = bb;
     }
-    if (mounted) {
+    if (mounted && _src == src) {
       setState(() {
         img = im;
         box = bb;
