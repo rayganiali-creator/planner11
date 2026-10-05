@@ -259,6 +259,8 @@ def badge_svg(i, uid):
     R = 86
     outer = frame_path(kind, R); plate = frame_path(kind, R - 13)
     g = motif(i)
+    crown = i % 8 == 0
+    if crown: tier = 'legendary'; light, mid, dark = METAL[tier]
     legend = tier == 'legendary'
     rim_stops = (f'<stop offset="0" stop-color="{light}"/><stop offset=".28" stop-color="{mid}"/><stop offset=".52" stop-color="{dark}"/>'
                  f'<stop offset=".76" stop-color="{mid}"/><stop offset="1" stop-color="{light}"/>')
@@ -270,14 +272,26 @@ def badge_svg(i, uid):
     if legend:
         extra = ''.join(f'<line x1="{f(P(R+4,a)[0])}" y1="{f(P(R+4,a)[1])}" x2="{f(P(R+8,a)[0])}" y2="{f(P(R+8,a)[1])}" stroke="{mid}" stroke-width="1.2" stroke-linecap="round" opacity=".85"/>' for a in range(0, 360, 10))
         extra += f'<path d="M0,{-R-6}l5,6l-5,6l-5,-6z" fill="url(#{uid}r)"/>'
+    back = ''
+    if crown:
+        rays = ''.join(f'<line x1="{f(P(R+1,a)[0])}" y1="{f(P(R+1,a)[1])}" x2="{f(P(R+(17 if k%2==0 else 9),a)[0])}" y2="{f(P(R+(17 if k%2==0 else 9),a)[1])}" stroke="url(#{uid}r)" stroke-width="{3.4 if k%2==0 else 1.8}" stroke-linecap="round"/>' for k, a in enumerate(range(0, 360, 15)))
+        def sp(a, r, z):
+            x, y = P(r, a); return f'<path transform="translate({f(x)} {f(y)})" d="M0,{-z}Q0,0 {z},0Q0,0 0,{z}Q0,0 {-z},0Q0,0 0,{-z}z" fill="#D9A93A"/>'
+        back = (f'<circle r="108" fill="url(#{uid}h)"/>' + rays)
+        sparkles = sp(45, R + 22, 6) + sp(135, R + 20, 4) + sp(225, R + 22, 5) + sp(315, R + 20, 4)
+        extra = (sparkles + f'<path d="M0,{-R-20}l7,10l-7,10l-7,-10z" fill="url(#{uid}r)" stroke="#000" stroke-opacity=".3" stroke-width=".8"/>'
+                 f'<path d="M0,{-R-14}l3,4l-3,4l-3,-4z" fill="{glow}"/>'
+                 f'<path d="{frame_path(kind, R + 3.5)}" fill="none" stroke="url(#{uid}r)" stroke-width="1" opacity=".9"/>')
     return f'''
 <defs>
+ <radialGradient id="{uid}h" cx=".5" cy=".5" r=".5"><stop offset=".6" stop-color="#F3D58A" stop-opacity="0"/><stop offset=".82" stop-color="#F3D58A" stop-opacity=".95"/><stop offset="1" stop-color="#F3D58A" stop-opacity="0"/></radialGradient>
  <linearGradient id="{uid}r" x1="0" y1="0" x2="1" y2="1">{rim_stops}</linearGradient>
  <radialGradient id="{uid}p" cx=".3" cy=".22" r="1.15"><stop offset="0" stop-color="{p_top}"/><stop offset="1" stop-color="{p_bot}"/></radialGradient>
  <radialGradient id="{uid}g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="{glow}" stop-opacity=".95"/><stop offset="1" stop-color="{glow}" stop-opacity=".55"/></radialGradient>
  <linearGradient id="{uid}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
  <clipPath id="{uid}c"><path d="{plate}"/></clipPath>
 </defs>
+{back}
 <path d="{outer}" transform="translate(0 7)" fill="#000" opacity=".26" filter="url(#blur8)"/>
 <path d="{outer}" fill="url(#{uid}r)"/>
 <path d="{outer}" fill="none" stroke="#000" stroke-opacity=".38" stroke-width="1.1"/>
@@ -306,7 +320,8 @@ def symbol_style(i, uid):
 
 def single_svg(i):
     uid = f'b{i}'
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" width="400" height="400"><defs>{SHARED_DEFS}</defs>'
+    VB = -118 if i % 8 == 0 else -100
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{VB} {VB} {-2*VB} {-2*VB}" width="400" height="400"><defs>{SHARED_DEFS}</defs>'
             f'<style>{symbol_style(i, uid)}</style>{badge_svg(i, uid)}</svg>')
 
 def sheet_svg():

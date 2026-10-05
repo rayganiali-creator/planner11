@@ -4,12 +4,14 @@
 <filter id="emb" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.1" flood-color="#000" flood-opacity=".38"/></filter>
 </defs><style>.mb35 .nf{fill:none} .mb35 .sf{fill:#1F2B4E;fill-opacity:.17} .mb35 .fl{fill:#1F2B4E;stroke:none} .mb35 .gl{fill:url(#b35g);stroke:none}</style>
 <defs>
+ <radialGradient id="b35h" cx=".5" cy=".5" r=".5"><stop offset=".6" stop-color="#F3D58A" stop-opacity="0"/><stop offset=".82" stop-color="#F3D58A" stop-opacity=".95"/><stop offset="1" stop-color="#F3D58A" stop-opacity="0"/></radialGradient>
  <linearGradient id="b35r" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFEFB8"/><stop offset=".28" stop-color="#E2B94A"/><stop offset=".52" stop-color="#8E6914"/><stop offset=".76" stop-color="#E2B94A"/><stop offset="1" stop-color="#FFEFB8"/></linearGradient>
  <radialGradient id="b35p" cx=".3" cy=".22" r="1.15"><stop offset="0" stop-color="#EAD9B0"/><stop offset="1" stop-color="#B79C63"/></radialGradient>
  <radialGradient id="b35g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFF3CF" stop-opacity=".95"/><stop offset="1" stop-color="#FFF3CF" stop-opacity=".55"/></radialGradient>
  <linearGradient id="b35s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
  <clipPath id="b35c"><path d="M-21.26,-60.5Q0,-81.76 21.26,-60.5L60.5,-21.26Q81.76,0 60.5,21.26L21.26,60.5Q0,81.76 -21.26,60.5L-60.5,21.26Q-81.76,0 -60.5,-21.26Z"/></clipPath>
 </defs>
+
 <path d="M-25.04,-71.28Q0,-96.32 25.04,-71.28L71.28,-25.04Q96.32,0 71.28,25.04L25.04,71.28Q0,96.32 -25.04,71.28L-71.28,25.04Q-96.32,0 -71.28,-25.04Z" transform="translate(0 7)" fill="#000" opacity=".26" filter="url(#blur8)"/>
 <path d="M-25.04,-71.28Q0,-96.32 25.04,-71.28L71.28,-25.04Q96.32,0 71.28,25.04L25.04,71.28Q0,96.32 -25.04,71.28L-71.28,25.04Q-96.32,0 -71.28,-25.04Z" fill="url(#b35r)"/>
 <path d="M-25.04,-71.28Q0,-96.32 25.04,-71.28L71.28,-25.04Q96.32,0 71.28,25.04L25.04,71.28Q0,96.32 -25.04,71.28L-71.28,25.04Q-96.32,0 -71.28,-25.04Z" fill="none" stroke="#000" stroke-opacity=".38" stroke-width="1.1"/>
