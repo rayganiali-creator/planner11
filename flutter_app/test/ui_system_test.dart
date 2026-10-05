@@ -213,11 +213,13 @@ void main() {
 
     testWidgets('خانه: کارت تحلیل هوشمند برای Free قفل کوچک دارد و برای Pro ندارد', (tester) async {
       await boot(tester, pro: false);
+      await tester.scrollUntilVisible(find.byKey(const ValueKey('home-smart')), 300, scrollable: find.byType(Scrollable).first);
       expect(find.byKey(const ValueKey('home-smart')), findsOneWidget);
       expect(find.descendant(of: find.byKey(const ValueKey('home-smart')), matching: find.byType(ProLockIcon)), findsOneWidget);
       expect(find.byIcon(Icons.lock), findsNothing); // ProLockIcon از Lucide است؛ ولی وجود دارد
       await drain(tester);
       await boot(tester, pro: true);
+      await tester.scrollUntilVisible(find.byKey(const ValueKey('home-smart')), 300, scrollable: find.byType(Scrollable).first);
       final lock = find.descendant(of: find.byKey(const ValueKey('home-smart')), matching: find.byType(Icon));
       // برای Pro: فقط آیکن مغز و فلش (بدون قفل)
       expect(lock.evaluate().length, 2);

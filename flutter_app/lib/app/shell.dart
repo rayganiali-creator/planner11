@@ -66,8 +66,19 @@ class _ShellState extends State<Shell> {
     if (mounted) Future.delayed(const Duration(milliseconds: 500), _nextCheckin);
   }
 
+  bool _revealing = false;
+  Future<void> _reveal() async {
+    if (_revealing || !mounted) return;
+    _revealing = true;
+    try {
+      await showPendingReveals(context);
+    } finally {
+      _revealing = false;
+    }
+  }
+
   void _onProgress() {
-    if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) showPendingReveals(context); });
+    if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) => _reveal());
   }
 
   @override
@@ -88,7 +99,7 @@ class _ShellState extends State<Shell> {
     });
     final acts = context.read<AppActions>();
     acts.progressTick.addListener(_onProgress);
-    WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) showPendingReveals(context); });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reveal());
     _chTimer = Timer.periodic(const Duration(seconds: 20), (_) => _tickChallenges());
     _remTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       if (mounted) context.read<AppActions>().reminderTick(notifier: context.read<Notifier?>());

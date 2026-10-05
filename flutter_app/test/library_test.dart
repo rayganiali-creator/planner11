@@ -19,7 +19,7 @@ void main() {
     expect(bookProgressPct({'totalPages': 100, 'pagesRead': 500}), 100);
   });
 
-  test('کتاب: ذخیره، ثبت صفحه، اتمام = +سکه، ویرایش صفحات', () {
+  test('کتاب: ذخیره، ثبت صفحه، اتمام، ویرایش صفحات', () {
     final dir = Directory.systemTemp.createTempSync('rp_l');
     addTearDown(() => dir.deleteSync(recursive: true));
     final store = AppStore('${dir.path}/s.json')..load();
@@ -36,12 +36,11 @@ void main() {
     r = a.logPages(id, justRead: 10, totalSoFar: 50); // مجموع اولویت دارد
     expect(b['pagesRead'], 50);
     expect((b['history'] as List).last['delta'], 20);
-    final before = (store.state['scores'] as Map)['coins'] ?? 0;
     r = a.logPages(id, totalSoFar: 999);
     expect(b['pagesRead'], 100);
     expect(r.justCompleted, isTrue);
-    expect((store.state['scores'] as Map)['coins'] - before, 50);
-    expect(a.logPages(id, totalSoFar: 100).justCompleted, isFalse); // دوباره سکه نمی‌دهد
+    expect(a.logPages(id, totalSoFar: 100).justCompleted, isFalse); // دوباره جشن نمی‌گیرد
+    expect(store.state['scores']['coins'], 0);
     a.saveBook(editingId: id, title: 'کتاب', author: '', summary: '', totalPages: 300, reward: '');
     expect(b['completed'], isFalse); // صفحه‌ی کل بیشتر شد
     a.deleteBook(id);
@@ -69,7 +68,6 @@ void main() {
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: a));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('شازده کوچولو'), findsOneWidget);
-    expect(find.text('سطح ۱'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }

@@ -34,20 +34,19 @@ void main() {
       a.incrementChallenge(w['id'], 1);
     }
     expect(w['status'], 'active');
-    final coins0 = (store.state['scores'] as Map)['coins'] ?? 0;
     a.incrementChallenge(w['id'], 1);
     expect(w['status'], 'success');
-    expect((store.state['scores'] as Map)['coins'] - coins0, 40);
+    expect(store.state['scores']['coins'], 0, reason: 'دیگر سکه‌ای در کار نیست');
     expect(store.state['medals'], isNull); // رایگان: مدال نه
     // شخصی فقط پرو
-    final f = ChallengeForm()..name = 'مطالعه'..kind = 'both'..target = 3..durationValue = 2..durationUnit = 'hours'..rewardCoins = 999..rewardText = 'شیرینی';
+    final f = ChallengeForm()..name = 'مطالعه'..kind = 'both'..target = 3..durationValue = 2..durationUnit = 'hours'..rewardText = 'شیرینی';
     expect(a.createChallenge(f), 'pro');
     store.state['isPremium'] = true;
     expect(a.createChallenge(ChallengeForm()..name = ' '), 'name');
     expect(a.createChallenge(ChallengeForm()..name = 'x'..kind = 'timed'..deadlineMode = 'exact'..exactAt = now.millisecondsSinceEpoch - 1), 'date');
     expect(a.createChallenge(f), isNull);
     final c = a.challenges.last;
-    expect(c['rewardCoins'], 50); // سقف
+    expect(c.containsKey('rewardCoins'), isFalse); // بدون ارز
     expect(c['deadlineAt'], now.add(const Duration(hours: 2)).millisecondsSinceEpoch);
     // مهلت نرسیده
     expect(a.checkChallengeDeadlines(), isEmpty);
@@ -55,10 +54,9 @@ void main() {
     expect(a.checkChallengeDeadlines(), [c['id']]);
     expect(c['status'], 'pending_review');
     expect(a.checkChallengeDeadlines(), isEmpty); // دوباره صف نمی‌شود
-    final coins1 = (store.state['scores'] as Map)['coins'];
     a.resolveCheckin(c['id'], true);
     expect(c['status'], 'success');
-    expect((store.state['scores'] as Map)['coins'] - coins1, 50);
+    expect(store.state['scores']['coins'], 0);
     final medals = store.state['medals'] as List;
     expect(medals.single['tier'], 'bronze'); // ۳ + ۲ساعت ≈ ۳٫۱
     a.awardChallenge(c);

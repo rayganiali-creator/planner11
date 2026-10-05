@@ -15,11 +15,12 @@ void main() {
     addTearDown(() => dir.deleteSync(recursive: true));
     final store = AppStore('${dir.path}/s.json')..load();
     final a = AppActions(store, ToastBus());
-    final f = HabitForm(a.todayISO)..name = 'مطالعه'..type = 'numeric'..numericTarget = 10..rewardPoints = 99;
+    final f = HabitForm(a.todayISO)..name = 'مطالعه'..type = 'numeric'..numericTarget = 10..important = true;
     expect(a.saveHabit(HabitForm(a.todayISO)), isNull); // نام خالی
     final id = a.saveHabit(f)!;
     final h = (store.state['habits'] as List).single as Map;
-    expect(h['rewardPoints'], 50); // سقف
+    expect(h['important'], true);
+    expect(h.containsKey('rewardPoints'), isFalse);
     expect(h['numericUnit'], 'بار');
     a.setValue(a.todayISO, id, 12);
     (store.state['reasons'] as Map)[id] = {'x': 1};

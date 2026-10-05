@@ -26,8 +26,8 @@ class XpBar extends StatelessWidget {
       const SizedBox(height: 6),
       Row(children: [
         Text(s.maxed ? '${groupDigits(context, s.xp)} XP' : '${groupDigits(context, s.into)} / ${groupDigits(context, s.needed)} XP', key: const ValueKey('xp-line'), style: rpText(RpType.label, weight: 600, color: p.text)),
-        const Spacer(),
-        Text(s.maxed ? context.tr('بالاترین سطح', 'Max level') : context.tr('${groupDigits(context, s.toNext)} XP تا سطح بعد', '${groupDigits(context, s.toNext)} XP to next level'), style: rpText(RpType.label, weight: 500, color: p.muted)),
+        const SizedBox(width: 8),
+        Expanded(child: Text(s.maxed ? context.tr('بالاترین سطح', 'Max level') : context.tr('${groupDigits(context, s.toNext)} XP تا سطح بعد', '${groupDigits(context, s.toNext)} XP to next level'), textAlign: TextAlign.end, maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.label, weight: 500, color: p.muted))),
       ]),
     ]);
   }
@@ -103,7 +103,7 @@ class ProfileCard extends StatelessWidget {
             Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text(context.tr('سطح ${context.n(s.level)}', 'LEVEL ${s.level}'), key: const ValueKey('profile-level'), style: rpText(RpType.title, weight: 800, color: p.text, height: 1.2)),
               const SizedBox(width: 8),
-              Padding(padding: const EdgeInsets.only(bottom: 2), child: Text(rankName(context, s.rank), key: const ValueKey('profile-rank'), style: rpText(RpType.body, weight: 600, color: p.primary))),
+              Flexible(child: Padding(padding: const EdgeInsets.only(bottom: 2), child: Text(rankName(context, s.rank), key: const ValueKey('profile-rank'), maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.body, weight: 600, color: p.primary)))),
             ]),
             const SizedBox(height: RpSpace.s2),
             XpBar(d),
@@ -111,11 +111,11 @@ class ProfileCard extends StatelessWidget {
             Row(children: [
               Icon(LucideIcons.flame, size: 16, color: p.fire),
               const SizedBox(width: 4),
-              Text(context.tr('${context.n(s.streak)} روز استمرار', '${s.streak}-day streak'), key: const ValueKey('profile-streak'), style: rpText(RpType.label, weight: 600, color: p.text)),
+              Flexible(child: Text(context.tr('${context.n(s.streak)} روز استمرار', '${s.streak}-day streak'), key: const ValueKey('profile-streak'), maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.label, weight: 600, color: p.text))),
               const Spacer(),
               Icon(LucideIcons.award, size: 16, color: p.goldInk),
               const SizedBox(width: 4),
-              Text(context.tr('${context.n(s.badgeCount)} نشان', '${s.badgeCount} badges'), key: const ValueKey('profile-badges'), style: rpText(RpType.label, weight: 600, color: p.text)),
+              Flexible(child: Text(context.tr('${context.n(s.badgeCount)} نشان', '${s.badgeCount} badges'), key: const ValueKey('profile-badges'), maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.label, weight: 600, color: p.text))),
             ]),
           ]),
         ),

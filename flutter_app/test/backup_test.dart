@@ -12,6 +12,17 @@ import 'golden_loader.dart';
 
 Map<String, dynamic> _copy(Object? o) => jsonDecode(jsonEncode(o)) as Map<String, dynamic>;
 
+// تفاوتِ آگاهانه با نسخه‌ی HTML: سیستمِ آواتار/سکه/سطحِ عادت حذف شد (این کلیدها دیگر ساخته/اعتبارسنجی نمی‌شوند) و
+// سیستمِ پیشرفت دو کلیدِ تازه دارد (progress, todoLog). برای مقایسه با JS این کلیدها از هر دو طرف کنار گذاشته می‌شوند.
+const _legacyKeys = {'avatar', 'levelToastSent', 'levelReachedColor', 'masteryColor', 'progress', 'todoLog'};
+Object? _strip(Object? o) {
+  if (o is Map) {
+    return {for (final e in o.entries) if (!_legacyKeys.contains(e.key)) e.key: _strip(e.value)};
+  }
+  if (o is List) return [for (final e in o) if (!(e is String && _legacyKeys.contains(e))) _strip(e)];
+  return o;
+}
+
 void main() {
   group('اعتبارسنجی و بازیابی', () {
     final rows = (loadGolden('backup_validate') as List).cast<Map<String, dynamic>>();
@@ -35,7 +46,7 @@ void main() {
             got = {'ok': true, 'state': st, 'skipped': v.skipped, 'version': v.version};
           }
         }
-        final d = firstDiff(jsonDecode(jsonEncode(got)), r['ok']);
+        final d = firstDiff(_strip(jsonDecode(jsonEncode(got))), _strip(r['ok']));
         if (d != null) {
           bad++;
           if (msgs.length < 8) msgs.add('$fn: $d');
@@ -52,8 +63,8 @@ void main() {
       final msgs = <String>[];
       for (final r in rows) {
         final st = _copy(r['state']);
-        final got = backupToJson(createBackupMap(st, exportedAtUtc: DateTime.parse(r['now'] as String)));
-        final want = r['ok'] as String;
+        final got = jsonEncode(_strip(jsonDecode(backupToJson(createBackupMap(st, exportedAtUtc: DateTime.parse(r['now'] as String))))));
+        final want = jsonEncode(_strip(jsonDecode(r['ok'] as String)));
         if (got != want) {
           bad++;
           if (msgs.length < 4) {

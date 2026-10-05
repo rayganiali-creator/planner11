@@ -36,9 +36,8 @@ class ProgressScreen extends StatelessWidget {
         AppCard(
           key: const ValueKey('level-card'),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Wrap(crossAxisAlignment: WrapCrossAlignment.end, spacing: 10, children: [
               Text(context.tr('سطح ${context.n(s.level)}', 'Level ${s.level}'), style: rpText(32, weight: 800, color: p.text, height: 1.1)),
-              const SizedBox(width: 10),
               Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(rankName(context, s.rank), style: rpText(RpType.bodyL, weight: 700, color: p.primary))),
             ]),
             if (s.title != null) Padding(padding: const EdgeInsets.only(top: 2), child: Text(context.tr(s.title!.nameFa, s.title!.nameEn), style: rpText(RpType.label, weight: 600, color: p.goldInk))),
@@ -98,16 +97,16 @@ class ProgressScreen extends StatelessWidget {
         _StatsSection(d),
         SizedBox(height: sp),
         // ۷) مسیرِ من
-        RpCollapsible(key: const ValueKey('timeline-section'), icon: LucideIcons.route, title: context.tr('مسیر من (نقاط عطف)', 'My journey (milestones)'), child: _Timeline(d)),
+        RpCollapsible(key: const ValueKey('timeline-section'), persistKey: 'progTimeline', icon: LucideIcons.route, title: context.tr('مسیر من (نقاط عطف)', 'My journey (milestones)'), child: _Timeline(d)),
         SizedBox(height: sp),
         // ۸) عنوان‌ها
-        RpCollapsible(key: const ValueKey('titles-section'), icon: LucideIcons.badgeCheck, title: context.tr('عنوان‌ها', 'Titles'), child: _Titles(d)),
+        RpCollapsible(key: const ValueKey('titles-section'), persistKey: 'progTitles', icon: LucideIcons.badgeCheck, title: context.tr('عنوان‌ها', 'Titles'), child: _Titles(d)),
         SizedBox(height: sp),
         // ۹) فصل (پرو)
-        RpCollapsible(key: const ValueKey('season-section'), icon: LucideIcons.calendarRange, title: context.tr('فصل‌ها', 'Seasons'), child: const _Seasons()),
+        RpCollapsible(key: const ValueKey('season-section'), persistKey: 'progSeason', icon: LucideIcons.calendarRange, title: context.tr('فصل‌ها', 'Seasons'), child: const _Seasons()),
         SizedBox(height: sp),
         // ۱۰) تاریخچه (پرو)
-        RpCollapsible(key: const ValueKey('history-section'), icon: LucideIcons.history, title: context.tr('تاریخچه‌ی XP', 'XP history'), child: const _History()),
+        RpCollapsible(key: const ValueKey('history-section'), persistKey: 'progHistory', icon: LucideIcons.history, title: context.tr('تاریخچه‌ی XP', 'XP history'), child: const _History()),
       ],
     );
   }

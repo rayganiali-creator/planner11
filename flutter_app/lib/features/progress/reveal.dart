@@ -13,16 +13,12 @@ import 'badge_emblem.dart';
 import 'profile_card.dart';
 import 'progress_data.dart';
 
-bool _showing = false;
-
 /// اگر رخدادِ اعلام‌نشده‌ای هست، به‌ترتیب (سطح، سپس نشان‌ها) نشان می‌دهد و بعد «اعلام‌شده» ثبت می‌کند.
 Future<void> showPendingReveals(BuildContext context) async {
-  if (_showing) return;
   final a = context.read<AppActions>();
   final pend = pendingAnnouncements(a.store.state);
   if (pend.isEmpty) return;
-  _showing = true;
-  try {
+  {
     if (pend.level != null) {
       await _show(context, _LevelReveal(pend.level!));
       if (!context.mounted) return;
@@ -35,8 +31,6 @@ Future<void> showPendingReveals(BuildContext context) async {
     }
     markAnnounced(a.store.state);
     a.store.save();
-  } finally {
-    _showing = false;
   }
 }
 
