@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 
 import '../data/actions.dart';
 import '../data/challenge_ops.dart';
+import '../data/notifier.dart';
+import '../data/reminder_tick.dart';
 import '../features/challenges/challenges_sheet.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/onboarding/onboarding.dart';
@@ -34,6 +36,7 @@ class Shell extends StatefulWidget {
 
 class _ShellState extends State<Shell> {
   Timer? _chTimer;
+  Timer? _remTimer;
   final List<String> _checkins = [];
   bool _checkinOpen = false;
 
@@ -62,6 +65,7 @@ class _ShellState extends State<Shell> {
   @override
   void dispose() {
     _chTimer?.cancel();
+    _remTimer?.cancel();
     super.dispose();
   }
 
@@ -74,6 +78,9 @@ class _ShellState extends State<Shell> {
       if (texts != null) runFirstRunFlow(context, texts);
     });
     _chTimer = Timer.periodic(const Duration(seconds: 20), (_) => _tickChallenges());
+    _remTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) context.read<AppActions>().reminderTick(notifier: context.read<Notifier?>());
+    });
     // پنجره‌ی «سطح استادی» (ادامه‌ی مرحله‌ی بعد؟) — هر وقت ثبتی به سقفِ مرحله برسد
     context.read<AppActions>().onCapstone = (hid, level) => _capstone(hid, level);
   }
