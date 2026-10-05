@@ -214,6 +214,25 @@ void main() {
   });
 
   group('رابط کاربری', () {
+    testWidgets('ویرایشِ نامِ کاربر: مداد، ذخیره، خالی = «کاربر»، ماندگاری', (tester) async {
+      final (store, _, _) = await boot(tester);
+      expect(find.byKey(const ValueKey('profile-name')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('profile-name-edit')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.enterText(find.byKey(const ValueKey('name-field')), '  سارا   احمدی ');
+      await tester.tap(find.byKey(const ValueKey('name-save')));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(store.state['profileName'], 'سارا احمدی');
+      expect(find.text('سارا احمدی'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('profile-name-edit')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.enterText(find.byKey(const ValueKey('name-field')), '   ');
+      await tester.tap(find.byKey(const ValueKey('name-save')));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(store.state['profileName'], 'کاربر');
+      await drain(tester);
+    });
+
     testWidgets('پروفایلِ خانه: سطح، رتبه، XP، استریک و نشان‌ها؛ بدونِ سکه/آواتار', (tester) async {
       final (store, a, _) = await boot(tester);
       expect(find.byKey(const ValueKey('profile-card')), findsOneWidget);

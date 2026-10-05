@@ -7,6 +7,7 @@ import '../../app/i18n.dart';
 import '../../app/nav.dart';
 import '../../core/progress/achievements.dart';
 import '../../core/progress/config.dart';
+import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
@@ -91,7 +92,15 @@ class ProfileCard extends StatelessWidget {
             Row(children: [
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(name.isEmpty ? context.tr('مسیر رشد من', 'My growth') : name, maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.bodyL, weight: 700, color: p.text)),
+                  Row(children: [
+                    Flexible(child: Text(name.isEmpty ? context.tr('مسیر رشد من', 'My growth') : name, key: const ValueKey('profile-name'), maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.bodyL, weight: 700, color: p.text))),
+                    GestureDetector(
+                      key: const ValueKey('profile-name-edit'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => showEditNameDialog(context),
+                      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), child: Icon(LucideIcons.pencil, size: 15, color: p.muted)),
+                    ),
+                  ]),
                   if (s.title != null) Text(context.tr(s.title!.nameFa, s.title!.nameEn), key: const ValueKey('profile-title'), style: rpText(RpType.label, weight: 600, color: p.goldInk)),
                 ]),
               ),
@@ -122,4 +131,40 @@ class ProfileCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// ویرایشِ نامِ کاربر
+Future<void> showEditNameDialog(BuildContext context) {
+  final actions = context.read<AppActions>();
+  final cur = '${context.read<AppStore>().state['profileName'] ?? ''}'.trim();
+  final ctl = TextEditingController(text: cur == 'کاربر' ? '' : cur);
+  return showDialog<void>(
+    context: context,
+    builder: (dctx) => AlertDialog(
+      title: Text(context.tr('نامِ شما', 'Your name')),
+      content: TextField(
+        key: const ValueKey('name-field'),
+        controller: ctl,
+        autofocus: true,
+        maxLength: 30,
+        textInputAction: TextInputAction.done,
+        decoration: InputDecoration(hintText: context.tr('مثلاً علی', 'e.g. Alex')),
+        onSubmitted: (v) {
+          actions.setProfileName(v);
+          Navigator.of(dctx).pop();
+        },
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(dctx).pop(), child: Text(context.tr('انصراف', 'Cancel'))),
+        TextButton(
+          key: const ValueKey('name-save'),
+          onPressed: () {
+            actions.setProfileName(ctl.text);
+            Navigator.of(dctx).pop();
+          },
+          child: Text(context.tr('ذخیره', 'Save')),
+        ),
+      ],
+    ),
+  );
 }

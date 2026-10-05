@@ -13,7 +13,7 @@ void main() {
   testWidgets('پیش‌نمایشِ صفحه‌ی نشان‌ها', (tester) async {
     final loader = FontLoader('Vazirmatn')..addFont(Future.value(ByteData.sublistView(File('assets/fonts/Vazirmatn-arabic.ttf').readAsBytesSync())));
     await loader.load();
-    final (store, _, _) = await boot(tester, view: AppView.badges, size: const Size(1080, 4200), prep: (s, a) {
+    final (_, _, _) = await boot(tester, view: AppView.badges, size: const Size(1080, 4200), prep: (s, a) {
       final hid = addHabit(a, 'ورزش');
       (s.state['habits'] as List).single['createdAt'] = iso(40);
       s.state['records'] = {for (int i = 0; i < 20; i++) iso(i): {hid: 'success'}};

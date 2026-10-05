@@ -41,6 +41,13 @@ class AppActions {
     renderAll();
   }
 
+  /// نامِ کاربر (نمایش در پروفایل/گزارش)؛ خالی = «کاربر»
+  void setProfileName(String raw) {
+    final n = raw.trim().replaceAll(RegExp(r'\s+'), ' ');
+    store.state['profileName'] = n.isEmpty ? 'کاربر' : (n.length > 30 ? n.substring(0, 30) : n);
+    store.save();
+  }
+
   void setBinary(String iso, String hid, String v) => _finish(setBinaryRecord(store.state, iso, hid, v));
   void setValue(String iso, String hid, Object? val) => _finish(setValueRecord(store.state, iso, hid, val));
   void clear(String iso, String hid) => _finish(clearRecord(store.state, iso, hid));
