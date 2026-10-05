@@ -10,13 +10,6 @@ import 'package:routine_planner/core/smart.dart';
 
 import 'golden_loader.dart';
 
-Map lvl(LevelDef l) => {'num': l.num, 'minPoints': l.minPoints, 'labelFa': l.labelFa, 'labelEn': l.labelEn, 'icon': l.icon, 'isCapstone': l.isCapstone};
-
-Map lvlFromJs(Map m) => {
-      'num': m['num'], 'minPoints': m['minPoints'], 'labelFa': m['labelFa'], 'labelEn': m['labelEn'],
-      'icon': m['icon'] ?? '', 'isCapstone': m['isCapstone'] ?? false,
-    };
-
 void main() {
   final raw = loadGolden('habits') as Map<String, dynamic>;
   final states = (raw['states'] as List).cast<Map<String, dynamic>>();
@@ -46,20 +39,6 @@ void main() {
         return {'total': r.total, 'success': r.success, 'fail': r.fail, 'unset': r.unset};
       case 'getStatusFromRecord_id':
         return getStatusFromRecord(a[0], findHabit(st, a[1]));
-      case 'getRecordPoints_id':
-        return getRecordPoints(a[0], findHabit(st, a[1]));
-      case 'getHabitRewardPoints_id':
-        return getHabitRewardPoints(findHabit(st, a[0]));
-      case 'computeAllHabitPoints':
-        return computeAllHabitPoints(st);
-      case 'computeTotalPoints':
-        return computeTotalPoints(st);
-      case 'level_habit':
-        return lvl(getLevelFromPoints(a[0], habitActiveThresholds(findHabit(st, a[1]))));
-      case 'level_base':
-        return lvl(getLevelFromPoints(a[0]));
-      case 'stageCount_id':
-        return habitUnlockedStageCount(findHabit(st, a[0]));
       case 'computeStreak':
         return computeStreak(st, now);
       case 'computePermanentStreak':
@@ -90,26 +69,6 @@ void main() {
         }
       case 'getWeekStart_iso':
         return dateToISO(getWeekStart(st, startOfDay(now)));
-      case 'getAccountLevelFromCoins':
-        final c = a[0];
-        return getAccountLevelFromCoins(c is num ? c : (c == null ? null : double.nan));
-      case 'coinOps':
-        final out = <Object?>[];
-        for (final op in a[0]) {
-          final x = op[1] as num;
-          if (op[0] == 'add') {
-            out.add(addCoins(st, x));
-          } else if (op[0] == 'remove') {
-            out.add(removeCoins(st, x));
-          } else {
-            syncCoinsFromPoints(st, x);
-            out.add(null);
-          }
-          final sc = st['scores'] as Map;
-          out.add(sc['coins']);
-          out.add(sc['lastPoints']);
-        }
-        return out;
     }
     throw UnimplementedError(fn);
   }
@@ -121,7 +80,7 @@ void main() {
     for (final c in cases) {
       final fn = c['fn'] as String;
       // این سه تابعِ JS (باگ‌دار: امروز شمرده نمی‌شد، برچسب‌های هفته/ماه، میانگینِ ناهمگن) عمداً با core/analytics.dart جایگزین شدند؛ تستشان در analytics_core_test است
-      if (fn == 'habitProgressPct_id' || fn == 'collectSeries' || fn == 'getTotalStats' || fn == 'getWeekStart_iso') continue; // getWeekStart: شروعِ هفته‌ی فارسی (اصلاحِ باگِ HTML)
+      if (const {'habitProgressPct_id', 'collectSeries', 'getTotalStats', 'getWeekStart_iso', 'computeAllHabitPoints', 'computeTotalPoints', 'getRecordPoints_id', 'getHabitRewardPoints_id', 'level_habit', 'level_base', 'stageCount_id', 'getAccountLevelFromCoins', 'coinOps'}.contains(fn)) continue; // سکه/سطحِ عادت حذف شد // getWeekStart: شروعِ هفته‌ی فارسی (اصلاحِ باگِ HTML)
       counts[fn] = (counts[fn] ?? 0) + 1;
       // هر مورد روی کپیِ تازه‌ی state (coinOps آن را تغییر می‌دهد)
       final st = jsonDecode(jsonEncode(states[c['s']])) as Map<String, dynamic>;
@@ -134,10 +93,6 @@ void main() {
         got = 'EXCEPTION: $e';
       }
       Object? want = c['ok'];
-      if (fn.startsWith('level_')) {
-        got = lvlFromJs(got as Map);
-        want = lvlFromJs(want as Map);
-      }
       if (fn == 'smart') {
         // تفاوتِ آگاهانه با JS: «امروزِ بی‌ثبت» روزِ سررسید حساب نمی‌شود (dueDays/perfect/zero/consistency)؛ بقیه‌ی فیلدها باید یکی باشند.
         for (final side in [got, want]) {

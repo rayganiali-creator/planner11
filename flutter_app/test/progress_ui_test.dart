@@ -49,7 +49,7 @@ Future<void> drain(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
 }
 
-String iso(int ago) => '${base.subtract(Duration(days: ago)).toIso8601String().substring(0, 10)}';
+String iso(int ago) => base.subtract(Duration(days: ago)).toIso8601String().substring(0, 10);
 
 String addHabit(AppActions a, String name) => a.saveHabit(HabitForm(a.todayISO)..name = name)!;
 
@@ -120,6 +120,20 @@ void main() {
       expect(totalXp(store.state), 8);
       final again = AppStore('${dir.path}/s.json')..load(); // Restart
       expect(totalXp(again.state), 8);
+    });
+
+    test('کارِ مهم: ۱۲ XP به‌جای ۸', () {
+      final dir = Directory.systemTemp.createTempSync('rp_th');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final store = AppStore('${dir.path}/s.json')..load();
+      var t = DateTime.now();
+      final a = AppActions(store, ToastBus(), clock: () => t);
+      a.renderAll();
+      final todo = a.addTodo('گزارشِ مالیِ مهم')!;
+      expect(a.saveTodoEdit(todo['id'] as String, title: 'گزارشِ مالیِ مهم', repeatMode: 'none', repeatDays: const [], subs: const [], high: true), isTrue);
+      t = t.add(const Duration(minutes: 3));
+      a.toggleTodo(todo['id'] as String);
+      expect(totalXp(store.state), 12);
     });
 
     test('پومودورو: فقط پایانِ واقعیِ فاز جلسه می‌سازد؛ Skip/Start-Stop نه', () {
@@ -304,20 +318,20 @@ void main() {
       expect(progressOf(store.state)['featured'], ['first_habit']);
       await drain(tester);
       // پرو: فیلترِ پیشرفته کار می‌کند
-      final (_, __, ___) = await boot(tester, view: AppView.badges, pro: true);
+      final (_, _, _) = await boot(tester, view: AppView.badges, pro: true);
       await tapT(tester, 'بازشده');
       expect(find.byKey(const ValueKey('badge-focus_1')), findsNothing);
       await drain(tester);
     });
 
     testWidgets('صفحه‌ی پیشرفت: آمارِ بدونِ داده «داده کافی…»؛ با داده مقدار و (پرو) تغییر؛ Timeline و عنوان‌ها', (tester) async {
-      final (store, a, _) = await boot(tester, view: AppView.progress);
+      final (_, _, _) = await boot(tester, view: AppView.progress);
       expect(find.byKey(const ValueKey('level-card')), findsOneWidget);
       await tester.scrollUntilVisible(find.byKey(const ValueKey('stat-consistency-empty')), 300, scrollable: find.byType(Scrollable).first);
       expect(find.text('داده کافی برای محاسبه وجود ندارد.'), findsWidgets);
       expect(find.byKey(const ValueKey('stat-consistency')), findsNothing, reason: 'هرگز عددِ ساختگی نشان نده');
       await drain(tester);
-      final (store2, __, ___) = await boot(tester, view: AppView.progress, pro: true, prep: (s, a) {
+      final (store2, _, _) = await boot(tester, view: AppView.progress, pro: true, prep: (s, a) {
         s.state['uiOpen'] = {'progTimeline': true, 'progTitles': true};
         final hid = addHabit(a, 'ورزش');
         (s.state['habits'] as List).single['createdAt'] = iso(80);

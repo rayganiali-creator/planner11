@@ -1,20 +1,10 @@
 // کتابخانه: سطح کتابخوان، ثبت صفحه، افزودن/ویرایش/حذف کتاب (قواعدِ نسخه‌ی HTML).
-import 'dart:math';
-
 import '../core/calendar.dart';
 import 'actions.dart';
 import 'media_store.dart';
 import 'habit_ops.dart' show newHabitId;
 
 const int freeBookLimit = 3;
-
-int libraryLevelNum(int completed) => min(completed ~/ 5 + 1, 21);
-int libraryBooksToNext(int completed) {
-  final n = libraryLevelNum(completed);
-  return n >= 21 ? 0 : n * 5 - completed;
-}
-
-double libraryLevelPct(int completed) => libraryLevelNum(completed) >= 21 ? 100 : (completed % 5) / 5 * 100;
 
 double bookProgressPct(Map b) {
   final t = b['totalPages'];

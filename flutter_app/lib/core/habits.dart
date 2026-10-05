@@ -1,4 +1,4 @@
-// پورت منطقِ عادت‌ها، امتیاز، سطح و streak از www/index.html.
+// پورت منطقِ عادت‌ها و streak از www/index.html. (سکه/امتیاز/سطحِ عادت حذف شد؛ پیشرفت در core/progress است.)
 // هر تابع با خروجی طلایی JS سنجیده می‌شود (test/habits_test.dart).
 //
 // `state` همان سند JSON است (Map). «امروز» همیشه پارامتر است، نه ساعت سیستم، تا تست‌پذیر باشد.
@@ -7,70 +7,6 @@ import 'calendar.dart';
 import 'js_compat.dart';
 
 
-const int coinMaxPerOp = 50; // سقف دریافت/کسر سکه در هر عملیات
-
-// ---------------------------------------------------------------- سطح‌ها
-class LevelDef {
-  final int num;
-  final int minPoints;
-  final String labelFa, labelEn, icon;
-  final bool isCapstone;
-  const LevelDef(this.num, this.minPoints, this.labelFa, this.labelEn, {this.icon = '', this.isCapstone = false});
-  Map<String, dynamic> toJson() => {'num': num, 'minPoints': minPoints, 'labelFa': labelFa, 'labelEn': labelEn, 'icon': icon, 'isCapstone': isCapstone};
-}
-
-const List<List<LevelDef>> habitLevelStages = [
-  [
-    LevelDef(1, 250, 'سطح ۱', 'Level 1'),
-    LevelDef(2, 500, 'سطح ۲', 'Level 2'),
-    LevelDef(3, 750, 'سطح ۳', 'Level 3'),
-    LevelDef(4, 1000, 'سطح ۴', 'Level 4'),
-    LevelDef(5, 1500, 'سطح ۵', 'Level 5'),
-    LevelDef(6, 2000, 'استادی', 'Master', icon: '🏆', isCapstone: true),
-  ],
-  [
-    LevelDef(7, 2500, 'سطح ۷', 'Level 7'),
-    LevelDef(8, 3000, 'سطح ۸', 'Level 8'),
-    LevelDef(9, 3500, 'سطح ۹', 'Level 9'),
-    LevelDef(10, 4000, 'سطح ۱۰', 'Level 10'),
-    LevelDef(11, 4500, 'سطح ۱۱', 'Level 11'),
-    LevelDef(12, 5000, 'استاد اعظم', 'Grand Master', icon: '👑', isCapstone: true),
-  ],
-];
-
-List<LevelDef> get levelThresholds => habitLevelStages[0];
-
-int habitUnlockedStageCount(Map? h) {
-  if (h == null) return 1;
-  final v = h['unlockedStage'];
-  return jsTruthy(v) ? jsToNumber(v).toInt() : 1;
-}
-
-List<LevelDef> habitActiveThresholds(Map? h) {
-  final n = habitUnlockedStageCount(h);
-  final take = n < habitLevelStages.length ? n : habitLevelStages.length;
-  return [for (final s in habitLevelStages.take(take < 0 ? 0 : take)) ...s];
-}
-
-List<LevelDef> habitCurrentStageThresholds(Map? h) {
-  final n = habitUnlockedStageCount(h);
-  final k = n < habitLevelStages.length ? n : habitLevelStages.length;
-  return (k - 1 >= 0 && k - 1 < habitLevelStages.length) ? habitLevelStages[k - 1] : habitLevelStages[0];
-}
-
-const LevelDef _beginner = LevelDef(0, 0, 'شروع', 'Beginner');
-
-LevelDef getLevelFromPoints(num points, [List<LevelDef>? thresholds]) {
-  final list = thresholds ?? levelThresholds;
-  for (int i = list.length - 1; i >= 0; i--) {
-    if (points >= list[i].minPoints) return list[i];
-  }
-  return _beginner;
-}
-
-int getLevelNum(num points, [List<LevelDef>? thresholds]) => getLevelFromPoints(points, thresholds).num;
-
-// ---------------------------------------------------------------- عادت در یک روز
 bool habitAppliesOnISO(Map h, String iso) {
   final created = h['createdAt'];
   if (created is String && iso.compareTo(created) < 0) return false; // iso < h.createdAt
@@ -177,88 +113,6 @@ String? getStatusFromRecord(Object? value, Map h) {
     return ok ? 'success' : 'fail';
   }
   return null;
-}
-
-// ---------------------------------------------------------------- امتیاز
-num getHabitRewardPoints(Map? h) {
-  final rp = h == null ? null : h['rewardPoints'];
-  final v = (rp is num && rp > 0) ? rp : 10;
-  return v < coinMaxPerOp ? v : coinMaxPerOp;
-}
-
-num getRecordPoints(Object? value, Map h) {
-  final status = getStatusFromRecord(value, h);
-  final reward = getHabitRewardPoints(h);
-  if (status == 'success') return reward;
-  if (status == 'fail') {
-    final half = jsRound(reward / 2);
-    return -(half > 1 ? half : 1);
-  }
-  return 0;
-}
-
-Map<String, num> computeAllHabitPoints(Doc state) {
-  final habitMap = <dynamic, Map>{for (final h in _habits(state)) h['id']: h};
-  final totals = <String, num>{};
-  final recs = state['records'];
-  if (recs is Map) {
-    for (final iso in recs.keys) {
-      final rec = recs[iso];
-      if (rec is! Map) continue; // روزِ خراب، نه خطا
-      for (final hid in rec.keys) {
-        final h = habitMap[hid];
-        if (h != null) totals['$hid'] = (totals['$hid'] ?? 0) + getRecordPoints(rec[hid], h);
-      }
-    }
-  }
-  return totals;
-}
-
-num computeHabitPoints(Doc state, String hid) => computeAllHabitPoints(state)[hid] ?? 0;
-
-num computeTotalPoints(Doc state) => computeAllHabitPoints(state).values.fold<num>(0, (a, b) => a + b);
-
-// ---------------------------------------------------------------- سکه
-int getAccountLevelFromCoins(num? coins) {
-  final c = (coins == null || coins.isNaN) ? 0 : coins;
-  return (c < 0 ? 0 : c) ~/ 1000;
-}
-
-Map _scores(Doc state) {
-  final s = state['scores'];
-  if (s is Map) return s;
-  final m = <String, dynamic>{};
-  state['scores'] = m;
-  return m;
-}
-
-int _safeCoins(num? amount) {
-  final a = jsRound(amount ?? 0);
-  return a < 0 ? 0 : (a > coinMaxPerOp ? coinMaxPerOp : a);
-}
-
-/// هر دریافت سکه در کل برنامه فقط از همین‌جا می‌گذرد (سقف ۵۰ در هر عملیات).
-int addCoins(Doc state, num? amount) {
-  final safe = _safeCoins(amount);
-  final sc = _scores(state);
-  sc['coins'] = ((sc['coins'] is num ? sc['coins'] : 0) as num) + safe;
-  return safe;
-}
-
-int removeCoins(Doc state, num? amount) {
-  final safe = _safeCoins(amount);
-  final sc = _scores(state);
-  final cur = (sc['coins'] is num ? sc['coins'] : 0) as num;
-  sc['coins'] = (cur - safe) < 0 ? 0 : cur - safe;
-  return safe;
-}
-
-void syncCoinsFromPoints(Doc state, num totalPoints) {
-  final sc = _scores(state);
-  if (!sc.containsKey('lastPoints') || sc['lastPoints'] == null) sc['lastPoints'] = totalPoints;
-  final delta = totalPoints - (sc['lastPoints'] as num);
-  if (delta > 0) addCoins(state, delta);
-  sc['lastPoints'] = totalPoints;
 }
 
 // ---------------------------------------------------------------- streak / رکورد

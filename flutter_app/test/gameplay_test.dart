@@ -1,5 +1,5 @@
-// تست تفاضلی گیم‌پلی: دنباله‌ی عملیات (ثبت/پاک/مشتق‌سازی) روی ۱۳۰ state و HP/حالِ آواتار.
-// JS همان کدِ واقعیِ برنامه است (setBinaryRecord/… با renderDashboard) و toast/پنجره‌ها ضبط شده‌اند.
+// تست تفاضلیِ ثبتِ عادت: دنباله‌ی عملیات (ثبت/پاک) روی ۱۳۰ state؛ فقط «رکوردها/دلایل» با JS مقایسه می‌شود.
+// (سکه/سطح/HP/آواتار عمداً حذف شده‌اند؛ آن بخش‌های JS دیگر مرجع نیستند.)
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -11,51 +11,37 @@ Map<String, dynamic> _copy(Object? o) => jsonDecode(jsonEncode(o)) as Map<String
 
 void main() {
   final rows = (loadGolden('gameplay') as List).cast<Map<String, dynamic>>();
-  final today = DateTime(2026, 9, 30, 10);
 
-  test('همه‌ی ${rows.length} مورد با JS یکسان است (state و رویدادها)', () {
+  test('همه‌ی ${rows.length} مورد: رکوردها و دلایل با JS یکسان است', () {
     final bad = <String>[];
-    int events = 0;
+    int ops = 0;
     for (int i = 0; i < rows.length; i++) {
       final r = rows[i];
+      if (r['fn'] != 'runOps') continue; // HP/حالِ آواتار حذف شده
       final a = r['args'] as List;
       final st = _copy(a[0]);
-      final want = r['ok'] as Map<String, dynamic>;
-      Object? got;
-      if (r['fn'] == 'runOps') {
-        final ev = <List<Object?>>[];
-        for (final op in (a[1] as List)) {
-          RecordResult? res;
-          switch (op[0]) {
-            case 'bin':
-              res = setBinaryRecord(st, op[1], op[2], op[3]);
-            case 'val':
-              res = setValueRecord(st, op[1], op[2], op[3]);
-            case 'clear':
-              res = clearRecord(st, op[1], op[2]);
-            case 'derive':
-              ev.addAll(applyDerived(st, today).map((e) => e.toJson()));
-          }
-          if (res != null) {
-            ev.addAll(res.events.map((e) => e.toJson()));
-            if (res.rendered) ev.addAll(applyDerived(st, today).map((e) => e.toJson())); // renderAll()
-          }
+      for (final op in (a[1] as List)) {
+        switch (op[0]) {
+          case 'bin':
+            setBinaryRecord(st, op[1], op[2], op[3]);
+            ops++;
+          case 'val':
+            setValueRecord(st, op[1], op[2], op[3]);
+            ops++;
+          case 'clear':
+            clearRecord(st, op[1], op[2]);
+            ops++;
         }
-        st.remove('clock'); // lastSeen به ساعتِ زنده وابسته است
-        events += ev.length;
-        got = {'state': st, 'events': ev};
-      } else {
-        final hp = computeAvatarHP(st, today);
-        got = {'hp': hp, 'cond': [0, 6, 7, 12, 18, 19, 23].map((h) => avConditionOf(hp, h)).toList()};
       }
-      final d = firstDiff(jsonDecode(jsonEncode(got)), want);
+      Map pick(Map s) => {'records': s['records'], 'reasons': s['reasons']};
+      final d = firstDiff(jsonDecode(jsonEncode(pick(st))), pick((r['ok'] as Map<String, dynamic>)['state'] as Map));
       if (d != null) {
-        bad.add('#$i ${r['fn']}: $d');
+        bad.add('#$i: $d');
         if (bad.length >= 8) break;
       }
     }
     // ignore: avoid_print
-    print('رویدادهای مقایسه‌شده: $events');
+    print('عملیاتِ مقایسه‌شده: $ops');
     expect(bad, isEmpty, reason: bad.join('\n'));
   });
 }

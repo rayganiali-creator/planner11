@@ -123,8 +123,6 @@ extension HabitOps on AppActions {
     for (final k in ['reasons', 'triggers', 'habitNotes']) {
       if (s[k] is Map) (s[k] as Map).remove(id);
     }
-    final sent = s['levelToastSent'];
-    if (sent is Map) sent.removeWhere((k, _) => '$k'.startsWith('${id}_level_'));
     media?.deleteAllPhotos(PhotoKind.habit, id);
     store.save();
     renderAll();

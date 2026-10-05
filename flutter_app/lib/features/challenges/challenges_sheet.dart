@@ -155,7 +155,7 @@ class _SheetState extends State<_Sheet> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(fa ? pr.nameFa : pr.nameEn, style: rpText(RpType.body, weight: 800, color: p.text)),
                   Text(
-                    '${pr.kind == 'timed' ? (fa ? '${toPersianDigits(pr.days)} روز' : '${pr.days} days') : (fa ? '${toPersianDigits(pr.target)} بار' : '${pr.target} times')}',
+                    pr.kind == 'timed' ? (fa ? '${toPersianDigits(pr.days)} روز' : '${pr.days} days') : (fa ? '${toPersianDigits(pr.target)} بار' : '${pr.target} times'),
                     style: rpText(RpType.label, weight: 500, color: p.muted),
                   ),
                 ]),

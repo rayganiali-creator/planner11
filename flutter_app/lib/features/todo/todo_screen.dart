@@ -263,6 +263,7 @@ class _TodoEditorState extends State<_TodoEditor> {
   final sub = TextEditingController();
   late int? due = (widget.todo['dueAt'] as num?)?.toInt();
   late String mode = '${widget.todo['repeatMode'] ?? 'none'}';
+  late bool high = widget.todo['priority'] == 'high';
   late List<int> days = [for (final d in (widget.todo['repeatDays'] as List? ?? const [])) (d as num).toInt()];
   late List<Map> subs = [for (final s in (widget.todo['subtasks'] as List? ?? const []).cast<Map>()) {...s}];
 
@@ -278,6 +279,7 @@ class _TodoEditorState extends State<_TodoEditor> {
         RpSheetHeader(context.tr('ویرایش کار', 'Edit task')),
         const SizedBox(height: RpSpace.s3),
         TextField(controller: title, decoration: InputDecoration(labelText: context.tr('عنوان', 'Title'))),
+        SwitchListTile(key: const ValueKey('todo-high'), dense: true, contentPadding: EdgeInsets.zero, title: Text(context.tr('کارِ مهم', 'Important task')), subtitle: Text(context.tr('۱۲ XP به‌جای ۸ XP هنگام انجام', '12 XP instead of 8 on completion')), value: high, onChanged: (v) => setState(() => high = v)),
         const SizedBox(height: RpSpace.s2),
         Row(children: [
           OutlinedButton.icon(
@@ -342,7 +344,7 @@ class _TodoEditorState extends State<_TodoEditor> {
           const SizedBox(width: RpSpace.s3),
           Expanded(
             child: RpButton(context.tr('ذخیره', 'Save'), onTap: () {
-              final ok = a.saveTodoEdit(widget.todo['id'] as String, title: title.text, dueAt: due, repeatMode: mode, repeatDays: days, subs: subs, notifier: widget.notifier);
+              final ok = a.saveTodoEdit(widget.todo['id'] as String, title: title.text, dueAt: due, repeatMode: mode, repeatDays: days, subs: subs, high: high, notifier: widget.notifier);
               if (!ok) {
                 a.toasts.show(context.tr('عنوان نمی‌تونه خالی باشه', 'Title cannot be empty'), ms: 2000);
                 return;

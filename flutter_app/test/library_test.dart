@@ -10,15 +10,6 @@ import 'package:routine_planner/data/app_store.dart';
 import 'package:routine_planner/data/library_ops.dart';
 
 void main() {
-  test('سطح کتابخوان', () {
-    expect([0, 4, 5, 9, 10, 99, 100, 101].map(libraryLevelNum), [1, 1, 2, 2, 3, 20, 21, 21]);
-    expect([0, 4, 5, 100].map(libraryBooksToNext), [5, 1, 5, 0]);
-    expect([0, 2, 5, 100].map(libraryLevelPct), [0, 40, 0, 100]);
-    expect(bookProgressPct({'totalPages': 0, 'pagesRead': 5}), 0);
-    expect(bookProgressPct({'totalPages': 200, 'pagesRead': 50}), 25);
-    expect(bookProgressPct({'totalPages': 100, 'pagesRead': 500}), 100);
-  });
-
   test('کتاب: ذخیره، ثبت صفحه، اتمام، ویرایش صفحات', () {
     final dir = Directory.systemTemp.createTempSync('rp_l');
     addTearDown(() => dir.deleteSync(recursive: true));

@@ -129,7 +129,7 @@ extension TodoOps on AppActions {
   }
 
   /// ویرایش؛ false اگر عنوان خالی باشد
-  bool saveTodoEdit(String id, {required String title, int? dueAt, required String repeatMode, required List<int> repeatDays, required List<Map> subs, Notifier? notifier}) {
+  bool saveTodoEdit(String id, {required String title, int? dueAt, required String repeatMode, required List<int> repeatDays, required List<Map> subs, bool? high, Notifier? notifier}) {
     final t = _todos.where((x) => x['id'] == id).firstOrNull;
     if (t == null) return false;
     final nt = title.trim();
@@ -137,6 +137,13 @@ extension TodoOps on AppActions {
     t['title'] = nt;
     t['dueAt'] = dueAt;
     t['repeatMode'] = (repeatMode == 'custom' && !isPro) ? (t['repeatMode'] == 'custom' ? 'custom' : 'none') : repeatMode;
+    if (high != null) {
+      if (high) {
+        t['priority'] = 'high';
+      } else {
+        t.remove('priority');
+      }
+    }
     t['subtasks'] = subs;
     t['repeatDays'] = repeatMode == 'custom' ? [...repeatDays] : <int>[];
     store.save();

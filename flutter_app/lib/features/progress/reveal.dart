@@ -40,7 +40,7 @@ Future<void> _show(BuildContext context, Widget w) => showGeneralDialog<void>(
       barrierLabel: 'close',
       barrierColor: Colors.black.withValues(alpha: 0.45),
       transitionDuration: const Duration(milliseconds: 420),
-      pageBuilder: (_, __, ___) => Center(child: w),
+      pageBuilder: (_, _, _) => Center(child: w),
       transitionBuilder: (ctx, anim, _, child) {
         final c = CurvedAnimation(parent: anim, curve: Curves.easeOutCubic);
         return FadeTransition(opacity: c, child: ScaleTransition(scale: Tween<double>(begin: .92, end: 1).animate(c), child: child));
@@ -113,7 +113,7 @@ class _LevelReveal extends StatelessWidget {
           tween: Tween(begin: 0, end: 1),
           duration: const Duration(milliseconds: 900),
           curve: Curves.easeOutCubic,
-          builder: (_, t, __) => SizedBox(
+          builder: (_, t, _) => SizedBox(
             width: 130,
             height: 130,
             child: Stack(alignment: Alignment.center, children: [
