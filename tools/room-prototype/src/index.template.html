@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>اتاق من — نمونه‌ی اولیه</title>
+<style>
+:root{--bg:#161a22;--panel:#1e2430;--line:#2e3647;--text:#eef1f7;--muted:#9aa5bb;--acc:#f2b84b;--acc2:#c8892a}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Vazirmatn,Tahoma,sans-serif}
+button{font:inherit;color:inherit;background:#2a3142;border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}button.on,button.primary{background:var(--acc2);border-color:var(--acc);color:#1a1205;font-weight:700}
+button.danger:hover{border-color:#e5564f;color:#ff8a84}
+#app{display:grid;grid-template-rows:auto 1fr;height:100vh}
+#top{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+#top h1{font-size:16px;margin:0;flex:1}#coinsbox{background:#2a3142;border:1px solid var(--acc);border-radius:20px;padding:3px 14px;font-weight:700;color:var(--acc)}
+#main{display:grid;grid-template-columns:1fr 380px;min-height:0}
+#left{display:flex;flex-direction:column;min-width:0;min-height:0}
+#stagebox{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:10px;background:#0e1117}
+#room{image-rendering:pixelated;border:3px solid #000;border-radius:4px;touch-action:none;cursor:grab;max-width:100%;max-height:100%}
+#bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 12px;background:var(--panel);border-top:1px solid var(--line)}
+#bar .muted{flex:1;min-width:140px}
+#side{display:flex;flex-direction:column;min-height:0;background:var(--panel);border-inline-start:1px solid var(--line)}
+#tabs{display:flex;flex-wrap:wrap;gap:5px;padding:8px;border-bottom:1px solid var(--line)}#tabs button{padding:3px 9px;font-size:13px}
+#items{overflow:auto;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;align-content:start}
+.card{background:#262d3d;border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.card.sel{border-color:var(--acc)}.card .row{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}.card button{padding:3px 7px;font-size:12px}
+.th{image-rendering:pixelated;background:repeating-conic-gradient(#2c3446 0 25%,#232a39 0 50%) 50%/10px 10px;border-radius:6px;padding:3px;max-width:100%}
+.muted{color:var(--muted);font-size:12px}.pad{padding:14px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2a3142;border:1px solid var(--acc);padding:7px 14px;border-radius:10px;display:none;z-index:9}
+@media(max-width:860px){#app{height:auto}#main{grid-template-columns:1fr}#stagebox{height:60vh;flex:none}#side{height:70vh}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top"><h1>🏠 اتاق من <span class="muted">— نمونه‌ی اولیه (هنوز در اپ نیست)</span></h1>
+    <span id="coinsbox">🪙 <span id="coins">0</span></span>
+    <button id="addcoins">+۵۰۰ سکه (فقط برای تست)</button><button id="daynight">☀ روز</button><button id="reset">شروع از نو</button></div>
+  <div id="main">
+    <div id="left"><div id="stagebox"><canvas id="room"></canvas></div><div id="bar"></div></div>
+    <div id="side"><div id="tabs"></div><div id="items"></div></div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+/*PETS*/
+/*JS*/
+</script>
+</body>
+</html>
