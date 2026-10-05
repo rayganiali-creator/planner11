@@ -35,6 +35,25 @@ function equip(fam, varId) {
   commit('equip');
 }
 function unequip(layerId) { delete P.scene.equipped[layerId]; commit('unequip'); }
+/** PNG را به رجیستری تصاویر اضافه می‌کند: {id,w,h} */
+function addImageFile(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onerror = () => rej(r.error);
+    r.onload = () => { const im = new Image(); im.onload = () => { const id = 'img_' + newId('i'); P.images[id] = r.result; imgCache.set(r.result, { img: im, ok: true }); res({ id, w: im.width, h: im.height }); }; im.onerror = () => rej(new Error('تصویر نامعتبر')); im.src = r.result; };
+    r.readAsDataURL(file);
+  });
+}
+function pickImage(fn) { const inp = h('input', { type: 'file', accept: 'image/png,image/*' }); inp.onchange = async () => { if (inp.files[0]) { try { fn(await addImageFile(inp.files[0])); } catch (e) { toast(e.message); } } }; inp.click(); }
+function importPngFamily() {
+  pickImage(im => {
+    const cat = S.cat === 'all' ? 'accessory' : S.cat, f = newFamily('PNG جدید', cat);
+    const p = newPart('image', im.w, im.h, 0, 0); p.img = im.id; f.parts.push(p); f.anchor = 'top-center';
+    const cid = P.scene.characterId; if (cid) f.characterIds = [cid];
+    f.geometry['*'] = newGeometry(Math.round(P.canvas.w / 2), Math.round((P.canvas.h - im.h) / 2));
+    P.families.push(f); equip(f);
+  });
+}
 function newBlankFamily(cat) {
   const f = newFamily((CAT_FA[cat] || cat) + ' جدید', cat);
   const p = newPart('part1', 16, 16, -8, -16); f.parts.push(p);
@@ -67,10 +86,11 @@ function renderLeft() {
 }
 function assetsList() {
   const cats = [['all', 'همه'], ...CATS];
-  const fams = P.families.filter(f => S.cat === 'all' || f.category === S.cat);
+  const fams = P.families.filter(f => (S.cat === 'all' || f.category === S.cat) && (!S.onlyCompat || compatible(f, P.scene.characterId)));
   return [
     h('div', { class: 'tabs' }, cats.map(([k, l]) => h('button', { class: S.cat === k ? 'on' : '', onclick: () => { S.cat = k; renderLeft(); } }, l))),
-    h('div', { class: 'pb' }, btn('＋ Asset Family جدید', () => newBlankFamily(S.cat === 'all' ? 'accessory' : S.cat), 'primary')),
+    h('div', { class: 'pb' }, h('div', { class: 'row wrap' }, btn('＋ پیکسلی', () => newBlankFamily(S.cat === 'all' ? 'accessory' : S.cat), 'primary'), btn('🖼 ایمپورت PNG', importPngFamily, 'primary')),
+      h('label', { class: 'row' }, chkIn(S.onlyCompat, v => { S.onlyCompat = v; renderLeft(); }), ' فقط سازگار با کاراکتر فعلی')),
     h('div', { class: 'list' }, fams.map(f => {
       const L = layerOfFam(f.id), ok = compatible(f, P.scene.characterId);
       return h('div', { class: 'item' + (S.famId === f.id ? ' sel' : ''), onclick: () => (L ? selectFam(f) : equip(f)) },
@@ -194,9 +214,11 @@ function partsTab() {
     btn('＋ قطعه', () => { const w = num(prompt('عرض', 16), 16), hh = num(prompt('ارتفاع', 16), 16); const p = newPart('part' + (f.parts.length + 1), clamp(w, 1, 96), clamp(hh, 1, 144), -Math.floor(w / 2), -hh); f.parts.push(p); S.partId = p.id; invalidateCache(); commit('addPart'); }),
     btn('⧉ تکثیر', () => { if (!pt) return; const c = { ...clone({ ...pt, px: [] }), id: newId('part'), px: new Uint8Array(pt.px), name: pt.name + '2', dx: pt.dx + 2, dy: pt.dy + 2 }; f.parts.push(c); S.partId = c.id; invalidateCache(); commit('dupPart'); }),
     btn('🗑 حذف', () => { if (!pt) return; f.parts = f.parts.filter(p => p !== pt); S.partId = null; invalidateCache(); commit('delPart'); }, 'danger'),
-    btn('✎ ویرایش پیکسلی', () => pt && openPixelEditor(f, pt), 'primary'),
-    btn('✂ برش به محتوا', () => { if (pt) { cropPart(pt); invalidateCache(); commit('crop'); } }),
-    btn('⑂ تقسیم (اجزای جدا)', () => { if (pt) { splitPart(f, pt); invalidateCache(); commit('split'); } }),
+    btn('✎ ویرایش پیکسلی', () => { if (!pt) return; if (pt.img) return toast('این قطعه تصویری (PNG) است؛ با «جایگزینی تصویر» عوضش کنید'); openPixelEditor(f, pt); }, 'primary'),
+    btn('🖼 جایگزینی تصویر', () => pt && pickImage(im => { pt.img = im.id; pt.w = im.w; pt.h = im.h; invalidateCache(); commit('img'); })),
+    btn('🖼 تصویر این Variant', () => pt && pickImage(im => { (variant.overrides[pt.id] || (variant.overrides[pt.id] = {})).img = im.id; invalidateCache(); commit('varimg'); })),
+    btn('✂ برش به محتوا', () => { if (pt && !pt.img) { cropPart(pt); invalidateCache(); commit('crop'); } }),
+    btn('⑂ تقسیم (اجزای جدا)', () => { if (pt && !pt.img) { splitPart(f, pt); invalidateCache(); commit('split'); } }),
     btn('⇄ جایگزینی (از قطعه‌ی دیگر)', () => { if (!pt) return; const others = P.families.flatMap(x => x.parts.map(p => ({ x, p }))).filter(o => o.p !== pt); const n = prompt('نامِ قطعه‌ی منبع:\n' + others.map(o => o.x.name + '/' + o.p.name).join('\n')); const m = others.find(o => o.x.name + '/' + o.p.name === n); if (m) { pt.w = m.p.w; pt.h = m.p.h; pt.px = new Uint8Array(m.p.px); invalidateCache(); commit('replacePart'); } }));
   const fields = !pt ? h('div', { class: 'muted' }, 'قطعه‌ای انتخاب نشده (روی صحنه هم می‌توانید قطعه را جابه‌جا کنید).') : h('div', { class: 'grid2' },
     row('نام', txtIn(pt.name, upd(v => (pt.name = v)))), row('Part ID', h('input', { type: 'text', value: pt.id, readonly: true })),

@@ -35,16 +35,16 @@ function renderToolbar() {
 // ---- پروژه‌ها
 async function loadProject(id) {
   const rec = await DB.get(id); if (!rec) return false;
-  P = deserialize(JSON.parse(rec.json)); resetHistory(); invalidateCache(); S.famId = null; S.partId = null; localStorage.setItem('ad:current', id); fitView(); renderAll(); return true;
+  P = deserialize(JSON.parse(rec.json)); await preloadImages(P); resetHistory(); invalidateCache(); S.famId = null; S.partId = null; localStorage.setItem('ad:current', id); fitView(); renderAll(); return true;
 }
-function startProject(p) { P = p; resetHistory(); invalidateCache(); S.famId = null; S.partId = null; S.bgId = null; fitView(); saveNow(); renderAll(); }
+async function startProject(p) { await preloadImages(p); P = p; resetHistory(); invalidateCache(); S.famId = null; S.partId = null; S.bgId = null; fitView(); saveNow(); renderAll(); }
 function newProject() {
-  const demo = confirm('با پروژه‌ی نمونه (دمو) شروع شود؟\nOK = دمو · Cancel = پروژه‌ی خالی');
+  const demo = confirm('با آواتار فعلیِ اپ شروع شود؟\nOK = آواتار فعلی اپ · Cancel = پروژه‌ی خالی');
   if (demo) startProject(seedProject());
   else { const p = emptyProject('Avatar Project'); p.characters.push({ id: newId('char'), name: 'Character 01', notes: '' }); p.scene.characterId = p.characters[0].id; startProject(p); }
 }
 function dupProject() { const c = deserialize(serialize(P)); c.id = newId('proj'); c.name = P.name + ' (copy)'; c.createdAt = Date.now(); startProject(c); toast('پروژه تکثیر شد'); }
-function resetProject() { if (!confirm('پروژه به نمونه‌ی اولیه برگردد؟ (می‌توانید با Undo برگردید)')) return; const id = P.id, name = P.name; const keep = snap(); const p = seedProject(); p.id = id; p.name = name; P = p; invalidateCache(); H.undo.push(keep); commit('reset'); H.undo.splice(-1, 1, snap()); S.famId = null; S.partId = null; fitView(); renderAll(); }
+function resetProject() { if (!confirm('پروژه به آواتار اولیه‌ی اپ برگردد؟ (با Undo می‌توانید برگردید)')) return; const imgs = P.images, id = P.id; const p = seedProject(); p.id = id; Object.assign(imgs, p.images); p.images = imgs; P = p; invalidateCache(); S.famId = null; S.partId = null; S.bgId = null; commit('reset'); fitView(); renderAll(); }
 async function openProjects() {
   const all = (await DB.all()).sort((a, b) => b.updatedAt - a.updatedAt);
   const bg = h('div', { class: 'modal-bg', onclick: e => e.target === bg && bg.remove() }, h('div', { class: 'modal' }, h('h3', {}, h('span', { class: 'grow' }, 'پروژه‌ها (ذخیره‌ی محلی مرورگر)'), btn('✕', () => bg.remove())),
@@ -62,7 +62,7 @@ function importFile() {
 function importProjectText(txt) {
   const o = JSON.parse(txt);
   if (o.format !== 'rp-avatar-project') throw new Error('این فایل پروژه‌ی Avatar Studio (.rpa) نیست');
-  const p = deserialize(o); p.id = newId('proj'); startProject(p); toast('پروژه وارد شد ✓');
+  const p = deserialize(o); p.id = newId('proj'); toast('پروژه وارد شد ✓'); return startProject(p);
 }
 
 // ---- میان‌برها
@@ -85,9 +85,11 @@ document.addEventListener('keyup', e => { if (e.key === ' ') S.space = false; })
 async function init() {
   initStage();
   let ok = false;
+  if (new URLSearchParams(location.search).has('fresh')) localStorage.removeItem('ad:current');
+  if (localStorage.getItem('ad:seedver') !== '2') { localStorage.removeItem('ad:current'); localStorage.setItem('ad:seedver', '2'); } // نسخه‌ی قدیمیِ دمو را کنار بگذار (در Projects می‌ماند)
   const cur = localStorage.getItem('ad:current');
   if (cur) { try { ok = await loadProject(cur); } catch (e) { ok = false; } }
-  if (!ok) { startProject(seedProject()); }
+  if (!ok) { await startProject(seedProject()); }
   window.addEventListener('beforeunload', () => { saveNow(); });
   setStatus('آماده');
 }

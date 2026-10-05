@@ -7,9 +7,13 @@ function invalidateCache() { spriteCache.clear(); }
 function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
 function hexToRgb(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return [255, 0, 255]; const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 
+function loadImage(url) { return new Promise(res => { const img = new Image(); img.onload = () => { imgCache.set(url, { img, ok: true }); res(img); }; img.onerror = () => res(null); img.src = url; }); }
+function preloadImages(p) { return Promise.all(Object.values(p.images || {}).map(u => (imgCache.get(u) && imgCache.get(u).ok ? null : loadImage(u)))); }
 function partCanvas(f, variant, part) {
   const c = mkCanvas(part.w, part.h);
   const ctx = c.getContext('2d');
+  const srcId = (variant.overrides[part.id] || {}).img || part.img;
+  if (srcId) { const im = getImg(P.images[srcId], () => { invalidateCache(); renderAll(); }); if (im) { ctx.imageSmoothingEnabled = false; ctx.drawImage(im, 0, 0, part.w, part.h); } return c; }
   const img = ctx.createImageData(part.w, part.h);
   const cols = {};
   for (let i = 0; i < part.px.length; i++) {

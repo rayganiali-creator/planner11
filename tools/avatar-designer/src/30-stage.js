@@ -1,7 +1,7 @@
 'use strict';
 // ===== صحنه (Canvas): زوم/جابه‌جایی/شبکه/خط‌کش/راهنما/ناحیه‌ی امن/دستگیره‌های جابه‌جایی-مقیاس-چرخش =====
 
-const S = { tool: 'select', cat: 'body', leftTab: 'assets', rightTab: 'layers', bottomTab: 'parts', famId: null, partId: null, varId: null, bgId: null, scope: 'auto', partMode: false, space: false, drag: null, sizeW: 0, sizeH: 0 };
+const S = { tool: 'select', cat: 'body', leftTab: 'assets', rightTab: 'layers', bottomTab: 'parts', famId: null, partId: null, varId: null, bgId: null, scope: 'auto', partMode: false, onlyCompat: true, space: false, drag: null, sizeW: 0, sizeH: 0 };
 const ST = { cv: null, ctx: null, off: null, pointers: new Map(), pinch: null };
 const RULER = 18;
 

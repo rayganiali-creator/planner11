@@ -26,7 +26,7 @@ function toast(msg, ms = 2200) { const t = $('#toast'); t.textContent = msg; t.s
 const CATS = [
   ['body', 'بدن'], ['face', 'صورت'], ['hair', 'مو'], ['eyes', 'چشم'], ['eyebrows', 'ابرو'], ['mouth', 'دهان'], ['hat', 'کلاه'], ['hijab', 'روسری'],
   ['helmet', 'کلاه‌خود'], ['clothes', 'لباس'], ['shirt', 'پیراهن'], ['pants', 'شلوار'], ['shoes', 'کفش'], ['armor', 'زره'], ['sword', 'شمشیر'],
-  ['weapon', 'سلاح'], ['shield', 'سپر'], ['accessory', 'اکسسوری'], ['pet', 'حیوان'], ['shadow', 'سایه'], ['effect', 'افکت'],
+  ['weapon', 'سلاح'], ['shield', 'سپر'], ['accessory', 'اکسسوری'], ['pet', 'حیوان'], ['petgear', 'تجهیزات حیوان'], ['cape', 'شنل'], ['capeback', 'شنل (پشت)'], ['hands', 'دست'], ['sleep', 'خواب'], ['condition', 'وضعیت'], ['shadow', 'سایه'], ['effect', 'افکت'],
 ];
 const CAT_FA = Object.fromEntries(CATS);
 const MOODS = [['neutral', 'خنثی'], ['happy', 'شاد'], ['sad', 'غمگین'], ['angry', 'عصبانی'], ['surprised', 'متعجب'], ['tired', 'خسته'], ['excited', 'هیجان‌زده']];
@@ -51,7 +51,7 @@ function emptyProject(name = 'Avatar Project') {
   return {
     format: 'rp-avatar-project', version: 1, id: newId('proj'), name, createdAt: Date.now(), updatedAt: Date.now(),
     canvas: { w: 96, h: 144, safe: { x: 8, y: 8, w: 80, h: 128 } },
-    characters: [], families: [],
+    characters: [], families: [], images: {},
     layers: DEFAULT_LAYERS.map(c => ({ id: 'L_' + c, name: CAT_FA[c] || c, category: c, visible: true, locked: false })),
     moods: {}, backgrounds: [],
     scene: {
@@ -95,12 +95,17 @@ function decodeRows(rows, w, h) {
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px[y * w + x] = Math.max(0, SLOT_CHARS.indexOf((rows[y] || '')[x] || '0'));
   return px;
 }
-function serialize(p) {
-  const c = { ...p, families: p.families.map(f => ({ ...f, parts: f.parts.map(pt => { const { px, ...r } = pt; return { ...r, rows: encodeRows(pt) }; }) })) };
-  return JSON.parse(JSON.stringify(c));
+/** تصاویر (PNG) جدا از Snapshotهای Undo نگه‌داری می‌شوند؛ فقط در ذخیره/Export همراه‌اند */
+function serialize(p, withImages = true) {
+  const { images, ...rest } = p;
+  const c = { ...rest, families: p.families.map(f => ({ ...f, parts: f.parts.map(pt => { const { px, ...r } = pt; return { ...r, rows: pt.img ? [] : encodeRows(pt) }; }) })) };
+  const o = JSON.parse(JSON.stringify(c));
+  if (withImages) o.images = images || {};
+  return o;
 }
 function deserialize(o) {
   const p = JSON.parse(JSON.stringify(o));
+  p.images = p.images || {};
   for (const f of p.families) for (const pt of f.parts) { pt.px = decodeRows(pt.rows || [], pt.w, pt.h); delete pt.rows; }
   const base = emptyProject();
   p.view = Object.assign(base.view, p.view || {});
@@ -111,7 +116,7 @@ function deserialize(o) {
 
 // ---------------------------------------------------------------- تاریخچه (Undo/Redo)
 const H = { undo: [], redo: [], max: 120 };
-function snap() { return JSON.stringify(serialize(P)); }
+function snap() { return JSON.stringify(serialize(P, false)); }
 function resetHistory() { H.undo = [snap()]; H.redo = []; }
 function commit(msg) {
   P.updatedAt = Date.now();
@@ -121,7 +126,7 @@ function commit(msg) {
   invalidateCache();
   renderAll();
 }
-function restore(s) { P = deserialize(JSON.parse(s)); invalidateCache(); scheduleSave(); renderAll(); }
+function restore(s) { const imgs = P.images; P = deserialize(JSON.parse(s)); P.images = imgs; invalidateCache(); scheduleSave(); renderAll(); }
 function undo() { if (H.undo.length < 2) return toast('چیزی برای بازگردانی نیست'); H.redo.push(H.undo.pop()); restore(H.undo[H.undo.length - 1]); }
 function redo() { if (!H.redo.length) return toast('چیزی برای تکرار نیست'); const s = H.redo.pop(); H.undo.push(s); restore(s); }
 
@@ -165,6 +170,6 @@ let saveTimer = null;
 function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
 async function saveNow() {
   if (!P) return;
-  try { await DB.put({ id: P.id, name: P.name, updatedAt: P.updatedAt, json: snap() }); localStorage.setItem('ad:current', P.id); setStatus('ذخیره شد ✓'); } catch (e) { setStatus('خطا در ذخیره: ' + e.message); }
+  try { await DB.put({ id: P.id, name: P.name, updatedAt: P.updatedAt, json: JSON.stringify(serialize(P)) }); localStorage.setItem('ad:current', P.id); setStatus('ذخیره شد ✓'); } catch (e) { setStatus('خطا در ذخیره: ' + e.message); }
 }
 function setStatus(t) { const s = $('#status'); if (s) s.textContent = t; }

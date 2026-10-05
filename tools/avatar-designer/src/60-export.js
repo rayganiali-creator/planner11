@@ -2,22 +2,23 @@
 // ===== خروجی: avatarSystem JSON، مشخصات Markdown، CLAUDE_AVATAR_IMPLEMENTATION.md، پروژه (.rpa) و بسته‌ی ZIP =====
 
 const FORMAT_VERSION = 1;
+const fsafe = id => String(id).replace(/[^\w.-]+/g, '_');
 function resolvedColors(f, v) { return Object.fromEntries(f.slots.map(s => [s.id, slotColor(f, v, s.id)])); }
 function layerIndex(cat) { return P.layers.findIndex(l => l.category === cat); }
 
 function buildSystem() {
   const layers = P.layers.map((L, i) => ({ id: L.id, name: L.name, category: L.category, order: i, visible: L.visible, locked: L.locked }));
   const assetFamilies = P.families.map(f => ({
-    id: f.id, name: f.name, category: f.category, anchor: f.anchor, tags: f.tags, characterIds: f.characterIds, shared: !f.characterIds.length,
+    id: f.id, name: f.name, category: f.category, anchor: f.anchor, tags: f.tags, meta: f.meta || {}, characterIds: f.characterIds, shared: !f.characterIds.length,
     slots: f.slots, variantIds: f.variants.map(v => v.id),
     layerId: (P.layers.find(l => l.category === f.category) || {}).id || null,
     geometry: Object.fromEntries(Object.entries(f.geometry).map(([k, g]) => [k, { ...g }])),
-    parts: f.parts.map(p => ({ id: p.id, name: p.name, width: p.w, height: p.h, x: p.dx, y: p.dy, scale: p.scale, rotation: p.rotation, flipX: p.flipX, flipY: p.flipY, visible: p.visible, rows: encodeRows(p) })),
+    parts: f.parts.map(p => ({ id: p.id, name: p.name, width: p.w, height: p.h, x: p.dx, y: p.dy, scale: p.scale, rotation: p.rotation, flipX: p.flipX, flipY: p.flipY, visible: p.visible, ...(p.img ? { image: p.img } : { rows: encodeRows(p) }) })),
   }));
   const variants = [];
   for (const f of P.families) for (const v of f.variants) {
     const o = Object.fromEntries(Object.entries(v.overrides || {}).filter(([, x]) => x && (x.visible === false || (x.colors && Object.keys(x.colors).length))));
-    variants.push({ id: v.id, familyId: f.id, name: v.name, colors: resolvedColors(f, v), overrides: o, sprite: `sprites/${f.id}/${v.id}.png` });
+    variants.push({ id: v.id, familyId: f.id, name: v.name, colors: resolvedColors(f, v), overrides: o, sprite: `sprites/${fsafe(f.id)}/${fsafe(v.id)}.png` });
   }
   const characters = P.characters.map(c => ({
     id: c.id, name: c.name, notes: c.notes || '',
@@ -33,7 +34,7 @@ function buildSystem() {
     const L = P.layers.find(l => l.category === f.category), moodsOf = MOODS.filter(([m]) => P.moods[m] && P.moods[m].familyId === f.id).map(([m]) => m);
     for (const v of f.variants) {
       const s = familySprite(f, v), g = f.geometry['*'] || newGeometry();
-      assets.push({ id: f.id + ':' + v.id, familyId: f.id, variantId: v.id, category: f.category, name: f.name, variant: v.name, width: s.w || 0, height: s.h || 0, x: g.x, y: g.y, scale: g.scale, rotation: g.rotation, opacity: g.opacity, layer: L ? L.id : null, layerOrder: L ? P.layers.indexOf(L) : -1, anchor: f.anchor, flipX: g.flipX, flipY: g.flipY, visible: L ? L.visible : true, locked: L ? L.locked : false, color: Object.values(resolvedColors(f, v))[0], tags: f.tags, mood: moodsOf, characterCompatibility: f.characterIds.length ? f.characterIds : 'all', sprite: `sprites/${f.id}/${v.id}.png`, spriteOffset: { x: s.ox || 0, y: s.oy || 0 } });
+      assets.push({ id: f.id + ':' + v.id, familyId: f.id, variantId: v.id, category: f.category, name: f.name, variant: v.name, width: s.w || 0, height: s.h || 0, x: g.x, y: g.y, scale: g.scale, rotation: g.rotation, opacity: g.opacity, layer: L ? L.id : null, layerOrder: L ? P.layers.indexOf(L) : -1, anchor: f.anchor, flipX: g.flipX, flipY: g.flipY, visible: L ? L.visible : true, locked: L ? L.locked : false, color: Object.values(resolvedColors(f, v))[0], tags: f.tags, mood: moodsOf, characterCompatibility: f.characterIds.length ? f.characterIds : 'all', sprite: `sprites/${fsafe(f.id)}/${fsafe(v.id)}.png`, spriteOffset: { x: s.ox || 0, y: s.oy || 0 } });
     }
   }
   const relationships = {
@@ -48,6 +49,7 @@ function buildSystem() {
     transformOrder: 'translate(geometry.x, geometry.y) -> rotate(geometry.rotation deg) -> scale(scale * flip) -> translate(-anchorPoint) -> draw sprite at its spriteOffset.',
     geometryResolution: 'effective = base ("*") overridden by geometry[characterId] when present. All variants of a family share the same geometry.',
     moodRule: 'When a mood is active, the layer with category "mouth" is drawn with moods[mood] family/variant instead of the equipped one. Other layers do not change.',
+    imageParts: 'A part with `image` (an id in imageFiles) is a full-color PNG (images/<id>.png) drawn at part x/y at its natural size w x h, instead of rows. A variant may swap it via variants[].overrides[partId].img (also an image id). Slot colors do not apply to image parts.',
     pixelFormat: 'parts[].rows are base-36 strings, one char per pixel: 0 = transparent, n = family slot number n (1-based, slots[n-1]). Slot color comes from variant.colors[slot.id], overridden by variant.overrides[partId].colors[slot.id].',
   };
   return {
@@ -55,6 +57,7 @@ function buildSystem() {
       version: FORMAT_VERSION, name: P.name, generatedAt: new Date().toISOString(), canvas: P.canvas,
       characters, assetFamilies, variants, layers, moods: P.moods, backgrounds: P.backgrounds, scene: P.scene,
       geometry, palette, assets, relationships, instructions,
+      imageFiles: Object.fromEntries(Object.keys(P.images).map(k => [k, `images/${k}.png`])),
     },
   };
 }
@@ -161,7 +164,8 @@ const canvasPng = c => new Promise(r => c.toBlob(async b => r(new Uint8Array(awa
 async function buildZipFiles() {
   const sys = buildSystem(), files = [];
   files.push({ name: 'avatar-system.json', data: JSON.stringify(sys, null, 2) }, { name: 'AVATAR_SPEC.md', data: buildSpecMd(sys) }, { name: 'CLAUDE_AVATAR_IMPLEMENTATION.md', data: buildClaudeMd(sys) }, { name: 'project.rpa', data: JSON.stringify(serialize(P)) });
-  for (const f of P.families) for (const v of f.variants) { const s = familySprite(f, v); if (!s.empty) files.push({ name: `sprites/${f.id}/${v.id}.png`, data: await canvasPng(s.canvas) }); }
+  for (const [k, url] of Object.entries(P.images)) { const bin = atob(url.split(',')[1]), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); files.push({ name: `images/${k}.png`, data: u }); }
+  for (const f of P.families) for (const v of f.variants) { const s = familySprite(f, v); if (!s.empty) files.push({ name: `sprites/${fsafe(f.id)}/${fsafe(v.id)}.png`, data: await canvasPng(s.canvas) }); }
   for (const [k, label, w, hh] of PREVIEWS) { const c = mkCanvas(w, hh); renderPreview(k, c, true); files.push({ name: `previews/${k}.png`, data: await canvasPng(c) }); }
   return files;
 }
