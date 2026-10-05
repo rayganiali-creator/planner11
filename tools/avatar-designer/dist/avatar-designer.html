@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="fa" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Avatar Studio</title>
+<style>
+:root{--bg:#0f1117;--panel:#171a23;--panel2:#1d212c;--line:#2a3040;--text:#e8ebf3;--muted:#8d96ad;--accent:#7c8cff;--accent2:#5560d6;--ok:#3fb97b;--bad:#e5564f;--warn:#e7b34a;--chk:#252a38}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:13px/1.45 system-ui,-apple-system,"Segoe UI",Vazirmatn,Tahoma,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 9px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.on,button.primary{background:var(--accent2);border-color:var(--accent);color:#fff}
+button.danger:hover{border-color:var(--bad);color:var(--bad)}
+button:disabled{opacity:.4;cursor:default}
+input[type=text],input[type=number],select,textarea{background:#10131a;border:1px solid var(--line);border-radius:5px;padding:3px 6px;min-width:0}
+input[type=number]{width:70px}
+input[type=color]{width:34px;height:24px;padding:0;border:1px solid var(--line);background:none;border-radius:4px}
+input[type=range]{accent-color:var(--accent)}
+#app{display:grid;grid-template-rows:46px 1fr 292px;height:100vh}
+#toolbar{display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap}
+#toolbar .sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+#toolbar .title{font-weight:700;margin-inline-end:6px}
+#projname{width:140px;flex:none}
+#toolbar>*{flex:none}
+#main{display:grid;grid-template-columns:270px 1fr 310px;min-height:0}
+.panel{background:var(--panel);overflow:auto;min-height:0}
+#left{border-inline-end:1px solid var(--line)}
+#right{border-inline-start:1px solid var(--line)}
+.ph{position:sticky;top:0;background:var(--panel);z-index:2;padding:7px 10px;font-weight:700;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px}
+.ph .grow{flex:1}
+.pb{padding:8px 10px}
+.row{display:flex;align-items:center;gap:6px;margin:4px 0}
+.row>label{width:92px;color:var(--muted);flex:none}
+.row.wrap{flex-wrap:wrap}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tabs button{padding:2px 7px;font-size:12px}
+.list .item{display:flex;align-items:center;gap:6px;padding:5px 10px;border-bottom:1px solid #1f2430;cursor:pointer}
+.list .item:hover{background:#1c2130}
+.list .item.sel{background:#232a44;outline:1px solid var(--accent);outline-offset:-1px}
+.list .item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .item small{color:var(--muted)}
+.ib{padding:1px 6px;font-size:12px;min-width:24px}
+.thumb{width:36px;height:36px;border:1px solid var(--line);border-radius:4px;background:repeating-conic-gradient(#222836 0 25%,#1a1e29 0 50%) 50%/10px 10px;image-rendering:pixelated;flex:none}
+#center{position:relative;background:#0b0d12;min-width:0;min-height:0;overflow:hidden}
+#stage{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:default}
+#stagehud{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;flex-wrap:wrap;background:#0f1117cc;border:1px solid var(--line);padding:4px;border-radius:8px}
+#stagehud button,#stagehud select{padding:2px 7px;font-size:12px}
+#bottom{border-top:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+#bottombody{overflow:auto;flex:1;padding:8px 12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 18px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border:1px solid var(--line);border-radius:12px;background:var(--chk);font-size:12px}
+.swatch{width:20px;height:20px;border-radius:4px;border:1px solid #0006;display:inline-block;vertical-align:middle}
+.previews{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 10px}
+.previews figure{margin:0;text-align:center;color:var(--muted);font-size:11px}
+.previews canvas{background:repeating-conic-gradient(#222836 0 25%,#1a1e29 0 50%) 50%/10px 10px;border:1px solid var(--line);image-rendering:pixelated;max-width:100%}
+.modal-bg{position:fixed;inset:0;background:#000a;z-index:50;display:flex;align-items:center;justify-content:center;padding:12px}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:min(1100px,100%);max-height:96vh;overflow:auto;display:flex;flex-direction:column;min-width:min(520px,100%)}
+.modal h3{margin:0;padding:10px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center}
+.modal h3 .grow{flex:1}
+.modal .mb{padding:12px 14px}
+.stat{display:flex;gap:8px;margin:2px 0}.stat b{min-width:110px;display:inline-block}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#222a40;border:1px solid var(--accent);padding:7px 14px;border-radius:8px;z-index:99;display:none}
+#pe{display:grid;grid-template-columns:150px 1fr 190px;gap:8px;min-width:min(960px,92vw)}
+#pe .tools{display:grid;grid-template-columns:1fr 1fr;gap:4px;align-content:start}
+#pe canvas{background:repeating-conic-gradient(#222836 0 25%,#1a1e29 0 50%) 50%/16px 16px;border:1px solid var(--line);image-rendering:pixelated;touch-action:none;max-width:100%}
+.pal{display:flex;flex-wrap:wrap;gap:4px}
+.pal .sw{width:28px;height:28px;border-radius:5px;border:2px solid transparent;cursor:pointer}
+.pal .sw.sel{border-color:#fff}
+.muted{color:var(--muted)}
+@media(max-width:900px){#app{grid-template-rows:46px auto 320px;height:auto;min-height:100vh}#main{grid-template-columns:1fr}#center{height:60vh}#pe{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toolbar"></div>
+  <div id="main">
+    <div id="left" class="panel"></div>
+    <div id="center"><canvas id="stage"></canvas><div id="stagehud"></div></div>
+    <div id="right" class="panel"></div>
+  </div>
+  <div id="bottom"><div class="tabs" id="bottomtabs"></div><div id="bottombody"></div></div>
+</div>
+<div id="toast"></div>
+<script>
+'use strict';
+// ===== Avatar Designer — هسته: مدل داده، تاریخچه، ذخیره‌سازی محلی =====
+// ابزارِ مستقل و موقت؛ هیچ سروری ندارد. پروژه در IndexedDB/localStorage مرورگر ذخیره می‌شود.
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+    else if (k === 'value' || k === 'checked' || k === 'disabled' || k === 'selected') e[k] = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(Infinity)) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(c)); }
+  return e;
+}
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const num = (v, d = 0) => { const n = parseFloat(v); return Number.isFinite(n) ? n : d; };
+const clone = o => JSON.parse(JSON.stringify(o));
+function newId(p) { return p + '_' + Math.random().toString(36).slice(2, 7) + Date.now().toString(36).slice(-3); }
+function toast(msg, ms = 2200) { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toast._t); toast._t = setTimeout(() => (t.style.display = 'none'), ms); }
+
+const CATS = [
+  ['body', 'بدن'], ['face', 'صورت'], ['hair', 'مو'], ['eyes', 'چشم'], ['eyebrows', 'ابرو'], ['mouth', 'دهان'], ['hat', 'کلاه'], ['hijab', 'روسری'],
+  ['helmet', 'کلاه‌خود'], ['clothes', 'لباس'], ['shirt', 'پیراهن'], ['pants', 'شلوار'], ['shoes', 'کفش'], ['armor', 'زره'], ['sword', 'شمشیر'],
+  ['weapon', 'سلاح'], ['shield', 'سپر'], ['accessory', 'اکسسوری'], ['pet', 'حیوان'], ['shadow', 'سایه'], ['effect', 'افکت'],
+];
+const CAT_FA = Object.fromEntries(CATS);
+const MOODS = [['neutral', 'خنثی'], ['happy', 'شاد'], ['sad', 'غمگین'], ['angry', 'عصبانی'], ['surprised', 'متعجب'], ['tired', 'خسته'], ['excited', 'هیجان‌زده']];
+const ANCHORS = ['origin', 'center', 'top-center', 'bottom-center', 'left-center', 'right-center'];
+const DEFAULT_LAYERS = ['pet', 'body', 'shoes', 'pants', 'shirt', 'clothes', 'armor', 'face', 'eyes', 'eyebrows', 'mouth', 'hair', 'hijab', 'hat', 'helmet', 'accessory', 'sword', 'weapon', 'shield', 'effect'];
+const SLOT_CHARS = '0123456789abcdefghijklmnopqrstuvwxyz';
+
+// ---------------------------------------------------------------- ساخت مدل
+function newGeometry(x = 48, y = 134) { return { x, y, scale: 1, rotation: 0, opacity: 1, flipX: false, flipY: false }; }
+function newPart(name, w = 16, h = 16, dx = 0, dy = 0) {
+  return { id: newId('part'), name, w, h, px: new Uint8Array(w * h), dx, dy, scale: 1, rotation: 0, flipX: false, flipY: false, visible: true };
+}
+function newFamily(name, category, slots) {
+  return {
+    id: newId('fam'), name, category, characterIds: [], anchor: 'origin', tags: [],
+    slots: slots || [{ id: 's1', name: 'اصلی', color: '#cccccc' }, { id: 's2', name: 'سایه', color: '#888888' }, { id: 's3', name: 'خط دور', color: '#222222' }],
+    parts: [], variants: [{ id: newId('var'), name: 'Default', colors: {}, overrides: {} }],
+    geometry: { '*': newGeometry() },
+  };
+}
+function emptyProject(name = 'Avatar Project') {
+  return {
+    format: 'rp-avatar-project', version: 1, id: newId('proj'), name, createdAt: Date.now(), updatedAt: Date.now(),
+    canvas: { w: 96, h: 144, safe: { x: 8, y: 8, w: 80, h: 128 } },
+    characters: [], families: [],
+    layers: DEFAULT_LAYERS.map(c => ({ id: 'L_' + c, name: CAT_FA[c] || c, category: c, visible: true, locked: false })),
+    moods: {}, backgrounds: [],
+    scene: {
+      characterId: null, mood: 'neutral', equipped: {}, backgroundId: null,
+      bgVisible: true,
+      shadow: { on: true, color: '#000000', opacity: 0.35, w: 34, h: 8, x: 48, y: 134 },
+      ground: { on: false, color: '#3a4a3a', opacity: 1, height: 16 },
+      lighting: { on: false, color: '#ffe9b0', angle: 45, opacity: 0.18 },
+      glow: { on: false, color: '#9fb0ff', radius: 60, opacity: 0.25, x: 48, y: 80 },
+    },
+    view: { zoom: 4, panX: 0, panY: 0, grid: 8, snap: true, showGrid: true, showRuler: true, showSafe: true, showCenter: true, showLayerBoxes: false, guides: [] },
+  };
+}
+
+// ---------------------------------------------------------------- ابزارهای جستجو
+let P = null; // پروژه‌ی جاری
+const famById = id => P.families.find(f => f.id === id);
+const charById = id => P.characters.find(c => c.id === id);
+const layerById = id => P.layers.find(l => l.id === id);
+const varOf = (f, vid) => f.variants.find(v => v.id === vid) || f.variants[0];
+function compatible(f, charId) { return !f.characterIds.length || !charId || f.characterIds.includes(charId); }
+function geomFor(f, charId) {
+  const base = f.geometry['*'] || newGeometry();
+  const o = charId && f.geometry[charId];
+  return Object.assign({}, base, o || {});
+}
+function slotColor(f, variant, slotId, partId) {
+  const ov = partId && variant.overrides && variant.overrides[partId];
+  if (ov && ov.colors && ov.colors[slotId]) return ov.colors[slotId];
+  return (variant.colors && variant.colors[slotId]) || (f.slots.find(s => s.id === slotId) || {}).color || '#ff00ff';
+}
+
+// ---------------------------------------------------------------- (د)سریال‌سازی
+function encodeRows(part) {
+  const rows = [];
+  for (let y = 0; y < part.h; y++) { let s = ''; for (let x = 0; x < part.w; x++) s += SLOT_CHARS[part.px[y * part.w + x]] || '0'; rows.push(s); }
+  return rows;
+}
+function decodeRows(rows, w, h) {
+  const px = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) px[y * w + x] = Math.max(0, SLOT_CHARS.indexOf((rows[y] || '')[x] || '0'));
+  return px;
+}
+function serialize(p) {
+  const c = { ...p, families: p.families.map(f => ({ ...f, parts: f.parts.map(pt => { const { px, ...r } = pt; return { ...r, rows: encodeRows(pt) }; }) })) };
+  return JSON.parse(JSON.stringify(c));
+}
+function deserialize(o) {
+  const p = JSON.parse(JSON.stringify(o));
+  for (const f of p.families) for (const pt of f.parts) { pt.px = decodeRows(pt.rows || [], pt.w, pt.h); delete pt.rows; }
+  const base = emptyProject();
+  p.view = Object.assign(base.view, p.view || {});
+  p.scene = Object.assign(base.scene, p.scene || {});
+  p.canvas = Object.assign(base.canvas, p.canvas || {});
+  return p;
+}
+
+// ---------------------------------------------------------------- تاریخچه (Undo/Redo)
+const H = { undo: [], redo: [], max: 120 };
+function snap() { return JSON.stringify(serialize(P)); }
+function resetHistory() { H.undo = [snap()]; H.redo = []; }
+function commit(msg) {
+  P.updatedAt = Date.now();
+  const s = snap();
+  if (H.undo[H.undo.length - 1] !== s) { H.undo.push(s); if (H.undo.length > H.max) H.undo.shift(); H.redo = []; }
+  scheduleSave();
+  invalidateCache();
+  renderAll();
+}
+function restore(s) { P = deserialize(JSON.parse(s)); invalidateCache(); scheduleSave(); renderAll(); }
+function undo() { if (H.undo.length < 2) return toast('چیزی برای بازگردانی نیست'); H.redo.push(H.undo.pop()); restore(H.undo[H.undo.length - 1]); }
+function redo() { if (!H.redo.length) return toast('چیزی برای تکرار نیست'); const s = H.redo.pop(); H.undo.push(s); restore(s); }
+
+// ---------------------------------------------------------------- ذخیره‌سازی محلی (IndexedDB با پشتیبانِ localStorage)
+const DB = {
+  db: null,
+  async open() {
+    if (this.db) return this.db;
+    try {
+      this.db = await new Promise((res, rej) => {
+        const r = indexedDB.open('avatar-designer', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('projects', { keyPath: 'id' });
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+    } catch (e) { this.db = 'ls'; }
+    return this.db;
+  },
+  async put(rec) {
+    const db = await this.open();
+    if (db === 'ls') { localStorage.setItem('ad:' + rec.id, JSON.stringify(rec)); return; }
+    await new Promise((res, rej) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').put(rec); tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+  },
+  async get(id) {
+    const db = await this.open();
+    if (db === 'ls') return JSON.parse(localStorage.getItem('ad:' + id) || 'null');
+    return new Promise((res, rej) => { const r = db.transaction('projects').objectStore('projects').get(id); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); });
+  },
+  async all() {
+    const db = await this.open();
+    if (db === 'ls') return Object.keys(localStorage).filter(k => k.startsWith('ad:')).map(k => JSON.parse(localStorage.getItem(k)));
+    return new Promise((res, rej) => { const r = db.transaction('projects').objectStore('projects').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  },
+  async del(id) {
+    const db = await this.open();
+    if (db === 'ls') { localStorage.removeItem('ad:' + id); return; }
+    await new Promise((res, rej) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').delete(id); tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+  },
+};
+let saveTimer = null;
+function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 400); }
+async function saveNow() {
+  if (!P) return;
+  try { await DB.put({ id: P.id, name: P.name, updatedAt: P.updatedAt, json: snap() }); localStorage.setItem('ad:current', P.id); setStatus('ذخیره شد ✓'); } catch (e) { setStatus('خطا در ذخیره: ' + e.message); }
+}
+function setStatus(t) { const s = $('#status'); if (s) s.textContent = t; }
+
+'use strict';
+// ===== پروژه‌ی نمونه (دموی آماده): ۲ کاراکتر، چندین خانواده‌ی Asset با Variant رنگی، ۷ Mood، ۶ پس‌زمینه =====
+// فضای مختصاتِ قطعه‌ها «فضای کاراکتر» است: مبدأ = وسطِ پاهای کاراکتر؛ y منفی = بالا. هندسه‌ی پیش‌فرضِ خانواده (x=48,y=134) آن را روی صحنه می‌گذارد.
+
+function A(w, h) { return { w, h, px: new Uint8Array(w * h) }; }
+function sp(a, x, y, s) { if (x >= 0 && y >= 0 && x < a.w && y < a.h) a.px[y * a.w + x] = s; }
+function rf(a, x, y, w, h, s) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) sp(a, x + i, y + j, s); }
+/** جعبه با خط دور (slot اول=outline)، پرکننده، سایه‌ی راست/پایین؛ round = گوشه‌های گرد */
+function sbox(w, h, fill, shade, outline, round) {
+  const a = A(w, h);
+  rf(a, 0, 0, w, h, outline);
+  rf(a, 1, 1, w - 2, h - 2, fill);
+  if (shade) { rf(a, w - 3, 1, 2, h - 2, shade); rf(a, 1, h - 3, w - 2, 2, shade); }
+  if (round) for (const [x, y] of [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]]) sp(a, x, y, 0);
+  return a;
+}
+function addPart(f, name, a, dx, dy) { const p = newPart(name, a.w, a.h, dx, dy); p.px = a.px; f.parts.push(p); return p; }
+function dk(hex, k) { const [r, g, b] = hexToRgb(hex); const m = c => clamp(Math.round(c * k), 0, 255); return '#' + [m(r), m(g), m(b)].map(v => v.toString(16).padStart(2, '0')).join(''); }
+function lt(hex, k) { const [r, g, b] = hexToRgb(hex); const m = c => clamp(Math.round(c + (255 - c) * k), 0, 255); return '#' + [m(r), m(g), m(b)].map(v => v.toString(16).padStart(2, '0')).join(''); }
+function slots(...defs) { return defs.map(([name, color], i) => ({ id: 's' + (i + 1), name, color })); }
+function setVariants(f, list) {
+  f.variants = list.map(([name, cols]) => ({ id: newId('var'), name, colors: Object.fromEntries(Object.entries(cols).map(([k, v]) => [k, v])), overrides: {} }));
+}
+
+function seedProject() {
+  const p = emptyProject('Demo — Avatar Studio');
+  P = p; // ابزارهای newFamily به P نیاز ندارند؛ فقط برای سازگاری
+  const hero = { id: newId('char'), name: 'Character 01 — Hero', notes: '' };
+  const heroine = { id: newId('char'), name: 'Character 02 — Heroine', notes: '' };
+  p.characters.push(hero, heroine);
+  const fams = p.families;
+  const mk = (name, cat, sl, charIds = []) => { const f = newFamily(name, cat, sl); f.characterIds = charIds; fams.push(f); return f; };
+
+  // ---- بدن
+  const skinSlots = slots(['skin', '#e9b48f'], ['shade', '#c98c68'], ['outline', '#3a2a24']);
+  const skins = [['Light', { s1: '#f0c4a0', s2: '#d49a78', s3: '#3a2a24' }], ['Tan', { s1: '#d9a070', s2: '#b97f52', s3: '#3a2a24' }], ['Brown', { s1: '#a8683f', s2: '#85492a', s3: '#2e1d16' }], ['Dark', { s1: '#6e432b', s2: '#52301d', s3: '#22140e' }]];
+  const body = (name, charId, headW) => {
+    const f = mk(name, 'body', skinSlots.map(s => ({ ...s })), [charId]);
+    addPart(f, 'legL', sbox(9, 30, 1 + 0, 0, 3), -10, -30);
+    f.parts[0].px = (() => { const a = sbox(9, 30, 1, 2, 3); return a.px; })();
+    addPart(f, 'legR', sbox(9, 30, 1, 2, 3), 1, -30);
+    addPart(f, 'torso', sbox(26, 30, 1, 2, 3), -13, -60);
+    addPart(f, 'armL', sbox(7, 28, 1, 2, 3, true), -20, -59);
+    addPart(f, 'armR', sbox(7, 28, 1, 2, 3, true), 13, -59);
+    addPart(f, 'neck', sbox(6, 4, 1, 2, 3), -3, -64);
+    const head = sbox(headW, 22, 1, 2, 3, true);
+    rf(head, 0, 9, 1, 5, 3); // گوش‌ها
+    addPart(f, 'head', head, -Math.floor(headW / 2), -86);
+    setVariants(f, skins);
+    return f;
+  };
+  const bodyHero = body('Body — Hero', hero.id, 22);
+  const bodyHeroine = body('Body — Heroine', heroine.id, 22);
+
+  // ---- چشم / ابرو
+  const eyes = mk('Eyes — Basic', 'eyes', slots(['iris', '#3a2a1a'], ['white', '#ffffff'], ['lash', '#1a1410']));
+  for (const [nm, dx] of [['eyeL', -7], ['eyeR', 3]]) { const a = A(4, 4); rf(a, 0, 0, 4, 4, 2); rf(a, 1, 1, 2, 3, 1); sp(a, 1, 1, 3); addPart(eyes, nm, a, dx, -77); }
+  setVariants(eyes, [['Brown', { s1: '#5a3a22' }], ['Blue', { s1: '#3b73d6' }], ['Green', { s1: '#3a9a5a' }], ['Gray', { s1: '#7a8696' }]]);
+  const brows = mk('Eyebrows — Basic', 'eyebrows', slots(['brow', '#2a1a10']));
+  for (const [nm, dx] of [['browL', -8], ['browR', 3]]) { const a = A(5, 1); rf(a, 0, 0, 5, 1, 1); addPart(brows, nm, a, dx, -81); }
+  setVariants(brows, [['Dark', { s1: '#2a1a10' }], ['Brown', { s1: '#6b4426' }], ['Blond', { s1: '#c9a050' }], ['Gray', { s1: '#8a8a8a' }]]);
+
+  // ---- دهان‌ها (Mood)
+  const mouthDefs = {
+    neutral: ['  XXXX  '.trim()],
+  };
+  const mouthPix = {
+    neutral: ['.......', '.XXXXX.', '.......'],
+    happy: ['X.....X', '.XXXXX.', '.......'],
+    sad: ['.......', '.XXXXX.', 'X.....X'],
+    angry: ['.......', 'XXXXXXX', '.X...X.'],
+    surprised: ['..XXX..', '.X...X.', '..XXX..'],
+    tired: ['.......', '.X.X.X.', '..X.X..'],
+    excited: ['X.....X', 'XYYYYYX', '.XXXXX.'],
+  };
+  const mouthFam = {};
+  for (const [m, rows] of Object.entries(mouthPix)) {
+    const f = mk('Mouth — ' + m, 'mouth', slots(['lip', '#b04a4a'], ['teeth', '#ffffff']));
+    const a = A(7, 3);
+    rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'X') sp(a, x, y, 1); if (c === 'Y') sp(a, x, y, 2); }));
+    addPart(f, 'mouth', a, -3, -71);
+    setVariants(f, [['Natural', { s1: '#b04a4a' }], ['Dark', { s1: '#7a2c34' }], ['Pink', { s1: '#d86a8a' }]]);
+    mouthFam[m] = f;
+    p.moods[m] = { familyId: f.id, variantId: f.variants[0].id };
+  }
+
+  // ---- مو
+  const hairSlots = slots(['hair', '#3b2a20'], ['shade', '#2a1d16'], ['outline', '#140e0a']);
+  const hairVars = [['Black', { s1: '#26211e', s2: '#15110f', s3: '#0a0807' }], ['Brown', { s1: '#6b4426', s2: '#4a2e18', s3: '#22150b' }], ['Blond', { s1: '#d9b45a', s2: '#b08a3a', s3: '#5a4519' }], ['Red', { s1: '#b4442a', s2: '#862e1a', s3: '#3a1209' }], ['Blue', { s1: '#3b5fd6', s2: '#2a45a0', s3: '#121f4a' }]];
+  const hs = mk('Hair — Short', 'hair', hairSlots.map(s => ({ ...s })), [hero.id]);
+  { const a = sbox(26, 12, 1, 2, 3, true); rf(a, 6, 9, 14, 3, 0); rf(a, 8, 9, 4, 3, 1); addPart(hs, 'cap', a, -13, -92); const s1 = sbox(3, 10, 1, 2, 3); addPart(hs, 'sideL', s1, -13, -82); addPart(hs, 'sideR', sbox(3, 10, 1, 2, 3), 10, -82); }
+  setVariants(hs, hairVars);
+  const hl = mk('Hair — Long', 'hair', hairSlots.map(s => ({ ...s })), [heroine.id]);
+  { const back = sbox(30, 36, 1, 2, 3, true); rf(back, 5, 10, 20, 26, 0); addPart(hl, 'back', back, -15, -92); const fr = sbox(26, 10, 1, 2, 3, true); rf(fr, 5, 7, 16, 3, 0); addPart(hl, 'fringe', fr, -13, -92); }
+  setVariants(hl, hairVars);
+
+  // ---- کلاه / روسری / کلاه‌خود
+  const cap = mk('Hat — Cap', 'hat', slots(['main', '#c0392b'], ['shade', '#8c2a20'], ['outline', '#2a0f0b']));
+  addPart(cap, 'crown', sbox(24, 9, 1, 2, 3, true), -12, -96); addPart(cap, 'brim', sbox(28, 3, 2, 2, 3), -14, -88);
+  setVariants(cap, [['Red', {}], ['Blue', { s1: '#2e63c9', s2: '#204a98', s3: '#0e1f44' }], ['Green', { s1: '#2e9a5a', s2: '#206f40', s3: '#0e2f1c' }], ['Black', { s1: '#34363c', s2: '#202226', s3: '#0a0b0d' }]]);
+  cap.geometry[heroine.id] = { y: 134 };
+  const hij = mk('Hijab — Wrap', 'hijab', slots(['cloth', '#222a3a'], ['fold', '#161c28'], ['outline', '#080b11']), [heroine.id]);
+  { const a = sbox(32, 38, 1, 2, 3, true); rf(a, 7, 9, 18, 14, 0); addPart(hij, 'wrap', a, -16, -94); addPart(hij, 'drape', sbox(30, 8, 1, 2, 3), -15, -58); }
+  setVariants(hij, [['Black', {}], ['White', { s1: '#f2f2ee', s2: '#cfcfc8', s3: '#6a6a66' }], ['Navy', { s1: '#26467a', s2: '#1a3256', s3: '#0a1730' }], ['Rose', { s1: '#c06a86', s2: '#94485f', s3: '#3d1a26' }]]);
+  const helm = mk('Helmet — Knight', 'helmet', slots(['metal', '#b9c1cc'], ['shade', '#808a98'], ['outline', '#22262e'], ['plume', '#c0392b']));
+  { addPart(helm, 'dome', sbox(28, 18, 1, 2, 3, true), -14, -98); const v = sbox(20, 5, 3, 3, 3); addPart(helm, 'visor', v, -10, -84); addPart(helm, 'plume', sbox(4, 10, 4, 4, 3), -2, -108); }
+  setVariants(helm, [['Silver', {}], ['Gold', { s1: '#e3bf52', s2: '#b08a22', s3: '#3d2f08' }], ['Iron', { s1: '#6c7480', s2: '#464d58', s3: '#14161a' }]]);
+
+  // ---- لباس‌ها
+  const shirt = mk('Shirt — Basic', 'shirt', slots(['main', '#c0392b'], ['shade', '#8c2a20'], ['trim', '#f2e2c2'], ['outline', '#2a0f0b']));
+  { addPart(shirt, 'body', sbox(26, 27, 1, 2, 4), -13, -60); addPart(shirt, 'sleeveL', sbox(8, 13, 1, 2, 4), -21, -60); addPart(shirt, 'sleeveR', sbox(8, 13, 1, 2, 4), 13, -60); const c = A(10, 3); rf(c, 0, 0, 10, 3, 3); addPart(shirt, 'collar', c, -5, -61); const b = A(1, 14); for (let y = 0; y < 14; y += 3) sp(b, 0, y, 3); addPart(shirt, 'buttons', b, 0, -57); }
+  const shirtCols = [['Red', '#c0392b', '#f2e2c2'], ['Blue', '#2e63c9', '#f2e2c2'], ['Green', '#2e9a5a', '#f2e2c2'], ['Black', '#34363c', '#d0b050'], ['White', '#eeeeea', '#4a6acb']];
+  setVariants(shirt, shirtCols.map(([n, m, t]) => [n, { s1: m, s2: dk(m, 0.72), s3: t, s4: dk(m, 0.3) }]));
+  const pants = mk('Pants — Basic', 'pants', slots(['main', '#2e4a8a'], ['shade', '#203566'], ['outline', '#0e1630']));
+  { addPart(pants, 'waist', sbox(26, 6, 1, 2, 3), -13, -36); addPart(pants, 'legL', sbox(9, 24, 1, 2, 3), -10, -30); addPart(pants, 'legR', sbox(9, 24, 1, 2, 3), 1, -30); }
+  setVariants(pants, [['Blue', {}], ['Black', { s1: '#34363c', s2: '#202226', s3: '#0a0b0d' }], ['Khaki', { s1: '#b09a6a', s2: '#8a7648', s3: '#3d3319' }], ['Gray', { s1: '#7a8088', s2: '#565b62', s3: '#1a1c1f' }]]);
+  const shoes = mk('Shoes — Basic', 'shoes', slots(['main', '#3a2a24'], ['sole', '#d8d2c4'], ['outline', '#120c0a']));
+  for (const [nm, dx] of [['shoeL', -11], ['shoeR', 1]]) { const a = sbox(10, 6, 1, 0, 3, true); rf(a, 1, 4, 8, 1, 2); addPart(shoes, nm, a, dx, -6); }
+  setVariants(shoes, [['Brown', {}], ['Black', { s1: '#26272c', s2: '#d8d2c4', s3: '#08080a' }], ['White', { s1: '#f0f0ee', s2: '#9a9a96', s3: '#3a3a38' }], ['Red', { s1: '#c0392b', s2: '#e8dccd', s3: '#2a0f0b' }]]);
+  const armor = mk('Armor — Plate', 'armor', slots(['metal', '#b9c1cc'], ['shade', '#808a98'], ['trim', '#d8b04a'], ['outline', '#22262e']));
+  { addPart(armor, 'chest', sbox(26, 24, 1, 2, 4), -13, -60); addPart(armor, 'pauldronL', sbox(9, 7, 1, 2, 4, true), -22, -62); addPart(armor, 'pauldronR', sbox(9, 7, 1, 2, 4, true), 13, -62); const t = A(26, 2); rf(t, 0, 0, 26, 2, 3); addPart(armor, 'belt', t, -13, -38); }
+  setVariants(armor, [['Steel', {}], ['Bronze', { s1: '#c98a4a', s2: '#94602a', s3: '#e8d070', s4: '#3a2210' }], ['Dark', { s1: '#5a606c', s2: '#3a3f48', s3: '#9a7ad0', s4: '#0e1014' }]]);
+  const scarf = mk('Scarf', 'accessory', slots(['main', '#d8a030'], ['shade', '#a87818'], ['outline', '#3a2808']));
+  { addPart(scarf, 'wrap', sbox(14, 5, 1, 2, 3), -7, -67); addPart(scarf, 'tail', sbox(5, 11, 1, 2, 3), 2, -63); }
+  setVariants(scarf, [['Yellow', {}], ['Red', { s1: '#c0392b', s2: '#8c2a20', s3: '#2a0f0b' }], ['Teal', { s1: '#2a9a96', s2: '#1c6e6a', s3: '#0a2c2a' }]]);
+
+  // ---- سلاح‌ها (مبدأ = دست)
+  const sword = mk('Sword — Long', 'sword', slots(['blade', '#c9d2dc'], ['edge', '#8b97a6'], ['hilt', '#6b4426'], ['guard', '#d8b04a']));
+  { const bl = A(3, 26); rf(bl, 0, 0, 3, 26, 1); rf(bl, 2, 0, 1, 26, 2); rf(bl, 1, 0, 1, 1, 1); addPart(sword, 'blade', bl, -1, -32); addPart(sword, 'guard', sbox(9, 2, 4, 4, 4), -4, -6); addPart(sword, 'hilt', sbox(3, 7, 3, 3, 3), -1, -4); }
+  sword.geometry['*'] = newGeometry(65, 104);
+  setVariants(sword, [['Steel', {}], ['Gold', { s1: '#f0d060', s2: '#b08a22', s3: '#6b4426', s4: '#f8e8a0' }], ['Ice', { s1: '#b8e4f8', s2: '#6ab0d8', s3: '#3a5a78', s4: '#e0f4ff' }]]);
+  const shield = mk('Shield — Round', 'shield', slots(['face', '#8a5a30'], ['rim', '#c9d2dc'], ['boss', '#d8b04a'], ['outline', '#22262e']));
+  { const a = sbox(18, 18, 1, 0, 4, true); rf(a, 0, 0, 18, 1, 2); rf(a, 0, 17, 18, 1, 2); rf(a, 0, 0, 1, 18, 2); rf(a, 17, 0, 1, 18, 2); rf(a, 7, 7, 4, 4, 3); addPart(shield, 'disc', a, -9, -9); }
+  shield.geometry['*'] = newGeometry(30, 104);
+  setVariants(shield, [['Wood', {}], ['Steel', { s1: '#8a97a6', s2: '#c9d2dc', s3: '#d8b04a', s4: '#22262e' }], ['Royal', { s1: '#2e63c9', s2: '#d8b04a', s3: '#f2e2c2', s4: '#0e1f44' }]]);
+
+  // ---- حیوان همراه
+  const cat = mk('Pet — Cat', 'pet', slots(['fur', '#d98a3a'], ['dark', '#a8601c'], ['outline', '#2a170a'], ['eye', '#3a9a5a']));
+  { addPart(cat, 'tail', sbox(3, 12, 1, 2, 3), 9, -16); addPart(cat, 'body', sbox(18, 10, 1, 2, 3, true), -9, -10); const hd = sbox(11, 9, 1, 2, 3, true); sp(hd, 3, 3, 4); sp(hd, 7, 3, 4); addPart(cat, 'head', hd, -14, -17); addPart(cat, 'earL', sbox(3, 3, 2, 2, 3), -14, -20); addPart(cat, 'earR', sbox(3, 3, 2, 2, 3), -6, -20); }
+  cat.geometry['*'] = newGeometry(80, 134);
+  setVariants(cat, [['Orange', {}], ['Gray', { s1: '#9a9ea6', s2: '#6a6e76', s3: '#1a1c20' }], ['Black', { s1: '#34363c', s2: '#202226', s3: '#08080a' }]]);
+  const shadowF = mk('Shadow — Blob', 'shadow', slots(['shadow', '#000000']));
+  { const a = A(34, 8); for (let y = 0; y < 8; y++) for (let x = 0; x < 34; x++) { const dx = (x - 16.5) / 17, dy = (y - 3.5) / 4; if (dx * dx + dy * dy <= 1) sp(a, x, y, 1); } addPart(shadowF, 'blob', a, -17, -4); }
+  shadowF.geometry['*'] = newGeometry(48, 134);
+  const spark = mk('Effect — Sparkle', 'effect', slots(['spark', '#ffe9a0']));
+  { for (const [dx, dy] of [[-30, -90], [28, -80], [-26, -40], [32, -20]]) { const a = A(5, 5); rf(a, 2, 0, 1, 5, 1); rf(a, 0, 2, 5, 1, 1); addPart(spark, 'sp' + dx, a, dx, dy); } }
+  setVariants(spark, [['Gold', {}], ['Cyan', { s1: '#a0f0ff' }], ['Pink', { s1: '#ffa0d8' }]]);
+
+  // ---- پس‌زمینه‌ها
+  const bgs = p.backgrounds;
+  bgs.push({ id: newId('bg'), name: 'Night Blue', type: 'solid', color: '#1b2238', color2: '#000000', angle: 0, pattern: { kind: 'dots', color: '#ffffff', size: 10, opacity: 0.08 }, image: null, x: 0, y: 0, scale: 1, opacity: 1, effects: { vignette: 0.45, scanlines: 0, noise: 0 } });
+  bgs.push({ id: newId('bg'), name: 'Sunset', type: 'gradient', color: '#ffb36b', color2: '#7a3a8a', angle: 0, pattern: { kind: 'none' }, image: null, x: 0, y: 0, scale: 1, opacity: 1, effects: { vignette: 0.2, scanlines: 0, noise: 0.2 } });
+  bgs.push({ id: newId('bg'), name: 'Forest', type: 'gradient', color: '#a7d8a0', color2: '#2f6a46', angle: 0, pattern: { kind: 'stripes', color: '#ffffff', size: 12, opacity: 0.05 }, image: null, x: 0, y: 0, scale: 1, opacity: 1, effects: { vignette: 0.25, scanlines: 0, noise: 0 } });
+  bgs.push({ id: newId('bg'), name: 'Checker', type: 'solid', color: '#cfd6e4', color2: '#000', angle: 0, pattern: { kind: 'checker', color: '#aab4c8', size: 8, opacity: 0.6 }, image: null, x: 0, y: 0, scale: 1, opacity: 1, effects: { vignette: 0, scanlines: 0, noise: 0 } });
+  bgs.push({ id: newId('bg'), name: 'Retro Grid', type: 'gradient', color: '#14102a', color2: '#4a1e78', angle: 0, pattern: { kind: 'grid', color: '#ff5fd0', size: 12, opacity: 0.18 }, image: null, x: 0, y: 0, scale: 1, opacity: 1, effects: { vignette: 0.3, scanlines: 0.25, noise: 0 } });
+  bgs.push({ id: newId('bg'), name: 'Soft Gray', type: 'gradient', color: '#e8eaf0', color2: '#b8bdca', angle: 0, pattern: { kind: 'none' }, image: null, x: 0, y: 0, scale: 1, opacity: 1, effects: { vignette: 0.1, scanlines: 0, noise: 0 } });
+
+  // ---- صحنه‌ی پیش‌فرض
+  const eq = (cat2, fam, vi = 0) => { p.scene.equipped['L_' + cat2] = { familyId: fam.id, variantId: fam.variants[vi].id }; };
+  p.scene.characterId = hero.id;
+  p.scene.backgroundId = bgs[0].id;
+  eq('body', bodyHero); eq('shoes', shoes); eq('pants', pants); eq('shirt', shirt); eq('eyes', eyes); eq('eyebrows', brows); eq('mouth', mouthFam.neutral); eq('hair', hs, 1); eq('sword', sword); eq('shield', shield);
+  p.scene.shadow = { on: true, color: '#000000', opacity: 0.35, w: 34, h: 8, x: 48, y: 134 };
+  p.view.zoom = 4;
+  return p;
+}
+
+'use strict';
+// ===== رندر: اسپرایتِ خانواده/واریانت، صحنه، پس‌زمینه و پیش‌نمایش‌ها =====
+
+const spriteCache = new Map();
+const imgCache = new Map();
+function invalidateCache() { spriteCache.clear(); }
+function mkCanvas(w, h) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
+function hexToRgb(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return [255, 0, 255]; const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+
+function partCanvas(f, variant, part) {
+  const c = mkCanvas(part.w, part.h);
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(part.w, part.h);
+  const cols = {};
+  for (let i = 0; i < part.px.length; i++) {
+    const s = part.px[i];
+    if (!s) continue;
+    const sl = f.slots[s - 1];
+    if (!sl) continue;
+    const col = cols[sl.id] || (cols[sl.id] = hexToRgb(slotColor(f, variant, sl.id, part.id)));
+    img.data[i * 4] = col[0]; img.data[i * 4 + 1] = col[1]; img.data[i * 4 + 2] = col[2]; img.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return c;
+}
+function partCorners(pt) {
+  const cx = pt.dx + pt.w / 2, cy = pt.dy + pt.h / 2, a = (pt.rotation * Math.PI) / 180, sx = pt.scale * (pt.flipX ? -1 : 1), sy = pt.scale * (pt.flipY ? -1 : 1);
+  return [[-pt.w / 2, -pt.h / 2], [pt.w / 2, -pt.h / 2], [pt.w / 2, pt.h / 2], [-pt.w / 2, pt.h / 2]].map(([x, y]) => {
+    const X = x * sx, Y = y * sy;
+    return [cx + X * Math.cos(a) - Y * Math.sin(a), cy + X * Math.sin(a) + Y * Math.cos(a)];
+  });
+}
+/** اسپرایتِ ترکیبیِ یک خانواده در یک واریانت: {canvas, ox, oy} (ox/oy نسبت به مبدأِ خانواده) */
+function familySprite(f, variant) {
+  const key = f.id + '|' + variant.id;
+  let s = spriteCache.get(key);
+  if (s) return s;
+  const parts = f.parts.filter(p => p.visible && !(variant.overrides[p.id] && variant.overrides[p.id].visible === false));
+  if (!parts.length) { s = { canvas: mkCanvas(1, 1), ox: 0, oy: 0, w: 0, h: 0, empty: true }; spriteCache.set(key, s); return s; }
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const p of parts) for (const [x, y] of partCorners(p)) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  x0 = Math.floor(x0); y0 = Math.floor(y0); x1 = Math.ceil(x1); y1 = Math.ceil(y1);
+  const c = mkCanvas(x1 - x0, y1 - y0);
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  for (const p of parts) {
+    ctx.save();
+    ctx.translate(p.dx + p.w / 2 - x0, p.dy + p.h / 2 - y0);
+    ctx.rotate((p.rotation * Math.PI) / 180);
+    ctx.scale(p.scale * (p.flipX ? -1 : 1), p.scale * (p.flipY ? -1 : 1));
+    ctx.drawImage(partCanvas(f, variant, p), -p.w / 2, -p.h / 2);
+    ctx.restore();
+  }
+  s = { canvas: c, ox: x0, oy: y0, w: x1 - x0, h: y1 - y0 };
+  spriteCache.set(key, s);
+  return s;
+}
+function anchorPoint(f, s) {
+  switch (f.anchor) {
+    case 'center': return [s.ox + s.w / 2, s.oy + s.h / 2];
+    case 'top-center': return [s.ox + s.w / 2, s.oy];
+    case 'bottom-center': return [s.ox + s.w / 2, s.oy + s.h];
+    case 'left-center': return [s.ox, s.oy + s.h / 2];
+    case 'right-center': return [s.ox + s.w, s.oy + s.h / 2];
+    default: return [0, 0];
+  }
+}
+
+/** فهرستِ آیتم‌های قابل‌رسم صحنه (پایین → بالا) */
+function sceneItems() {
+  const out = [];
+  const charId = P.scene.characterId;
+  for (const L of P.layers) {
+    if (!L.visible) continue;
+    const eq = P.scene.equipped[L.id];
+    if (!eq) continue;
+    let fam = famById(eq.familyId), vid = eq.variantId;
+    if (L.category === 'mouth' && P.moods[P.scene.mood] && famById(P.moods[P.scene.mood].familyId)) { fam = famById(P.moods[P.scene.mood].familyId); vid = P.moods[P.scene.mood].variantId; }
+    if (!fam || !compatible(fam, charId)) continue;
+    const variant = varOf(fam, vid);
+    const spr = familySprite(fam, variant);
+    if (spr.empty) continue;
+    out.push({ layer: L, fam, variant, spr, g: geomFor(fam, charId) });
+  }
+  return out;
+}
+function drawItem(ctx, it, extraAlpha = 1) {
+  const { fam, spr, g } = it;
+  const [ax, ay] = anchorPoint(fam, spr);
+  ctx.save();
+  ctx.globalAlpha = clamp(g.opacity, 0, 1) * extraAlpha;
+  ctx.translate(g.x, g.y);
+  ctx.rotate((g.rotation * Math.PI) / 180);
+  ctx.scale(g.scale * (g.flipX ? -1 : 1), g.scale * (g.flipY ? -1 : 1));
+  ctx.translate(-ax, -ay);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(spr.canvas, spr.ox, spr.oy);
+  ctx.restore();
+}
+function itemMatrix(it) {
+  // نگاشتِ نقطه‌ی محلیِ اسپرایت (بدون ox/oy) به مختصاتِ صحنه
+  const [ax, ay] = anchorPoint(it.fam, it.spr);
+  const g = it.g, a = (g.rotation * Math.PI) / 180, sx = g.scale * (g.flipX ? -1 : 1), sy = g.scale * (g.flipY ? -1 : 1);
+  return (lx, ly) => { const X = (lx - ax) * sx, Y = (ly - ay) * sy; return [g.x + X * Math.cos(a) - Y * Math.sin(a), g.y + X * Math.sin(a) + Y * Math.cos(a)]; };
+}
+function itemQuad(it) {
+  const m = itemMatrix(it), s = it.spr;
+  return [m(s.ox, s.oy), m(s.ox + s.w, s.oy), m(s.ox + s.w, s.oy + s.h), m(s.ox, s.oy + s.h)];
+}
+function hitItems(px, py) {
+  const items = sceneItems();
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    const g = it.g, a = (-g.rotation * Math.PI) / 180, [ax, ay] = anchorPoint(it.fam, it.spr);
+    const dx = px - g.x, dy = py - g.y;
+    let X = dx * Math.cos(a) - dy * Math.sin(a), Y = dx * Math.sin(a) + dy * Math.cos(a);
+    X = X / (g.scale * (g.flipX ? -1 : 1)) + ax; Y = Y / (g.scale * (g.flipY ? -1 : 1)) + ay;
+    const sx = Math.floor(X - it.spr.ox), sy = Math.floor(Y - it.spr.oy);
+    if (sx < 0 || sy < 0 || sx >= it.spr.w || sy >= it.spr.h) continue;
+    const d = it.spr.canvas.getContext('2d').getImageData(sx, sy, 1, 1).data;
+    if (d[3] > 10) return it;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------- پس‌زمینه و محیط
+function getImg(src, cb) {
+  let e = imgCache.get(src);
+  if (e) return e.ok ? e.img : null;
+  const img = new Image();
+  e = { img, ok: false };
+  imgCache.set(src, e);
+  img.onload = () => { e.ok = true; cb && cb(); };
+  img.src = src;
+  return null;
+}
+function drawBackground(ctx, bg, W, H, onLoad) {
+  if (!bg) return;
+  ctx.save();
+  ctx.globalAlpha = clamp(bg.opacity == null ? 1 : bg.opacity, 0, 1);
+  if (bg.type === 'gradient') {
+    const a = ((bg.angle || 0) * Math.PI) / 180, cx = W / 2, cy = H / 2, r = Math.hypot(W, H) / 2;
+    const g = ctx.createLinearGradient(cx - Math.sin(a) * r, cy - Math.cos(a) * r, cx + Math.sin(a) * r, cy + Math.cos(a) * r);
+    g.addColorStop(0, bg.color || '#223'); g.addColorStop(1, bg.color2 || '#556');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  } else if (bg.type === 'image' && bg.image) {
+    ctx.fillStyle = bg.color || '#000'; ctx.fillRect(0, 0, W, H);
+    const im = getImg(bg.image, onLoad);
+    if (im) { const s = bg.scale || 1; ctx.imageSmoothingEnabled = false; ctx.drawImage(im, bg.x || 0, bg.y || 0, im.width * s, im.height * s); }
+  } else {
+    ctx.fillStyle = bg.color || '#334'; ctx.fillRect(0, 0, W, H);
+  }
+  const pt = bg.pattern;
+  if (pt && pt.kind && pt.kind !== 'none') {
+    ctx.globalAlpha = clamp(pt.opacity == null ? 0.15 : pt.opacity, 0, 1) * clamp(bg.opacity == null ? 1 : bg.opacity, 0, 1);
+    ctx.fillStyle = ctx.strokeStyle = pt.color || '#ffffff';
+    const s = Math.max(2, pt.size || 8);
+    if (pt.kind === 'dots') for (let y = s / 2; y < H; y += s) for (let x = s / 2; x < W; x += s) ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
+    else if (pt.kind === 'stripes') for (let x = -H; x < W; x += s) { ctx.beginPath(); ctx.moveTo(x, H); ctx.lineTo(x + H, 0); ctx.lineWidth = 1; ctx.stroke(); }
+    else if (pt.kind === 'checker') for (let y = 0; y < H; y += s) for (let x = 0; x < W; x += s) if (((x / s) + (y / s)) % 2 === 0) ctx.fillRect(x, y, s, s);
+    else if (pt.kind === 'grid') { for (let x = 0; x < W; x += s) ctx.fillRect(x, 0, 1, H); for (let y = 0; y < H; y += s) ctx.fillRect(0, y, W, 1); }
+  }
+  const ef = bg.effects || {};
+  ctx.globalAlpha = 1;
+  if (ef.vignette) { const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.hypot(W, H) / 2); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${clamp(ef.vignette, 0, 1)})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
+  if (ef.scanlines) { ctx.fillStyle = `rgba(0,0,0,${clamp(ef.scanlines, 0, 1)})`; for (let y = 0; y < H; y += 2) ctx.fillRect(0, y, W, 1); }
+  if (ef.noise) { let sd = 12345; const rnd = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296); ctx.fillStyle = `rgba(255,255,255,${clamp(ef.noise, 0, 1) * 0.25})`; for (let i = 0; i < (W * H) / 40; i++) ctx.fillRect(Math.floor(rnd() * W), Math.floor(rnd() * H), 1, 1); }
+  ctx.restore();
+}
+function drawEnvironment(ctx, W, H, phase, onLoad) {
+  const sc = P.scene;
+  if (phase === 'back') {
+    if (sc.bgVisible) drawBackground(ctx, P.backgrounds.find(b => b.id === sc.backgroundId), W, H, onLoad);
+    if (sc.glow.on) { const g = ctx.createRadialGradient(sc.glow.x, sc.glow.y, 0, sc.glow.x, sc.glow.y, Math.max(2, sc.glow.radius)); g.addColorStop(0, sc.glow.color); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.save(); ctx.globalAlpha = clamp(sc.glow.opacity, 0, 1); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+    if (sc.ground.on) { ctx.save(); ctx.globalAlpha = clamp(sc.ground.opacity, 0, 1); ctx.fillStyle = sc.ground.color; ctx.fillRect(0, H - sc.ground.height, W, sc.ground.height); ctx.restore(); }
+    if (sc.shadow.on) { ctx.save(); ctx.globalAlpha = clamp(sc.shadow.opacity, 0, 1); ctx.fillStyle = sc.shadow.color; ctx.beginPath(); ctx.ellipse(sc.shadow.x, sc.shadow.y, sc.shadow.w / 2, sc.shadow.h / 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+  } else if (sc.lighting.on) {
+    const a = (sc.lighting.angle * Math.PI) / 180, r = Math.hypot(W, H) / 2, cx = W / 2, cy = H / 2;
+    const g = ctx.createLinearGradient(cx - Math.sin(a) * r, cy - Math.cos(a) * r, cx + Math.sin(a) * r, cy + Math.cos(a) * r);
+    g.addColorStop(0, sc.lighting.color); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save(); ctx.globalAlpha = clamp(sc.lighting.opacity, 0, 1); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore();
+  }
+}
+/** کلِ صحنه روی ctx (۱ پیکسلِ بوم = ۱ پیکسل) */
+function drawScene(ctx, opts = {}) {
+  const W = P.canvas.w, H = P.canvas.h;
+  drawEnvironment(ctx, W, H, 'back', opts.onLoad);
+  for (const it of sceneItems()) drawItem(ctx, it);
+  drawEnvironment(ctx, W, H, 'front');
+}
+function sceneBounds() {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const it of sceneItems()) for (const [x, y] of itemQuad(it)) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  if (!Number.isFinite(x0)) return { x: 0, y: 0, w: P.canvas.w, h: P.canvas.h };
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+/** پیش‌نمایش در اندازه‌های مختلف */
+const PREVIEWS = [
+  ['full', 'Full Character', 96, 144], ['inventory', 'Inventory', 64, 64], ['profile', 'Profile', 72, 72], ['icon', 'Small Icon', 32, 32], ['modal', 'Modal', 90, 120],
+];
+function renderPreview(kind, canvas, withBg = true) {
+  const full = mkCanvas(P.canvas.w, P.canvas.h);
+  const fx = full.getContext('2d');
+  if (withBg) drawScene(fx); else { for (const it of sceneItems()) drawItem(fx, it); }
+  const b = sceneBounds();
+  let r;
+  if (kind === 'full' || kind === 'modal') r = { x: 0, y: 0, w: P.canvas.w, h: P.canvas.h };
+  else if (kind === 'inventory') { const s = Math.max(b.w, b.h) + 8; r = { x: b.x + b.w / 2 - s / 2, y: b.y + b.h / 2 - s / 2, w: s, h: s }; }
+  else if (kind === 'profile') { const s = Math.max(b.w * 0.55, 24); r = { x: b.x + b.w / 2 - s / 2, y: b.y - 2, w: s, h: s }; }
+  else { const s = Math.max(b.w, b.h) + 4; r = { x: b.x + b.w / 2 - s / 2, y: b.y + b.h / 2 - s / 2, w: s, h: s }; }
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (kind === 'profile') { ctx.save(); ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, Math.PI * 2); ctx.clip(); }
+  ctx.drawImage(full, r.x, r.y, r.w, r.h, 0, 0, canvas.width, canvas.height);
+  if (kind === 'profile') ctx.restore();
+}
+
+'use strict';
+// ===== صحنه (Canvas): زوم/جابه‌جایی/شبکه/خط‌کش/راهنما/ناحیه‌ی امن/دستگیره‌های جابه‌جایی-مقیاس-چرخش =====
+
+const S = { tool: 'select', cat: 'body', leftTab: 'assets', rightTab: 'layers', bottomTab: 'parts', famId: null, partId: null, varId: null, bgId: null, scope: 'auto', partMode: false, space: false, drag: null, sizeW: 0, sizeH: 0 };
+const ST = { cv: null, ctx: null, off: null, pointers: new Map(), pinch: null };
+const RULER = 18;
+
+const selFam = () => (S.famId ? famById(S.famId) : null);
+const selPart = () => { const f = selFam(); return f ? f.parts.find(p => p.id === S.partId) || null : null; };
+function layerOfFam(famId) { for (const L of P.layers) { const e = P.scene.equipped[L.id]; if (e && e.familyId === famId) return L; } return null; }
+function toScreen(x, y) { const v = P.view; return [v.panX + x * v.zoom, v.panY + y * v.zoom]; }
+function toScene(sx, sy) { const v = P.view; return [(sx - v.panX) / v.zoom, (sy - v.panY) / v.zoom]; }
+
+function geomKey(fam) {
+  const c = P.scene.characterId;
+  if (S.scope === 'char' && c) return c;
+  if (S.scope === 'auto' && c && fam.geometry[c]) return c;
+  return '*';
+}
+function setGeom(fam, patch) {
+  const k = geomKey(fam);
+  fam.geometry[k] = Object.assign(fam.geometry[k] || (k === '*' ? newGeometry() : {}), patch);
+}
+function selItem() {
+  const f = selFam();
+  if (!f) return null;
+  return sceneItems().find(it => it.fam.id === f.id) || null;
+}
+
+function fitView() {
+  const r = ST.cv.getBoundingClientRect();
+  const z = Math.max(1, Math.floor(Math.min((r.width - RULER - 40) / P.canvas.w, (r.height - RULER - 40) / P.canvas.h) * 2) / 2);
+  P.view.zoom = z;
+  P.view.panX = Math.round(RULER + (r.width - RULER - P.canvas.w * z) / 2);
+  P.view.panY = Math.round(RULER + (r.height - RULER - P.canvas.h * z) / 2);
+}
+function zoomAt(sx, sy, factor) {
+  const v = P.view, [x, y] = toScene(sx, sy);
+  v.zoom = clamp(v.zoom * factor, 1, 32);
+  v.panX = sx - x * v.zoom; v.panY = sy - y * v.zoom;
+  renderStage();
+}
+
+function initStage() {
+  const cv = (ST.cv = $('#stage'));
+  ST.ctx = cv.getContext('2d');
+  ST.off = mkCanvas(1, 1);
+  new ResizeObserver(() => { const r = cv.getBoundingClientRect(); const d = devicePixelRatio || 1; cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); if (P) renderStage(); }).observe(cv);
+  cv.addEventListener('pointerdown', onDown);
+  cv.addEventListener('pointermove', onMove);
+  cv.addEventListener('pointerup', onUp);
+  cv.addEventListener('pointercancel', onUp);
+  cv.addEventListener('wheel', e => { e.preventDefault(); const r = cv.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.15 : 1 / 1.15); }, { passive: false });
+  cv.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+// ---------------------------------------------------------------- رسم
+function renderStage() {
+  if (!ST.cv || !P) return;
+  const cv = ST.cv, ctx = ST.ctx, d = devicePixelRatio || 1, W = cv.width / d, H = cv.height / d, v = P.view, z = v.zoom;
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+  ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, W, H);
+  const cw = P.canvas.w, ch = P.canvas.h;
+  // زمینه‌ی شطرنجی (نشان‌دهنده‌ی شفافیت)
+  ctx.save(); ctx.beginPath(); ctx.rect(v.panX, v.panY, cw * z, ch * z); ctx.clip();
+  const cs = 8 * z;
+  for (let y = 0; y * cs < ch * z; y++) for (let x = 0; x * cs < cw * z; x++) { ctx.fillStyle = (x + y) % 2 ? '#1a1e29' : '#222836'; ctx.fillRect(v.panX + x * cs, v.panY + y * cs, cs, cs); }
+  ST.off.width = cw; ST.off.height = ch;
+  const o = ST.off.getContext('2d'); o.clearRect(0, 0, cw, ch);
+  drawScene(o, { onLoad: renderStage });
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(ST.off, v.panX, v.panY, cw * z, ch * z);
+  ctx.restore();
+  ctx.strokeStyle = '#4a5270'; ctx.lineWidth = 1; ctx.strokeRect(v.panX - 0.5, v.panY - 0.5, cw * z + 1, ch * z + 1);
+
+  const line = (x0, y0, x1, y1, col, dash) => { ctx.beginPath(); ctx.setLineDash(dash || []); ctx.strokeStyle = col; ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.setLineDash([]); };
+  if (v.showGrid && v.grid * z >= 5) {
+    ctx.globalAlpha = 0.22;
+    for (let x = 0; x <= cw; x += v.grid) { const [sx] = toScreen(x, 0); line(Math.round(sx) + 0.5, v.panY, Math.round(sx) + 0.5, v.panY + ch * z, '#8d96ad'); }
+    for (let y = 0; y <= ch; y += v.grid) { const [, sy] = toScreen(0, y); line(v.panX, Math.round(sy) + 0.5, v.panX + cw * z, Math.round(sy) + 0.5, '#8d96ad'); }
+    ctx.globalAlpha = 1;
+  }
+  if (v.showSafe) { const s = P.canvas.safe, [sx, sy] = toScreen(s.x, s.y); ctx.strokeStyle = '#e7b34a'; ctx.setLineDash([5, 4]); ctx.strokeRect(sx + 0.5, sy + 0.5, s.w * z, s.h * z); ctx.setLineDash([]); }
+  if (v.showCenter) { const [cx, cy] = toScreen(cw / 2, ch / 2); line(cx + 0.5, v.panY, cx + 0.5, v.panY + ch * z, '#3fb97b', [3, 3]); line(v.panX, cy + 0.5, v.panX + cw * z, cy + 0.5, '#3fb97b55', [3, 3]); }
+  for (const g of v.guides) { if (g.axis === 'v') { const [sx] = toScreen(g.pos, 0); line(Math.round(sx) + 0.5, 0, Math.round(sx) + 0.5, H, '#e5564f'); } else { const [, sy] = toScreen(0, g.pos); line(0, Math.round(sy) + 0.5, W, Math.round(sy) + 0.5, '#e5564f'); } }
+
+  const items = sceneItems();
+  if (v.showLayerBoxes) for (const it of items) { const q = itemQuad(it).map(p => toScreen(...p)); poly(ctx, q, '#7c8cff66', 1, [3, 3]); ctx.fillStyle = '#7c8cffcc'; ctx.font = '10px system-ui'; ctx.fillText(it.layer.name, q[0][0] + 2, q[0][1] - 2); }
+  const si = selItem();
+  if (si) {
+    const q = itemQuad(si).map(p => toScreen(...p));
+    poly(ctx, q, '#ffffff', 1.5, []);
+    const hs = handles(si);
+    if (!si.layer.locked) { for (const k of ['tl', 'tr', 'br', 'bl']) box(ctx, hs[k], '#fff'); line(...hs.tc, ...hs.rot, '#fff'); ctx.beginPath(); ctx.arc(hs.rot[0], hs.rot[1], 5, 0, 7); ctx.fillStyle = '#7c8cff'; ctx.fill(); }
+    const [ax, ay] = toScreen(si.g.x, si.g.y); line(ax - 6, ay, ax + 6, ay, '#ff5fd0'); line(ax, ay - 6, ax, ay + 6, '#ff5fd0');
+    if (S.partMode) { const pt = selPart(); if (pt) { const m = itemMatrix(si); poly(ctx, partCorners(pt).map(c => toScreen(...m(...c))), '#3fb97b', 2, []); } }
+  }
+  if (v.showRuler) rulers(ctx, W, H);
+  const hud = $('#zoomlbl'); if (hud) hud.textContent = Math.round(z * 100) + '%';
+}
+function poly(ctx, pts, col, w, dash) { ctx.beginPath(); ctx.setLineDash(dash); ctx.strokeStyle = col; ctx.lineWidth = w; pts.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p))); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 1; }
+function box(ctx, p, col) { ctx.fillStyle = col; ctx.strokeStyle = '#000'; ctx.fillRect(p[0] - 4, p[1] - 4, 8, 8); ctx.strokeRect(p[0] - 4.5, p[1] - 4.5, 9, 9); }
+function handles(it) {
+  const q = itemQuad(it).map(p => toScreen(...p));
+  const tc = [(q[0][0] + q[1][0]) / 2, (q[0][1] + q[1][1]) / 2];
+  const bc = [(q[2][0] + q[3][0]) / 2, (q[2][1] + q[3][1]) / 2];
+  let dx = tc[0] - bc[0], dy = tc[1] - bc[1]; const L = Math.hypot(dx, dy) || 1;
+  return { tl: q[0], tr: q[1], br: q[2], bl: q[3], tc, rot: [tc[0] + (dx / L) * 22, tc[1] + (dy / L) * 22] };
+}
+function rulers(ctx, W, H) {
+  const v = P.view, z = v.zoom;
+  ctx.fillStyle = '#171a23'; ctx.fillRect(0, 0, W, RULER); ctx.fillRect(0, 0, RULER, H);
+  ctx.fillStyle = '#8d96ad'; ctx.strokeStyle = '#4a5270'; ctx.font = '9px system-ui';
+  const step = z >= 8 ? 4 : z >= 4 ? 8 : z >= 2 ? 16 : 32;
+  for (let x = 0; x <= P.canvas.w; x += step) { const [sx] = toScreen(x, 0); ctx.beginPath(); ctx.moveTo(sx + 0.5, RULER - (x % (step * 2) ? 5 : 9)); ctx.lineTo(sx + 0.5, RULER); ctx.stroke(); if (x % (step * 2) === 0) ctx.fillText(x, sx + 2, 9); }
+  for (let y = 0; y <= P.canvas.h; y += step) { const [, sy] = toScreen(0, y); ctx.beginPath(); ctx.moveTo(RULER - (y % (step * 2) ? 5 : 9), sy + 0.5); ctx.lineTo(RULER, sy + 0.5); ctx.stroke(); if (y % (step * 2) === 0) ctx.fillText(y, 1, sy - 2); }
+  ctx.fillStyle = '#171a23'; ctx.fillRect(0, 0, RULER, RULER);
+}
+
+// ---------------------------------------------------------------- تعامل
+function pos(e) { const r = ST.cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+function snapPos(x, y, noMagnet) {
+  const v = P.view;
+  x = Math.round(x); y = Math.round(y);
+  if (!v.snap || noMagnet) return [x, y];
+  const th = 4 / v.zoom, cands = { x: [P.canvas.w / 2], y: [P.canvas.h / 2] };
+  for (let k = 0; k <= P.canvas.w; k += v.grid) cands.x.push(k);
+  for (let k = 0; k <= P.canvas.h; k += v.grid) cands.y.push(k);
+  for (const g of v.guides) cands[g.axis === 'v' ? 'x' : 'y'].push(g.pos);
+  for (const c of cands.x) if (Math.abs(c - x) <= th) { x = c; break; }
+  for (const c of cands.y) if (Math.abs(c - y) <= th) { y = c; break; }
+  return [x, y];
+}
+function onDown(e) {
+  if (!P) return;
+  ST.cv.setPointerCapture(e.pointerId);
+  const [sx, sy] = pos(e);
+  ST.pointers.set(e.pointerId, [sx, sy]);
+  if (ST.pointers.size === 2) { const [a, b] = [...ST.pointers.values()]; ST.pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), zoom: P.view.zoom, mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2 }; S.drag = null; return; }
+  const v = P.view;
+  if (v.showRuler && (sx < RULER || sy < RULER) && !(sx < RULER && sy < RULER)) {
+    const g = { axis: sx < RULER ? 'v' : 'h', pos: 0 }; v.guides.push(g); S.drag = { type: 'guide', g, fresh: true }; return;
+  }
+  const [px, py] = toScene(sx, sy);
+  if (e.button === 1 || S.space || S.tool === 'pan') { S.drag = { type: 'pan', sx, sy, px: v.panX, py: v.panY }; return; }
+  for (const g of v.guides) { const gp = g.axis === 'v' ? toScreen(g.pos, 0)[0] : toScreen(0, g.pos)[1]; if (Math.abs((g.axis === 'v' ? sx : sy) - gp) < 4) { S.drag = { type: 'guide', g }; return; } }
+  const si = selItem();
+  if (si && !si.layer.locked) {
+    const hs = handles(si), near = p => Math.hypot(p[0] - sx, p[1] - sy) <= 9;
+    const [ax, ay] = toScreen(si.g.x, si.g.y);
+    if (near(hs.rot)) { S.drag = { type: 'rotate', fam: si.fam, g0: { ...si.g }, ax, ay }; return; }
+    for (const k of ['tl', 'tr', 'br', 'bl']) if (near(hs[k])) { S.drag = { type: 'scale', fam: si.fam, g0: { ...si.g }, ax, ay, d0: Math.hypot(sx - ax, sy - ay) || 1 }; return; }
+    if (S.partMode && selPart()) {
+      const pt = selPart(), m = itemMatrix(si);
+      if (pointInPoly(sx, sy, partCorners(pt).map(c => toScreen(...m(...c))))) { S.drag = { type: 'part', si, pt, px, py, d0: [pt.dx, pt.dy], moved: false }; return; }
+    }
+  }
+  const hit = hitItems(px, py);
+  if (hit) {
+    S.famId = hit.fam.id; S.varId = hit.variant.id; if (S.partId && !hit.fam.parts.some(p => p.id === S.partId)) S.partId = null;
+    S.drag = hit.layer.locked ? null : { type: 'move', fam: hit.fam, g0: { ...hit.g }, px, py, moved: false };
+    renderPanelsOnly();
+  } else {
+    if (S.famId) { S.famId = null; S.partId = null; renderPanelsOnly(); }
+    S.drag = { type: 'pan', sx, sy, px: v.panX, py: v.panY };
+  }
+  renderStage();
+}
+function pointInPoly(x, y, q) { let c = false; for (let i = 0, j = q.length - 1; i < q.length; j = i++) if ((q[i][1] > y) !== (q[j][1] > y) && x < ((q[j][0] - q[i][0]) * (y - q[i][1])) / (q[j][1] - q[i][1]) + q[i][0]) c = !c; return c; }
+function onMove(e) {
+  if (!P) return;
+  const [sx, sy] = pos(e);
+  if (ST.pointers.has(e.pointerId)) ST.pointers.set(e.pointerId, [sx, sy]);
+  if (ST.pinch && ST.pointers.size === 2) {
+    const [a, b] = [...ST.pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    const v = P.view, [x, y] = toScene(ST.pinch.mx, ST.pinch.my); v.zoom = clamp(ST.pinch.zoom * (d / ST.pinch.d), 1, 32); v.panX = ST.pinch.mx - x * v.zoom; v.panY = ST.pinch.my - y * v.zoom; renderStage(); return;
+  }
+  const [px, py] = toScene(sx, sy);
+  const hudp = $('#coords'); if (hudp) hudp.textContent = `x ${Math.round(px)}  y ${Math.round(py)}`;
+  const d = S.drag; if (!d) return;
+  if (d.type === 'pan') { P.view.panX = d.px + sx - d.sx; P.view.panY = d.py + sy - d.sy; }
+  else if (d.type === 'guide') { const [x, y] = toScene(sx, sy); d.g.pos = Math.round(d.g.axis === 'v' ? x : y); d.moved = true; }
+  else if (d.type === 'move') { const [nx, ny] = snapPos(d.g0.x + (px - d.px), d.g0.y + (py - d.py), e.altKey); d.moved = true; setGeom(d.fam, { x: nx, y: ny }); }
+  else if (d.type === 'scale') { let s = d.g0.scale * (Math.hypot(sx - d.ax, sy - d.ay) / d.d0); s = P.view.snap ? Math.round(s * 20) / 20 : s; d.moved = true; setGeom(d.fam, { scale: clamp(+s.toFixed(3), 0.1, 8) }); }
+  else if (d.type === 'rotate') { let a = (Math.atan2(sy - d.ay, sx - d.ax) * 180) / Math.PI + 90; if (P.view.snap || e.shiftKey) a = Math.round(a / 5) * 5; a = ((a + 540) % 360) - 180; d.moved = true; setGeom(d.fam, { rotation: a }); }
+  else if (d.type === 'part') {
+    const g = d.si.g, a = (-g.rotation * Math.PI) / 180, dx = px - d.px, dy = py - d.py;
+    let X = dx * Math.cos(a) - dy * Math.sin(a), Y = dx * Math.sin(a) + dy * Math.cos(a);
+    X /= g.scale * (g.flipX ? -1 : 1); Y /= g.scale * (g.flipY ? -1 : 1);
+    d.pt.dx = Math.round(d.d0[0] + X); d.pt.dy = Math.round(d.d0[1] + Y); d.moved = true; invalidateCache();
+  }
+  renderStage();
+  if (d.moved && d.type !== 'pan') liveFields();
+}
+function onUp(e) {
+  ST.pointers.delete(e.pointerId);
+  if (ST.pointers.size < 2) ST.pinch = null;
+  const d = S.drag; S.drag = null;
+  if (!d || !P) return;
+  if (d.type === 'guide') {
+    const [sx, sy] = pos(e);
+    if ((d.g.axis === 'v' && sx < RULER) || (d.g.axis === 'h' && sy < RULER)) P.view.guides = P.view.guides.filter(g => g !== d.g);
+    commit('guide'); return;
+  }
+  if (d.type === 'pan') { scheduleSave(); return; }
+  if (d.moved) commit(d.type);
+}
+function nudge(dx, dy) {
+  const f = selFam(); if (!f) return;
+  const L = layerOfFam(f.id); if (L && L.locked) return;
+  if (S.partMode && selPart()) { selPart().dx += dx; selPart().dy += dy; invalidateCache(); } else { const g = geomFor(f, P.scene.characterId); setGeom(f, { x: g.x + dx, y: g.y + dy }); }
+  commit('nudge');
+}
+
+'use strict';
+// ===== پنل‌ها: دارایی‌ها/کاراکترها (چپ)، لایه‌ها/بازرس (راست)، قطعات/واریانت/Mood/پس‌زمینه/صحنه/پیش‌نمایش (پایین) =====
+
+// ---- سازنده‌های فیلد
+const row = (label, ...c) => h('div', { class: 'row' }, label != null ? h('label', {}, label) : null, ...c);
+const btn = (t, fn, cls, title) => h('button', { class: cls || '', title, onclick: fn }, t);
+const numIn = (v, fn, o = {}) => h('input', { type: 'number', value: +(+v).toFixed(3), step: o.step || 1, min: o.min, max: o.max, onchange: e => fn(num(e.target.value, v)) });
+const txtIn = (v, fn, o = {}) => h('input', { type: 'text', value: v == null ? '' : v, style: o.style, placeholder: o.ph, onchange: e => fn(e.target.value) });
+const chkIn = (v, fn) => h('input', { type: 'checkbox', checked: !!v, onchange: e => fn(e.target.checked) });
+const colIn = (v, fn) => h('input', { type: 'color', value: /^#[0-9a-f]{6}$/i.test(v) ? v : '#ff00ff', onchange: e => fn(e.target.value) });
+const selIn = (v, opts, fn) => h('select', { onchange: e => fn(e.target.value) }, opts.map(([val, lab]) => h('option', { value: val, selected: val === v }, lab)));
+const rangeIn = (v, fn, min, max, step) => h('input', { type: 'range', value: v, min, max, step, onchange: e => fn(num(e.target.value, v)) });
+function tabs(cur, list, fn) { return h('div', { class: 'tabs' }, list.map(([k, l]) => h('button', { class: cur === k ? 'on' : '', onclick: () => fn(k) }, l))); }
+function paint(el, build) { const st = el.scrollTop; el.replaceChildren(...[].concat(build()).flat(Infinity).filter(Boolean)); el.scrollTop = st; }
+function thumb(fam, variant, size = 36) {
+  const c = h('canvas', { class: 'thumb', width: size, height: size });
+  const s = familySprite(fam, variant || fam.variants[0]);
+  if (!s.empty) { const k = Math.min((size - 2) / s.w, (size - 2) / s.h, 4); const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false; ctx.drawImage(s.canvas, Math.round((size - s.w * k) / 2), Math.round((size - s.h * k) / 2), Math.round(s.w * k), Math.round(s.h * k)); }
+  return c;
+}
+
+// ---- عملیات مشترک
+function selectFam(fam, varId) {
+  S.famId = fam.id; S.partId = null;
+  const L = layerOfFam(fam.id);
+  S.varId = varId || (L ? P.scene.equipped[L.id].variantId : fam.variants[0].id);
+  renderAll();
+}
+function equip(fam, varId) {
+  let L = layerOfFam(fam.id) || P.layers.find(l => l.category === fam.category && !P.scene.equipped[l.id]) || P.layers.find(l => l.category === fam.category);
+  if (!L) { L = { id: 'L_' + newId('c'), name: CAT_FA[fam.category] || fam.category, category: fam.category, visible: true, locked: false }; P.layers.push(L); }
+  P.scene.equipped[L.id] = { familyId: fam.id, variantId: varId || (P.scene.equipped[L.id] && P.scene.equipped[L.id].familyId === fam.id ? P.scene.equipped[L.id].variantId : fam.variants[0].id) };
+  if (!compatible(fam, P.scene.characterId)) toast('این Asset با کاراکترِ فعلی سازگار نیست (نمایش داده نمی‌شود)');
+  S.famId = fam.id; S.varId = P.scene.equipped[L.id].variantId;
+  commit('equip');
+}
+function unequip(layerId) { delete P.scene.equipped[layerId]; commit('unequip'); }
+function newBlankFamily(cat) {
+  const f = newFamily((CAT_FA[cat] || cat) + ' جدید', cat);
+  const p = newPart('part1', 16, 16, -8, -16); f.parts.push(p);
+  P.families.push(f); equip(f);
+  openPixelEditor(f, p);
+}
+function dupFamily(f) {
+  const c = clone({ ...f, parts: [] });
+  c.id = newId('fam'); c.name = f.name + ' کپی';
+  c.parts = f.parts.map(p => ({ ...p, id: newId('part'), px: new Uint8Array(p.px) }));
+  const idMap = Object.fromEntries(f.parts.map((p, i) => [p.id, c.parts[i].id]));
+  c.variants = f.variants.map(v => { const nv = clone(v); nv.id = newId('var'); nv.overrides = Object.fromEntries(Object.entries(v.overrides || {}).map(([k, o]) => [idMap[k] || k, o])); return nv; });
+  P.families.splice(P.families.indexOf(f) + 1, 0, c); S.famId = c.id; commit('dupFamily');
+}
+function delFamily(f) {
+  if (!confirm(`«${f.name}» و همه‌ی واریانت‌هایش حذف شود؟`)) return;
+  P.families = P.families.filter(x => x !== f);
+  for (const k of Object.keys(P.scene.equipped)) if (P.scene.equipped[k].familyId === f.id) delete P.scene.equipped[k];
+  for (const m of Object.keys(P.moods)) if (P.moods[m].familyId === f.id) delete P.moods[m];
+  if (S.famId === f.id) { S.famId = null; S.partId = null; }
+  commit('delFamily');
+}
+
+// ================================================================ چپ
+function renderLeft() {
+  paint($('#left'), () => [
+    tabs(S.leftTab, [['assets', 'Assets'], ['chars', 'Characters']], k => { S.leftTab = k; renderLeft(); }),
+    S.leftTab === 'assets' ? assetsList() : charsList(),
+  ]);
+}
+function assetsList() {
+  const cats = [['all', 'همه'], ...CATS];
+  const fams = P.families.filter(f => S.cat === 'all' || f.category === S.cat);
+  return [
+    h('div', { class: 'tabs' }, cats.map(([k, l]) => h('button', { class: S.cat === k ? 'on' : '', onclick: () => { S.cat = k; renderLeft(); } }, l))),
+    h('div', { class: 'pb' }, btn('＋ Asset Family جدید', () => newBlankFamily(S.cat === 'all' ? 'accessory' : S.cat), 'primary')),
+    h('div', { class: 'list' }, fams.map(f => {
+      const L = layerOfFam(f.id), ok = compatible(f, P.scene.characterId);
+      return h('div', { class: 'item' + (S.famId === f.id ? ' sel' : ''), onclick: () => (L ? selectFam(f) : equip(f)) },
+        thumb(f, L ? varOf(f, P.scene.equipped[L.id].variantId) : f.variants[0]),
+        h('span', { class: 'nm' }, f.name, h('br'), h('small', {}, `${CAT_FA[f.category] || f.category} · ${f.variants.length} واریانت · ${f.parts.length} قطعه${ok ? '' : ' · ⛔ ناسازگار'}`)),
+        L ? h('span', { class: 'chip' }, '✓') : null,
+        btn('⧉', e => { e.stopPropagation(); dupFamily(f); }, 'ib', 'تکثیر'), btn('🗑', e => { e.stopPropagation(); delFamily(f); }, 'ib danger', 'حذف'));
+    })),
+    fams.length ? null : h('div', { class: 'pb muted' }, 'خانواده‌ای در این دسته نیست.'),
+  ];
+}
+function charsList() {
+  return [
+    h('div', { class: 'pb' }, btn('＋ کاراکتر جدید', () => { const c = { id: newId('char'), name: 'Character ' + String(P.characters.length + 1).padStart(2, '0'), notes: '' }; P.characters.push(c); P.scene.characterId = c.id; commit('addChar'); }, 'primary')),
+    h('div', { class: 'list' }, P.characters.map(c => h('div', { class: 'item' + (P.scene.characterId === c.id ? ' sel' : ''), onclick: () => { P.scene.characterId = c.id; commit('selChar'); } },
+      h('span', { class: 'nm' }, h('input', { type: 'text', value: c.name, style: { width: '100%' }, onclick: e => e.stopPropagation(), onchange: e => { c.name = e.target.value; commit('renChar'); } }),
+        h('small', {}, `${P.families.filter(f => f.characterIds.includes(c.id)).length} Asset اختصاصی · ${P.families.filter(f => !f.characterIds.length).length} مشترک`)),
+      btn('⧉', e => { e.stopPropagation(); dupChar(c); }, 'ib', 'تکثیر'),
+      btn('🗑', e => { e.stopPropagation(); if (P.characters.length > 1 && confirm('کاراکتر حذف شود؟')) { delChar(c); } else if (P.characters.length <= 1) toast('حداقل یک کاراکتر لازم است'); }, 'ib danger', 'حذف')))),
+    h('div', { class: 'pb muted' }, 'Assetهای اختصاصیِ هر کاراکتر را در بازرس (Character Compatibility) تعیین کنید؛ Assetِ بدون محدودیت بین همه‌ی کاراکترها مشترک است.'),
+  ];
+}
+function dupChar(c) {
+  const n = { id: newId('char'), name: c.name + ' کپی', notes: c.notes };
+  P.characters.push(n);
+  for (const f of P.families) { if (f.characterIds.includes(c.id)) f.characterIds.push(n.id); if (f.geometry[c.id]) f.geometry[n.id] = clone(f.geometry[c.id]); }
+  P.scene.characterId = n.id; commit('dupChar');
+}
+function delChar(c) {
+  P.characters = P.characters.filter(x => x !== c);
+  for (const f of P.families) { f.characterIds = f.characterIds.filter(i => i !== c.id); delete f.geometry[c.id]; }
+  if (P.scene.characterId === c.id) P.scene.characterId = P.characters[0].id;
+  commit('delChar');
+}
+
+// ================================================================ راست
+function renderRight() {
+  paint($('#right'), () => [tabs(S.rightTab, [['layers', 'Layers'], ['inspect', 'Inspector']], k => { S.rightTab = k; renderRight(); }), S.rightTab === 'layers' ? layersPanel() : inspector()]);
+}
+function layersPanel() {
+  const ls = [...P.layers].reverse();
+  return [
+    h('div', { class: 'pb' }, btn('＋ لایه', () => { const n = prompt('نام لایه', 'لایه جدید'); if (n) { P.layers.push({ id: 'L_' + newId('c'), name: n, category: 'accessory', visible: true, locked: false }); commit('addLayer'); } })),
+    h('div', { class: 'list' }, ls.map(L => {
+      const eq = P.scene.equipped[L.id], fam = eq && famById(eq.familyId), i = P.layers.indexOf(L);
+      return h('div', { class: 'item' + (fam && S.famId === fam.id ? ' sel' : ''), onclick: () => { if (fam) selectFam(fam, eq.variantId); } },
+        btn(L.visible ? '👁' : '⌀', e => { e.stopPropagation(); L.visible = !L.visible; commit('vis'); }, 'ib', 'نمایش/مخفی'),
+        btn(L.locked ? '🔒' : '🔓', e => { e.stopPropagation(); L.locked = !L.locked; commit('lock'); }, 'ib', 'قفل'),
+        fam ? thumb(fam, varOf(fam, eq.variantId), 28) : h('span', { class: 'thumb', style: { width: '28px', height: '28px' } }),
+        h('span', { class: 'nm', ondblclick: e => { e.stopPropagation(); const n = prompt('نام لایه', L.name); if (n) { L.name = n; commit('renLayer'); } } }, L.name, h('br'), h('small', {}, fam ? fam.name : '— خالی —')),
+        btn('▲', e => { e.stopPropagation(); if (i < P.layers.length - 1) { [P.layers[i], P.layers[i + 1]] = [P.layers[i + 1], P.layers[i]]; commit('zup'); } }, 'ib', 'بالاتر'),
+        btn('▼', e => { e.stopPropagation(); if (i > 0) { [P.layers[i], P.layers[i - 1]] = [P.layers[i - 1], P.layers[i]]; commit('zdn'); } }, 'ib', 'پایین‌تر'),
+        btn('⧉', e => { e.stopPropagation(); const n = { ...L, id: 'L_' + newId('c'), name: L.name + ' کپی' }; P.layers.splice(i + 1, 0, n); if (eq) P.scene.equipped[n.id] = { ...eq }; commit('dupLayer'); }, 'ib', 'تکثیر لایه'),
+        btn('🗑', e => { e.stopPropagation(); if (confirm('لایه حذف شود؟')) { P.layers.splice(i, 1); delete P.scene.equipped[L.id]; commit('delLayer'); } }, 'ib danger', 'حذف'));
+    })),
+  ];
+}
+function inspector() {
+  const f = selFam();
+  if (!f) return h('div', { class: 'pb muted' }, 'یک Asset را روی صحنه یا از فهرست انتخاب کنید.');
+  const L = layerOfFam(f.id), cid = P.scene.characterId, g = geomFor(f, cid), variant = varOf(f, S.varId), spr = familySprite(f, variant);
+  const set = (patch) => { setGeom(f, patch); commit('geom'); };
+  const hasOv = !!(cid && f.geometry[cid]);
+  const out = [h('div', { class: 'pb' },
+    row('Family ID', h('input', { type: 'text', value: f.id, readonly: true })),
+    row('Variant ID', h('input', { type: 'text', value: variant.id, readonly: true })),
+    row('Name', txtIn(f.name, v => { f.name = v; commit('name'); })),
+    row('Category', selIn(f.category, CATS, v => { f.category = v; commit('cat'); })),
+    row('Variant', selIn(variant.id, f.variants.map(v => [v.id, v.name]), v => { S.varId = v; if (L) P.scene.equipped[L.id].variantId = v; commit('variant'); })),
+    row('Width × Height', h('span', {}, `${spr.w || 0} × ${spr.h || 0} px`)),
+    row('Geometry', selIn(S.scope, [['auto', 'خودکار' + (hasOv ? ' (override)' : ' (مشترک)')], ['shared', 'مشترک بین کاراکترها'], ['char', 'فقط این کاراکتر']], v => { S.scope = v; renderRight(); })),
+    row('X', h('span', { id: 'f_x' }, numIn(g.x, v => set({ x: v })))), row('Y', h('span', { id: 'f_y' }, numIn(g.y, v => set({ y: v })))),
+    row('Scale', h('span', { id: 'f_scale' }, numIn(g.scale, v => set({ scale: clamp(v, 0.1, 8) }), { step: 0.05 }))),
+    row('Rotation', h('span', { id: 'f_rot' }, numIn(g.rotation, v => set({ rotation: v }), { step: 5 }))),
+    row('Opacity', rangeIn(g.opacity, v => set({ opacity: v }), 0, 1, 0.05)),
+    row('Flip', h('label', {}, chkIn(g.flipX, v => set({ flipX: v })), ' X  '), h('label', {}, chkIn(g.flipY, v => set({ flipY: v })), ' Y')),
+    row('Anchor', selIn(f.anchor, ANCHORS.map(a => [a, a]), v => { f.anchor = v; commit('anchor'); })),
+    row('Layer', selIn(L ? L.id : '', [['', '— روی صحنه نیست —'], ...P.layers.map(l => [l.id, l.name])], v => { if (L) { const e = P.scene.equipped[L.id]; delete P.scene.equipped[L.id]; if (v) P.scene.equipped[v] = e; } else if (v) P.scene.equipped[v] = { familyId: f.id, variantId: variant.id }; commit('layer'); })),
+    row('Visible', chkIn(L ? L.visible : false, v => { if (L) { L.visible = v; commit('vis'); } })),
+    row('Locked', chkIn(L ? L.locked : false, v => { if (L) { L.locked = v; commit('lock'); } })),
+    row('Tags', txtIn(f.tags.join(', '), v => { f.tags = v.split(',').map(s => s.trim()).filter(Boolean); commit('tags'); })),
+    row('Mood', f.category === 'mouth' ? h('span', {}, MOODS.filter(([m]) => P.moods[m] && P.moods[m].familyId === f.id).map(([, l]) => l).join('، ') || '— (در تب Moods تنظیم کنید)') : h('span', { class: 'muted' }, '— فقط برای دهان')),
+  ), h('div', { class: 'ph' }, 'رنگ‌ها (واریانت جاری)'),
+  h('div', { class: 'pb' }, f.slots.map(sl => row(sl.name, colIn(slotColor(f, variant, sl.id), v => { variant.colors[sl.id] = v; commit('color'); }), h('small', { class: 'muted' }, slotColor(f, variant, sl.id))))),
+  h('div', { class: 'ph' }, 'Character Compatibility'),
+  h('div', { class: 'pb' }, P.characters.map(c => h('label', { class: 'row' }, chkIn(!f.characterIds.length || f.characterIds.includes(c.id), v => {
+    const all = P.characters.map(x => x.id);
+    let cur = f.characterIds.length ? [...f.characterIds] : [...all];
+    cur = v ? [...new Set([...cur, c.id])] : cur.filter(i => i !== c.id);
+    f.characterIds = cur.length === all.length ? [] : cur; commit('compat');
+  }), ' ' + c.name)), h('small', { class: 'muted' }, 'همه‌ی کاراکترها تیک‌خورده = Asset مشترک')),
+  ];
+  return out;
+}
+/** هنگام درگ، فقط مقدار فیلدهای هندسه به‌روز می‌شود (بدون بازسازی پنل) */
+function liveFields() {
+  const f = selFam(); if (!f) return;
+  const g = geomFor(f, P.scene.characterId);
+  for (const [id, k] of [['f_x', 'x'], ['f_y', 'y'], ['f_scale', 'scale'], ['f_rot', 'rotation']]) { const i = $('#' + id + ' input'); if (i) i.value = +(+g[k]).toFixed(3); }
+}
+
+// ================================================================ پایین
+const BTABS = [['parts', 'Parts'], ['variants', 'Variants'], ['moods', 'Moods'], ['bg', 'Background'], ['scene', 'Shadow/Ground/Light'], ['previews', 'Previews']];
+function renderBottom() {
+  paint($('#bottombody'), () => ({ parts: partsTab, variants: variantsTab, moods: moodsTab, bg: bgTab, scene: sceneTab, previews: previewsTab }[S.bottomTab])());
+  $('#bottomtabs').replaceChildren(...BTABS.map(([k, l]) => h('button', { class: S.bottomTab === k ? 'on' : '', onclick: () => { S.bottomTab = k; renderBottom(); } }, l)));
+}
+function needFam() { return h('div', { class: 'muted' }, 'ابتدا یک Asset را انتخاب کنید.'); }
+function partsTab() {
+  const f = selFam(); if (!f) return needFam();
+  const variant = varOf(f, S.varId), pt = selPart();
+  const ov = pt && (variant.overrides[pt.id] || (variant.overrides[pt.id] = {}));
+  const upd = fn => v => { fn(v); invalidateCache(); commit('part'); };
+  const list = h('div', { class: 'list', style: { width: '260px', flex: 'none', border: '1px solid var(--line)', borderRadius: '6px', maxHeight: '230px', overflow: 'auto' } },
+    f.parts.map((p, i) => h('div', { class: 'item' + (pt && pt.id === p.id ? ' sel' : ''), onclick: () => { S.partId = p.id; S.partMode = true; renderAll(); } },
+      btn(p.visible ? '👁' : '⌀', e => { e.stopPropagation(); p.visible = !p.visible; invalidateCache(); commit('pvis'); }, 'ib'),
+      h('span', { class: 'nm' }, p.name, ' ', h('small', {}, `${p.w}×${p.h}`)),
+      btn('▲', e => { e.stopPropagation(); if (i) { [f.parts[i], f.parts[i - 1]] = [f.parts[i - 1], f.parts[i]]; invalidateCache(); commit('porder'); } }, 'ib'),
+      btn('▼', e => { e.stopPropagation(); if (i < f.parts.length - 1) { [f.parts[i], f.parts[i + 1]] = [f.parts[i + 1], f.parts[i]]; invalidateCache(); commit('porder'); } }, 'ib'))));
+  const actions = h('div', { class: 'row wrap' },
+    btn('＋ قطعه', () => { const w = num(prompt('عرض', 16), 16), hh = num(prompt('ارتفاع', 16), 16); const p = newPart('part' + (f.parts.length + 1), clamp(w, 1, 96), clamp(hh, 1, 144), -Math.floor(w / 2), -hh); f.parts.push(p); S.partId = p.id; invalidateCache(); commit('addPart'); }),
+    btn('⧉ تکثیر', () => { if (!pt) return; const c = { ...clone({ ...pt, px: [] }), id: newId('part'), px: new Uint8Array(pt.px), name: pt.name + '2', dx: pt.dx + 2, dy: pt.dy + 2 }; f.parts.push(c); S.partId = c.id; invalidateCache(); commit('dupPart'); }),
+    btn('🗑 حذف', () => { if (!pt) return; f.parts = f.parts.filter(p => p !== pt); S.partId = null; invalidateCache(); commit('delPart'); }, 'danger'),
+    btn('✎ ویرایش پیکسلی', () => pt && openPixelEditor(f, pt), 'primary'),
+    btn('✂ برش به محتوا', () => { if (pt) { cropPart(pt); invalidateCache(); commit('crop'); } }),
+    btn('⑂ تقسیم (اجزای جدا)', () => { if (pt) { splitPart(f, pt); invalidateCache(); commit('split'); } }),
+    btn('⇄ جایگزینی (از قطعه‌ی دیگر)', () => { if (!pt) return; const others = P.families.flatMap(x => x.parts.map(p => ({ x, p }))).filter(o => o.p !== pt); const n = prompt('نامِ قطعه‌ی منبع:\n' + others.map(o => o.x.name + '/' + o.p.name).join('\n')); const m = others.find(o => o.x.name + '/' + o.p.name === n); if (m) { pt.w = m.p.w; pt.h = m.p.h; pt.px = new Uint8Array(m.p.px); invalidateCache(); commit('replacePart'); } }));
+  const fields = !pt ? h('div', { class: 'muted' }, 'قطعه‌ای انتخاب نشده (روی صحنه هم می‌توانید قطعه را جابه‌جا کنید).') : h('div', { class: 'grid2' },
+    row('نام', txtIn(pt.name, upd(v => (pt.name = v)))), row('Part ID', h('input', { type: 'text', value: pt.id, readonly: true })),
+    row('X', numIn(pt.dx, upd(v => (pt.dx = Math.round(v))))), row('Y', numIn(pt.dy, upd(v => (pt.dy = Math.round(v))))),
+    row('Scale', numIn(pt.scale, upd(v => (pt.scale = clamp(v, 0.1, 8))), { step: 0.1 })), row('Rotation', numIn(pt.rotation, upd(v => (pt.rotation = v)), { step: 5 })),
+    row('Flip', h('label', {}, chkIn(pt.flipX, upd(v => (pt.flipX = v))), ' X '), h('label', {}, chkIn(pt.flipY, upd(v => (pt.flipY = v))), ' Y')),
+    row('اندازه', h('span', {}, `${pt.w}×${pt.h}`)),
+    h('div', { class: 'row wrap', style: { gridColumn: '1/-1' } }, h('b', {}, `Override در واریانت «${variant.name}»:`), h('label', {}, chkIn(ov.visible !== false, v => { if (v) delete ov.visible; else ov.visible = false; invalidateCache(); commit('ovvis'); }), ' نمایش'),
+      ...f.slots.map(sl => h('span', { class: 'chip' }, sl.name, colIn(slotColor(f, variant, sl.id, pt.id), v => { (ov.colors || (ov.colors = {}))[sl.id] = v; invalidateCache(); commit('ovcolor'); }), btn('×', () => { if (ov.colors) delete ov.colors[sl.id]; invalidateCache(); commit('ovclr'); }, 'ib', 'حذف override')))));
+  return h('div', { style: { display: 'flex', gap: '14px', alignItems: 'flex-start', flexWrap: 'wrap' } }, h('div', {}, list, h('div', { class: 'muted' }, 'Collar/Sleeves/Body/Buttons… هر کدام یک قطعه‌اند.')), h('div', { style: { flex: 1, minWidth: '300px' } }, actions, fields));
+}
+function cropPart(pt) {
+  let x0 = pt.w, y0 = pt.h, x1 = -1, y1 = -1;
+  for (let y = 0; y < pt.h; y++) for (let x = 0; x < pt.w; x++) if (pt.px[y * pt.w + x]) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  if (x1 < 0) return toast('قطعه خالی است');
+  const w = x1 - x0 + 1, hh = y1 - y0 + 1, px = new Uint8Array(w * hh);
+  for (let y = 0; y < hh; y++) for (let x = 0; x < w; x++) px[y * w + x] = pt.px[(y + y0) * pt.w + x + x0];
+  pt.px = px; pt.dx += x0; pt.dy += y0; pt.w = w; pt.h = hh;
+}
+function splitPart(f, pt) {
+  const seen = new Uint8Array(pt.w * pt.h), comps = [];
+  for (let i = 0; i < pt.px.length; i++) {
+    if (!pt.px[i] || seen[i]) continue;
+    const st = [i], cells = []; seen[i] = 1;
+    while (st.length) { const c = st.pop(); cells.push(c); const x = c % pt.w, y = (c - x) / pt.w; for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) { if (nx < 0 || ny < 0 || nx >= pt.w || ny >= pt.h) continue; const n = ny * pt.w + nx; if (pt.px[n] && !seen[n]) { seen[n] = 1; st.push(n); } } }
+    comps.push(cells);
+  }
+  if (comps.length < 2) return toast('فقط یک جزء وجود دارد');
+  const idx = f.parts.indexOf(pt);
+  const news = comps.map((cells, k) => {
+    const p = newPart(pt.name + '_' + (k + 1), pt.w, pt.h, pt.dx, pt.dy); Object.assign(p, { scale: pt.scale, rotation: pt.rotation, flipX: pt.flipX, flipY: pt.flipY });
+    for (const c of cells) p.px[c] = pt.px[c]; cropPart(p); return p;
+  });
+  f.parts.splice(idx, 1, ...news); S.partId = news[0].id;
+}
+
+function variantsTab() {
+  const f = selFam(); if (!f) return needFam();
+  const L = layerOfFam(f.id), cur = varOf(f, S.varId);
+  const list = h('div', { class: 'list', style: { width: '260px', flex: 'none', border: '1px solid var(--line)', borderRadius: '6px', maxHeight: '230px', overflow: 'auto' } },
+    f.variants.map(v => h('div', { class: 'item' + (v.id === cur.id ? ' sel' : ''), onclick: () => { S.varId = v.id; if (L) P.scene.equipped[L.id].variantId = v.id; commit('selVar'); } },
+      thumb(f, v, 28), h('span', { class: 'nm' }, h('input', { type: 'text', value: v.name, style: { width: '100%' }, onclick: e => e.stopPropagation(), onchange: e => { v.name = e.target.value; commit('renVar'); } })),
+      f.slots.slice(0, 3).map(sl => h('span', { class: 'swatch', style: { background: slotColor(f, v, sl.id) } })),
+      btn('⧉', e => { e.stopPropagation(); const n = clone(v); n.id = newId('var'); n.name = v.name + ' کپی'; f.variants.push(n); S.varId = n.id; commit('dupVar'); }, 'ib'),
+      btn('🗑', e => { e.stopPropagation(); if (f.variants.length > 1) { f.variants = f.variants.filter(x => x !== v); S.varId = f.variants[0].id; for (const k of Object.keys(P.scene.equipped)) if (P.scene.equipped[k].familyId === f.id && P.scene.equipped[k].variantId === v.id) P.scene.equipped[k].variantId = f.variants[0].id; commit('delVar'); } else toast('حداقل یک واریانت لازم است'); }, 'ib danger'))));
+  return h('div', { style: { display: 'flex', gap: '14px', flexWrap: 'wrap' } },
+    h('div', {}, list, btn('＋ واریانت جدید', () => { const n = { id: newId('var'), name: 'Variant ' + (f.variants.length + 1), colors: clone(cur.colors), overrides: {} }; f.variants.push(n); S.varId = n.id; commit('addVar'); }, 'primary')),
+    h('div', { style: { flex: 1, minWidth: '300px' } },
+      h('div', { class: 'muted' }, 'همه‌ی واریانت‌ها هندسه (Base Geometry) و قطعه‌ها را مشترک دارند؛ فقط رنگ/Override قطعه‌ها فرق می‌کند.'),
+      h('div', { class: 'grid2' }, f.slots.map((sl, i) => row(null, h('input', { type: 'text', value: sl.name, style: { width: '90px' }, onchange: e => { sl.name = e.target.value; commit('slotName'); } }), h('small', { class: 'muted' }, 'پایه'), colIn(sl.color, v => { sl.color = v; commit('slotBase'); }), h('small', { class: 'muted' }, 'واریانت'), colIn(slotColor(f, cur, sl.id), v => { cur.colors[sl.id] = v; commit('slotVar'); }),
+        btn('↺', () => { delete cur.colors[sl.id]; commit('slotReset'); }, 'ib', 'برگرداندن به پایه')))),
+      row(null, btn('＋ Slot رنگ', () => { if (f.slots.length >= 35) return; const id = 's' + (Math.max(0, ...f.slots.map(s => +s.id.slice(1))) + 1); f.slots.push({ id, name: 'رنگ ' + (f.slots.length + 1), color: '#888888' }); commit('addSlot'); }),
+        btn('🗑 آخرین Slot', () => { if (f.slots.length > 1) { const s = f.slots.pop(); const n = f.slots.length; for (const p of f.parts) for (let i = 0; i < p.px.length; i++) if (p.px[i] > n) p.px[i] = 0; delete cur.colors[s.id]; invalidateCache(); commit('delSlot'); } }, 'danger')),
+      h('div', { class: 'row wrap' }, h('b', {}, 'Base Geometry:'), ...Object.entries(f.geometry).map(([k, g]) => h('span', { class: 'chip' }, (k === '*' ? 'مشترک' : (charById(k) || { name: k }).name), ` x${g.x ?? '·'} y${g.y ?? '·'} s${g.scale ?? '·'} r${g.rotation ?? '·'}`, k === '*' ? null : btn('×', () => { delete f.geometry[k]; commit('delGeom'); }, 'ib', 'حذف override'))))));
+}
+function moodsTab() {
+  const mouths = P.families.filter(f => f.category === 'mouth');
+  return h('div', {},
+    h('div', { class: 'row wrap' }, h('b', {}, 'Mood فعلی:'), ...MOODS.map(([k, l]) => h('button', { class: P.scene.mood === k ? 'on' : '', onclick: () => { P.scene.mood = k; commit('mood'); } }, l + ' · ' + k))),
+    h('div', { class: 'grid2' }, MOODS.map(([k, l]) => { const m = P.moods[k] || {}, fam = famById(m.familyId); return row(l, selIn(m.familyId || '', [['', '— بدون —'], ...mouths.map(x => [x.id, x.name])], v => { if (v) P.moods[k] = { familyId: v, variantId: famById(v).variants[0].id }; else delete P.moods[k]; commit('moodMap'); }), fam ? selIn(m.variantId, fam.variants.map(v => [v.id, v.name]), v => { m.variantId = v; commit('moodVar'); }) : null); })),
+    h('div', { class: 'muted' }, 'Mood فعلی لایه‌ی «mouth» را روی صحنه با دهانِ نگاشت‌شده جایگزین می‌کند؛ بقیه‌ی لایه‌ها دست‌نخورده می‌مانند.'));
+}
+function curBg() { return P.backgrounds.find(b => b.id === (S.bgId || P.scene.backgroundId)) || P.backgrounds[0]; }
+function bgTab() {
+  const b = curBg();
+  const upd = fn => v => { fn(v); commit('bg'); };
+  const list = h('div', { class: 'list', style: { width: '240px', flex: 'none', border: '1px solid var(--line)', borderRadius: '6px', maxHeight: '230px', overflow: 'auto' } }, P.backgrounds.map(x => h('div', { class: 'item' + (b && x.id === b.id ? ' sel' : ''), onclick: () => { S.bgId = x.id; P.scene.backgroundId = x.id; commit('selBg'); } },
+    h('span', { class: 'swatch', style: { background: x.type === 'gradient' ? `linear-gradient(${x.color},${x.color2})` : x.color } }), h('span', { class: 'nm' }, x.name), P.scene.backgroundId === x.id ? h('span', { class: 'chip' }, '✓') : null,
+    btn('⧉', e => { e.stopPropagation(); const n = clone(x); n.id = newId('bg'); n.name += ' کپی'; P.backgrounds.push(n); S.bgId = n.id; commit('dupBg'); }, 'ib'),
+    btn('🗑', e => { e.stopPropagation(); P.backgrounds = P.backgrounds.filter(y => y !== x); if (P.scene.backgroundId === x.id) P.scene.backgroundId = P.backgrounds[0] ? P.backgrounds[0].id : null; S.bgId = null; commit('delBg'); }, 'ib danger'))));
+  const add = btn('＋ پس‌زمینه', () => { const n = { id: newId('bg'), name: 'Background ' + (P.backgrounds.length + 1), type: 'solid', color: '#334155', color2: '#0f172a', angle: 0, pattern: { kind: 'none', color: '#ffffff', size: 8, opacity: 0.15 }, image: null, x: 0, y: 0, scale: 1, opacity: 1, effects: { vignette: 0, scanlines: 0, noise: 0 } }; P.backgrounds.push(n); S.bgId = n.id; P.scene.backgroundId = n.id; commit('addBg'); }, 'primary');
+  if (!b) return h('div', {}, add);
+  b.pattern = b.pattern || { kind: 'none', color: '#ffffff', size: 8, opacity: 0.15 }; b.effects = b.effects || { vignette: 0, scanlines: 0, noise: 0 };
+  return h('div', { style: { display: 'flex', gap: '14px', flexWrap: 'wrap' } }, h('div', {}, list, add, h('label', { class: 'row' }, chkIn(P.scene.bgVisible, upd(v => (P.scene.bgVisible = v))), ' نمایش پس‌زمینه')),
+    h('div', { class: 'grid2', style: { flex: 1, minWidth: '300px' } },
+      row('نام', txtIn(b.name, upd(v => (b.name = v)))), row('نوع', selIn(b.type, [['solid', 'Color'], ['gradient', 'Gradient'], ['image', 'Image']], upd(v => (b.type = v)))),
+      row('رنگ ۱', colIn(b.color, upd(v => (b.color = v)))), row('رنگ ۲', colIn(b.color2, upd(v => (b.color2 = v)))), row('زاویه', numIn(b.angle, upd(v => (b.angle = v)), { step: 15 })),
+      row('تصویر', h('input', { type: 'file', accept: 'image/*', onchange: e => { const fl = e.target.files[0]; if (!fl) return; const r = new FileReader(); r.onload = () => { b.image = r.result; b.type = 'image'; commit('bgimg'); }; r.readAsDataURL(fl); } }), b.image ? btn('×', upd(() => { b.image = null; }), 'ib') : null),
+      row('X / Y', numIn(b.x, upd(v => (b.x = v))), numIn(b.y, upd(v => (b.y = v)))), row('Scale', numIn(b.scale, upd(v => (b.scale = clamp(v, 0.05, 20))), { step: 0.1 })), row('Opacity', rangeIn(b.opacity, upd(v => (b.opacity = v)), 0, 1, 0.05)),
+      row('Pattern', selIn(b.pattern.kind || 'none', ['none', 'dots', 'stripes', 'checker', 'grid'].map(k => [k, k]), upd(v => (b.pattern.kind = v)))), row('رنگ Pattern', colIn(b.pattern.color, upd(v => (b.pattern.color = v)))),
+      row('اندازه Pattern', numIn(b.pattern.size, upd(v => (b.pattern.size = clamp(v, 2, 64))))), row('شفافیت Pattern', rangeIn(b.pattern.opacity, upd(v => (b.pattern.opacity = v)), 0, 1, 0.05)),
+      row('Vignette', rangeIn(b.effects.vignette, upd(v => (b.effects.vignette = v)), 0, 1, 0.05)), row('Scanlines', rangeIn(b.effects.scanlines, upd(v => (b.effects.scanlines = v)), 0, 1, 0.05)), row('Noise', rangeIn(b.effects.noise, upd(v => (b.effects.noise = v)), 0, 1, 0.05))));
+}
+function sceneTab() {
+  const sc = P.scene, u = fn => v => { fn(v); commit('scene'); };
+  const sect = (title, o, fields) => h('div', {}, h('label', { class: 'row' }, chkIn(o.on, u(v => (o.on = v))), h('b', {}, ' ' + title)), ...fields);
+  return h('div', { class: 'grid2' },
+    sect('Shadow', sc.shadow, [row('رنگ', colIn(sc.shadow.color, u(v => (sc.shadow.color = v)))), row('Opacity', rangeIn(sc.shadow.opacity, u(v => (sc.shadow.opacity = v)), 0, 1, 0.05)), row('W × H', numIn(sc.shadow.w, u(v => (sc.shadow.w = v))), numIn(sc.shadow.h, u(v => (sc.shadow.h = v)))), row('X / Y', numIn(sc.shadow.x, u(v => (sc.shadow.x = v))), numIn(sc.shadow.y, u(v => (sc.shadow.y = v))))]),
+    sect('Ground', sc.ground, [row('رنگ', colIn(sc.ground.color, u(v => (sc.ground.color = v)))), row('Opacity', rangeIn(sc.ground.opacity, u(v => (sc.ground.opacity = v)), 0, 1, 0.05)), row('ارتفاع', numIn(sc.ground.height, u(v => (sc.ground.height = v))))]),
+    sect('Lighting', sc.lighting, [row('رنگ', colIn(sc.lighting.color, u(v => (sc.lighting.color = v)))), row('زاویه', numIn(sc.lighting.angle, u(v => (sc.lighting.angle = v)), { step: 15 })), row('Opacity', rangeIn(sc.lighting.opacity, u(v => (sc.lighting.opacity = v)), 0, 1, 0.05))]),
+    sect('Glow', sc.glow, [row('رنگ', colIn(sc.glow.color, u(v => (sc.glow.color = v)))), row('Radius', numIn(sc.glow.radius, u(v => (sc.glow.radius = v)))), row('Opacity', rangeIn(sc.glow.opacity, u(v => (sc.glow.opacity = v)), 0, 1, 0.05)), row('X / Y', numIn(sc.glow.x, u(v => (sc.glow.x = v))), numIn(sc.glow.y, u(v => (sc.glow.y = v))))]));
+}
+function previewsTab() {
+  const wrap = h('div', { class: 'row wrap', style: { gap: '16px', alignItems: 'flex-end' } });
+  for (const [k, label, w, hh] of PREVIEWS) { const c = h('canvas', { width: w, height: hh, style: { width: w * 2 + 'px', height: hh * 2 + 'px', imageRendering: 'pixelated', border: '1px solid var(--line)', background: 'var(--chk)' } }); renderPreview(k, c, true); wrap.append(h('figure', { style: { margin: 0, textAlign: 'center' } }, c, h('figcaption', { class: 'muted' }, label + ` ${w}×${hh}`))); }
+  return wrap;
+}
+
+'use strict';
+// ===== ویرایشگر پیکسلی قطعه: قلم، پاک‌کن، خط، مستطیل، چندضلعی، سطل، انتخاب/جابه‌جایی/کپی/پیست/تکثیر، وارونه/چرخش، تغییر اندازه، Undo/Redo =====
+
+function openPixelEditor(fam, part) {
+  const E = { w: part.w, h: part.h, px: new Uint8Array(part.px), tool: 'pencil', slot: 1, size: 1, fill: false, zoom: 16, sel: null, clip: null, hist: [], redo: [], poly: [], drag: null, floating: null };
+  const variant = varOf(fam, S.varId);
+  const cv = h('canvas', { width: 10, height: 10 });
+  const ctx = cv.getContext('2d');
+  const prev = h('canvas', { width: 10, height: 10, style: { width: '100%', imageRendering: 'pixelated', border: '1px solid var(--line)' } });
+  const info = h('div', { class: 'muted' });
+  const pushH = () => { E.hist.push({ w: E.w, h: E.h, px: new Uint8Array(E.px) }); if (E.hist.length > 100) E.hist.shift(); E.redo = []; };
+  const undoE = () => { if (!E.hist.length) return; E.redo.push({ w: E.w, h: E.h, px: new Uint8Array(E.px) }); const s = E.hist.pop(); Object.assign(E, { w: s.w, h: s.h, px: s.px, sel: null }); draw(); };
+  const redoE = () => { if (!E.redo.length) return; E.hist.push({ w: E.w, h: E.h, px: new Uint8Array(E.px) }); const s = E.redo.pop(); Object.assign(E, { w: s.w, h: s.h, px: s.px, sel: null }); draw(); };
+  const colorOf = s => (s ? slotColor(fam, variant, fam.slots[s - 1].id, part.id) : null);
+  const inb = (x, y) => x >= 0 && y >= 0 && x < E.w && y < E.h;
+  const put = (x, y, v) => { if (inb(x, y)) E.px[y * E.w + x] = v; };
+  const get = (x, y) => (inb(x, y) ? E.px[y * E.w + x] : 0);
+  const val = () => (E.tool === 'eraser' ? 0 : E.slot);
+
+  function draw() {
+    const z = E.zoom;
+    cv.width = E.w * z; cv.height = E.h * z;
+    ctx.imageSmoothingEnabled = false;
+    for (let y = 0; y < E.h; y++) for (let x = 0; x < E.w; x++) {
+      ctx.fillStyle = (x + y) % 2 ? '#1a1e29' : '#222836'; ctx.fillRect(x * z, y * z, z, z);
+      const s = E.px[y * E.w + x]; if (s) { ctx.fillStyle = colorOf(s); ctx.fillRect(x * z, y * z, z, z); }
+    }
+    ctx.strokeStyle = '#ffffff18'; ctx.beginPath();
+    for (let x = 0; x <= E.w; x++) { ctx.moveTo(x * z + 0.5, 0); ctx.lineTo(x * z + 0.5, E.h * z); }
+    for (let y = 0; y <= E.h; y++) { ctx.moveTo(0, y * z + 0.5); ctx.lineTo(E.w * z, y * z + 0.5); }
+    ctx.stroke();
+    if (E.floating) { const f = E.floating; for (let y = 0; y < f.h; y++) for (let x = 0; x < f.w; x++) if (f.px[y * f.w + x]) { ctx.fillStyle = colorOf(f.px[y * f.w + x]); ctx.globalAlpha = 0.85; ctx.fillRect((f.x + x) * z, (f.y + y) * z, z, z); ctx.globalAlpha = 1; } ctx.strokeStyle = '#3fb97b'; ctx.strokeRect(f.x * z + 0.5, f.y * z + 0.5, f.w * z, f.h * z); }
+    if (E.sel) { ctx.strokeStyle = '#7c8cff'; ctx.setLineDash([4, 3]); ctx.strokeRect(E.sel.x * z + 0.5, E.sel.y * z + 0.5, E.sel.w * z, E.sel.h * z); ctx.setLineDash([]); }
+    if (E.poly.length) { ctx.strokeStyle = '#ffd24a'; ctx.beginPath(); E.poly.forEach(([x, y], i) => (i ? ctx.lineTo((x + 0.5) * z, (y + 0.5) * z) : ctx.moveTo((x + 0.5) * z, (y + 0.5) * z))); ctx.stroke(); }
+    if (E.drag && E.drag.preview) { ctx.globalAlpha = 0.6; for (const [x, y] of E.drag.preview) { ctx.fillStyle = val() ? colorOf(val()) : '#ff4444'; ctx.fillRect(x * z, y * z, z, z); } ctx.globalAlpha = 1; }
+    // پیش‌نمایش واقعی
+    prev.width = E.w; prev.height = E.h; const pc = prev.getContext('2d'), im = pc.createImageData(E.w, E.h);
+    for (let i = 0; i < E.px.length; i++) if (E.px[i]) { const c = hexToRgb(colorOf(E.px[i])); im.data.set([c[0], c[1], c[2], 255], i * 4); }
+    pc.putImageData(im, 0, 0);
+    info.textContent = `${E.w}×${E.h} px · ابزار: ${E.tool}${E.sel ? ` · انتخاب ${E.sel.w}×${E.sel.h}` : ''}`;
+  }
+  const line = (x0, y0, x1, y1) => { const out = []; let dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, er = dx + dy; for (;;) { out.push([x0, y0]); if (x0 === x1 && y0 === y1) break; const e2 = 2 * er; if (e2 >= dy) { er += dy; x0 += sx; } if (e2 <= dx) { er += dx; y0 += sy; } } return out; };
+  const rectPts = (a, b, fill) => { const out = [], x0 = Math.min(a[0], b[0]), x1 = Math.max(a[0], b[0]), y0 = Math.min(a[1], b[1]), y1 = Math.max(a[1], b[1]); for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (fill || x === x0 || x === x1 || y === y0 || y === y1) out.push([x, y]); return out; };
+  const polyPts = (pts, fill) => {
+    const out = new Map(); const add = ([x, y]) => out.set(x + ',' + y, [x, y]);
+    for (let i = 0; i < pts.length; i++) line(...pts[i], ...pts[(i + 1) % pts.length]).forEach(add);
+    if (fill && pts.length > 2) { const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]); for (let y = Math.min(...ys); y <= Math.max(...ys); y++) for (let x = Math.min(...xs); x <= Math.max(...xs); x++) { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) if ((pts[i][1] > y) !== (pts[j][1] > y) && x + 0.5 < ((pts[j][0] - pts[i][0]) * (y + 0.5 - pts[i][1])) / (pts[j][1] - pts[i][1]) + pts[i][0]) c = !c; if (c) add([x, y]); } }
+    return [...out.values()];
+  };
+  const brush = (x, y, v) => { const s = E.size, o = Math.floor((s - 1) / 2); for (let j = 0; j < s; j++) for (let i = 0; i < s; i++) put(x - o + i, y - o + j, v); };
+  function floodFill(x, y, v) { if (!inb(x, y)) return; const t = get(x, y); if (t === v) return; const st = [[x, y]]; while (st.length) { const [cx, cy] = st.pop(); if (!inb(cx, cy) || get(cx, cy) !== t) continue; put(cx, cy, v); st.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]); } }
+  const at = e => { const r = cv.getBoundingClientRect(); return [Math.floor(((e.clientX - r.left) / r.width) * E.w), Math.floor(((e.clientY - r.top) / r.height) * E.h)]; };
+  const inSel = (x, y) => E.sel && x >= E.sel.x && y >= E.sel.y && x < E.sel.x + E.sel.w && y < E.sel.y + E.sel.h;
+  function liftSel() { // بالا بردنِ ناحیه‌ی انتخابی به‌صورت شناور
+    if (E.floating || !E.sel) return; pushH();
+    const s = E.sel, f = { x: s.x, y: s.y, w: s.w, h: s.h, px: new Uint8Array(s.w * s.h) };
+    for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) { f.px[y * s.w + x] = get(s.x + x, s.y + y); put(s.x + x, s.y + y, 0); }
+    E.floating = f;
+  }
+  function dropFloat() { const f = E.floating; if (!f) return; for (let y = 0; y < f.h; y++) for (let x = 0; x < f.w; x++) { const v = f.px[y * f.w + x]; if (v) put(f.x + x, f.y + y, v); } E.sel = { x: f.x, y: f.y, w: f.w, h: f.h }; E.floating = null; }
+
+  cv.addEventListener('pointerdown', e => {
+    cv.setPointerCapture(e.pointerId);
+    const [x, y] = at(e), t = E.tool;
+    if (t === 'picker') { const v = get(x, y); if (v) { E.slot = v; renderPal(); } return; }
+    if (t === 'polygon') { if (E.poly.length > 2 && x === E.poly[0][0] && y === E.poly[0][1]) closePoly(); else E.poly.push([x, y]); draw(); return; }
+    if (t === 'fill') { pushH(); floodFill(x, y, E.slot); draw(); return; }
+    if (t === 'select') {
+      if (E.floating && x >= E.floating.x && y >= E.floating.y && x < E.floating.x + E.floating.w && y < E.floating.y + E.floating.h) { E.drag = { kind: 'floatmove', x0: x, y0: y, fx: E.floating.x, fy: E.floating.y }; return; }
+      if (E.floating) dropFloat();
+      if (inSel(x, y)) { liftSel(); E.drag = { kind: 'floatmove', x0: x, y0: y, fx: E.floating.x, fy: E.floating.y }; draw(); return; }
+      E.sel = null; E.drag = { kind: 'select', a: [x, y] }; return;
+    }
+    pushH(); E.drag = { kind: t, a: [x, y], last: [x, y], preview: null };
+    if (t === 'pencil' || t === 'eraser') { brush(x, y, val()); draw(); }
+  });
+  cv.addEventListener('pointermove', e => {
+    const d = E.drag; if (!d) return; const [x, y] = at(e);
+    if (d.kind === 'pencil' || d.kind === 'eraser') { line(d.last[0], d.last[1], x, y).forEach(([px, py]) => brush(px, py, val())); d.last = [x, y]; }
+    else if (d.kind === 'line') d.preview = line(d.a[0], d.a[1], x, y).filter(([px, py]) => inb(px, py));
+    else if (d.kind === 'rect') d.preview = rectPts(d.a, [x, y], E.fill).filter(([px, py]) => inb(px, py));
+    else if (d.kind === 'select') { const x0 = clamp(Math.min(d.a[0], x), 0, E.w - 1), y0 = clamp(Math.min(d.a[1], y), 0, E.h - 1), x1 = clamp(Math.max(d.a[0], x), 0, E.w - 1), y1 = clamp(Math.max(d.a[1], y), 0, E.h - 1); E.sel = { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 }; }
+    else if (d.kind === 'floatmove') { E.floating.x = d.fx + x - d.x0; E.floating.y = d.fy + y - d.y0; }
+    draw();
+  });
+  const end = () => {
+    const d = E.drag; E.drag = null; if (!d) return;
+    if ((d.kind === 'line' || d.kind === 'rect') && d.preview) d.preview.forEach(([x, y]) => put(x, y, val()));
+    if (d.kind === 'floatmove') { E.sel = { x: E.floating.x, y: E.floating.y, w: E.floating.w, h: E.floating.h }; }
+    draw();
+  };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  cv.addEventListener('dblclick', () => { if (E.tool === 'polygon') closePoly(); });
+  function closePoly() { if (E.poly.length < 2) { E.poly = []; return; } pushH(); polyPts(E.poly, E.fill).forEach(([x, y]) => put(x, y, E.slot)); E.poly = []; draw(); }
+
+  // ---- عملیات
+  const region = () => (E.floating ? { x: E.floating.x, y: E.floating.y, w: E.floating.w, h: E.floating.h, px: E.floating.px, f: true } : E.sel ? (() => { const s = E.sel, px = new Uint8Array(s.w * s.h); for (let y = 0; y < s.h; y++) for (let x = 0; x < s.w; x++) px[y * s.w + x] = get(s.x + x, s.y + y); return { ...s, px }; })() : null);
+  const doCopy = () => { const r = region(); if (r) { E.clip = { w: r.w, h: r.h, px: new Uint8Array(r.px) }; toast('کپی شد'); } };
+  const doPaste = () => { if (!E.clip) return; if (E.floating) dropFloat(); pushH(); E.floating = { x: 0, y: 0, w: E.clip.w, h: E.clip.h, px: new Uint8Array(E.clip.px) }; E.sel = { x: 0, y: 0, w: E.clip.w, h: E.clip.h }; E.tool = 'select'; renderTools(); draw(); };
+  const doDup = () => { const r = region(); if (!r) return; E.clip = { w: r.w, h: r.h, px: new Uint8Array(r.px) }; if (E.floating) dropFloat(); pushH(); E.floating = { x: r.x + 2, y: r.y + 2, w: r.w, h: r.h, px: new Uint8Array(r.px) }; E.sel = { x: r.x + 2, y: r.y + 2, w: r.w, h: r.h }; draw(); };
+  const doDel = () => { if (E.floating) { E.floating = null; E.sel = null; draw(); return; } if (E.sel) { pushH(); for (let y = 0; y < E.sel.h; y++) for (let x = 0; x < E.sel.w; x++) put(E.sel.x + x, E.sel.y + y, 0); draw(); } };
+  const transform = (kind) => {
+    pushH();
+    const r = region(); const target = r ? { w: r.w, h: r.h, px: r.px } : { w: E.w, h: E.h, px: E.px };
+    let out = { w: target.w, h: target.h, px: new Uint8Array(target.px) };
+    if (kind === 'fh') for (let y = 0; y < target.h; y++) for (let x = 0; x < target.w; x++) out.px[y * target.w + x] = target.px[y * target.w + target.w - 1 - x];
+    if (kind === 'fv') for (let y = 0; y < target.h; y++) for (let x = 0; x < target.w; x++) out.px[y * target.w + x] = target.px[(target.h - 1 - y) * target.w + x];
+    if (kind === 'rot') { out = { w: target.h, h: target.w, px: new Uint8Array(target.px.length) }; for (let y = 0; y < target.h; y++) for (let x = 0; x < target.w; x++) out.px[x * out.w + (target.h - 1 - y)] = target.px[y * target.w + x]; }
+    if (r) { if (!E.floating) { for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) put(r.x + x, r.y + y, 0); E.floating = { x: r.x, y: r.y, ...out }; } else Object.assign(E.floating, out); E.sel = { x: E.floating.x, y: E.floating.y, w: E.floating.w, h: E.floating.h }; }
+    else { E.w = out.w; E.h = out.h; E.px = out.px; }
+    draw();
+  };
+  const resize = () => {
+    const w = clamp(num(prompt('عرض جدید', E.w), E.w), 1, 96), hh = clamp(num(prompt('ارتفاع جدید', E.h), E.h), 1, 144);
+    const ox = num(prompt('جابه‌جاییِ محتوا در X (پیکسل)', 0), 0), oy = num(prompt('جابه‌جاییِ محتوا در Y (پیکسل)', 0), 0);
+    pushH(); const px = new Uint8Array(w * hh);
+    for (let y = 0; y < E.h; y++) for (let x = 0; x < E.w; x++) { const nx = x + ox, ny = y + oy; if (nx >= 0 && ny >= 0 && nx < w && ny < hh) px[ny * w + nx] = E.px[y * E.w + x]; }
+    E.w = w; E.h = hh; E.px = px; E.sel = null; draw();
+  };
+
+  const TOOLS = [['pencil', '✏ قلم'], ['eraser', '⌫ پاک‌کن'], ['line', '／ خط'], ['rect', '▭ مستطیل'], ['polygon', '⬠ چندضلعی'], ['fill', '🪣 سطل'], ['select', '⬚ انتخاب/جابه‌جایی'], ['picker', '💧 قطره‌چکان']];
+  const tools = h('div', { class: 'tools' }), pal = h('div', { class: 'pal' });
+  function renderTools() { tools.replaceChildren(...TOOLS.map(([k, l]) => h('button', { class: E.tool === k ? 'on' : '', onclick: () => { if (E.floating) dropFloat(); E.tool = k; E.poly = []; renderTools(); draw(); } }, l))); }
+  function renderPal() { pal.replaceChildren(...fam.slots.map((sl, i) => h('div', { class: 'sw' + (E.slot === i + 1 ? ' sel' : ''), title: `${i + 1}: ${sl.name}`, style: { background: colorOf(i + 1) }, onclick: () => { E.slot = i + 1; if (E.tool === 'eraser') E.tool = 'pencil'; renderTools(); renderPal(); } }))); }
+  const keyH = e => {
+    if (e.target.tagName === 'INPUT') return;
+    const k = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? redoE() : undoE(); }
+    else if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); redoE(); }
+    else if ((e.ctrlKey || e.metaKey) && k === 'c') { e.preventDefault(); doCopy(); }
+    else if ((e.ctrlKey || e.metaKey) && k === 'v') { e.preventDefault(); doPaste(); }
+    else if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); doDup(); }
+    else if (k === 'delete' || k === 'backspace') doDel();
+    else if (k === 'enter' && E.tool === 'polygon') closePoly();
+    else if (k === 'escape') { E.poly = []; if (E.floating) dropFloat(); E.sel = null; draw(); }
+    e.stopPropagation();
+  };
+  const close = save => {
+    if (E.floating) dropFloat();
+    document.removeEventListener('keydown', keyH, true); bg.remove();
+    if (save) { part.w = E.w; part.h = E.h; part.px = E.px; invalidateCache(); commit('pixels'); }
+  };
+  const bg = h('div', { class: 'modal-bg' }, h('div', { class: 'modal' },
+    h('h3', {}, h('span', { class: 'grow' }, `ویرایش پیکسلی — ${fam.name} / ${part.name}`), btn('لغو', () => close(false)), ' ', btn('✓ ذخیره', () => close(true), 'primary')),
+    h('div', { class: 'mb' }, h('div', { id: 'pe' },
+      h('div', {}, tools, h('hr'), h('div', { class: 'row' }, h('label', {}, 'ضخامت'), selIn('1', [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']], v => (E.size = +v))), h('label', { class: 'row' }, chkIn(false, v => (E.fill = v)), ' پر (مستطیل/چندضلعی)'), h('hr'),
+        h('div', { class: 'row wrap' }, btn('↶', undoE, 'ib', 'Undo'), btn('↷', redoE, 'ib', 'Redo'), btn('⧉ کپی', doCopy), btn('📋 پیست', doPaste), btn('⧉⧉ تکثیر', doDup), btn('🗑 حذف انتخاب', doDel)),
+        h('div', { class: 'row wrap' }, btn('⇋ H', () => transform('fh'), '', 'وارونه افقی'), btn('⇅ V', () => transform('fv'), '', 'وارونه عمودی'), btn('⟳ 90°', () => transform('rot'), '', 'چرخش'), btn('⤢ اندازه', resize), btn('پاک‌کردن همه', () => { pushH(); E.px.fill(0); draw(); }, 'danger'))),
+      h('div', { style: { overflow: 'auto', maxHeight: '70vh' } }, cv),
+      h('div', {}, h('b', {}, 'رنگ‌ها (Slot)'), pal, h('div', { class: 'row' }, h('label', {}, 'زوم'), rangeIn(E.zoom, v => { E.zoom = v; draw(); }, 4, 32, 2)), h('b', {}, 'پیش‌نمایش'), prev, info,
+        h('div', { class: 'muted' }, 'Ctrl+Z/Y، Ctrl+C/V/D، Delete، چندضلعی: کلیک‌ها + دوبل‌کلیک/Enter'))))));
+  document.addEventListener('keydown', keyH, true);
+  document.body.append(bg);
+  renderTools(); renderPal(); draw();
+  return E;
+}
+
+'use strict';
+// ===== خروجی: avatarSystem JSON، مشخصات Markdown، CLAUDE_AVATAR_IMPLEMENTATION.md، پروژه (.rpa) و بسته‌ی ZIP =====
+
+const FORMAT_VERSION = 1;
+function resolvedColors(f, v) { return Object.fromEntries(f.slots.map(s => [s.id, slotColor(f, v, s.id)])); }
+function layerIndex(cat) { return P.layers.findIndex(l => l.category === cat); }
+
+function buildSystem() {
+  const layers = P.layers.map((L, i) => ({ id: L.id, name: L.name, category: L.category, order: i, visible: L.visible, locked: L.locked }));
+  const assetFamilies = P.families.map(f => ({
+    id: f.id, name: f.name, category: f.category, anchor: f.anchor, tags: f.tags, characterIds: f.characterIds, shared: !f.characterIds.length,
+    slots: f.slots, variantIds: f.variants.map(v => v.id),
+    layerId: (P.layers.find(l => l.category === f.category) || {}).id || null,
+    geometry: Object.fromEntries(Object.entries(f.geometry).map(([k, g]) => [k, { ...g }])),
+    parts: f.parts.map(p => ({ id: p.id, name: p.name, width: p.w, height: p.h, x: p.dx, y: p.dy, scale: p.scale, rotation: p.rotation, flipX: p.flipX, flipY: p.flipY, visible: p.visible, rows: encodeRows(p) })),
+  }));
+  const variants = [];
+  for (const f of P.families) for (const v of f.variants) {
+    const o = Object.fromEntries(Object.entries(v.overrides || {}).filter(([, x]) => x && (x.visible === false || (x.colors && Object.keys(x.colors).length))));
+    variants.push({ id: v.id, familyId: f.id, name: v.name, colors: resolvedColors(f, v), overrides: o, sprite: `sprites/${f.id}/${v.id}.png` });
+  }
+  const characters = P.characters.map(c => ({
+    id: c.id, name: c.name, notes: c.notes || '',
+    sharedFamilyIds: P.families.filter(f => !f.characterIds.length).map(f => f.id),
+    exclusiveFamilyIds: P.families.filter(f => f.characterIds.includes(c.id)).map(f => f.id),
+    geometryOverrides: Object.fromEntries(P.families.filter(f => f.geometry[c.id]).map(f => [f.id, f.geometry[c.id]])),
+  }));
+  const geometry = {};
+  for (const f of P.families) geometry[f.id] = { anchor: f.anchor, base: f.geometry['*'], characterOverrides: Object.fromEntries(Object.entries(f.geometry).filter(([k]) => k !== '*')) };
+  const palette = [...new Set(variants.flatMap(v => Object.values(v.colors)).concat(P.backgrounds.flatMap(b => [b.color, b.color2])))].sort();
+  const assets = [];
+  for (const f of P.families) {
+    const L = P.layers.find(l => l.category === f.category), moodsOf = MOODS.filter(([m]) => P.moods[m] && P.moods[m].familyId === f.id).map(([m]) => m);
+    for (const v of f.variants) {
+      const s = familySprite(f, v), g = f.geometry['*'] || newGeometry();
+      assets.push({ id: f.id + ':' + v.id, familyId: f.id, variantId: v.id, category: f.category, name: f.name, variant: v.name, width: s.w || 0, height: s.h || 0, x: g.x, y: g.y, scale: g.scale, rotation: g.rotation, opacity: g.opacity, layer: L ? L.id : null, layerOrder: L ? P.layers.indexOf(L) : -1, anchor: f.anchor, flipX: g.flipX, flipY: g.flipY, visible: L ? L.visible : true, locked: L ? L.locked : false, color: Object.values(resolvedColors(f, v))[0], tags: f.tags, mood: moodsOf, characterCompatibility: f.characterIds.length ? f.characterIds : 'all', sprite: `sprites/${f.id}/${v.id}.png`, spriteOffset: { x: s.ox || 0, y: s.oy || 0 } });
+    }
+  }
+  const relationships = {
+    familyToVariants: Object.fromEntries(P.families.map(f => [f.id, f.variants.map(v => v.id)])),
+    variantsShareGeometryWithFamily: true,
+    characterToFamilies: Object.fromEntries(P.characters.map(c => [c.id, P.families.filter(f => compatible(f, c.id)).map(f => f.id)])),
+    moodToMouth: P.moods,
+  };
+  const instructions = {
+    layerOrder: 'layers[] is ordered bottom -> top; draw in that order.',
+    coordinateSpace: `Canvas ${P.canvas.w}x${P.canvas.h}. Geometry x/y places the family origin on the canvas. Part x/y are in family space (origin = family origin, +y down, negative y = up).`,
+    transformOrder: 'translate(geometry.x, geometry.y) -> rotate(geometry.rotation deg) -> scale(scale * flip) -> translate(-anchorPoint) -> draw sprite at its spriteOffset.',
+    geometryResolution: 'effective = base ("*") overridden by geometry[characterId] when present. All variants of a family share the same geometry.',
+    moodRule: 'When a mood is active, the layer with category "mouth" is drawn with moods[mood] family/variant instead of the equipped one. Other layers do not change.',
+    pixelFormat: 'parts[].rows are base-36 strings, one char per pixel: 0 = transparent, n = family slot number n (1-based, slots[n-1]). Slot color comes from variant.colors[slot.id], overridden by variant.overrides[partId].colors[slot.id].',
+  };
+  return {
+    avatarSystem: {
+      version: FORMAT_VERSION, name: P.name, generatedAt: new Date().toISOString(), canvas: P.canvas,
+      characters, assetFamilies, variants, layers, moods: P.moods, backgrounds: P.backgrounds, scene: P.scene,
+      geometry, palette, assets, relationships, instructions,
+    },
+  };
+}
+function counts(sys) {
+  const a = sys.avatarSystem;
+  return { Characters: a.characters.length, 'Asset Families': a.assetFamilies.length, Variants: a.variants.length, Layers: a.layers.length, Moods: Object.keys(a.moods).length, Backgrounds: a.backgrounds.length, Parts: a.assetFamilies.reduce((n, f) => n + f.parts.length, 0), Colors: a.palette.length };
+}
+
+function buildSpecMd(sys) {
+  const a = sys.avatarSystem, c = counts(sys), L = [];
+  L.push(`# Avatar System Spec — ${a.name}`, '', `Generated: ${a.generatedAt}`, '', '## Summary', '', ...Object.entries(c).map(([k, v]) => `- **${k}**: ${v}`), '');
+  L.push('## Characters', '', ...a.characters.map(x => `- **${x.name}** (\`${x.id}\`) — ${x.exclusiveFamilyIds.length} exclusive families, ${x.sharedFamilyIds.length} shared`), '');
+  L.push('## Layer Structure (bottom → top)', '', ...a.layers.map(l => `${l.order + 1}. \`${l.id}\` — ${l.name} (category \`${l.category}\`)${l.visible ? '' : ' [hidden]'}${l.locked ? ' [locked]' : ''}`), '');
+  L.push('## Asset Families', '');
+  for (const f of a.assetFamilies) {
+    L.push(`### ${f.name} (\`${f.id}\`)`, '', `- Category: \`${f.category}\` · Anchor: \`${f.anchor}\` · ${f.shared ? 'shared by all characters' : 'characters: ' + f.characterIds.map(i => (a.characters.find(x => x.id === i) || {}).name).join(', ')}`, `- Base geometry: ${JSON.stringify(f.geometry['*'])}`);
+    const ov = Object.entries(f.geometry).filter(([k]) => k !== '*'); if (ov.length) L.push(`- Character geometry overrides: ${ov.map(([k, g]) => `${(a.characters.find(x => x.id === k) || {}).name || k} ${JSON.stringify(g)}`).join('; ')}`);
+    L.push(`- Slots: ${f.slots.map((s, i) => `${i + 1}=${s.name}`).join(', ')}`, `- Parts: ${f.parts.map(p => `${p.name} ${p.width}×${p.height} @(${p.x},${p.y})`).join(', ')}`, `- Variants: ${a.variants.filter(v => v.familyId === f.id).map(v => `${v.name} [${Object.values(v.colors).join(' ')}]`).join(' | ')}`, '');
+  }
+  L.push('## Mood Mapping', '', ...MOODS.map(([m]) => { const x = a.moods[m]; const fam = x && a.assetFamilies.find(f => f.id === x.familyId); const v = x && a.variants.find(y => y.id === x.variantId); return `- \`${m}\` → ${fam ? fam.name + (v ? ' / ' + v.name : '') : '(none)'}`; }), '');
+  L.push('## Backgrounds', '', ...a.backgrounds.map(b => `- **${b.name}** — ${b.type}, ${b.color}${b.type === 'gradient' ? ' → ' + b.color2 : ''}, pattern ${(b.pattern || {}).kind || 'none'}, effects ${JSON.stringify(b.effects || {})}`), '');
+  L.push('## Scene (shadow / ground / lighting / glow)', '', '```json', JSON.stringify({ shadow: a.scene.shadow, ground: a.scene.ground, lighting: a.scene.lighting, glow: a.scene.glow }, null, 2), '```', '');
+  L.push('## Color Palette', '', a.palette.map(x => '`' + x + '`').join(' '), '', '## Rules', '', ...Object.entries(a.instructions).map(([k, v]) => `- **${k}**: ${v}`), '');
+  return L.join('\n');
+}
+function buildClaudeMd(sys) {
+  const a = sys.avatarSystem, c = counts(sys);
+  return `# CLAUDE_AVATAR_IMPLEMENTATION
+
+> Instructions for the engineer/agent that implements this avatar system inside the Routine Planner (Flutter) app. Source data: \`avatar-system.json\` (this bundle). Visual reference: \`sprites/\` and \`previews/\`.
+
+## 1. What to build
+A layered, pixel-art avatar renderer driven entirely by \`avatar-system.json\`:
+- ${c.Characters} character(s), ${c['Asset Families']} asset families, ${c.Variants} variants, ${c.Layers} layers, ${c.Moods} moods, ${c.Backgrounds} backgrounds.
+- The existing avatar/wardrobe/coins/ownership data in the app's state must keep working (map old item ids to new families where equivalent; never delete user data).
+
+## 2. Where assets go
+- Copy \`avatar-system.json\` to \`flutter_app/assets/avatar/avatar-system.json\` and declare it (and \`assets/avatar/sprites/\`) in \`pubspec.yaml\`.
+- Either (a) render from \`parts[].rows\` + variant colors at runtime (preferred: recolor-able, tiny), or (b) use the pre-rendered \`sprites/<familyId>/<variantId>.png\` with \`spriteOffset\`.
+- Use \`FilterQuality.none\` / nearest-neighbour everywhere; never anti-alias pixel art.
+
+## 3. Components to implement
+1. \`AvatarSystem\` model + loader (parse JSON once, cache).
+2. \`AvatarComposer\` (CustomPainter or pre-composited \`ui.Image\`): input = characterId, equipped map (layerId → {familyId, variantId}), mood, background id, scene options; output = canvas ${a.canvas.w}×${a.canvas.h} scaled by an integer factor.
+3. \`AvatarView\` widget with sizes: full, inventory, profile (circle crop of head), small icon, modal — see \`previews/\` for framing.
+4. Wardrobe UI reads categories/families/variants from the JSON (no hard-coded lists).
+
+## 4. Layer order (bottom → top)
+${a.layers.map(l => `${l.order + 1}. ${l.id} (${l.category})`).join('\n')}
+
+Draw strictly in this order. Hidden layers are skipped.
+
+## 5. Geometry
+- Effective geometry of a family = \`geometry[familyId].base\` overridden by \`characterOverrides[characterId]\` (per-field).
+- Transform: translate(x,y) → rotate(rotation°) → scale(scale·flip) → translate(−anchor) → draw sprite at spriteOffset. Coordinates are canvas pixels (${a.canvas.w}×${a.canvas.h}); origin of characters = feet center.
+- **All variants of a family share the same geometry** — never store position per variant.
+
+## 6. Variants
+Colors per variant: \`variants[].colors[slotId]\`; optional per-part \`overrides[partId] = {visible?, colors?}\`. Pixel slot n ↔ \`slots[n-1]\`.
+
+## 7. Moods
+\`moods[mood] = {familyId, variantId}\` → replaces the drawn asset of the layer with category \`mouth\` only. Moods: ${MOODS.map(m => m[0]).join(', ')}. Wire to app events (e.g. completed all habits → happy, missed → sad, late night → tired, streak milestone → excited) — keep mapping in one place.
+
+## 8. Shared vs character-specific
+- \`characterIds: []\` ⇒ shared by all characters. Otherwise only those characters may equip it (hide others in the wardrobe; ignore if equipped).
+- Character-specific geometry overrides live in \`geometry[familyId].characterOverrides\`.
+
+## 9. Background & scene
+\`backgrounds[]\` (solid/gradient/image + pattern + vignette/scanlines/noise) and \`scene.shadow/ground/lighting/glow\`. Draw order: background → glow → ground → shadow → layers → lighting overlay. Day/night themes may pick different background ids.
+
+## 10. Must not change
+- User state schema/keys, backups/restore, coins/points/ownership logic, Free/Pro gating, habit data.
+- Accessibility labels and RTL layout of existing screens.
+- Add migration only; old saved avatars must still render (fall back to default character + default outfit).
+
+## 11. Verification
+- Golden-image tests: render each family×variant and compare with \`sprites/\`; render 3 full compositions and compare with \`previews/\`.
+- Unit-test geometry resolution (base vs override), layer order, mood→mouth swap, variant recolor, backup round-trip.
+
+## 12. Data summary
+${Object.entries(c).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
+`;
+}
+
+// ---------------------------------------------------------------- ZIP (store) + CRC32
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(b) { let c = 0xffffffff; for (let i = 0; i < b.length; i++) c = CRC_T[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
+function makeZip(files) {
+  const enc = new TextEncoder(), chunks = [], cd = []; let off = 0;
+  const u16 = n => [n & 255, (n >> 8) & 255], u32 = n => [n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >>> 24) & 255];
+  const d = new Date(), time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (const f of files) {
+    const name = enc.encode(f.name), data = typeof f.data === 'string' ? enc.encode(f.data) : f.data, crc = crc32(data);
+    const lh = new Uint8Array([0x50, 0x4b, 3, 4, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(time), ...u16(date), ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(name.length), ...u16(0)]);
+    chunks.push(lh, name, data);
+    cd.push(new Uint8Array([0x50, 0x4b, 1, 2, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(time), ...u16(date), ...u32(crc), ...u32(data.length), ...u32(data.length), ...u16(name.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(off)]), name);
+    off += lh.length + name.length + data.length;
+  }
+  const cdSize = cd.reduce((n, c) => n + c.length, 0);
+  const end = new Uint8Array([0x50, 0x4b, 5, 6, 0, 0, 0, 0, ...u16(files.length), ...u16(files.length), ...u32(cdSize), ...u32(off), 0, 0]);
+  return new Blob([...chunks, ...cd, end], { type: 'application/zip' });
+}
+const canvasPng = c => new Promise(r => c.toBlob(async b => r(new Uint8Array(await b.arrayBuffer())), 'image/png'));
+async function buildZipFiles() {
+  const sys = buildSystem(), files = [];
+  files.push({ name: 'avatar-system.json', data: JSON.stringify(sys, null, 2) }, { name: 'AVATAR_SPEC.md', data: buildSpecMd(sys) }, { name: 'CLAUDE_AVATAR_IMPLEMENTATION.md', data: buildClaudeMd(sys) }, { name: 'project.rpa', data: JSON.stringify(serialize(P)) });
+  for (const f of P.families) for (const v of f.variants) { const s = familySprite(f, v); if (!s.empty) files.push({ name: `sprites/${f.id}/${v.id}.png`, data: await canvasPng(s.canvas) }); }
+  for (const [k, label, w, hh] of PREVIEWS) { const c = mkCanvas(w, hh); renderPreview(k, c, true); files.push({ name: `previews/${k}.png`, data: await canvasPng(c) }); }
+  return files;
+}
+function download(name, blobOrText, type) {
+  const b = blobOrText instanceof Blob ? blobOrText : new Blob([blobOrText], { type: type || 'text/plain' });
+  const a = h('a', { href: URL.createObjectURL(b), download: name }); document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+const safeName = () => (P.name || 'avatar').replace(/[^\w\-]+/g, '_');
+
+function openExportPreview() {
+  const sys = buildSystem(), c = counts(sys);
+  const bg = h('div', { class: 'modal-bg', onclick: e => e.target === bg && bg.remove() }, h('div', { class: 'modal' },
+    h('h3', {}, h('span', { class: 'grow' }, 'Export Preview'), btn('✕', () => bg.remove())),
+    h('div', { class: 'mb' },
+      ...Object.entries(c).map(([k, v]) => h('div', { class: 'stat' }, h('b', {}, k), v)),
+      h('hr'),
+      h('div', { class: 'muted' }, 'بستهٔ ZIP شامل: avatar-system.json · AVATAR_SPEC.md · CLAUDE_AVATAR_IMPLEMENTATION.md · project.rpa · sprites/ · previews/'),
+      h('div', { class: 'row wrap', style: { marginTop: '10px' } },
+        btn('⬇ بسته‌ی کامل (ZIP) — این را برای Claude بفرستید', async () => { setStatus('در حال ساخت ZIP…'); const z = makeZip(await buildZipFiles()); download(safeName() + '-avatar-export.zip', z); setStatus('ZIP ساخته شد ✓'); }, 'primary'),
+        btn('avatar-system.json', () => download('avatar-system.json', JSON.stringify(sys, null, 2), 'application/json')),
+        btn('AVATAR_SPEC.md', () => download('AVATAR_SPEC.md', buildSpecMd(sys))),
+        btn('CLAUDE_AVATAR_IMPLEMENTATION.md', () => download('CLAUDE_AVATAR_IMPLEMENTATION.md', buildClaudeMd(sys))),
+        btn('پروژه (.rpa)', () => download(safeName() + '.rpa', JSON.stringify(serialize(P)), 'application/json')))),
+  ));
+  document.body.append(bg);
+}
+
+'use strict';
+// ===== راه‌اندازی، نوار ابزار، میان‌برها، مدیریت پروژه‌ها =====
+
+function renderAll() {
+  if (!P) return;
+  renderToolbar(); renderLeft(); renderRight(); renderBottom(); renderStage();
+}
+function renderPanelsOnly() { renderLeft(); renderRight(); renderBottom(); }
+
+function renderToolbar() {
+  const v = P.view, tg = (k, l, t) => h('button', { class: v[k] ? 'on' : '', title: t, onclick: () => { v[k] = !v[k]; scheduleSave(); renderToolbar(); renderStage(); } }, l);
+  $('#toolbar').replaceChildren(
+    h('span', { class: 'title' }, '🎨 Avatar Studio'),
+    h('input', { type: 'text', id: 'projname', value: P.name, onchange: e => { P.name = e.target.value || 'Avatar Project'; commit('rename'); } }),
+    btn('Projects', openProjects), btn('New', newProject), btn('Duplicate', dupProject), btn('Reset', resetProject, 'danger'),
+    h('span', { class: 'sep' }), btn('↶', undo, '', 'Undo (Ctrl+Z)'), btn('↷', redo, '', 'Redo (Ctrl+Shift+Z)'),
+    h('span', { class: 'sep' }),
+    h('button', { class: S.tool === 'select' ? 'on' : '', onclick: () => { S.tool = 'select'; renderToolbar(); } }, '↖ Select'),
+    h('button', { class: S.tool === 'pan' ? 'on' : '', onclick: () => { S.tool = 'pan'; renderToolbar(); } }, '✋ Pan'),
+    h('button', { class: S.partMode ? 'on' : '', title: 'حرکت دادن قطعه‌ی انتخابی روی صحنه', onclick: () => { S.partMode = !S.partMode; renderToolbar(); renderStage(); } }, '🧩 Part mode'),
+    h('span', { class: 'sep' }),
+    tg('showGrid', 'Grid'), tg('snap', 'Snap'), tg('showRuler', 'Ruler'), tg('showSafe', 'Safe'), tg('showCenter', 'Center'), tg('showLayerBoxes', 'Boxes'),
+    btn('Guide |', () => { v.guides.push({ axis: 'v', pos: Math.round(P.canvas.w / 2) }); commit('guide'); }), btn('Guide —', () => { v.guides.push({ axis: 'h', pos: Math.round(P.canvas.h / 2) }); commit('guide'); }), btn('Clear guides', () => { v.guides = []; commit('guide'); }),
+    h('span', { class: 'sep' }),
+    h('span', {}, 'Character '), selIn(P.scene.characterId || '', P.characters.map(c => [c.id, c.name]), id => { P.scene.characterId = id; commit('char'); }),
+    h('span', {}, ' Mood '), selIn(P.scene.mood, MOODS.map(([k, l]) => [k, l]), m => { P.scene.mood = m; commit('mood'); }),
+    h('span', { class: 'sep' }),
+    btn('Import', importFile), btn('⬇ Export', openExportPreview, 'primary'),
+    h('span', { id: 'status', class: 'muted', style: { marginInlineStart: '8px' } }, ''),
+  );
+  const hud = $('#stagehud');
+  hud.replaceChildren(btn('−', () => zoomAt(ST.cv.clientWidth / 2, ST.cv.clientHeight / 2, 1 / 1.25)), h('span', { id: 'zoomlbl', style: { minWidth: '44px', textAlign: 'center' } }, ''), btn('+', () => zoomAt(ST.cv.clientWidth / 2, ST.cv.clientHeight / 2, 1.25)), btn('Fit', () => { fitView(); renderStage(); }), h('span', { id: 'coords', class: 'muted', style: { minWidth: '90px' } }, ''));
+}
+
+// ---- پروژه‌ها
+async function loadProject(id) {
+  const rec = await DB.get(id); if (!rec) return false;
+  P = deserialize(JSON.parse(rec.json)); resetHistory(); invalidateCache(); S.famId = null; S.partId = null; localStorage.setItem('ad:current', id); fitView(); renderAll(); return true;
+}
+function startProject(p) { P = p; resetHistory(); invalidateCache(); S.famId = null; S.partId = null; S.bgId = null; fitView(); saveNow(); renderAll(); }
+function newProject() {
+  const demo = confirm('با پروژه‌ی نمونه (دمو) شروع شود؟\nOK = دمو · Cancel = پروژه‌ی خالی');
+  if (demo) startProject(seedProject());
+  else { const p = emptyProject('Avatar Project'); p.characters.push({ id: newId('char'), name: 'Character 01', notes: '' }); p.scene.characterId = p.characters[0].id; startProject(p); }
+}
+function dupProject() { const c = deserialize(serialize(P)); c.id = newId('proj'); c.name = P.name + ' (copy)'; c.createdAt = Date.now(); startProject(c); toast('پروژه تکثیر شد'); }
+function resetProject() { if (!confirm('پروژه به نمونه‌ی اولیه برگردد؟ (می‌توانید با Undo برگردید)')) return; const id = P.id, name = P.name; const keep = snap(); const p = seedProject(); p.id = id; p.name = name; P = p; invalidateCache(); H.undo.push(keep); commit('reset'); H.undo.splice(-1, 1, snap()); S.famId = null; S.partId = null; fitView(); renderAll(); }
+async function openProjects() {
+  const all = (await DB.all()).sort((a, b) => b.updatedAt - a.updatedAt);
+  const bg = h('div', { class: 'modal-bg', onclick: e => e.target === bg && bg.remove() }, h('div', { class: 'modal' }, h('h3', {}, h('span', { class: 'grow' }, 'پروژه‌ها (ذخیره‌ی محلی مرورگر)'), btn('✕', () => bg.remove())),
+    h('div', { class: 'mb list' }, all.map(r => h('div', { class: 'item' + (r.id === P.id ? ' sel' : '') },
+      h('span', { class: 'nm' }, r.name, ' ', h('small', {}, new Date(r.updatedAt).toLocaleString())),
+      btn('باز کردن', async () => { await saveNow(); await loadProject(r.id); bg.remove(); }),
+      btn('🗑', async () => { if (r.id === P.id) return toast('پروژه‌ی جاری را نمی‌توان حذف کرد'); if (confirm('حذف شود؟')) { await DB.del(r.id); bg.remove(); openProjects(); } }, 'danger')))))); 
+  document.body.append(bg);
+}
+function importFile() {
+  const inp = h('input', { type: 'file', accept: '.rpa,.json,application/json' });
+  inp.onchange = async () => { const f = inp.files[0]; if (!f) return; try { importProjectText(await f.text()); } catch (e) { toast('فایل نامعتبر: ' + e.message); } };
+  inp.click();
+}
+function importProjectText(txt) {
+  const o = JSON.parse(txt);
+  if (o.format !== 'rp-avatar-project') throw new Error('این فایل پروژه‌ی Avatar Studio (.rpa) نیست');
+  const p = deserialize(o); p.id = newId('proj'); startProject(p); toast('پروژه وارد شد ✓');
+}
+
+// ---- میان‌برها
+document.addEventListener('keydown', e => {
+  if (!P || e.target.matches('input,textarea,select') || $('.modal-bg')) return;
+  const k = e.key, ctrl = e.ctrlKey || e.metaKey;
+  if (ctrl && k.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+  else if (ctrl && k.toLowerCase() === 'y') { e.preventDefault(); redo(); }
+  else if (k === ' ') { S.space = true; e.preventDefault(); }
+  else if (k === 'ArrowLeft') { e.preventDefault(); nudge(e.shiftKey ? -8 : -1, 0); }
+  else if (k === 'ArrowRight') { e.preventDefault(); nudge(e.shiftKey ? 8 : 1, 0); }
+  else if (k === 'ArrowUp') { e.preventDefault(); nudge(0, e.shiftKey ? -8 : -1); }
+  else if (k === 'ArrowDown') { e.preventDefault(); nudge(0, e.shiftKey ? 8 : 1); }
+  else if (k === 'Delete') { const f = selFam(), L = f && layerOfFam(f.id); if (L) unequip(L.id); }
+  else if (k === '+' || k === '=') zoomAt(ST.cv.clientWidth / 2, ST.cv.clientHeight / 2, 1.25);
+  else if (k === '-') zoomAt(ST.cv.clientWidth / 2, ST.cv.clientHeight / 2, 1 / 1.25);
+});
+document.addEventListener('keyup', e => { if (e.key === ' ') S.space = false; });
+
+async function init() {
+  initStage();
+  let ok = false;
+  const cur = localStorage.getItem('ad:current');
+  if (cur) { try { ok = await loadProject(cur); } catch (e) { ok = false; } }
+  if (!ok) { startProject(seedProject()); }
+  window.addEventListener('beforeunload', () => { saveNow(); });
+  setStatus('آماده');
+}
+window.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
