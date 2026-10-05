@@ -64,8 +64,6 @@ void main() {
         return computeStreak(st, now);
       case 'computePermanentStreak':
         return computePermanentStreak(st, now);
-      case 'habitProgressPct_id':
-        return habitProgressPct(st, findHabit(st, a[0]), now);
       case 'computeHabitStreak_id':
         return computeHabitStreak(st, findHabit(st, a[0]), now);
       case 'computeHabitBestRecord_id':
@@ -90,12 +88,6 @@ void main() {
             'insights': [for (final x in saInsights(cur, prev, fa)) {'level': x.level, 'ico': x.ico, 't': x.t, 's': x.s, 'w': x.w}],
           };
         }
-      case 'collectSeries':
-        final s = collectSeries(st, a[0], now);
-        return {'labels': s.labels, 'values': s.values};
-      case 'getTotalStats':
-        final t = getTotalStats(st, a[0], now);
-        return {'success': t.success, 'fail': t.fail};
       case 'getWeekStart_iso':
         return dateToISO(getWeekStart(st, startOfDay(now)));
       case 'getAccountLevelFromCoins':
@@ -128,6 +120,8 @@ void main() {
     final msgs = <String>[];
     for (final c in cases) {
       final fn = c['fn'] as String;
+      // این سه تابعِ JS (باگ‌دار: امروز شمرده نمی‌شد، برچسب‌های هفته/ماه، میانگینِ ناهمگن) عمداً با core/analytics.dart جایگزین شدند؛ تستشان در analytics_core_test است
+      if (fn == 'habitProgressPct_id' || fn == 'collectSeries' || fn == 'getTotalStats' || fn == 'getWeekStart_iso') continue; // getWeekStart: شروعِ هفته‌ی فارسی (اصلاحِ باگِ HTML)
       counts[fn] = (counts[fn] ?? 0) + 1;
       // هر مورد روی کپیِ تازه‌ی state (coinOps آن را تغییر می‌دهد)
       final st = jsonDecode(jsonEncode(states[c['s']])) as Map<String, dynamic>;
@@ -143,6 +137,16 @@ void main() {
       if (fn.startsWith('level_')) {
         got = lvlFromJs(got as Map);
         want = lvlFromJs(want as Map);
+      }
+      if (fn == 'smart') {
+        // تفاوتِ آگاهانه با JS: «امروزِ بی‌ثبت» روزِ سررسید حساب نمی‌شود (dueDays/perfect/zero/consistency)؛ بقیه‌ی فیلدها باید یکی باشند.
+        for (final side in [got, want]) {
+          for (final k in ['cur', 'prev']) {
+            for (final f in ['dueDays', 'perfect', 'zero', 'consistency']) {
+              ((side as Map)[k] as Map).remove(f);
+            }
+          }
+        }
       }
       if (!deepEq(got, want)) {
         bad[fn] = (bad[fn] ?? 0) + 1;

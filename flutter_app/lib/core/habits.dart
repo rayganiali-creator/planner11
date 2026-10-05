@@ -262,11 +262,13 @@ void syncCoinsFromPoints(Doc state, num totalPoints) {
 }
 
 // ---------------------------------------------------------------- streak / رکورد
-/// روزِ شروعِ هفته بر اساس state.weekStart
+/// روزِ شروعِ هفته بر اساس state.weekStart: ۰ = شنبه، ۱ = یکشنبه (همان تعریفِ تنظیمات و تقویم).
+/// تفاوتِ آگاهانه با HTML: آنجا getWeekStart اندیسِ JS (۰=یکشنبه) را با weekStartِ فارسی ترکیب می‌کرد و
+/// «هفته‌ی جاری» در تحلیل یک روز جابه‌جا شروع می‌شد.
 DateTime getWeekStart(Doc state, DateTime d) {
   final ws = state['weekStart'];
   final offset = jsTruthy(ws) ? jsToNumber(ws).toInt() : 0;
-  final diff = (jsWeekday(d) - offset + 7) % 7;
+  final diff = (jsWeekdayToPersianIndex(jsWeekday(d)) - offset + 7) % 7;
   return addDays(d, -diff);
 }
 
@@ -392,147 +394,3 @@ num? computeHabitBestRecord(Doc state, Map h) {
   return best;
 }
 
-// ---------------------------------------------------------------- سری‌ها و آمار (برای نمودارها)
-typedef Series = ({List<String> labels, List<int?> values});
-
-/// `str.slice(0, 3)`: اگر رشته کوتاه‌تر بود خطا نمی‌دهد.
-String _slice3(String s) => s.length <= 3 ? s : s.substring(0, 3);
-
-int _lenOfGregorianMonth(int y, int m) => DateTime(y, m + 1, 0).day;
-
-({int jy, int jm}) _jalaliNow(DateTime today) {
-  final j = toJalaali(today.year, today.month, today.day);
-  return (jy: j.jy, jm: j.jm);
-}
-
-DateTime _dayOf(Doc state, int y, int m, int d) {
-  if (state['calendarType'] == 'jalali') {
-    final g = toGregorian(y, m, d);
-    return DateTime(g.gy, g.gm, g.gd);
-  }
-  return DateTime(y, m, d);
-}
-
-Series collectSeries(Doc state, String range, DateTime todayIn) {
-  final labels = <String>[], values = <int?>[];
-  final today = startOfDay(todayIn);
-  final fa = state['lang'] == 'fa';
-  final jalali = state['calendarType'] == 'jalali';
-  int pct(int s, int t) => jsRound(s / t * 100);
-  if (range == 'week') {
-    final s = getWeekStart(state, today);
-    final wds = fa ? persianWeekdaysShort : enWeekdaysShort;
-    for (int i = 0; i < 7; i++) {
-      final d = addDays(s, i);
-      labels.add(wds[i]);
-      if (d.isAfter(today)) {
-        values.add(null);
-        continue;
-      }
-      final st = dayStatsAll(state, dateToISO(d));
-      values.add(st.total > 0 ? pct(st.success, st.total) : null);
-    }
-  } else if (range == 'month') {
-    late int jy, jm, len;
-    if (jalali) {
-      final j = _jalaliNow(today);
-      jy = j.jy;
-      jm = j.jm;
-      len = jalaaliMonthLength(jy, jm);
-    } else {
-      jy = today.year;
-      jm = today.month;
-      len = _lenOfGregorianMonth(jy, jm);
-    }
-    for (int dn = 1; dn <= len; dn++) {
-      final d = _dayOf(state, jy, jm, dn);
-      labels.add(fa ? toPersianDigits(dn) : '$dn');
-      if (d.isAfter(today)) {
-        values.add(null);
-        continue;
-      }
-      final st = dayStatsAll(state, dateToISO(d));
-      values.add(st.total > 0 ? pct(st.success, st.total) : null);
-    }
-  } else {
-    final months = fa ? persianMonths : enMonths;
-    final year = jalali ? _jalaliNow(today).jy : today.year;
-    for (int jm = 1; jm <= 12; jm++) {
-      labels.add(_slice3(months[jm - 1]));
-      int sS = 0, fS = 0;
-      final len = jalali ? jalaaliMonthLength(year, jm) : _lenOfGregorianMonth(year, jm);
-      for (int dn = 1; dn <= len; dn++) {
-        final d = _dayOf(state, year, jm, dn);
-        if (d.isAfter(today)) continue;
-        final st = dayStatsAll(state, dateToISO(d));
-        sS += st.success;
-        fS += st.fail;
-      }
-      final tot = sS + fS;
-      values.add(tot > 0 ? pct(sS, tot) : null);
-    }
-  }
-  return (labels: labels, values: values);
-}
-
-({int success, int fail}) getTotalStats(Doc state, String range, DateTime todayIn) {
-  int sS = 0, fS = 0;
-  final today = startOfDay(todayIn);
-  final jalali = state['calendarType'] == 'jalali';
-  void add(DateTime d) {
-    if (d.isAfter(today)) return;
-    final st = dayStatsAll(state, dateToISO(d));
-    sS += st.success;
-    fS += st.fail;
-  }
-
-  if (range == 'week') {
-    final s = getWeekStart(state, today);
-    for (int i = 0; i < 7; i++) {
-      add(addDays(s, i));
-    }
-  } else if (range == 'month') {
-    final jy = jalali ? _jalaliNow(today).jy : today.year;
-    final jm = jalali ? _jalaliNow(today).jm : today.month;
-    final len = jalali ? jalaaliMonthLength(jy, jm) : _lenOfGregorianMonth(jy, jm);
-    for (int dn = 1; dn <= len; dn++) {
-      add(_dayOf(state, jy, jm, dn));
-    }
-  } else {
-    final year = jalali ? _jalaliNow(today).jy : today.year;
-    for (int jm = 1; jm <= 12; jm++) {
-      final len = jalali ? jalaaliMonthLength(year, jm) : _lenOfGregorianMonth(year, jm);
-      for (int dn = 1; dn <= len; dn++) {
-        add(_dayOf(state, year, jm, dn));
-      }
-    }
-  }
-  return (success: sS, fail: fS);
-}
-
-/// درصدِ پیشرفتِ کارتِ هر عادت: موفقیت ÷ روزهای ثبت‌شده؛ عادت دائمی فقط ۳۰ روزِ اخیر (habitProgressPct در HTML)
-int habitProgressPct(Doc state, Map h, DateTime todayIn) {
-  final today = startOfDay(todayIn);
-  final permanent = h['permanent'] != false;
-  final windowStart = addDays(today, -29);
-  // JS: new Date('YYYY-MM-DD') = نیمه‌شبِ UTC (نه محلی). عمداً همان رفتار حفظ شده: عادتی که «امروز» ساخته شده
-  // تا ساعتِ ۰۰:۰۰ محلی هنوز در پنجره نیست (d ≤ today نادرست می‌شود) و در مناطقِ غرب از UTC یک روز عقب می‌افتد.
-  final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch('${h['createdAt']}');
-  if (m == null) return 0;
-  final created = DateTime.utc(int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!)).toLocal();
-  var d = (permanent && created.isBefore(windowStart)) ? windowStart : created;
-  int total = 0, succ = 0;
-  while (!d.isAfter(today)) {
-    final iso = dateToISO(d);
-    if (habitAppliesOnISO(h, iso)) {
-      final r = habitSuccessOnISO(state, h, iso);
-      if (r != null) {
-        total++;
-        if (r) succ++;
-      }
-    }
-    // JS: setDate(getDate()+1) ساعتِ روز را نگه می‌دارد؛ پس «امروز» برای عادتِ بیرون از پنجره‌ی ۳۰روزه (۰۲:۰۰ محلی) هرگز شمرده نمی‌شود
-    d = DateTime(d.year, d.month, d.day + 1, d.hour, d.minute, d.second, d.millisecond);
-  }
-  return total > 0 ? jsRound(succ / total * 100) : 0;
-}

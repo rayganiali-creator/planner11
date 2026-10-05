@@ -13,13 +13,11 @@ import 'package:routine_planner/features/analytics/analytics_screen.dart';
 
 void main() {
   smartTests();
-  test('گزارش هفتگی: آستانه‌ی ۷۰٪ و متن', () {
+  test('گزارش هفتگی: بدون داده null (نه عددِ ساختگی)', () {
     final st = defaultState();
     final now = DateTime(2026, 9, 30, 12);
-    expect(weeklyReport(st, now, true), 'این هفته 0 از 0 عادت موفق (0%). کمی بیشتر تلاش کن! 🌱');
-    expect(weeklyReport(st, now, false), 'This week 0 of 0 habits successful (0%). Keep going! 🌱');
-    expect(jsRoundPct(1, 2), 50);
-    expect(jsRoundPct(2, 3), 67);
+    expect(weeklyReport(st, now, true), isNull);
+    expect(weeklyReport(st, now, false), isNull);
   });
 
   testWidgets('صفحه‌ی تحلیل: سه بازه، مقایسه و گزارش', (tester) async {
@@ -37,7 +35,7 @@ void main() {
     final nav = NavController()..go(AppView.analytics);
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: a));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('روند پیشرفت'), findsOneWidget);
+    expect(find.text('روند تکمیل'), findsOneWidget);
     expect(find.text('ورزش'), findsOneWidget);
     for (final r in ['ماه', 'سال', 'هفته']) {
       await tester.tap(find.text(r));

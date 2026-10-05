@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
 import '../../core/date_fmt.dart';
@@ -34,12 +36,10 @@ Future<void> showChallenges(BuildContext context, {String? tab}) {
   final store = context.read<AppStore>();
   final a = context.read<AppActions>();
   final n = context.read<Notifier>();
-  return showModalBottomSheet<void>(
+  return showRpSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (_) => MultiProvider(
       providers: [ChangeNotifierProvider.value(value: store), Provider.value(value: a), Provider.value(value: n)],
       child: _Sheet(initial: tab ?? (a.challenges.any((c) => c['status'] == 'active' || c['status'] == 'pending_review') ? 'active' : 'create')),
@@ -110,11 +110,10 @@ class _SheetState extends State<_Sheet> {
     final p = context.rp;
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: .92,
-      maxChildSize: .96,
+      initialChildSize: .75,
+      maxChildSize: .9,
+      minChildSize: .4,
       builder: (ctx, sc) => Column(children: [
-        const SizedBox(height: 10),
-        Container(width: 42, height: 5, decoration: BoxDecoration(color: p.line, borderRadius: BorderRadius.circular(9))),
         Padding(
           padding: const EdgeInsets.all(RpSpace.s3),
           child: Row(children: [
@@ -122,6 +121,7 @@ class _SheetState extends State<_Sheet> {
               Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ChoiceChip(label: Text(context.isFa ? t.$2 : t.$3), selected: tab == t.$1, onSelected: (_) => setState(() => tab = t.$1))),
             const Spacer(),
             const HelpButton('challenge'),
+            IconButton(key: const ValueKey('sheet-close'), visualDensity: VisualDensity.compact, iconSize: 20, onPressed: () => Navigator.maybePop(context), icon: Icon(Icons.close_rounded, color: p.muted)),
           ]),
         ),
         Expanded(
@@ -178,13 +178,7 @@ class _SheetState extends State<_Sheet> {
         ),
       const SizedBox(height: 12),
       if (!pro)
-        AppCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('⭐ ${context.tr('ساخت چالش شخصی و دریافت مدال', 'Custom challenges & medals')}', style: rpText(RpType.body, weight: 800, color: p.goldInk)),
-            const SizedBox(height: 6),
-            Text(context.tr('در نسخه‌ی پرو می‌توانید چالش دلخواه با زمان، تعداد و جایزه‌ی خودتان بسازید و برای هر چالش موفق مدال بگیرید.', 'With Pro you can build your own challenges and earn a medal for each one you complete.'), style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.8)),
-          ]),
-        )
+        const ProNotice(ProFeature.challengesCustom)
       else
         AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

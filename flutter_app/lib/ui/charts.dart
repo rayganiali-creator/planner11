@@ -73,29 +73,29 @@ class _BarPainter extends CustomPainter {
 }
 
 class RpDonut extends StatelessWidget {
-  final int success, fail;
+  final int success, fail, unset;
   final Color okColor, badColor, emptyColor;
   final double size;
   final Widget? center;
-  const RpDonut({super.key, required this.success, required this.fail, required this.okColor, required this.badColor, required this.emptyColor, this.size = 160, this.center});
+  const RpDonut({super.key, required this.success, required this.fail, this.unset = 0, required this.okColor, required this.badColor, required this.emptyColor, this.size = 160, this.center});
   @override
   Widget build(BuildContext context) => SizedBox(
         width: size,
         height: size,
-        child: CustomPaint(painter: _DonutPainter(success, fail, okColor, badColor, emptyColor), child: Center(child: center)),
+        child: CustomPaint(painter: _DonutPainter(success, fail, unset, okColor, badColor, emptyColor), child: Center(child: center)),
       );
 }
 
 class _DonutPainter extends CustomPainter {
-  final int ok, bad;
+  final int ok, bad, un;
   final Color okC, badC, emptyC;
-  _DonutPainter(this.ok, this.bad, this.okC, this.badC, this.emptyC);
+  _DonutPainter(this.ok, this.bad, this.un, this.okC, this.badC, this.emptyC);
   @override
   void paint(Canvas c, Size s) {
     final r = Rect.fromLTWH(14, 14, s.width - 28, s.height - 28);
     final sw = s.width * .13;
     Paint pt(Color col) => Paint()..style = PaintingStyle.stroke..strokeWidth = sw..color = col..strokeCap = StrokeCap.butt;
-    final total = ok + bad;
+    final total = ok + bad + un;
     if (total == 0) {
       c.drawArc(r, 0, math.pi * 2, false, pt(emptyC));
       return;
@@ -108,7 +108,7 @@ class _DonutPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DonutPainter o) => o.ok != ok || o.bad != bad || o.okC != okC || o.badC != badC;
+  bool shouldRepaint(_DonutPainter o) => o.ok != ok || o.bad != bad || o.un != un || o.okC != okC || o.badC != badC;
 }
 
 /// میله‌ی افقی برای مقایسه‌ی عادت‌ها (خوانا برای نام‌های بلند)

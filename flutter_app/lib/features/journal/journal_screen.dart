@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
@@ -19,11 +21,9 @@ String fmtDateTime(int ms, bool fa, bool jalali) => dateTimeLabel(DateTime.fromM
 Future<void> showReminderPicker(BuildContext context, String kind, Map item) {
   final a = context.read<AppActions>();
   final n = context.read<Notifier>();
-  return showModalBottomSheet<void>(
+  return showRpSheet<void>(
     context: context,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (_) => _ReminderSheet(kind: kind, item: item, actions: a, notifier: n),
   );
 }
@@ -50,13 +50,9 @@ class _ReminderSheetState extends State<_ReminderSheet> {
     return Padding(
       padding: const EdgeInsets.all(RpSpace.s4),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(context.tr('یادآوری', 'Reminder'), style: rpText(RpType.title, weight: 800, color: p.text)),
+        RpSheetHeader(context.tr('یادآوری', 'Reminder')),
         Text(sub.length > 48 ? sub.substring(0, 48) : sub, style: rpText(RpType.label, weight: 500, color: p.muted)),
-        if (!pro)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(context.tr('⭐ یادآوری یادداشت و کتاب از امکانات پرو است.', '⭐ Reminders for notes and books are a Pro feature.'), style: rpText(RpType.body, weight: 600, color: p.goldInk)),
-          ),
+        const ProNotice(ProFeature.itemReminders),
         const SizedBox(height: RpSpace.s3),
         OutlinedButton.icon(
           onPressed: pro

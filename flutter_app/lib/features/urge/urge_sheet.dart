@@ -13,12 +13,10 @@ import '../../ui/widgets.dart';
 Future<void> showUrge(BuildContext context) {
   final store = context.read<AppStore>();
   final a = context.read<AppActions>();
-  return showModalBottomSheet<void>(
+  return showRpSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (_) => MultiProvider(providers: [ChangeNotifierProvider.value(value: store), Provider.value(value: a)], child: const _Urge()),
   );
 }
@@ -43,8 +41,9 @@ class _UrgeState extends State<_Urge> {
     final habits = (a.store.state['habits'] as List).cast<Map>();
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: .9,
-      maxChildSize: .95,
+      initialChildSize: .75,
+      maxChildSize: .9,
+      minChildSize: .4,
       builder: (ctx, sc) => ListView(controller: sc, padding: const EdgeInsets.all(RpSpace.s4), children: [
         Row(children: [
           if (manage) IconButton(icon: const Icon(LucideIcons.arrowRight), onPressed: () => setState(() {

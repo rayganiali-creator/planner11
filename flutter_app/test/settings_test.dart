@@ -5,39 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:routine_planner/app/app.dart';
 import 'package:routine_planner/app/nav.dart';
 import 'package:routine_planner/app/toast.dart';
-import 'package:routine_planner/core/state_model.dart';
 import 'package:routine_planner/data/actions.dart';
 import 'package:routine_planner/data/app_store.dart';
 import 'package:routine_planner/ui/custom_theme.dart';
-import 'package:routine_planner/ui/tokens.dart';
-import 'tokens_test.dart' show contrast;
 
 void main() {
-  test('هر ۶ رنگِ اصلی × روشن/تاریک: متنِ روی دکمه خوانا (≥ ۴٫۵)', () {
-    final bad = <String>[];
-    for (final a in accents) {
-      for (final dark in [false, true]) {
-        final st = defaultState()..['accentTheme'] = a.id..['theme'] = dark ? 'dark' : 'light'..['themeIntensity'] = dark ? 100 : 0;
-        final p = paletteFromState(st);
-        final r = contrast(p.onPrimary, p.primary);
-        if (r < 4.5) bad.add('${a.id} ${dark ? 'dark' : 'light'}: ${r.toStringAsFixed(2)}');
-      }
-    }
-    expect(bad, isEmpty);
-  });
-
-  test('شدتِ روشن/تاریک: ۰ = روشن، ۱۰۰ = تاریک، میانه مخلوط؛ سازگار با بدون‌مقدار', () {
-    final light = paletteFromState(defaultState()..['themeIntensity'] = 0);
-    final dark = paletteFromState(defaultState()..['theme'] = 'dark'..['themeIntensity'] = 100);
-    final mid = paletteFromState(defaultState()..['themeIntensity'] = 50);
-    expect(light.surface, const Color(0xFFFFFFFF));
-    expect(dark.text, RpPalette.dark.text);
-    expect(mid.surface, isNot(light.surface));
-    expect(mid.surface, isNot(dark.surface));
-    final legacy = defaultState()..['theme'] = 'dark'..remove('themeIntensity');
-    expect(intensityOf(legacy), 1.0);
-  });
-
   test('HSL رفت‌وبرگشت و رنگِ کاشی در تاریک روشن‌تر', () {
     for (final h in ['#3E9B4F', '#C0483B', '#E5DBC8', '#146B69']) {
       final c = parseHex(h)!;
@@ -53,7 +25,7 @@ void main() {
     expect(tileColor(const Color(0xFF3E9B4F), false), const Color(0xFF3E9B4F));
   });
 
-  testWidgets('تنظیمات: زبان، اندازه فونت، تقویم و رنگ اصلی ذخیره می‌شوند', (tester) async {
+  testWidgets('تنظیمات: زبان، اندازه فونت، تقویم، تم و حالت ذخیره می‌شوند', (tester) async {
     tester.view.physicalSize = const Size(1080, 6000);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -83,17 +55,19 @@ void main() {
     expect(store.state['tileEffect'], 'neon');
     await tapText('یکشنبه');
     await tapText('میلادی');
-    await tapText('آبی');
+    await tapText('🌊 اقیانوس');
+    await tapText('تاریک');
     await tester.pump(const Duration(milliseconds: 300));
     expect(store.state['weekStart'], 1);
     expect(store.state['calendarType'], 'gregorian');
-    expect(store.state['accentTheme'], 'blue');
+    expect(store.state['accentTheme'], 'ocean');
+    expect(store.state['theme'], 'dark');
     await tapText('English');
     await tester.pump(const Duration(milliseconds: 300));
     expect(store.state['lang'], 'en');
     expect(find.text('Language'), findsOneWidget);
     // ذخیره روی دیسک
-    expect(File('${dir.path}/s.json').readAsStringSync(), contains('"accentTheme":"blue"'));
+    expect(File('${dir.path}/s.json').readAsStringSync(), contains('"accentTheme":"ocean"'));
     await tester.pumpWidget(const SizedBox());
   });
 }

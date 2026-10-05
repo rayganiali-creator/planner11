@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../app/i18n.dart';
 import '../../app/nav.dart';
+import '../../core/analytics.dart';
 import '../../core/calendar.dart';
 import '../../core/habits.dart';
 import '../../data/actions.dart';
@@ -16,24 +17,17 @@ import '../../ui/tokens.dart';
 import '../onboarding/onboarding.dart';
 import '../../ui/widgets.dart';
 
-String weeklyReport(Map st, DateTime today, bool fa) {
-  final s = getWeekStart(st.cast<String, dynamic>(), today);
-  int done = 0, all = 0;
-  final t = startOfDay(today);
-  for (int i = 0; i < 7; i++) {
-    final d = addDays(s, i);
-    if (d.isAfter(t)) break;
-    final ds = dayStats(st.cast<String, dynamic>(), dateToISO(d));
-    done += ds.success;
-    all += ds.total;
-  }
-  final pct = all > 0 ? jsRoundPct(done, all) : 0;
+/// گزارش هفته از دادهٔ واقعی؛ بدون داده null (UI باید «داده کافی نیست» بنویسد)
+String? weeklyReport(Map st, DateTime today, bool fa) {
+  final rep = buildRangeReport(st.cast<String, dynamic>(), 'week', today);
+  final t = rep.total;
+  final pct = rep.completion;
+  if (pct == null) return null;
+  final n = fa ? toPersianDigits : (Object x) => '$x';
   return fa
-      ? 'این هفته $done از $all عادت موفق ($pct%). ${pct >= 70 ? 'عالی! 💪' : 'کمی بیشتر تلاش کن! 🌱'}'
-      : 'This week $done of $all habits successful ($pct%). ${pct >= 70 ? 'Great! 💪' : 'Keep going! 🌱'}';
+      ? 'این هفته ${n(t.success)} از ${n(t.due)} عادتِ سررسید موفق بود (${n(pct)}٪).'
+      : 'This week ${t.success} of ${t.due} due habits were successful ($pct%).';
 }
-
-int jsRoundPct(int a, int b) => (a / b * 100 + 0.5).floor();
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -52,76 +46,103 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final fa = context.isFa;
     final st = store.state;
     final now = a.today;
-    final series = collectSeries(st, range, now);
-    final totals = getTotalStats(st, range, now);
-    final nv = series.values.whereType<int>().toList();
-    final avg = nv.isEmpty ? 0 : (nv.reduce((x, y) => x + y) / nv.length + 0.5).floor();
+    final rep = buildRangeReport(st.cast<String, dynamic>(), range, now);
     final habits = (st['habits'] as List).cast<Map>();
     final tc = (st['tileColors'] is Map ? st['tileColors'] as Map : const {});
-    final dark = st['theme'] == 'dark';
+    final dark = context.rpBrightness == Brightness.dark;
     final okC = tileColor(parseHex(tc['success']) ?? p.ok, dark), badC = tileColor(parseHex(tc['fail']) ?? p.bad, dark);
-    final labels = series.labels.map((l) => fa ? toPersianDigits(l) : l).toList();
-    final total = totals.success + totals.fail;
+    final labels = [for (final d in rep.days) d.label];
+    final values = [for (final d in rep.days) d.pct];
+    final t = rep.total;
+    final pct = rep.completion;
+    final noData = t.due == 0;
+    final report = weeklyReport(st, now, fa);
+    String insufficient = context.tr('داده کافی برای تحلیل وجود ندارد.', 'Not enough data to analyze.');
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Row(children: [Expanded(child: Text(context.tr('تحلیل', 'Analytics'), style: rpText(RpType.titleL, weight: 800, color: p.text))), HelpButton('progress')]),
+        Row(children: [Expanded(child: Text(context.tr('تحلیل', 'Analytics'), style: rpText(RpType.titleL, weight: 700, color: p.text))), HelpButton('progress')]),
         const SizedBox(height: RpSpace.s3),
         Wrap(spacing: 8, children: [
           for (final r in const [('week', 'هفته', 'Week'), ('month', 'ماه', 'Month'), ('year', 'سال', 'Year')])
-            ChoiceChip(label: Text(fa ? r.$2 : r.$3), selected: range == r.$1, onSelected: (_) => setState(() => range = r.$1)),
+            ChoiceChip(key: ValueKey('an-${r.$1}'), label: Text(fa ? r.$2 : r.$3), selected: range == r.$1, onSelected: (_) => setState(() => range = r.$1)),
         ]),
         const SizedBox(height: RpSpace.s3),
         Row(children: [
-          _Tile(context.n('$avg%'), context.tr('میانگین', 'Average'), p.primary, p.primarySoft),
+          _Tile(pct == null ? '—' : context.n('$pct%'), context.tr('تکمیل', 'Completion'), p.primary, p.primarySoft),
           const SizedBox(width: 8),
           _Tile(context.n(computeStreak(st, now)), context.tr('استریک', 'Streak'), p.fire, p.goldSoft),
           const SizedBox(width: 8),
           _Tile(context.n(habits.length), context.tr('عادت‌ها', 'Habits'), p.blueInk, p.blueSoft),
         ]),
         const SizedBox(height: RpSpace.s3),
-        AppCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(context.tr('روند پیشرفت', 'Progress trend'), style: rpText(RpType.body, weight: 800, color: p.text)),
-            const SizedBox(height: RpSpace.s3),
-            Directionality(textDirection: TextDirection.ltr, child: RpBarChart(labels: labels, values: series.values, color: p.primary, semantics: context.tr('نمودار میله‌ای پیشرفت', 'Progress bar chart'))),
-          ]),
-        ),
+        if (noData)
+          AppCard(child: Text(insufficient, key: const ValueKey('an-nodata'), style: rpText(RpType.body, weight: 500, color: p.muted)))
+        else ...[
+          AppCard(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(context.tr('روند تکمیل', 'Completion trend'), style: rpText(RpType.body, weight: 600, color: p.text)),
+              const SizedBox(height: RpSpace.s3),
+              Directionality(textDirection: TextDirection.ltr, child: RpBarChart(labels: labels, values: values, color: p.primary, semantics: context.tr('نمودار میله‌ای تکمیل', 'Completion bar chart'))),
+            ]),
+          ),
+          const SizedBox(height: RpSpace.s3),
+          AppCard(
+            child: Row(children: [
+              RpDonut(
+                success: t.success,
+                fail: t.fail,
+                unset: t.unset,
+                okColor: okC,
+                badColor: badC,
+                emptyColor: p.line,
+                size: 130,
+                center: Text(pct == null ? '—' : context.n('$pct%'), style: rpText(RpType.title, weight: 700, color: p.text)),
+              ),
+              const SizedBox(width: RpSpace.s4),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  _Legend(okC, context.tr('موفق', 'Success'), context.n(t.success)),
+                  const SizedBox(height: 8),
+                  _Legend(badC, context.tr('ناموفق', 'Failed'), context.n(t.fail)),
+                  const SizedBox(height: 8),
+                  _Legend(p.line, context.tr('ثبت‌نشده', 'Not logged'), context.n(t.unset)),
+                ]),
+              ),
+            ]),
+          ),
+        ],
         const SizedBox(height: RpSpace.s3),
         AppCard(
-          child: Row(children: [
-            RpDonut(
-              success: totals.success,
-              fail: totals.fail,
-              okColor: okC,
-              badColor: badC,
-              emptyColor: p.line,
-              size: 130,
-              center: Text(total == 0 ? '—' : context.n('${(totals.success / total * 100 + 0.5).floor()}%'), style: rpText(RpType.title, weight: 800, color: p.text)),
-            ),
-            const SizedBox(width: RpSpace.s4),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                _Legend(okC, context.tr('موفق', 'Success'), context.n(totals.success)),
-                const SizedBox(height: 8),
-                _Legend(badC, context.tr('ناموفق', 'Failed'), context.n(totals.fail)),
-              ]),
-            ),
-          ]),
-        ),
-        const SizedBox(height: RpSpace.s3),
-        AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(context.tr('مقایسه‌ی عادت‌ها (۳۰ روز اخیر)', 'Habit comparison (last 30 days)'), style: rpText(RpType.body, weight: 800, color: p.text)),
+            Text(context.tr('مقایسه‌ی عادت‌ها (۳۰ روز اخیر)', 'Habit comparison (last 30 days)'), style: rpText(RpType.body, weight: 600, color: p.text)),
             const SizedBox(height: RpSpace.s2),
             if (habits.isEmpty)
               Text(context.tr('هنوز عادتی اضافه نکردی.', "You haven't added any habits yet."), style: rpText(RpType.body, weight: 500, color: p.muted))
             else
-              for (final h in habits) RpHBar(label: '${h['name']}', value: habitProgressPct(st, h, now), color: p.primary),
+              for (final h in habits)
+                Builder(builder: (_) {
+                  final v = habitCompletionPct(st.cast<String, dynamic>(), h, now);
+                  return v == null
+                      ? Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [Expanded(child: Text('${h['name']}', style: rpText(RpType.body, weight: 500, color: p.text))), Text(context.tr('داده کافی نیست', 'Not enough data'), style: rpText(RpType.caption, weight: 500, color: p.muted))]))
+                      : RpHBar(label: '${h['name']}', value: v, color: p.primary);
+                }),
           ]),
         ),
         const SizedBox(height: RpSpace.s3),
-        AppCard(child: Text(weeklyReport(st, now, fa), style: rpText(RpType.body, weight: 600, color: p.text, height: 1.9))),
+        AppCard(child: Text(report ?? insufficient, key: const ValueKey('an-weekly'), style: rpText(RpType.body, weight: 500, color: report == null ? p.muted : p.text, height: 1.9))),
+        const SizedBox(height: RpSpace.s3),
+        RpCollapsible(
+          key: const ValueKey('an-method'),
+          icon: LucideIcons.info,
+          title: context.tr('این اعداد چطور محاسبه می‌شوند؟', 'How are these numbers calculated?'),
+          child: Text(
+            context.tr(
+                'فقط از ثبت‌های واقعیِ خودت. تکمیل = موفق ÷ عادت‌های سررسید. روزِ گذشته‌ای که ثبت نکرده‌ای «ثبت‌نشده» حساب می‌شود؛ امروز فقط وقتی ثبت کرده‌ای شمرده می‌شود و روزهای آینده هرگز. اگر چیزی برای شمارش نباشد، عددی ساخته نمی‌شود و «داده کافی نیست» می‌بینی.',
+                'Only from your real entries. Completion = successes ÷ habits due. A past day you did not log counts as “not logged”; today counts only once logged and future days never. If there is nothing to count, no number is made up.'),
+            style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.8),
+          ),
+        ),
         const SizedBox(height: RpSpace.s3),
         _SmartLink(),
       ],

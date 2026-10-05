@@ -10,6 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../data/actions.dart';
 import '../../data/media_store.dart';
@@ -163,7 +165,7 @@ class _VoiceListState extends State<VoiceList> {
     final a = context.read<AppActions>();
     final fa = a.store.state['lang'] != 'en';
     if (a.store.state['isPremium'] != true) {
-      a.toasts.show(fa ? '⭐ یادداشت صوتی برای کتاب‌ها از امکانات پرو است.' : '⭐ Voice notes are a Pro feature.', ms: 3400);
+      showProBlocked(context, ProFeature.voiceNotes);
       return;
     }
     if (recording) return _stop();

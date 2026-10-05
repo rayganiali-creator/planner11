@@ -6,9 +6,10 @@ import 'package:provider/provider.dart';
 import '../../app/i18n.dart';
 import '../../core/date_fmt.dart';
 import '../../core/calendar.dart';
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../core/smart.dart';
 import '../../core/smart_extras.dart';
-import '../../app/nav.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
@@ -40,26 +41,14 @@ class _SmartScreenState extends State<SmartScreen> {
       return ListView(padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)), children: [
         Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
         const SizedBox(height: RpSpace.s3),
-        AppCard(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [Icon(LucideIcons.brain, color: p.goldInk), const SizedBox(width: 8), Text(context.tr('ویژه‌ی نسخه‌ی پرو', 'Pro feature'), style: rpText(RpType.bodyL, weight: 800, color: p.goldInk))]),
-            const SizedBox(height: 8),
-            for (final t in [
-              context.tr('امتیاز کلی و داوریِ هوشمند از رفتارت', 'An overall score and smart verdict on your behavior'),
-              context.tr('تمرکزِ امروز: کدام عادت بیشترین نیاز را دارد', 'Today’s focus: the habit that needs you most'),
-              context.tr('عادت‌های در خطر و بینش‌های مرتب‌شده', 'Habits at risk and ranked insights'),
-              context.tr('روند، روزهای هفته، اثر محرک و مشوق، علت‌ها', 'Trend, weekdays, trigger & incentive impact, reasons'),
-            ])
-              Padding(padding: const EdgeInsets.only(bottom: 4), child: Row(children: [Icon(LucideIcons.check, size: 14, color: p.okInk), const SizedBox(width: 8), Expanded(child: Text(t, style: rpText(RpType.label, weight: 500, color: p.muted)))])),
-            const SizedBox(height: RpSpace.s3),
-            RpButton(context.tr('مشاهده‌ی پلن‌ها', 'See plans'), onTap: () => context.read<NavController>().go(AppView.purchases)),
-          ]),
-        ),
+        const ProNotice(ProFeature.smartAnalysis),
       ]);
     }
     final now = a.today;
     final cur = saCompute(st, saPeriod(range, 0, now)), prev = saCompute(st, saPeriod(range, 1, now));
-    String pc(double? x) => x == null ? '—' : '${N(jsR(x * 100))}$pct';
+    final status = smartStatus(cur);
+    final show = status != SmartStatus.insufficient;
+    String pc(double? x) => (!show || x == null) ? '—' : '${N(jsR(x * 100))}$pct';
     Widget delta(double? x, double? y) {
       if (x == null || y == null) return Text('—', style: rpText(RpType.caption, weight: 700, color: p.muted));
       final d = jsR((x - y) * 100);
@@ -125,7 +114,7 @@ class _SmartScreenState extends State<SmartScreen> {
       e.reasons.forEach((r, n) => pairs.add((t: e.name, r: r, n: n, fails: e.f, share: n / (e.f < 1 ? 1 : e.f))));
     }
     pairs.sort((x, y) => y.n != x.n ? y.n.compareTo(x.n) : y.share.compareTo(x.share));
-    final insights = saInsights(cur, prev, fa);
+    final findings = smartFindings(st, cur, prev, now, fa);
     final reasonsAll = <String>{};
     final rs = st['reasons'] is Map ? st['reasons'] as Map : const {};
     for (final v in rs.values) {
@@ -178,19 +167,18 @@ class _SmartScreenState extends State<SmartScreen> {
         );
     Widget empty(String t) => Text(t, style: rpText(RpType.label, weight: 500, color: p.muted));
 
-    final score = smartScore(cur);
+    final score = show ? smartScore(cur) : null;
     final iso = dateToISO(startOfDay(now));
     final focus = focusHabitToday(st, cur, iso);
     final risk = atRiskHabits(cur, prev);
-    final topReason = (cur.failReasons.entries.toList()..sort((x, y) => y.value.compareTo(x.value))).map((e) => e.key).firstOrNull;
-    Widget insightCard(SaInsight x) => Container(
+    Widget insightCard(SmartFinding x) => Container(
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(color: x.level == 'good' ? p.okSoft : x.level == 'bad' ? p.badSoft : p.goldSoft, borderRadius: BorderRadius.circular(RpRadius.md)),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(x.ico, style: const TextStyle(fontSize: 22)),
             const SizedBox(width: 10),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(x.t, style: rpText(RpType.body, weight: 800, color: p.text, height: 1.6)), Text(x.s, style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7))])),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(x.text, style: rpText(RpType.body, weight: 500, color: p.text, height: 1.7)), if (x.hint != null) Text(x.hint!, style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7))])),
           ]),
         );
     final scoreColor = score == null ? p.muted : (score >= 65 ? p.okInk : score >= 40 ? p.goldInk : p.badInk);
@@ -198,13 +186,23 @@ class _SmartScreenState extends State<SmartScreen> {
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 700, color: p.text)),
         const SizedBox(height: RpSpace.s2),
         Wrap(spacing: 8, children: [
-          for (final r in const [('week', 'هفتگی', 'Week'), ('month', 'ماهانه', 'Month'), ('year', 'سالانه', 'Year')])
+          for (final r in const [('week', '۷ روز اخیر', 'Last 7 days'), ('month', '۳۰ روز اخیر', 'Last 30 days'), ('year', '۳۶۵ روز اخیر', 'Last 365 days')])
             ChoiceChip(key: ValueKey('range-${r.$1}'), label: Text(fa ? r.$2 : r.$3), selected: range == r.$1, onSelected: (_) => setState(() => range = r.$1)),
         ]),
         const SizedBox(height: RpSpace.s3),
+        if (status == SmartStatus.insufficient)
+          Container(
+            key: const ValueKey('smart-insufficient'),
+            margin: const EdgeInsets.only(bottom: RpSpace.s3),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: p.surface2, borderRadius: BorderRadius.circular(RpRadius.md)),
+            child: Text(context.tr('داده کافی برای تحلیل وجود ندارد. (حداقل ۵ ثبتِ نتیجه در ۳ روزِ مختلف لازم است؛ فعلاً ${N(cur.succ + cur.fail)} ثبت در ${N(cur.activeDays)} روز.)', 'Not enough data to analyze. (At least 5 logged outcomes on 3 different days are needed; so far ${cur.succ + cur.fail} in ${cur.activeDays} days.)'), style: rpText(RpType.body, weight: 500, color: p.muted, height: 1.7)),
+          )
+        else if (status == SmartStatus.limited)
+          Padding(padding: const EdgeInsets.only(bottom: RpSpace.s3), child: Text(context.tr('داده هنوز محدود است؛ نتیجه‌ها قطعی نیستند.', 'Data is still limited; results are not conclusive.'), key: const ValueKey('smart-limited'), style: rpText(RpType.label, weight: 500, color: p.muted))),
         // امتیاز و داوری
         AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -224,7 +222,7 @@ class _SmartScreenState extends State<SmartScreen> {
             IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               kpi('✅', context.tr('موفقیت', 'Success'), pc(cur.rate), delta(cur.rate, prev.rate)),
               const SizedBox(width: 6),
-              kpi('🌟', context.tr('روز کامل', 'Perfect days'), N(cur.perfect), delta(perfectRate(cur), perfectRate(prev))),
+              kpi('🌟', context.tr('روز کامل', 'Perfect days'), show ? N(cur.perfect) : '—', delta(perfectRate(cur), perfectRate(prev))),
             ])),
             const SizedBox(height: 6),
             IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -240,12 +238,21 @@ class _SmartScreenState extends State<SmartScreen> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [Icon(LucideIcons.crosshair, size: 18, color: p.primary), const SizedBox(width: 8), Text(context.tr('تمرکزِ امروز', 'Today’s focus'), style: rpText(RpType.body, weight: 800, color: p.text))]),
             const SizedBox(height: 6),
-            if (focus == null)
-              Text(context.tr('همه‌ی عادت‌های امروز ثبت شده‌اند 🎉', 'Everything due today is logged 🎉'), style: rpText(RpType.body, weight: 500, color: p.muted))
+            if (!show)
+              Text(context.tr('داده کافی برای تحلیل وجود ندارد.', 'Not enough data to analyze.'), style: rpText(RpType.body, weight: 500, color: p.muted))
+            else if (focus == null)
+              Text(context.tr('همه‌ی عادت‌های سررسیدِ امروز ثبت شده‌اند 🎉', 'Everything due today is logged 🎉'), style: rpText(RpType.body, weight: 500, color: p.muted))
             else ...[
-              Text('${focus['name']}', key: const ValueKey('smart-focus'), style: rpText(RpType.bodyL, weight: 800, color: p.text)),
+              Text('${focus['name']}', key: const ValueKey('smart-focus'), style: rpText(RpType.bodyL, weight: 600, color: p.text)),
               const SizedBox(height: 2),
-              Text(saSuggestion(topReason, fa), style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7)),
+              Builder(builder: (_) {
+                final fd = focusDetail(st, cur, focus, cur.series.first.iso, cur.series.last.iso, fa);
+                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(fd.ratePct == null ? context.tr('برای این عادت هنوز داده‌ی کافی نیست.', 'Not enough data for this habit yet.') : context.tr('نرخ موفقیت: ${N(fd.ratePct!)}$pct از ${N(fd.n)} ثبت', 'Success rate: ${fd.ratePct}% of ${fd.n} entries'), style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7)),
+                  if (fd.topReason != null) Text(context.tr('پرتکرارترین علتِ شکست: «${fd.topReason}»', 'Most frequent failure reason: “${fd.topReason}”'), style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.7)),
+                  if (fd.hint != null) Text(fd.hint!, style: rpText(RpType.label, weight: 500, color: p.text, height: 1.7)),
+                ]);
+              }),
             ],
           ]),
         ),
@@ -268,14 +275,16 @@ class _SmartScreenState extends State<SmartScreen> {
         ],
         const SizedBox(height: RpSpace.s3),
         // بینش‌ها: ۳ مورد برتر، بقیه کشویی
-        Text(context.tr('بینش‌ها', 'Insights'), style: rpText(RpType.body, weight: 800, color: p.text)),
+        Text(context.tr('بینش‌ها', 'Insights'), style: rpText(RpType.body, weight: 600, color: p.text)),
         const SizedBox(height: RpSpace.s2),
-        if (insights.isEmpty)
-          empty(context.tr('برای کشف الگو، چند روز ثبت بیشتر لازم است.', 'A few more days of data are needed.'))
+        if (!show)
+          empty(context.tr('داده کافی برای تحلیل وجود ندارد.', 'Not enough data to analyze.'))
+        else if (findings.isEmpty)
+          empty(context.tr('الگوی معناداری در داده‌های این بازه پیدا نشد.', 'No meaningful pattern was found in this period’s data.'))
         else ...[
-          for (final x in insights.take(3)) insightCard(x),
-          if (insights.length > 3)
-            RpCollapsible(key: const ValueKey('smart-more-insights'), persistKey: 'smartMore', title: context.tr('بینش‌های بیشتر', 'More insights'), summary: N(insights.length - 3), card: false, child: Column(children: [for (final x in insights.skip(3)) insightCard(x)])),
+          for (final x in findings.take(3)) insightCard(x),
+          if (findings.length > 3)
+            RpCollapsible(key: const ValueKey('smart-more-insights'), persistKey: 'smartMore', title: context.tr('بینش‌های بیشتر', 'More insights'), summary: N(findings.length - 3), card: false, child: Column(children: [for (final x in findings.skip(3)) insightCard(x)])),
         ],
         section('📈', range == 'year' ? context.tr('روند ماهانه', 'Monthly trend') : range == 'month' ? context.tr('روند ۳۰ روز اخیر', 'Last 30 days') : context.tr('روند هفته', 'This week'),
             range == 'year' ? context.tr('میانگین نرخ موفقیت در هر ماه', 'Average success rate per month') : context.tr('نرخ موفقیت هر روز', 'Daily success rate'),
@@ -392,6 +401,20 @@ class _SmartScreenState extends State<SmartScreen> {
                         child: Text('${dateNumeric(DateTime.fromMillisecondsSinceEpoch((j['at'] as num).toInt()), jalali: jal, fa: fa)} — ${j['text']}', style: rpText(RpType.label, weight: 500, color: p.text, height: 1.7)),
                       ),
                   ])),
+        Padding(
+          padding: const EdgeInsets.only(top: RpSpace.s3),
+          child: RpCollapsible(
+            key: const ValueKey('smart-method'),
+            icon: LucideIcons.info,
+            title: context.tr('این تحلیل چطور کار می‌کند؟', 'How does this analysis work?'),
+            child: Text(
+              context.tr(
+                  'فقط از ثبت‌های واقعیِ خودت و فقط وقتی داده کافی باشد (حداقل ۵ ثبت در ۳ روز؛ هر الگو کمینه‌ی داده‌ی خودش را دارد). بازه‌ها «روزهای اخیر» هستند (۷/۳۰/۳۶۵ روز تا امروز) و با بازه‌ی قبلیِ هم‌اندازه مقایسه می‌شوند. «موفقیت» = موفق ÷ ثبت‌شده‌ها؛ «ثبات» = روزهای دارای ثبت ÷ روزهای سررسید. ساعتِ ثبت ذخیره نمی‌شود، پس تحلیلِ ساعت‌محور ممکن نیست و ساخته نمی‌شود.',
+                  'Only from your real entries and only with enough data (at least 5 entries over 3 days; each pattern has its own minimum). Periods are “recent days” (7/30/365 days up to today) compared with the equal previous period. “Success” = successes ÷ logged entries; “Consistency” = days with entries ÷ days due. The time of logging is not stored, so time-of-day analysis is not possible and is never faked.'),
+              style: rpText(RpType.label, weight: 500, color: p.muted, height: 1.8),
+            ),
+          ),
+        ),
       ],
     );
   }

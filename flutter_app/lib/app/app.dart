@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../data/actions.dart';
 import '../data/app_store.dart';
-import '../ui/custom_theme.dart';
+import '../ui/app_themes.dart';
 import '../ui/tokens.dart';
 import '../features/avatar/avatar_compose.dart';
 import '../data/billing.dart';
@@ -49,13 +49,14 @@ class RoutineApp extends StatelessWidget {
       ],
       child: Consumer<AppStore>(builder: (context, s, _) {
         final fa = s.state['lang'] != 'en';
-        final dark = s.state['theme'] == 'dark';
+        final platform = MediaQuery.platformBrightnessOf(context);
+        final dark = isDarkMode(s.state, platform);
         return MaterialApp(
           navigatorKey: rpNavKey,
           title: 'روتین پلنر',
           debugShowCheckedModeBanner: false,
-          theme: buildRpTheme(dark ? Brightness.dark : Brightness.light, palette: paletteFromState(s.state)),
-          themeMode: ThemeMode.light, // رنگ‌ها را paletteFromState تعیین می‌کند (شدتِ روشن/تاریک، لهجه، پس‌زمینه)
+          theme: buildRpTheme(dark ? Brightness.dark : Brightness.light, palette: paletteFor(s.state, platform)),
+          themeMode: ThemeMode.light, // پالتِ کامل را تمِ انتخابی + حالت (روشن/تاریک/سیستم) تعیین می‌کند
           locale: Locale(fa ? 'fa' : 'en'),
           supportedLocales: const [Locale('fa'), Locale('en')],
           localizationsDelegates: const [

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
 import '../../core/doc.dart';
@@ -47,7 +49,7 @@ class HabitsScreen extends StatelessWidget {
             label: Text(context.tr('عادت جدید', 'New habit')),
             onPressed: () {
               if (!actions.canCreateHabit()) {
-                actions.toasts.show(context.tr('⭐ در نسخه‌ی رایگان حداکثر ۳ عادت فعال می‌توانید داشته باشید. برای عادت‌های نامحدود، پرو را تهیه کنید.', '⭐ The free plan allows up to 3 active habits. Get Pro for unlimited habits.'), ms: 3400);
+                showProBlocked(context, ProFeature.habits);
                 return;
               }
               showHabitEditor(context, null);
@@ -424,12 +426,10 @@ class _HabitDetailsState extends State<_HabitDetails> {
 Future<void> showHabitEditor(BuildContext context, Map? habit) {
   final actions = context.read<AppActions>();
   final form = habit == null ? HabitForm(actions.todayISO) : HabitForm.from(habit);
-  return showModalBottomSheet<void>(
+  return showRpSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (_) => _Editor(form: form, editingId: habit?['id'] as String?, actions: actions),
   );
 }
@@ -486,9 +486,7 @@ class _EditorState extends State<_Editor> {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: ListView(padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, RpSpace.s4), shrinkWrap: true, children: [
-        Center(child: Container(width: 42, height: 5, decoration: BoxDecoration(color: p.line, borderRadius: BorderRadius.circular(9)))),
-        const SizedBox(height: RpSpace.s3),
-        Text(widget.editingId == null ? (fa ? 'عادت جدید' : 'New Habit') : (fa ? 'ویرایش عادت' : 'Edit Habit'), style: rpText(RpType.title, weight: 800, color: p.text)),
+        RpSheetHeader(widget.editingId == null ? (fa ? 'عادت جدید' : 'New Habit') : (fa ? 'ویرایش عادت' : 'Edit Habit')),
         const SizedBox(height: RpSpace.s3),
         TextField(controller: name, style: rpText(RpType.bodyL, weight: 700, color: p.text), decoration: _dec(fa ? 'نام عادت' : 'Habit name'), onChanged: (v) => f.name = v),
         _label(fa ? 'نوع' : 'Type'),
@@ -543,7 +541,7 @@ class _EditorState extends State<_Editor> {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(LucideIcons.clock),
             title: Text(fa ? 'ساعت یادآوری' : 'Reminder time'),
-            trailing: Text(fa ? toPersianDigits(f.reminderTime) : f.reminderTime, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+            trailing: Text(fa ? toPersianDigits(f.reminderTime) : f.reminderTime, style: rpText(RpType.bodyL, weight: 600)),
             onTap: () async {
               final parts = f.reminderTime.split(':');
               final cur = TimeOfDay(hour: int.tryParse(parts.first) ?? 8, minute: parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0);

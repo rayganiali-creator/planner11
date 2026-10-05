@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../core/gameplay.dart';
 import '../../data/actions.dart';
@@ -80,12 +82,10 @@ Future<void> showAvatarPanel(BuildContext context) {
   if (data == null) return Future.value();
   if (a.avState().gender == null) return showGenderPicker(context);
   final store = context.read<AppStore>();
-  return showModalBottomSheet<void>(
+  return showRpSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (_) => MultiProvider(providers: [ChangeNotifierProvider.value(value: store), Provider.value(value: a), Provider<AvData?>.value(value: data)], child: const _Panel()),
   );
 }
@@ -273,7 +273,7 @@ class _PanelState extends State<_Panel> {
                     }
                     if (res == 'pro') {
                       Navigator.pop(context);
-                      a.toasts.show(context.tr('⭐ آیتم‌های آواتار با نسخه‌ی پرو باز می‌شوند و بعد با سکه خریده می‌شوند. انتخاب مرد یا زن و مدل‌ها رایگان است.', '⭐ Avatar items unlock with Pro and are then bought with coins. Gender and models are free.'), ms: 3400);
+                      showProBlocked(context, ProFeature.avatarItems);
                     }
                   }
                 : null,

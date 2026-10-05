@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
 import '../../app/nav.dart';
+import '../../core/analytics.dart';
 import '../../core/calendar.dart';
 import '../../core/date_fmt.dart';
 import '../../core/doc.dart';
@@ -16,6 +17,7 @@ import '../../core/format.dart';
 import '../../core/gameplay.dart';
 import '../../core/habits.dart';
 import '../../core/smart.dart';
+import '../../ui/pro_widgets.dart';
 import '../../core/smart_extras.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
@@ -109,7 +111,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.rp;
     final store = context.read<AppStore>();
-    final dark = store.state['theme'] == 'dark';
+    final dark = context.rpBrightness == Brightness.dark; // حالتِ مؤثر (سیستم هم لحاظ می‌شود)
     return Row(children: [
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -121,7 +123,7 @@ class _Header extends StatelessWidget {
         tooltip: context.tr('تم', 'Theme'),
         onPressed: () {
           store.state['theme'] = dark ? 'light' : 'dark';
-          store.state['themeIntensity'] = dark ? 0 : 100; // مثل دکمه‌ی تم در HTML
+          store.state['themeIntensity'] = dark ? 0 : 100; // کلیدِ سازگار با بکاپ
           store.save();
         },
         icon: Icon(dark ? LucideIcons.sun : LucideIcons.moon, color: p.text),
@@ -362,7 +364,7 @@ class _HabitsProgress extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 10),
               child: Builder(builder: (_) {
                 final perm = h['permanent'] != false;
-                final pct = habitProgressPct(state, h, now);
+                final pct = habitCompletionPct(state, h, now);
                 final streak = perm ? computeHabitStreak(state, h, now) : 0;
                 return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
@@ -372,11 +374,11 @@ class _HabitsProgress extends StatelessWidget {
                         if (perm) TextSpan(text: fa ? '  (۳۰ روز اخیر)' : '  (last 30 days)', style: rpText(RpType.caption, weight: 400, color: p.muted)),
                       ])),
                     ),
-                    Text('${context.n(pct)}%', style: rpText(RpType.label, weight: 800, color: p.text)),
+                    Text(pct == null ? context.tr('داده کافی نیست', 'Not enough data') : '${context.n(pct)}%', style: rpText(RpType.label, weight: 600, color: pct == null ? p.muted : p.text)),
                     if (perm && streak > 0) Text('  🔥${context.n(streak)}', style: rpText(RpType.label, weight: 800, color: p.fire)),
                   ]),
                   const SizedBox(height: 4),
-                  RpProgressBar(value: pct / 100, colors: [p.primary, p.primary2]),
+                  RpProgressBar(value: (pct ?? 0) / 100, colors: [p.primary, p.primary2]),
                 ]);
               }),
             ),
@@ -394,9 +396,9 @@ class _SmartTeaser extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.rp;
     final fa = context.isFa;
-    String sub;
+    String? sub;
     if (state['isPremium'] != true) {
-      sub = context.tr('ویژه‌ی پرو', 'Pro');
+      sub = null; // کاربر رایگان: فقط قفل کوچک؛ توضیح در خودِ صفحه
     } else {
       final score = smartScore(saCompute(state, saPeriod('month', 0, now)));
       sub = score == null ? context.tr('داده‌ی کافی نیست', 'Not enough data') : '${context.n(score)} · ${smartVerdict(score, fa)}';
@@ -410,9 +412,11 @@ class _SmartTeaser extends StatelessWidget {
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.body, weight: 800, color: p.text)),
-            Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.caption, weight: 600, color: p.muted)),
+            if (sub != null) Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.caption, weight: 500, color: p.muted)),
           ]),
         ),
+        const ProLockIcon(),
+        const SizedBox(width: 6),
         Icon(fa ? LucideIcons.chevronLeft : LucideIcons.chevronRight, size: 18, color: p.muted),
       ]),
     );

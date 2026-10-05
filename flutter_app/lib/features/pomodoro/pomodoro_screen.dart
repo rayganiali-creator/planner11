@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
 import '../../data/actions.dart';
@@ -114,17 +116,13 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                       label: fa ? k.$2 : k.$3,
                       value: pro ? a.pomoMinutes(k.$1) : pomoDefaults[k.$1]!,
                       enabled: pro,
-                      onTapDisabled: () => a.toasts.show(context.tr('⭐ زمان‌های دلخواه پومودورو از امکانات پرو است.', '⭐ Custom Pomodoro times are a Pro feature.'), ms: 3400),
+                      onTapDisabled: () => showProBlocked(context, ProFeature.pomodoroCustom),
                       onChanged: (v) => a.pomoSetMinutes(k.$1, v, k.$4),
                     ),
                   ),
                 ),
             ]),
-            if (!pro)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(context.tr('نسخه‌ی رایگان: ۲۵ دقیقه تمرکز، ۵ استراحت کوتاه و ۱۵ استراحت بلند. زمان‌های دلخواه از امکانات پرو است.', 'Free: 25 min focus, 5 short break, 15 long break. Custom times are Pro.'), style: rpText(RpType.label, weight: 500, color: p.muted)),
-              ),
+            const ProNotice(ProFeature.pomodoroCustom),
           ]),
         ),
       ],

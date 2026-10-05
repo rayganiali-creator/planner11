@@ -269,6 +269,7 @@ Future<void> showActionGrid(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    showDragHandle: false,
     backgroundColor: Colors.transparent,
     barrierColor: const Color(0x85060E0D),
     builder: (_) => _ActionGridSheet(rootContext: root),
@@ -304,7 +305,7 @@ class _ActionGridSheet extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
         decoration: BoxDecoration(
           color: p.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(RpRadius.lg)),
           boxShadow: RpShadow.e3(context.rpBrightness),
         ),
         child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [

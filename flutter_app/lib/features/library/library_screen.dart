@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../core/date_fmt.dart';
 import '../../data/actions.dart';
@@ -59,11 +61,25 @@ class _LibraryScreenState extends State<LibraryScreen> {
         return ((y['createdAt'] as num?) ?? 0).compareTo((x['createdAt'] as num?) ?? 0);
       });
     final nowMs = DateTime.now().millisecondsSinceEpoch;
-    return Stack(children: [
-      ListView(
+    return ListView(
         padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
         children: [
-          Text(context.tr('کتابخانه', 'Library'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+          Row(children: [
+            Expanded(child: Text(context.tr('کتابخانه', 'Library'), style: rpText(RpType.titleL, weight: 700, color: p.text))),
+            FilledButton.icon(
+              key: const ValueKey('add-book'),
+              style: FilledButton.styleFrom(visualDensity: VisualDensity.compact, minimumSize: const Size(0, 38), padding: const EdgeInsets.symmetric(horizontal: 12)),
+              icon: const Icon(LucideIcons.plus, size: 16),
+              label: Text(context.tr('کتاب جدید', 'New book')),
+              onPressed: () {
+                if (!a.canAddBook) {
+                  showProBlocked(context, ProFeature.books);
+                  return;
+                }
+                _bookEditor(context, null);
+              },
+            ),
+          ]),
           const SizedBox(height: RpSpace.s3),
           AppCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -107,18 +123,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           else
             for (final b in list) _BookCard(book: b, nowMs: nowMs, open: open.contains(b['id']), onToggleHistory: () => setState(() => open.contains(b['id']) ? open.remove(b['id']) : open.add(b['id'] as String))),
         ],
-      ),
-      Positioned(
-        left: RpSpace.s4, right: RpSpace.s4, bottom: 104,
-        child: RpButton(context.tr('افزودن کتاب', 'Add book'), icon: LucideIcons.plus, onTap: () {
-          if (!a.canAddBook) {
-            a.toasts.show(context.tr('⭐ در نسخه‌ی رایگان حداکثر ۳ کتاب در حال مطالعه می‌توانید داشته باشید. با تمام کردن یک کتاب جا باز می‌شود، یا پرو را تهیه کنید.', '⭐ The free plan allows 3 books in progress. Finish one to free a slot, or get Pro.'), ms: 3400);
-            return;
-          }
-          _bookEditor(context, null);
-        }),
-      ),
-    ]);
+    );
   }
 }
 
@@ -288,16 +293,14 @@ void _bookEditor(BuildContext context, Map? b) {
   final pages = TextEditingController(text: b?['totalPages'] != null ? '${b!['totalPages']}' : '');
   final reward = TextEditingController(text: '${b?['reward'] ?? ''}');
   final mediaStore = context.read<MediaStore>();
-  showModalBottomSheet<void>(
+  showRpSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
       child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(RpSpace.s4), children: [
-        Text(b == null ? ctx.tr('📚 افزودن کتاب', '📚 Add Book') : ctx.tr('✏️ ویرایش کتاب', '✏️ Edit Book'), style: rpText(RpType.title, weight: 800, color: ctx.rp.text)),
+        RpSheetHeader(b == null ? ctx.tr('📚 افزودن کتاب', '📚 Add Book') : ctx.tr('✏️ ویرایش کتاب', '✏️ Edit Book')),
         TextField(controller: title, decoration: InputDecoration(labelText: ctx.tr('نام کتاب', 'Title'))),
         TextField(controller: author, decoration: InputDecoration(labelText: ctx.tr('نویسنده', 'Author'))),
         TextField(controller: summary, maxLines: 3, decoration: InputDecoration(labelText: ctx.tr('خلاصه', 'Summary'))),

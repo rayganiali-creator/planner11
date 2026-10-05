@@ -299,3 +299,41 @@ class _RpCollapsibleState extends State<RpCollapsible> {
     return widget.card ? AppCard(padding: EdgeInsets.zero, child: col) : col;
   }
 }
+
+
+/// سرِ یکپارچه‌ی مودال‌ها: عنوان (تیتر) + دکمه‌ی بستن؛ فشرده و مینیمال.
+class RpSheetHeader extends StatelessWidget {
+  final String title;
+  final Widget? trailing;
+  const RpSheetHeader(this.title, {super.key, this.trailing});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: RpSpace.s2),
+      child: Row(children: [
+        Expanded(child: Text(title, style: rpText(RpType.bodyL, weight: 600, color: p.text, height: 1.4))),
+        ?trailing,
+        IconButton(
+          key: const ValueKey('sheet-close'),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          visualDensity: VisualDensity.compact,
+          iconSize: 20,
+          onPressed: () => Navigator.maybePop(context),
+          icon: Icon(Icons.close_rounded, color: p.muted),
+        ),
+      ]),
+    );
+  }
+}
+
+
+/// مودالِ پایین‌صفحه‌ی یکپارچه: حداکثر ۸۸٪ ارتفاع، عرضِ مناسب (تم)، گوشه و دستگیره از Design System.
+Future<T?> showRpSheet<T>({required BuildContext context, required WidgetBuilder builder, Color? backgroundColor, bool isScrollControlled = true, bool useSafeArea = true}) =>
+    showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: isScrollControlled,
+      useSafeArea: useSafeArea,
+      backgroundColor: backgroundColor,
+      builder: (ctx) => ConstrainedBox(constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * .9 - 48), child: builder(ctx)),
+    );

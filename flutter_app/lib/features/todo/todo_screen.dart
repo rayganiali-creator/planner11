@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/pro_features.dart';
+import '../../ui/pro_widgets.dart';
 import '../../app/i18n.dart';
 import '../../core/date_fmt.dart';
 import '../shared/date_picker.dart';
@@ -238,12 +240,10 @@ class _TodoCard extends StatelessWidget {
   }
 
   void _edit(BuildContext context) {
-    showModalBottomSheet<void>(
+    showRpSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: context.rp.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
       builder: (_) => _TodoEditor(todo: todo, actions: actions, notifier: notifier),
     );
   }
@@ -275,7 +275,7 @@ class _TodoEditorState extends State<_TodoEditor> {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(RpSpace.s4), children: [
-        Text(context.tr('ویرایش کار', 'Edit task'), style: rpText(RpType.title, weight: 800, color: p.text)),
+        RpSheetHeader(context.tr('ویرایش کار', 'Edit task')),
         const SizedBox(height: RpSpace.s3),
         TextField(controller: title, decoration: InputDecoration(labelText: context.tr('عنوان', 'Title'))),
         const SizedBox(height: RpSpace.s2),
@@ -298,7 +298,7 @@ class _TodoEditorState extends State<_TodoEditor> {
               selected: mode == m.$1,
               onSelected: (_) {
                 if (m.$1 == 'custom' && !a.isPro) {
-                  a.toasts.show(context.tr('⭐ تکرار در روزهای خاص هفته از امکانات پرو است. (در نسخه‌ی رایگان: بدون تکرار یا همه‌روزه)', '⭐ Repeating on specific weekdays is a Pro feature (free: none or daily).'), ms: 3400);
+                  showProBlocked(context, ProFeature.todoRepeatDays);
                   return;
                 }
                 setState(() => mode = m.$1);
@@ -325,7 +325,7 @@ class _TodoEditorState extends State<_TodoEditor> {
               final tt = sub.text.trim();
               if (tt.isEmpty) return;
               if (!a.isPro && subs.length >= freeSubtaskLimit) {
-                a.toasts.show(context.tr('⭐ در نسخه‌ی رایگان هر کار حداکثر ۳ زیرتسک دارد. زیرتسک نامحدود از امکانات پرو است.', '⭐ Free tasks have up to 3 subtasks. Unlimited subtasks are a Pro feature.'), ms: 3400);
+                showProBlocked(context, ProFeature.subtasks);
                 return;
               }
               setState(() {
@@ -335,8 +335,7 @@ class _TodoEditorState extends State<_TodoEditor> {
             },
           ),
         ]),
-        if (!a.isPro)
-          Text(context.tr('نسخه‌ی رایگان: حداکثر ${context.n(freeSubtaskLimit)} زیرتسک برای هر کار (پرو: نامحدود)', 'Free: up to $freeSubtaskLimit subtasks per task (Pro: unlimited)'), style: rpText(RpType.caption, weight: 500, color: p.muted)),
+        const ProNotice(ProFeature.subtasks, showCta: false),
         const SizedBox(height: RpSpace.s4),
         Row(children: [
           Expanded(child: RpButton(context.tr('انصراف', 'Cancel'), kind: BtnKind.ghost, onTap: () => Navigator.pop(context))),

@@ -82,10 +82,10 @@ TileStyle tileStyleOf(Doc st, RpPalette p) => TileStyle(
 
 class _Colors {
   final Color ok, bad, neutral;
-  _Colors(Doc st, RpPalette p)
-      : ok = tileColor(_hex((st['tileColors'] as Map?)?['success'], p.ok), st['theme'] == 'dark'),
-        bad = tileColor(_hex((st['tileColors'] as Map?)?['fail'], p.bad), st['theme'] == 'dark'),
-        neutral = tileColor(_hex((st['tileColors'] as Map?)?['neutral'], p.line), st['theme'] == 'dark');
+  _Colors(Doc st, RpPalette p, bool dark)
+      : ok = tileColor(_hex((st['tileColors'] as Map?)?['success'], p.ok), dark),
+        bad = tileColor(_hex((st['tileColors'] as Map?)?['fail'], p.bad), dark),
+        neutral = tileColor(_hex((st['tileColors'] as Map?)?['neutral'], p.line), dark);
 }
 
 ({DateTime first, int len}) _monthInfo(bool jalali, int y, int m) {
@@ -139,7 +139,7 @@ class _MonthScreenState extends State<MonthScreen> {
         ? (fa ? persianMonths[m! - 1] : enMonths[toGregorian(y!, m!, 1).gm - 1])
         : (fa ? enMonths[m! - 1] : '${enMonths[m! - 1]} $y');
     final sub = jalali ? (fa ? toPersianDigits(y) : '$y') : '';
-    final cols = _Colors(st, p);
+    final cols = _Colors(st, p, context.rpBrightness == Brightness.dark);
     void move(int delta) => setState(() {
           m = m! + delta;
           if (m! > 12) {
@@ -249,7 +249,7 @@ class _YearScreenState extends State<YearScreen> {
     final today = startOfDay(context.read<AppActions>().today);
     y ??= jalali ? toJalaali(today.year, today.month, today.day).jy : today.year;
     final weekStart = (st['weekStart'] as num?)?.toInt() ?? 0;
-    final cols = _Colors(st, p);
+    final cols = _Colors(st, p, context.rpBrightness == Brightness.dark);
     final months = fa ? persianMonths : enMonths;
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
@@ -330,12 +330,10 @@ class _MiniMonth extends StatelessWidget {
 
 // ---------------------------------------------------------------- پنجره‌ی ثبتِ روز
 Future<void> showDaySheet(BuildContext context, DateTime d) {
-  return showModalBottomSheet<void>(
+  return showRpSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (_) => MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: context.read<AppStore>()),
@@ -365,7 +363,7 @@ class _DaySheet extends StatelessWidget {
       shrinkWrap: true,
       padding: const EdgeInsets.all(RpSpace.s4),
       children: [
-        Text(title, style: rpText(RpType.title, weight: 800, color: p.text)),
+        RpSheetHeader(title),
         const SizedBox(height: 4),
         Text(
           app.isEmpty ? context.tr('برای این روز عادتی فعال نیست.', 'No active habits.') : (future ? context.tr('این روز هنوز نرسیده.', 'Not yet.') : context.tr('نتیجه رو ثبت کن:', 'Record:')),

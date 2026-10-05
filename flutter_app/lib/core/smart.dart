@@ -74,7 +74,9 @@ SaResult saCompute(Doc state, SaPeriod per) {
         bh.run = 0;
       }
     }
-    if (due > 0) {
+    // «امروز» تا وقتی چیزی ثبت نشده روزِ سررسید حساب نمی‌شود (نه شکست است نه موفقیت)؛ وگرنه ثبات و روزِ بی‌ثبت بی‌دلیل بدتر می‌شد
+    final isTodayEmpty = iso == per.to && ds + df == 0;
+    if (due > 0 && !isTodayEmpty) {
       r.dueDays++;
       if (ds + df > 0) r.activeDays++;
       if (ds == due) r.perfect++;
@@ -137,21 +139,27 @@ SaResult saCompute(Doc state, SaPeriod per) {
   return r;
 }
 
-String saSuggestion(String? reason, bool fa) {
+final List<(RegExp, String, String)> _saRules = [
+  (RegExp('خست|خواب|انرژی|tired|sleep', caseSensitive: false), 'زمان این عادت را به ساعتی ببرید که انرژی بیشتری دارید، یا نسخه‌ی کوتاه‌تری از آن تعریف کنید.', 'Move it to a higher-energy time of day, or define a shorter version.'),
+  (RegExp('وقت|زمان|سر ?کار|مشغول|busy|time', caseSensitive: false), 'یک زمان ثابت در تقویم برایش رزرو کنید و یادآوری بگذارید.', 'Reserve a fixed slot for it and set a reminder.'),
+  (RegExp('حوصله|انگیزه|تنبل|motivat|lazy', caseSensitive: false), 'هدف را کوچک کنید (مثلاً ۲ دقیقه) و بعد از انجام، به خودتان جایزه بدهید.', 'Shrink the goal (e.g. 2 minutes) and reward yourself afterwards.'),
+  (RegExp('گوشی|موبایل|شبکه|اینستا|phone|social', caseSensitive: false), 'هنگام این عادت گوشی را در اتاق دیگری بگذارید یا حالت تمرکز را روشن کنید.', 'Keep the phone in another room or turn on focus mode.'),
+  (RegExp('استرس|ناراحت|عصبی|stress|sad', caseSensitive: false), 'قبل از شروع، ۳ دقیقه تنفس آرام یا پیاده‌روی کوتاه را امتحان کنید.', 'Try 3 minutes of slow breathing or a short walk first.'),
+  (RegExp('مهمان|بیرون|سفر|travel|guest', caseSensitive: false), 'برای روزهای خاص یک نسخه‌ی «حداقلی» از عادت داشته باشید تا زنجیره نشکند.', 'Keep a minimal version for unusual days so the chain doesn’t break.'),
+];
+
+/// پیشنهادِ مرتبط با علتِ ثبت‌شده؛ اگر علت با هیچ قاعده‌ای نخواند null (پیشنهادِ عمومی ساخته نمی‌شود).
+String? saSuggestionOrNull(String? reason, bool fa) {
   final r = reason ?? '';
-  final rules = <(RegExp, String, String)>[
-    (RegExp('خست|خواب|انرژی|tired|sleep', caseSensitive: false), 'زمان این عادت را به ساعتی ببرید که انرژی بیشتری دارید، یا نسخه‌ی کوتاه‌تری از آن تعریف کنید.', 'Move it to a higher-energy time of day, or define a shorter version.'),
-    (RegExp('وقت|زمان|سر ?کار|مشغول|busy|time', caseSensitive: false), 'یک زمان ثابت در تقویم برایش رزرو کنید و یادآوری بگذارید.', 'Reserve a fixed slot for it and set a reminder.'),
-    (RegExp('حوصله|انگیزه|تنبل|motivat|lazy', caseSensitive: false), 'هدف را کوچک کنید (مثلاً ۲ دقیقه) و بعد از انجام، به خودتان جایزه بدهید.', 'Shrink the goal (e.g. 2 minutes) and reward yourself afterwards.'),
-    (RegExp('گوشی|موبایل|شبکه|اینستا|phone|social', caseSensitive: false), 'هنگام این عادت گوشی را در اتاق دیگری بگذارید یا حالت تمرکز را روشن کنید.', 'Keep the phone in another room or turn on focus mode.'),
-    (RegExp('استرس|ناراحت|عصبی|stress|sad', caseSensitive: false), 'قبل از شروع، ۳ دقیقه تنفس آرام یا پیاده‌روی کوتاه را امتحان کنید.', 'Try 3 minutes of slow breathing or a short walk first.'),
-    (RegExp('مهمان|بیرون|سفر|travel|guest', caseSensitive: false), 'برای روزهای خاص یک نسخه‌ی «حداقلی» از عادت داشته باشید تا زنجیره نشکند.', 'Keep a minimal version for unusual days so the chain doesn’t break.'),
-  ];
-  for (final x in rules) {
+  for (final x in _saRules) {
     if (x.$1.hasMatch(r)) return fa ? x.$2 : x.$3;
   }
-  return fa ? 'برای این مانع یک برنامه‌ی «اگر… آنگاه…» بنویسید؛ مثلاً «اگر این اتفاق افتاد، آنگاه…».' : 'Write an “if… then…” plan for this obstacle.';
+  return null;
 }
+
+/// نسخه‌ی JS (با پیشنهادِ عمومیِ پیش‌فرض)؛ فقط برای مقایسه‌ی تفاضلی با HTML.
+String saSuggestion(String? reason, bool fa) =>
+    saSuggestionOrNull(reason, fa) ?? (fa ? 'برای این مانع یک برنامه‌ی «اگر… آنگاه…» بنویسید؛ مثلاً «اگر این اتفاق افتاد، آنگاه…».' : 'Write an “if… then…” plan for this obstacle.');
 
 class SaInsight {
   final String level, ico, t, s;

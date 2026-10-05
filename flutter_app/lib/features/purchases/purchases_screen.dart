@@ -11,6 +11,7 @@ import '../../app/toast.dart';
 import '../../data/billing.dart';
 import '../../data/owner_unlock.dart';
 import '../../ui/tokens.dart';
+import '../../ui/pro_widgets.dart';
 import '../../ui/widgets.dart';
 
 String purDateLabel(num? ts, {required bool fa, required bool jalali, bool withTime = false}) {
@@ -110,7 +111,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
           const SizedBox(height: RpSpace.s3),
         ],
         hero,
-        if (!lifetime) ...[
+        if (!lifetime && (!premium || timed)) ...[
           const SizedBox(height: RpSpace.s4),
           AppCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -149,6 +150,8 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
             ]),
           ),
         ],
+        const SizedBox(height: RpSpace.s3),
+        const ProComparison(),
         const SizedBox(height: RpSpace.s3),
         RpButton(context.tr('بازیابی خریدها', 'Restore purchases'), icon: LucideIcons.refreshCw, kind: BtnKind.tonal, onTap: () async {
           await billing.restore();

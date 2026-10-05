@@ -6,6 +6,7 @@ import '../calendar/tile_style.dart';
 import '../../app/i18n.dart';
 import '../../data/app_store.dart';
 import '../../data/files_service.dart';
+import '../../ui/app_themes.dart';
 import '../../ui/custom_theme.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
@@ -40,9 +41,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         );
 
-    final intensity = (intensityOf(st) * 100).round();
     final tc = (st['tileColors'] is Map ? st['tileColors'] as Map : const {});
-    Color col(Object? v, Color f) => parseHex(v) ?? f;
 
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
@@ -50,14 +49,31 @@ class SettingsScreen extends StatelessWidget {
         Text(context.tr('تنظیمات', 'Settings'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
         const SizedBox(height: RpSpace.s3),
         section(
-          context.tr('🌗 روشن / تاریک', '🌗 Light / Dark'),
-          Row(children: [
-            Text(context.tr('روشن', 'Light'), style: rpText(RpType.label, weight: 600, color: p.muted)),
-            Expanded(child: Slider(value: intensity.toDouble(), min: 0, max: 100, divisions: 100, onChanged: (v) => set('themeIntensity', v.round()))),
-            Text(context.tr('تاریک', 'Dark'), style: rpText(RpType.label, weight: 600, color: p.muted)),
-            SizedBox(width: 44, child: Text(context.n('$intensity${fa ? '٪' : '%'}'), textAlign: TextAlign.end, style: rpText(RpType.label, weight: 800, color: p.text))),
+          context.tr('🎨 ظاهر و تم', '🎨 Appearance & Theme'),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(context.tr('حالت', 'Mode'), style: rpText(RpType.label, weight: 500, color: p.muted)),
+            const SizedBox(height: 6),
+            Wrap(spacing: 8, children: [
+              for (final m in const [('light', 'روشن', 'Light'), ('dark', 'تاریک', 'Dark'), ('system', 'سیستم', 'System')])
+                ChoiceChip(
+                  key: ValueKey('mode-${m.$1}'),
+                  label: Text(fa ? m.$2 : m.$3),
+                  selected: themeMode(st) == m.$1,
+                  onSelected: (_) {
+                    st['theme'] = m.$1;
+                    st['themeIntensity'] = m.$1 == 'dark' ? 100 : 0; // کلیدِ سازگار با بکاپ
+                    store.save();
+                  },
+                ),
+            ]),
+            const SizedBox(height: RpSpace.s3),
+            Text(context.tr('تم', 'Theme'), style: rpText(RpType.label, weight: 500, color: p.muted)),
+            const SizedBox(height: 6),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final t in appThemes) _ThemeCard(def: t, selected: themeById(st['accentTheme']).id == t.id, dark: context.rpBrightness == Brightness.dark, onTap: () => set('accentTheme', t.id)),
+            ]),
           ]),
-          hint: context.tr('با این اسلایدر می‌توانی میزان روشن یا تاریک بودن پس‌زمینه را دقیقاً از صفر تا صد تنظیم کنی.', 'Use this slider to set exactly how light or dark the background is, from 0 to 100.'),
+          hint: context.tr('تم و حالت مستقل‌اند: مثلاً «زمرد + تاریک». انتخاب در حافظه می‌ماند.', 'Theme and mode are independent, e.g. “Emerald + Dark”. Your choice is remembered.'),
         ),
         section(
           context.tr('شکل کاشی‌ها (۲۰+ شکل)', 'Tile Shapes (20+)'),
@@ -72,53 +88,19 @@ class SettingsScreen extends StatelessWidget {
           ]),
         ),
         section(
-          context.tr('رنگ پس‌زمینه (طیف کامل)', 'Background (full spectrum)'),
-          _ColorRow(label: context.tr('هر رنگی که دوست داری انتخاب کن', 'Pick any color you like'), color: col(st['bgColor'], p.bg), onPick: (c) => set('bgColor', toHex(c))),
-          hint: context.tr('در حالت تاریک، نسخه‌ی تیره‌ی همین رنگ به‌طور خودکار ساخته می‌شود.', 'In dark mode, a dark version of this color is generated automatically.'),
-        ),
-        section(
-          context.tr('رنگ اصلی (دکمه‌ها و متن‌های برجسته)', 'Accent Color'),
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final a in accents)
-              GestureDetector(
-                onTap: () => set('accentTheme', a.id),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [a.lightA, a.lightB]),
-                    borderRadius: BorderRadius.circular(RpRadius.sm),
-                    border: Border.all(color: st['accentTheme'] == a.id || (st['accentTheme'] == null && a.id == 'teal') ? p.text : Colors.transparent, width: 2),
-                  ),
-                  child: Text(fa ? a.fa : a.en, style: rpText(RpType.label, weight: 700, color: Colors.white)),
-                ),
-              ),
-          ]),
-        ),
-        section(
-          context.tr('رنگ کاشی‌های روز در تقویم (طیف کامل)', 'Calendar day tile colors (full spectrum)'),
-          Column(children: [
-            _ColorRow(label: context.tr('روز موفق', 'Success day'), color: col(tc['success'], const Color(0xFF3E9B4F)), onPick: (c) => set('tileColors', {...tc, 'success': toHex(c)})),
-            _ColorRow(label: context.tr('روز ناموفق', 'Failed day'), color: col(tc['fail'], const Color(0xFFC0483B)), onPick: (c) => set('tileColors', {...tc, 'fail': toHex(c)})),
-            _ColorRow(label: context.tr('روز ثبت‌نشده', 'Unset day'), color: col(tc['neutral'], const Color(0xFFE5DBC8)), onPick: (c) => set('tileColors', {...tc, 'neutral': toHex(c)})),
+          context.tr('رنگ کاشی‌های روز در تقویم', 'Calendar day tile colors'),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _SwatchRow(label: context.tr('روز موفق', 'Success day'), selected: tc['success'], options: const ['#3E9B4F', '#2F9E57', '#1E8E5A', '#2B7FB8', '#0E8FB0'], onPick: (h) => set('tileColors', {...tc, 'success': h})),
+            _SwatchRow(label: context.tr('روز ناموفق', 'Failed day'), selected: tc['fail'], options: const ['#C0483B', '#D0455F', '#E65100', '#B03A5B', '#8E3B8E'], onPick: (h) => set('tileColors', {...tc, 'fail': h})),
+            _SwatchRow(label: context.tr('روز ثبت‌نشده', 'Unset day'), selected: tc['neutral'], options: const ['#E5DBC8', '#DCDCDC', '#D5E2EC', '#EBD7DE', '#D8E4D8'], onPick: (h) => set('tileColors', {...tc, 'neutral': h})),
           ]),
           hint: context.tr('این رنگ‌ها روی کاشی‌های ماه/سال اعمال می‌شن؛ در حالت تاریک نسخه‌ی روشن‌ترشان استفاده می‌شود.', 'These colors apply to the month/year tiles; a lighter version is used in dark mode.'),
         ),
         section(
           context.tr('🎨 رنگ دایره‌های پیشرفت', '🎨 Level Circle Colors'),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final h in levelColors)
-                GestureDetector(
-                  onTap: () => set('levelReachedColor', h),
-                  child: Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(color: parseHex(h), shape: BoxShape.circle, border: Border.all(color: (st['levelReachedColor'] ?? '#146B69').toString().toUpperCase() == h ? p.text : Colors.transparent, width: 3)),
-                    child: (st['levelReachedColor'] ?? '#146B69').toString().toUpperCase() == h ? const Icon(Icons.check, color: Colors.white, size: 18) : null,
-                  ),
-                ),
-            ]),
-            const SizedBox(height: 8),
-            _ColorRow(label: context.tr('رنگ استادی', 'Mastery Color'), color: col(st['masteryColor'], const Color(0xFFC79A2E)), onPick: (c) => set('masteryColor', toHex(c))),
+            _SwatchRow(label: context.tr('سطح‌های رسیده', 'Reached levels'), selected: st['levelReachedColor'], options: levelColors, onPick: (h) => set('levelReachedColor', h)),
+            _SwatchRow(label: context.tr('رنگ استادی', 'Mastery Color'), selected: st['masteryColor'], options: const ['#C79A2E', '#E3BE5D', '#D4A017', '#E65100', '#6C3FA6', '#B03A5B'], onPick: (h) => set('masteryColor', h)),
           ]),
         ),
         section(
@@ -195,53 +177,70 @@ class AppVersion {
   static const code = 100;
 }
 
-class _ColorRow extends StatelessWidget {
+/// ردیفِ رنگ‌های آماده (بدون انتخابگرِ آزادِ رنگ)
+class _SwatchRow extends StatelessWidget {
   final String label;
-  final Color color;
-  final ValueChanged<Color> onPick;
-  const _ColorRow({required this.label, required this.color, required this.onPick});
+  final Object? selected;
+  final List<String> options;
+  final void Function(String hex) onPick;
+  const _SwatchRow({required this.label, required this.selected, required this.options, required this.onPick});
   @override
   Widget build(BuildContext context) {
     final p = context.rp;
-    return InkWell(
-      onTap: () async {
-        final c = await showColorPicker(context, color);
-        if (c != null) onPick(c);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(children: [
-          Expanded(child: Text(label, style: rpText(RpType.body, weight: 500, color: p.text))),
-          Container(width: 44, height: 28, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8), border: Border.all(color: p.line))),
+    final cur = '${selected ?? ''}'.toUpperCase();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(label, style: rpText(RpType.body, weight: 500, color: p.text)),
+        const SizedBox(height: 8),
+        Wrap(spacing: 10, runSpacing: 10, children: [
+          for (final h in options)
+            GestureDetector(
+              key: ValueKey('sw-$label-$h'),
+              onTap: () => onPick(h),
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(color: parseHex(h), shape: BoxShape.circle, border: Border.all(color: cur == h.toUpperCase() ? p.text : p.line, width: cur == h.toUpperCase() ? 2.5 : 1)),
+              ),
+            ),
         ]),
-      ),
+      ]),
     );
   }
 }
 
-/// انتخابگرِ رنگِ طیف کامل (سه لغزنده‌ی رنگ‌مایه/اشباع/روشنایی)
-Future<Color?> showColorPicker(BuildContext context, Color initial) {
-  final h0 = hexToHsl(initial);
-  double h = h0.h, s = h0.s, l = h0.l;
-  return showDialog<Color>(
-    context: context,
-    builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
-      final c = hslToColor(h, s, l);
-      return AlertDialog(
-        title: Text(toHex(c), textDirection: TextDirection.ltr),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(height: 48, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(12))),
-          Slider(value: h.clamp(0, 360).toDouble(), min: 0, max: 360, onChanged: (v) => setS(() => h = v)),
-          Slider(value: s.clamp(0, 100).toDouble(), min: 0, max: 100, onChanged: (v) => setS(() => s = v)),
-          Slider(value: l.clamp(0, 100).toDouble(), min: 0, max: 100, onChanged: (v) => setS(() => l = v)),
+/// کارتِ تم: نام + ۵ نقطه‌ی رنگیِ همان تم (در حالتِ فعلی) + نشانِ انتخاب
+class _ThemeCard extends StatelessWidget {
+  final AppThemeDef def;
+  final bool selected, dark;
+  final VoidCallback onTap;
+  const _ThemeCard({required this.def, required this.selected, required this.dark, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    final pal = def.of(dark);
+    final fa = context.isFa;
+    return GestureDetector(
+      key: ValueKey('theme-${def.id}'),
+      onTap: onTap,
+      child: Container(
+        width: 148,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: pal.bg, borderRadius: BorderRadius.circular(RpRadius.md), border: Border.all(color: selected ? pal.primary : p.line, width: selected ? 2.5 : 1)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text('${def.emoji} ${fa ? def.fa : def.en}', style: rpText(RpType.body, weight: 600, color: pal.text, height: 1.3))),
+            if (selected) Icon(Icons.check_circle_rounded, size: 18, color: pal.primary),
+          ]),
+          const SizedBox(height: 8),
+          Row(children: [for (final c in [pal.primary, pal.secondary, pal.chart[2], pal.chart[3], pal.surface]) Container(width: 16, height: 16, margin: const EdgeInsetsDirectional.only(end: 5), decoration: BoxDecoration(color: c, shape: BoxShape.circle, border: Border.all(color: pal.line)))]),
+          const SizedBox(height: 6),
+          Text(context.tr('روشن / تاریک', 'Light / Dark'), style: rpText(RpType.caption, weight: 500, color: pal.muted, height: 1.2)),
         ]),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(ctx.tr('انصراف', 'Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, c), child: Text(ctx.tr('انتخاب', 'Select'))),
-        ],
-      );
-    }),
-  );
+      ),
+    );
+  }
 }
 
 

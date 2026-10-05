@@ -10,17 +10,14 @@ import '../../ui/charts.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 
-const _palette = [Color(0xFF1FA2A0), Color(0xFFF4B942), Color(0xFFEF6F6C), Color(0xFF7C6CF2), Color(0xFF3DA5F4), Color(0xFF43C59E), Color(0xFFF28CB1), Color(0xFF8D99AE)];
 
 Future<void> showHabitCharts(BuildContext context, Map habit, {String type = 'trigger'}) {
   final store = context.read<AppStore>();
   final a = context.read<AppActions>();
-  return showModalBottomSheet<void>(
+  return showRpSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: context.rp.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(RpRadius.xl))),
     builder: (_) => MultiProvider(providers: [ChangeNotifierProvider.value(value: store), Provider.value(value: a)], child: _Sheet(habit: habit, type: type)),
   );
 }
@@ -69,7 +66,7 @@ class _SheetState extends State<_Sheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: ListView(padding: const EdgeInsets.all(RpSpace.s4), shrinkWrap: true, children: [
-        Text('📊 ${context.tr('نمودارهای ', 'Charts for ')}${widget.habit['name']}', style: rpText(RpType.title, weight: 800, color: p.text)),
+        RpSheetHeader('📊 ${context.tr('نمودارهای ', 'Charts for ')}${widget.habit['name']}'),
         const SizedBox(height: RpSpace.s3),
         Row(children: [mini('trigger'), mini('incentive'), mini('success'), mini('fail')]),
         const SizedBox(height: RpSpace.s3),
@@ -98,7 +95,7 @@ class _SheetState extends State<_Sheet> {
         for (int i = 0; i < sorted.length; i++)
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.circle, size: 12, color: _palette[i % _palette.length]),
+            leading: Icon(Icons.circle, size: 12, color: context.rp.chart[i % context.rp.chart.length]),
             title: Text(sorted[i].key, style: rpText(RpType.body, weight: 600, color: p.text)),
             trailing: Row(mainAxisSize: MainAxisSize.min, children: [
               Text(context.n(sorted[i].value), style: rpText(RpType.body, weight: 800, color: p.text)),
