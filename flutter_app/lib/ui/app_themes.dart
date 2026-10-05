@@ -1,4 +1,4 @@
-// سیستم Theme: ۶ هویتِ بصریِ مستقل × (Light / Dark). هر کدام یک مجموعه‌ی کاملِ توکن است (نه فقط رنگِ اصلی).
+// سیستم Theme: ۹ هویتِ بصریِ مستقل × (Light / Dark). هر کدام یک مجموعه‌ی کاملِ توکن است (نه فقط رنگِ اصلی).
 // ساختار (Layout/Typography/Component) برای همه یکسان است؛ فقط هویتِ رنگی عوض می‌شود.
 // انتخابِ تم در state['accentTheme'] و حالت در state['theme'] (light | dark | system) ذخیره می‌شود (کلیدهای قدیمیِ بکاپ).
 import 'package:flutter/material.dart';
@@ -51,6 +51,15 @@ final List<AppThemeDef> appThemes = [
   AppThemeDef('mono', 'تک‌رنگ', 'Monochrome', '⚪',
       _make(_lightBase, bg: 0xF6F6F6, surface: 0xFFFFFF, surface2: 0xEEEEEE, line: 0xDCDCDC, text: 0x111111, muted: 0x585858, primary: 0x1E1E1E, primary2: 0x3A3A3A, soft: 0xE8E8E8, on: 0xFFFFFF, secondary: 0x777777, chart: [0x1E1E1E, 0x6A6A6A, 0x2B7FB8, 0xC08411, 0xC0483C, 0x2E8B57]),
       _make(_darkBase, bg: 0x0B0B0B, surface: 0x151515, surface2: 0x101010, line: 0x2A2A2A, text: 0xF2F2F2, muted: 0x9C9C9C, primary: 0xF2F2F2, primary2: 0xCFCFCF, soft: 0x262626, on: 0x111111, secondary: 0xB0B0B0, chart: [0xF2F2F2, 0xB0B0B0, 0x5DB6F0, 0xF2C14E, 0xFF8672, 0x52D6A0])),
+  AppThemeDef('royal', 'آبی سلطنتی', 'Royal Blue', '🔷',
+      _make(_lightBase, bg: 0xF2F6FD, surface: 0xFFFFFF, surface2: 0xE8EFFA, line: 0xD3DEF0, text: 0x0F1B33, muted: 0x4A5B78, primary: 0x1D4ED8, primary2: 0x2759E0, soft: 0xDCE7FC, on: 0xFFFFFF, secondary: 0x5B8DEF, chart: [0x1D4ED8, 0x5B8DEF, 0x1E9A8A, 0xC08411, 0xC0483C, 0x7A5AC9]),
+      _make(_darkBase, bg: 0x090F1D, surface: 0x111A2E, surface2: 0x0D1526, line: 0x22304D, text: 0xE6EDFB, muted: 0x8FA2C4, primary: 0x6C9BFF, primary2: 0x4F84F5, soft: 0x172A52, on: 0x071433, secondary: 0xA8C4FF, chart: [0x6C9BFF, 0xA8C4FF, 0x3FD0B8, 0xF2C14E, 0xFF8672, 0xB49BFF])),
+  AppThemeDef('coral', 'مرجانی', 'Coral', '🧡',
+      _make(_lightBase, bg: 0xFDF4F1, surface: 0xFFFFFF, surface2: 0xF9E8E2, line: 0xF0D5CC, text: 0x2B1713, muted: 0x7A5249, primary: 0xB93A25, primary2: 0xCB4A30, soft: 0xFBE1D9, on: 0xFFFFFF, secondary: 0xF08A6E, chart: [0xB93A25, 0xD9674A, 0x2B7FB8, 0xC08411, 0x7A5AC9, 0x2E9B6A]),
+      _make(_darkBase, bg: 0x170C09, surface: 0x22130F, surface2: 0x1C0F0C, line: 0x3B2119, text: 0xF7E9E4, muted: 0xBC9A8E, primary: 0xFF8B6E, primary2: 0xF2724F, soft: 0x3B1B12, on: 0x3A0E04, secondary: 0xFFB8A3, chart: [0xFF8B6E, 0xFFB8A3, 0x5DB6F0, 0xF2C14E, 0xB49BFF, 0x52D6A0])),
+  AppThemeDef('lagoon', 'فیروزه‌ای', 'Lagoon', '🐚',
+      _make(_lightBase, bg: 0xF0F7F7, surface: 0xFFFFFF, surface2: 0xE4F1F0, line: 0xCFE3E2, text: 0x0C2224, muted: 0x456769, primary: 0x0B6E66, primary2: 0x0D7F76, soft: 0xD5EFEC, on: 0xFFFFFF, secondary: 0x3DB3A8, chart: [0x0B6E66, 0x2A9D92, 0x2B7FB8, 0xC08411, 0xC0483C, 0x7A5AC9]),
+      _make(_darkBase, bg: 0x07161A, surface: 0x0D2328, surface2: 0x0A1C20, line: 0x1A3A40, text: 0xE2F2F2, muted: 0x86AAAD, primary: 0x3FD6C6, primary2: 0x2BBFB0, soft: 0x0F3A3B, on: 0x042226, secondary: 0x8CE8DC, chart: [0x3FD6C6, 0x8CE8DC, 0x5DB6F0, 0xF2C14E, 0xFF8672, 0xB49BFF])),
 ];
 
 const String defaultThemeId = 'emerald';

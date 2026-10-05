@@ -298,7 +298,7 @@ void main() {
       await drain(tester);
     });
 
-    testWidgets('مجموعه‌ی نشان‌ها: شمارنده، فیلترِ دسته، جزئیات، پیشرفت، ویژه کردن؛ فیلترِ پیشرفته فقط پرو', (tester) async {
+    testWidgets('مجموعه‌ی نشان‌ها: شمارنده، فیلترِ دسته، جزئیات، پیشرفت، ویژه کردن؛ فیلترِ پیشرفته برای همه آزاد است', (tester) async {
       final (store, a, _) = await boot(tester, view: AppView.badges, prep: (s, a) {
         final hid = addHabit(a, 'ورزش');
         (s.state['habits'] as List).single['createdAt'] = iso(20);
@@ -312,8 +312,14 @@ void main() {
       expect(find.byKey(const ValueKey('badge-first_habit')), findsNothing);
       expect(find.byKey(const ValueKey('badge-focus_1')), findsOneWidget);
       await tapT(tester, 'همه');
-      // فیلترِ پیشرفته برای Free: توستِ محدودیت، بدونِ تغییر
+      // فیلترِ پیشرفته برای Free هم کار می‌کند (قفل نیست): فقط بازشده‌ها
       await tapT(tester, 'بازشده');
+      expect(find.byKey(const ValueKey('badge-focus_1')), findsNothing);
+      expect(find.byKey(const ValueKey('badge-first_habit')), findsOneWidget);
+      final allChip = find.widgetWithText(ChoiceChip, 'همه').last; // «همه»ی ردیفِ فیلترِ پیشرفته
+      await Scrollable.ensureVisible(tester.element(allChip), alignment: 0.5);
+      await tester.tap(allChip);
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.byKey(const ValueKey('badge-focus_1')), findsOneWidget);
       // جزئیات: نزدیک به باز شدن (۵ از ۷)
       await vis(tester, find.byKey(const ValueKey('badge-cons_7')));

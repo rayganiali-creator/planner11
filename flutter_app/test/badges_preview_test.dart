@@ -1,4 +1,4 @@
-// پیش‌نمایشِ تصویریِ صفحه‌ی نشان‌ها در اپ (مجموعه‌ی ۴۸تایی) — فقط برای دیدنِ نتیجه: flutter test --update-goldens test/badges_preview_test.dart
+// پیش‌نمایشِ تصویریِ صفحه‌ی نشان‌ها در اپ (مجموعه‌ی ۴۸تایی) — فقط برای دیدنِ نتیجه: BADGE_PREVIEW=1 flutter test --update-goldens test/badges_preview_test.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,7 +9,7 @@ import 'package:routine_planner/core/progress/achievements.dart';
 import 'progress_ui_test.dart';
 
 void main() {
-  testWidgets('پیش‌نمایشِ صفحه‌ی نشان‌ها', (tester) async {
+  testWidgets('پیش‌نمایشِ صفحه‌ی نشان‌ها', skip: Platform.environment['BADGE_PREVIEW'] != '1', (tester) async {
     final loader = FontLoader('Vazirmatn')..addFont(Future.value(ByteData.sublistView(File('assets/fonts/Vazirmatn-arabic.ttf').readAsBytesSync())));
     await loader.load();
     final (_, _, _) = await boot(tester, view: AppView.badges, size: const Size(1080, 4200), prep: (s, a) {

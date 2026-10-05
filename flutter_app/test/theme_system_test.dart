@@ -1,4 +1,4 @@
-// سیستم Theme: ۶ تم × (روشن/تاریک) — توکن‌های کامل، خوانایی (WCAG)، پایداری، تمایز و رندر در همه‌ی صفحه‌ها.
+// سیستم Theme: ۹ تم × (روشن/تاریک) — توکن‌های کامل، خوانایی (WCAG)، پایداری، تمایز و رندر در همه‌ی صفحه‌ها.
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -14,9 +14,9 @@ import 'package:routine_planner/ui/tokens.dart';
 import 'tokens_test.dart' show contrast;
 
 void main() {
-  test('دقیقاً ۶ تمِ آماده، هرکدام با نسخه‌ی روشن و تاریکِ مستقل', () {
-    expect(appThemes.length, 6);
-    expect({for (final t in appThemes) t.id}.length, 6);
+  test('دقیقاً ۹ تمِ آماده، هرکدام با نسخه‌ی روشن و تاریکِ مستقل', () {
+    expect(appThemes.length, 9);
+    expect({for (final t in appThemes) t.id}.length, 9);
     for (final t in appThemes) {
       expect(t.light.bg, isNot(t.dark.bg), reason: t.id);
       expect(t.light.text, isNot(t.dark.text), reason: t.id);
@@ -29,9 +29,9 @@ void main() {
   test('تم‌ها واقعاً متمایزند (پالتِ اصلی/زمینه/نمودار تکراری نیست)', () {
     for (final dark in [false, true]) {
       final ps = [for (final t in appThemes) t.of(dark)];
-      expect({for (final p in ps) p.primary.toARGB32()}.length, 6);
-      expect({for (final p in ps) p.bg.toARGB32()}.length, 6);
-      expect({for (final p in ps) p.chart.map((c) => c.toARGB32()).join(',')}.length, 6);
+      expect({for (final p in ps) p.primary.toARGB32()}.length, 9);
+      expect({for (final p in ps) p.bg.toARGB32()}.length, 9);
+      expect({for (final p in ps) p.chart.map((c) => c.toARGB32()).join(',')}.length, 9);
     }
   });
 

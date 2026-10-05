@@ -1,8 +1,7 @@
-// «نشان‌های من»: مجموعه‌ی کامل با فیلتر و مرتب‌سازی؛ فیلترهای پیشرفته و مرتب‌سازیِ کمیابی فقط پرو است.
+// «نشان‌های من»: مجموعه‌ی کامل با فیلتر و مرتب‌سازی (همه‌ی فیلترها برای همه آزاد است).
 import 'package:flutter/material.dart';
 
 import '../../app/i18n.dart';
-import '../../core/pro_features.dart';
 import '../../core/progress/achievements.dart';
 import '../../ui/pro_widgets.dart';
 import '../../ui/tokens.dart';
@@ -21,10 +20,10 @@ class _BadgesScreenState extends State<BadgesScreen> {
   String cat = 'all', sort = 'default', stateF = 'all';
   BadgeTier? tierF;
 
-  List<AchStatus> _apply(ProgressData d, bool pro) {
+  List<AchStatus> _apply(ProgressData d) {
     var l = d.statuses.where((s) => cat == 'all' || s.def.cat == cat).toList();
-    if (pro && stateF != 'all') l = l.where((s) => stateF == 'unlocked' ? s.unlocked : stateF == 'near' ? s.state == AchState.near : (!s.unlocked)).toList();
-    if (pro && tierF != null) l = l.where((s) => s.def.tier == tierF).toList();
+    if (stateF != 'all') l = l.where((s) => stateF == 'unlocked' ? s.unlocked : stateF == 'near' ? s.state == AchState.near : (!s.unlocked)).toList();
+    if (tierF != null) l = l.where((s) => s.def.tier == tierF).toList();
     switch (sort) {
       case 'recent':
         l.sort((a, b) => (b.unlockedAt ?? -1).compareTo(a.unlockedAt ?? -1));
@@ -41,13 +40,12 @@ class _BadgesScreenState extends State<BadgesScreen> {
     final p = context.rp;
     final d = progressDataOf(context);
     final pro = context.isPro;
-    final shown = _apply(d, pro);
+    final shown = _apply(d);
     final cats = [('all', context.tr('همه', 'All')), for (final c in badgeCategories) (c.id, context.tr(c.nameFa, c.nameEn))];
     Widget chip(String label, bool on, VoidCallback f, {bool locked = false}) => Padding(
           padding: const EdgeInsetsDirectional.only(end: 6),
           child: ChoiceChip(label: Row(mainAxisSize: MainAxisSize.min, children: [Text(label), if (locked) ...[const SizedBox(width: 4), const ProLockIcon(size: 12)]]), selected: on, onSelected: (_) => f(), visualDensity: VisualDensity.compact),
         );
-    void proOnly(VoidCallback f) => pro ? f() : showProBlocked(context, ProFeature.badgeFilters);
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
@@ -67,15 +65,15 @@ class _BadgesScreenState extends State<BadgesScreen> {
             chip(context.tr('پیش‌فرض', 'Default'), sort == 'default', () => setState(() => sort = 'default')),
             chip(context.tr('تازه‌دریافت‌شده', 'Recently unlocked'), sort == 'recent', () => setState(() => sort = 'recent')),
             chip(context.tr('پیشرفت', 'Progress'), sort == 'progress', () => setState(() => sort = 'progress')),
-            chip(context.tr('کمیاب‌ترین', 'Rarest'), sort == 'rarest', () => proOnly(() => setState(() => sort = 'rarest')), locked: true),
+            chip(context.tr('کمیاب‌ترین', 'Rarest'), sort == 'rarest', () => setState(() => sort = 'rarest')),
           ]),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(children: [
             Text(context.tr('فیلتر پیشرفته: ', 'Advanced: '), style: rpText(RpType.label, weight: 500, color: p.muted)),
-            for (final e in [('all', context.tr('همه', 'All')), ('unlocked', context.tr('بازشده', 'Unlocked')), ('near', context.tr('نزدیک', 'Near')), ('locked', context.tr('قفل', 'Locked'))]) chip(e.$2, stateF == e.$1, () => e.$1 == 'all' ? setState(() => stateF = 'all') : proOnly(() => setState(() => stateF = e.$1)), locked: e.$1 != 'all'),
-            for (final t in BadgeTier.values) chip(context.tr(tierNameFa(t), tierNameEn(t)), tierF == t, () => proOnly(() => setState(() => tierF = tierF == t ? null : t)), locked: true),
+            for (final e in [('all', context.tr('همه', 'All')), ('unlocked', context.tr('بازشده', 'Unlocked')), ('near', context.tr('نزدیک', 'Near')), ('locked', context.tr('قفل', 'Locked'))]) chip(e.$2, stateF == e.$1, () => setState(() => stateF = e.$1)),
+            for (final t in BadgeTier.values) chip(context.tr(tierNameFa(t), tierNameEn(t)), tierF == t, () => setState(() => tierF = tierF == t ? null : t)),
           ]),
         ),
         const SizedBox(height: RpSpace.s3),
