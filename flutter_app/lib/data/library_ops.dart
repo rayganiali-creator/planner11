@@ -2,7 +2,6 @@
 import 'dart:math';
 
 import '../core/calendar.dart';
-import '../core/habits.dart';
 import 'actions.dart';
 import 'media_store.dart';
 import 'habit_ops.dart' show newHabitId;
@@ -119,10 +118,10 @@ extension LibraryOps on AppActions {
     var just = false;
     if (nowDone && !was) {
       b['completedAt'] = now.millisecondsSinceEpoch;
-      addCoins(store.state, coinMaxPerOp);
       store.save();
       just = true;
     }
+    afterChange();
     return (ok: true, justCompleted: just, pct: bookProgressPct(b).round());
   }
 }

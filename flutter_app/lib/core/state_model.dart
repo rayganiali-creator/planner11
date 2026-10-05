@@ -36,9 +36,6 @@ Doc _defaultStateLiteral() => <String, dynamic>{
       'reasons': {},
       'triggers': {},
       'triggerType': 'trigger',
-      'levelToastSent': {},
-      'levelReachedColor': '#146B69',
-      'masteryColor': '#C79A2E',
       'customUrgeSuggestions': [],
       'urgeHiddenIds': [],
       'habitNotes': {},
@@ -46,7 +43,8 @@ Doc _defaultStateLiteral() => <String, dynamic>{
       'langChosen': false,
       'isPremium': false,
       'proCache': null,
-      'avatar': {'gender': null, 'owned': {}, 'equipped': {'male': {}, 'female': {}}},
+      'progress': null, // ساخته‌ی سیستمِ پیشرفت (XP/نشان‌ها)؛ در اولین همگام‌سازی مهاجرت می‌شود
+      'todoLog': [],
       'termsAcceptedVersion': null,
       'termsAcceptedAt': null,
       'challenges': [],
@@ -60,13 +58,13 @@ Doc _freshScores() => {'points': 0, 'level': 1, 'streak': 0, 'lastDate': null, '
 /// هر میدانِ خراب یا با نوعِ اشتباه به نوعِ درستش برمی‌گردد. true = چیزی اصلاح شد.
 bool rpNormalizeState(Doc state) {
   bool fixed = false;
-  for (final k in const ['habits', 'journal', 'todos', 'books', 'challenges', 'medals', 'customUrgeSuggestions', 'urgeHiddenIds']) {
+  for (final k in const ['habits', 'journal', 'todos', 'books', 'challenges', 'medals', 'customUrgeSuggestions', 'urgeHiddenIds', 'todoLog']) {
     if (state[k] is! List) {
       state[k] = <dynamic>[];
       fixed = true;
     }
   }
-  for (final k in const ['records', 'reasons', 'triggers', 'habitNotes', 'behaviorJournal', 'levelToastSent', 'tileColors']) {
+  for (final k in const ['records', 'reasons', 'triggers', 'habitNotes', 'behaviorJournal', 'tileColors']) {
     final v = state[k];
     if (v == null || !_isObj(v) || !jsTruthy(v)) {
       state[k] = <String, dynamic>{};
@@ -83,16 +81,9 @@ bool rpNormalizeState(Doc state) {
     final n = sc.containsKey(k) ? jsToNumber(sc[k]) : double.nan;
     sc[k] = n.isFinite ? _intIfWhole(n) : (k == 'level' ? 1 : 0);
   }
-  if (state['avatar'] is! Map) {
-    state['avatar'] = {'gender': null, 'owned': {}, 'equipped': {'male': {}, 'female': {}}};
-  }
-  final av = state['avatar'] as Map;
-  if (!_isJsObject(av['owned']) || !jsTruthy(av['owned'])) av['owned'] = {};
-  if (!_isJsObject(av['equipped']) || !jsTruthy(av['equipped'])) av['equipped'] = {'male': {}, 'female': {}};
-  final eq = av['equipped'];
-  if (eq is Map) {
-    if (!_isJsObject(eq['male'])) eq['male'] = {};
-    if (!_isJsObject(eq['female'])) eq['female'] = {};
+  if (state['progress'] != null && state['progress'] is! Map) {
+    state['progress'] = null;
+    fixed = true;
   }
   // عادت/کار/کتاب/چالشِ بی‌شناسه قابل استفاده نیست
   bool hasId(Object? e) => e is Map && jsTruthy(e['id']);
@@ -230,9 +221,6 @@ void _applyDefaultsAfterLoad(Doc state) {
   if (!jsTruthy(state['reasons'])) state['reasons'] = {};
   if (!jsTruthy(state['triggers'])) state['triggers'] = {};
   if (absent('triggerType')) state['triggerType'] = 'trigger';
-  if (!jsTruthy(state['levelToastSent'])) state['levelToastSent'] = {};
-  if (!jsTruthy(state['levelReachedColor'])) state['levelReachedColor'] = '#146B69';
-  if (!jsTruthy(state['masteryColor'])) state['masteryColor'] = '#C79A2E';
   if (!jsTruthy(state['customUrgeSuggestions'])) state['customUrgeSuggestions'] = [];
   if (!jsTruthy(state['urgeHiddenIds'])) state['urgeHiddenIds'] = [];
   if (!jsTruthy(state['habitNotes'])) state['habitNotes'] = {};

@@ -20,6 +20,9 @@ import '../features/analytics/smart_screen.dart';
 import '../features/calendar/calendar_screens.dart';
 import '../features/habits/habits_screen.dart';
 import '../features/journal/journal_screen.dart';
+import '../features/progress/badges_screen.dart';
+import '../features/progress/progress_screen.dart';
+import '../features/progress/reveal.dart';
 import '../features/library/library_screen.dart';
 import '../features/pomodoro/pomodoro_screen.dart';
 import '../features/purchases/purchases_screen.dart';
@@ -63,8 +66,13 @@ class _ShellState extends State<Shell> {
     if (mounted) Future.delayed(const Duration(milliseconds: 500), _nextCheckin);
   }
 
+  void _onProgress() {
+    if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) showPendingReveals(context); });
+  }
+
   @override
   void dispose() {
+    try { context.read<AppActions>().progressTick.removeListener(_onProgress); } catch (_) {}
     _chTimer?.cancel();
     _remTimer?.cancel();
     super.dispose();
@@ -78,50 +86,13 @@ class _ShellState extends State<Shell> {
       final texts = context.read<AppTexts?>();
       if (texts != null) runFirstRunFlow(context, texts);
     });
+    final acts = context.read<AppActions>();
+    acts.progressTick.addListener(_onProgress);
+    WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) showPendingReveals(context); });
     _chTimer = Timer.periodic(const Duration(seconds: 20), (_) => _tickChallenges());
     _remTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       if (mounted) context.read<AppActions>().reminderTick(notifier: context.read<Notifier?>());
     });
-    // پنجره‌ی «سطح استادی» (ادامه‌ی مرحله‌ی بعد؟) — هر وقت ثبتی به سقفِ مرحله برسد
-    context.read<AppActions>().onCapstone = (hid, level) => _capstone(hid, level);
-  }
-
-  void _capstone(String hid, int level) {
-    final store = context.read<AppActions>().store;
-    final h = (store.state['habits'] as List).cast<Map>().firstWhere((x) => x['id'] == hid, orElse: () => {});
-    if (h.isEmpty) return;
-    final fa = store.state['lang'] != 'en';
-    showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        final p = ctx.rp;
-        return AlertDialog(
-          backgroundColor: p.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RpRadius.xl)),
-          title: Column(children: [
-            const Text('🏆', style: TextStyle(fontSize: 40)),
-            Text(fa ? 'سطح استادی!' : 'Mastery reached!', style: rpText(RpType.title, weight: 800, color: p.text)),
-          ]),
-          content: Text(
-            fa
-                ? 'تبریک! شما در عادت «${h['name']}» به سطح ${level >= 12 ? 'استاد اعظم' : 'استادی'} رسیدید. می‌خواهید این عادت را ادامه دهید و وارد مرحله‌ی بعد شوید؟'
-                : 'Congratulations! You reached ${level >= 12 ? 'Grand Master' : 'Master'} level in the habit "${h['name']}". Would you like to continue this habit and move to the next stage?',
-            textAlign: TextAlign.center,
-            style: rpText(RpType.body, weight: 500, color: p.text, height: 2),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(fa ? 'نه، همین‌جا کافیه' : 'No, this is enough')),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                context.read<AppActions>().continueToNextStage(hid);
-              },
-              child: Text(fa ? 'بله، ادامه بده' : 'Yes, continue'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -164,6 +135,8 @@ class _ShellState extends State<Shell> {
         AppView.settings => const SettingsScreen(),
         AppView.analytics => const AnalyticsScreen(),
         AppView.smart => const SmartScreen(),
+        AppView.progress => const ProgressScreen(),
+        AppView.badges => const BadgesScreen(),
         AppView.month => const MonthScreen(),
         AppView.year => const YearScreen(),
       };
@@ -295,6 +268,8 @@ class _ActionGridSheet extends StatelessWidget {
       (LucideIcons.timer, p.xpSoft, p.xpInk, context.tr('پومودورو', 'Pomodoro'), AppView.pomodoro),
       (LucideIcons.trophy, p.goldSoft, p.goldInk, context.tr('چالش‌ها', 'Challenges'), null),
       (LucideIcons.zap, p.hpSoft, p.hpInk, context.tr('لحظه‌ی وسوسه', 'Urge Moment'), null),
+      (LucideIcons.trendingUp, p.primarySoft, p.primary, context.tr('پیشرفت', 'Progress'), AppView.progress),
+      (LucideIcons.award, p.goldSoft, p.goldInk, context.tr('نشان‌های من', 'My Badges'), AppView.badges),
       (LucideIcons.brain, p.xpSoft, p.xpInk, context.tr('تحلیل هوشمند', 'Smart Analysis'), AppView.smart),
       (LucideIcons.chartColumn, p.blueSoft, p.blueInk, context.tr('تحلیل', 'Analytics'), AppView.analytics),
       (LucideIcons.settings, p.okSoft, p.okInk, context.tr('تنظیمات', 'Settings'), AppView.settings),

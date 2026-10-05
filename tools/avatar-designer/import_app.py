@@ -4,7 +4,7 @@
 import json, base64, hashlib, io, os, time
 from PIL import Image
 here = os.path.dirname(os.path.abspath(__file__))
-app = os.path.join(here, '../../flutter_app/assets')
+app = os.path.join(here, '../legacy-avatar-assets')
 d = json.load(open(f'{app}/avatar_data.json'))
 OFFX, W, H = 25, 180, 186
 images = {}

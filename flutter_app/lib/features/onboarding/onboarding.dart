@@ -12,8 +12,6 @@ import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
-import '../../data/avatar_ops.dart';
-import '../avatar/avatar_panel.dart';
 
 class AppTexts {
   final Map raw;
@@ -33,7 +31,6 @@ bool needsOnboarding(Map st, AppTexts t) => st['onboardingDone'] != true || ((st
 /// اجرای زنجیره‌ی اولین بار (و هر بار که قوانین/آموزش نسخه‌ی تازه‌ای شد)
 Future<void> runFirstRunFlow(BuildContext context, AppTexts texts) async {
   final store = context.read<AppStore>();
-  final a = context.read<AppActions>();
   Future<void> dlg(Widget w) => showDialog<void>(context: context, barrierDismissible: false, useRootNavigator: true, builder: (_) => PopScope(canPop: false, child: w));
   if (needsLang(store.state)) {
     await dlg(const _LangPicker());
@@ -46,10 +43,6 @@ Future<void> runFirstRunFlow(BuildContext context, AppTexts texts) async {
   if (needsOnboarding(store.state, texts)) {
     await showOnboarding(context, texts);
     if (!context.mounted) return;
-  }
-  if (a.avStateGender == null) {
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    if (context.mounted) await showGenderPicker(context);
   }
 }
 

@@ -34,6 +34,7 @@ extension JournalOps on AppActions {
     final now = DateTime.now().millisecondsSinceEpoch;
     _journal.add({'id': jrnlUid(now), 'text': t, 'createdAt': now});
     store.save();
+    afterChange();
     return true;
   }
 

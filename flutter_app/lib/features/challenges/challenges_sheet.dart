@@ -155,7 +155,7 @@ class _SheetState extends State<_Sheet> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(fa ? pr.nameFa : pr.nameEn, style: rpText(RpType.body, weight: 800, color: p.text)),
                   Text(
-                    '${pr.kind == 'timed' ? (fa ? '${toPersianDigits(pr.days)} روز' : '${pr.days} days') : (fa ? '${toPersianDigits(pr.target)} بار' : '${pr.target} times')} · 🪙 ${context.n(pr.reward)}',
+                    '${pr.kind == 'timed' ? (fa ? '${toPersianDigits(pr.days)} روز' : '${pr.days} days') : (fa ? '${toPersianDigits(pr.target)} بار' : '${pr.target} times')}',
                     style: rpText(RpType.label, weight: 500, color: p.muted),
                   ),
                 ]),
@@ -226,11 +226,6 @@ class _SheetState extends State<_Sheet> {
               if (form.reminderOn)
                 TextFormField(initialValue: '${form.reminderHours}', keyboardType: TextInputType.number, decoration: InputDecoration(labelText: context.tr('هر چند ساعت (۱ تا ۷۲)', 'Every N hours (1–72)')), onChanged: (v) => form.reminderHours = int.tryParse(v) ?? 2),
             ],
-            TextFormField(initialValue: '${form.rewardCoins}', keyboardType: TextInputType.number, decoration: InputDecoration(labelText: context.tr('جایزه (سکه، حداکثر ۵۰)', 'Reward coins (max 50)')), onChanged: (v) {
-              final x = int.tryParse(v) ?? 0;
-              form.rewardCoins = x;
-              if (x > 50) a.toasts.show(context.tr('حداکثر جایزه‌ی هر چالش ۵۰ سکه است.', 'The maximum reward per challenge is 50 coins.'), ms: 2200);
-            }),
             TextField(controller: rewardText, decoration: InputDecoration(labelText: context.tr('جایزه‌ی دلخواه (متن)', 'Custom reward (text)')), onChanged: (v) => form.rewardText = v),
             const SizedBox(height: 12),
             RpButton(context.tr('شروع چالش', 'Start challenge'), icon: LucideIcons.flame, onTap: () {
@@ -339,7 +334,7 @@ class _SheetState extends State<_Sheet> {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [Text('${c['icon']}', style: const TextStyle(fontSize: 24)), const SizedBox(width: 10), Expanded(child: Text('${c['name']}', style: rpText(RpType.body, weight: 800, color: p.text))), _badge(context, '${c['status']}')]),
                 if (c['completedAt'] is num) Text(_date((c['completedAt'] as num).toInt(), fa), style: rpText(RpType.label, weight: 500, color: p.muted)),
-                if (c['status'] == 'success') Text('🪙 ${context.n(c['rewardCoins'] ?? 0)}${'${c['rewardText'] ?? ''}'.isNotEmpty ? ' + 🎁 ${c['rewardText']}' : ''}', style: rpText(RpType.label, weight: 600, color: p.goldInk)),
+                if (c['status'] == 'success' && '${c['rewardText'] ?? ''}'.isNotEmpty) Text('🎁 ${c['rewardText']}', style: rpText(RpType.label, weight: 600, color: p.goldInk)),
               ]),
             ),
           ),

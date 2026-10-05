@@ -12,7 +12,6 @@ import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import '../onboarding/onboarding.dart';
 
-const levelColors = ['#146B69', '#D4A017', '#2E7D32', '#1D5DAD', '#6C3FA6', '#C62828', '#E65100', '#B03A5B', '#00897B', '#F9A825'];
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -95,13 +94,6 @@ class SettingsScreen extends StatelessWidget {
             _SwatchRow(label: context.tr('روز ثبت‌نشده', 'Unset day'), selected: tc['neutral'], options: const ['#E5DBC8', '#DCDCDC', '#D5E2EC', '#EBD7DE', '#D8E4D8'], onPick: (h) => set('tileColors', {...tc, 'neutral': h})),
           ]),
           hint: context.tr('این رنگ‌ها روی کاشی‌های ماه/سال اعمال می‌شن؛ در حالت تاریک نسخه‌ی روشن‌ترشان استفاده می‌شود.', 'These colors apply to the month/year tiles; a lighter version is used in dark mode.'),
-        ),
-        section(
-          context.tr('🎨 رنگ دایره‌های پیشرفت', '🎨 Level Circle Colors'),
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _SwatchRow(label: context.tr('سطح‌های رسیده', 'Reached levels'), selected: st['levelReachedColor'], options: levelColors, onPick: (h) => set('levelReachedColor', h)),
-            _SwatchRow(label: context.tr('رنگ استادی', 'Mastery Color'), selected: st['masteryColor'], options: const ['#C79A2E', '#E3BE5D', '#D4A017', '#E65100', '#6C3FA6', '#B03A5B'], onPick: (h) => set('masteryColor', h)),
-          ]),
         ),
         section(
           context.tr('زبان', 'Language'),

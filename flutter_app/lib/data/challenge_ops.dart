@@ -1,13 +1,12 @@
-// چالش‌ها و مدال‌ها (قواعدِ نسخه‌ی HTML): آماده‌ها رایگان، چالش شخصی و مدال پرو؛ جایزه ≤ ۵۰ سکه.
+// چالش‌ها و مدال‌ها (قواعدِ نسخه‌ی HTML): آماده‌ها رایگان، چالش شخصی و مدال پرو؛ پاداش فقط XP/دستاورد (بدون ارز).
 import 'dart:math';
 
-import '../core/habits.dart';
 import 'actions.dart';
 import 'notifier.dart';
 
 const challengePresets = [
-  (id: 'preset_social7', icon: '📵', nameFa: '۷ روز بدون شبکه‌های اجتماعی', nameEn: '7 days off social media', kind: 'timed', days: 7, target: 0, reward: 30),
-  (id: 'preset_workout10', icon: '🏃', nameFa: '۱۰ جلسه ورزش', nameEn: '10 workout sessions', kind: 'count', days: 0, target: 10, reward: 40),
+  (id: 'preset_social7', icon: '📵', nameFa: '۷ روز بدون شبکه‌های اجتماعی', nameEn: '7 days off social media', kind: 'timed', days: 7, target: 0),
+  (id: 'preset_workout10', icon: '🏃', nameFa: '۱۰ جلسه ورزش', nameEn: '10 workout sessions', kind: 'count', days: 0, target: 10),
 ];
 const challengeEmojis = ['🔥', '💪', '🏃', '📚', '🧘', '🚭', '💧', '🥗', '😴', '🎯', '✍️', '🧹', '🎨', '💰', '🚴', '🧊'];
 const _msUnit = {'minutes': 60000, 'hours': 3600000, 'days': 86400000};
@@ -23,7 +22,7 @@ String medalTier(Map ch) {
 
 class ChallengeForm {
   String name = '', icon = '🔥', kind = 'count', unit = '', rewardText = '', deadlineMode = 'duration', durationUnit = 'days';
-  int target = 1, rewardCoins = 10, durationValue = 1, reminderHours = 2;
+  int target = 1, durationValue = 1, reminderHours = 2;
   bool reminderOn = false;
   int? exactAt;
 }
@@ -47,7 +46,7 @@ extension ChallengeOps on AppActions {
     final now = _now;
     final ch = <String, dynamic>{
       'id': challengeUid('ch', now), 'presetId': p.id, 'name': _fa ? p.nameFa : p.nameEn, 'icon': p.icon, 'kind': p.kind,
-      'rewardCoins': min(coinMaxPerOp, p.reward), 'rewardText': '', 'createdAt': now, 'status': 'active', 'completedAt': null,
+      'rewardText': '', 'createdAt': now, 'status': 'active', 'completedAt': null,
     };
     if (p.kind == 'count') {
       ch['targetCount'] = p.target;
@@ -74,7 +73,7 @@ extension ChallengeOps on AppActions {
     final now = _now;
     final ch = <String, dynamic>{
       'id': challengeUid('ch', now), 'name': name, 'icon': f.icon, 'kind': f.kind,
-      'rewardCoins': min(coinMaxPerOp, max(0, f.rewardCoins)), 'rewardText': f.rewardText.trim(), 'createdAt': now, 'status': 'active', 'completedAt': null,
+      'rewardText': f.rewardText.trim(), 'createdAt': now, 'status': 'active', 'completedAt': null,
     };
     final needsCount = f.kind == 'count' || f.kind == 'both', needsTimed = f.kind == 'timed' || f.kind == 'both';
     if (needsCount) {
@@ -110,7 +109,7 @@ extension ChallengeOps on AppActions {
     n.scheduleOnce('challenge-${ch['id']}', title, body, (ch['deadlineAt'] as num).toInt());
   }
 
-  /// جایزه: سکه (با سقفِ مرکزی) + مدال پرو. برمی‌گرداند سکه‌ی واقعاً داده‌شده
+  /// موفقیتِ چالش: مدال (پرو) + پیامِ تبریک؛ پاداش فقط XP/دستاورد است (از دادهٔ واقعی همگام می‌شود). بدونِ ارز.
   int awardChallenge(Map ch) {
     if (_pro) {
       if (store.state['medals'] is! List) store.state['medals'] = [];
@@ -119,15 +118,15 @@ extension ChallengeOps on AppActions {
         medals.add({'challengeId': ch['id'], 'name': ch['name'], 'tier': medalTier(ch), 'at': _now});
       }
     }
-    final coins = addCoins(store.state, (ch['rewardCoins'] as num?) ?? 0);
     final rt = '${ch['rewardText'] ?? ''}';
     toasts.show(
-      _fa ? '🎉 آفرین! چالش «${ch['name']}» موفق شد. +$coins سکه${rt.isNotEmpty ? ' + 🎁 $rt' : ''}' : '🎉 Well done! "${ch['name']}" succeeded. +$coins coins${rt.isNotEmpty ? ' + 🎁 $rt' : ''}',
+      _fa ? '🎉 آفرین! چالش «${ch['name']}» موفق شد.${rt.isNotEmpty ? ' 🎁 $rt' : ''}' : '🎉 Well done! "${ch['name']}" succeeded.${rt.isNotEmpty ? ' 🎁 $rt' : ''}',
       ms: 4200,
       cls: 'toast-success',
     );
     store.save();
-    return coins;
+    afterChange();
+    return 0;
   }
 
   Map? _byId(String id) => challenges.where((x) => x['id'] == id).firstOrNull;

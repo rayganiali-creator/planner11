@@ -88,8 +88,25 @@ extension TodoOps on AppActions {
     final t = _todos.where((x) => x['id'] == id).firstOrNull;
     if (t == null) return;
     t['done'] = !(t['done'] == true);
-    if (t['done'] == true) notifier?.cancel('todo-$id');
+    final log = _todoLog;
+    if (t['done'] == true) {
+      notifier?.cancel('todo-$id');
+      // رویدادِ انجام: منبعِ XP. شناسه‌ی یکتا؛ Undo همین ورودی را برمی‌دارد (بازگرداندنِ XP)
+      final now = clock().millisecondsSinceEpoch;
+      log.add({'id': 'tl_${now.toRadixString(36)}${_rand(4)}', 'todoId': id, 'title': t['title'], 'at': now, 'createdAt': t['createdAt'], if (t['priority'] == 'high') 'priority': 'high'});
+      if (log.length > 5000) log.removeRange(0, log.length - 5000);
+    } else {
+      final i = log.lastIndexWhere((e) => e is Map && e['todoId'] == id);
+      if (i >= 0) log.removeAt(i);
+    }
     store.save();
+    afterChange();
+  }
+
+  List get _todoLog {
+    final s = store.state;
+    if (s['todoLog'] is! List) s['todoLog'] = <dynamic>[];
+    return s['todoLog'] as List;
   }
 
   void toggleSubtask(String tid, String sid) {

@@ -68,25 +68,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/avatar_data.json
     - assets/texts.json
-    - assets/avatar/base/
-    - assets/avatar/sleep/
-    - assets/avatar/hands/
-    - assets/avatar/cond/
-    - assets/avatar/armor/
-    - assets/avatar/cape/
-    - assets/avatar/clothes/
-    - assets/avatar/hair/
-    - assets/avatar/hat/
-    - assets/avatar/helmet/
-    - assets/avatar/hijab/
-    - assets/avatar/pants/
-    - assets/avatar/petgear/
-    - assets/avatar/pets/
-    - assets/avatar/shield/
-    - assets/avatar/shoes/
-    - assets/avatar/sword/
 
   # وزیرمتن (SIL OFL) — دو زیرمجموعه‌ی variable با محور wght ۱۰۰..۹۰۰؛ Flutter برخلاف CSS
   # unicode-range ندارد، پس لاتین به‌صورت fallback می‌آید (kFontFallback).

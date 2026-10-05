@@ -17,11 +17,6 @@ import '../journal/journal_screen.dart' show fmtDateTime, showReminderPicker;
 import '../media/media_widgets.dart';
 import '../../data/habit_ops.dart' show newHabitId;
 
-String libraryLevelLabel(int completed, bool fa) {
-  final n = libraryLevelNum(completed);
-  if (n >= 21) return fa ? 'سطح ۲۱ - کتابخوان اعظم 👑' : 'Level 21 - The Ultimate Reader 👑';
-  return fa ? 'سطح ${toFa(n)}' : 'Level $n';
-}
 
 String toFa(Object v) => '$v'.replaceAllMapped(RegExp(r'\d'), (m) => '۰۱۲۳۴۵۶۷۸۹'[int.parse(m[0]!)]);
 
@@ -46,7 +41,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final completed = a.completedBooks;
     final inProgress = all.where((b) => b['completed'] != true && ((b['pagesRead'] as num?) ?? 0) > 0).length;
     final pages = all.fold<num>(0, (s, b) => s + ((b['pagesRead'] as num?) ?? 0));
-    final toNext = libraryBooksToNext(completed);
     final q = search.text.trim().toLowerCase();
     var list = all.where((b) {
       final done = b['completed'] == true;
@@ -81,25 +75,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
           ]),
           const SizedBox(height: RpSpace.s3),
-          AppCard(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                CircleAvatar(radius: 22, backgroundColor: p.goldSoft, child: Text(context.n(libraryLevelNum(completed)), style: rpText(RpType.bodyL, weight: 800, color: p.goldInk))),
-                const SizedBox(width: RpSpace.s3),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(libraryLevelLabel(completed, fa), style: rpText(RpType.bodyL, weight: 800, color: p.text)),
-                    Text(
-                      toNext > 0 ? context.tr('${context.n(toNext)} کتاب دیگر تا سطح بعد', '$toNext more book(s) to next level') : context.tr('به بالاترین سطح رسیدی! 👑', 'You reached the top level! 👑'),
-                      style: rpText(RpType.label, weight: 500, color: p.muted),
-                    ),
-                  ]),
-                ),
-              ]),
-              const SizedBox(height: RpSpace.s3),
-              RpProgressBar(value: libraryLevelPct(completed) / 100, colors: [p.gold, p.goldSoft]),
-            ]),
-          ),
           const SizedBox(height: RpSpace.s3),
           Row(children: [
             _Stat(context.n(all.length), context.tr('کل', 'Total'), p.blueInk, p.blueSoft),
@@ -265,17 +240,12 @@ void _logPages(BuildContext context, Map b) {
 }
 
 void _bookComplete(BuildContext context, Map b) {
-  final a = context.read<AppActions>();
-  final after = a.completedBooks, before = after - 1;
-  final up = libraryLevelNum(after) > libraryLevelNum(before);
-  final fa = context.isFa;
   showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Column(children: [const Text('🎉', style: TextStyle(fontSize: 40)), Text('${b['title']}')]),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         Text('${b['reward']}'.isNotEmpty ? '🎁 ${b['reward']}' : ctx.tr('برای خودت پاداشی در نظر نگرفته بودی، ولی همین که تمومش کردی یک موفقیت بزرگه!', "You didn't set a reward, but finishing it is a big win on its own!"), textAlign: TextAlign.center),
-        if (up) Padding(padding: const EdgeInsets.only(top: 8), child: Text('${fa ? '🎊 سطحت رفت بالا: ' : '🎊 Level up: '}${libraryLevelLabel(after, fa)}', textAlign: TextAlign.center)),
       ]),
       actions: [FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(ctx.tr('عالی!', 'Great!')))],
     ),

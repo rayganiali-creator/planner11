@@ -12,7 +12,7 @@ import '../../app/i18n.dart';
 import '../../core/calendar.dart';
 import '../../core/doc.dart';
 import '../../core/habits.dart';
-import '../../ui/custom_theme.dart';
+import '../../core/progress/ledger.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../data/habit_ops.dart';
@@ -101,11 +101,7 @@ class _HabitCardState extends State<_HabitCard> {
     final st = store.state;
     final fa = context.isFa;
     final id = habit['id'] as String;
-    final pts = computeHabitPoints(st, id);
-    final levels = habitActiveThresholds(habit);
-    final cur = getLevelFromPoints(pts, levels);
-    final next = levels.where((l) => l.minPoints > pts).firstOrNull;
-    final prog = next == null ? 1.0 : ((pts - cur.minPoints) / (next.minPoints - cur.minPoints)).clamp(0.0, 1.0).toDouble();
+    final xp = validEvents(st, type: 'habit').where((e) => e['sourceId'] == id).fold<int>(0, (a, e) => a + (e['amount'] as int));
     final streak = computeHabitStreak(st, habit, now);
     final best = computeHabitBestRecord(st, habit);
     final applies = habitAppliesOnISO(habit, iso);
@@ -118,7 +114,7 @@ class _HabitCardState extends State<_HabitCard> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
             Expanded(child: Text('${habit['name'] ?? ''}', style: rpText(RpType.bodyL, weight: 800, color: p.text))),
-            RpChip(cur.icon.isNotEmpty ? '${cur.icon} ${fa ? cur.labelFa : cur.labelEn}' : (fa ? cur.labelFa : cur.labelEn)),
+            if (habit['important'] == true) RpChip(context.tr('مهم', 'Important')),
             IconButton(
               key: ValueKey('expand-$id'),
               tooltip: context.tr('یادداشت و عکس', 'Notes & photos'),
@@ -160,18 +156,9 @@ class _HabitCardState extends State<_HabitCard> {
           Padding(
             padding: const EdgeInsetsDirectional.only(end: RpSpace.s2),
             child: Wrap(spacing: 14, runSpacing: 4, children: [
-              _stat(context, LucideIcons.coins, p.goldInk, context.n(pts.round()), context.tr('سکه', 'coins'), context.tr('مجموع سکه‌ای که تا امروز از این عادت گرفته‌ای', 'Total coins you have earned from this habit')),
+              _stat(context, LucideIcons.sparkles, p.primary, context.n(xp), 'XP', context.tr('مجموع XP واقعیِ کسب‌شده از این عادت', 'Total real XP earned from this habit')),
               _stat(context, LucideIcons.flame, p.fire, context.n(streak), context.tr('روز پیاپی', 'day streak'), context.tr('چند روزِ پشت‌سرهم این عادت را موفق انجام داده‌ای', 'Consecutive days you completed this habit')),
               if (best != null) _stat(context, LucideIcons.trophy, p.goldInk, context.n(best), context.tr('رکورد', 'best'), context.tr('بلندترین رشته‌ی روزهای پیاپیِ موفقِ این عادت', 'Your longest streak of successful days for this habit')),
-            ]),
-          ),
-          const SizedBox(height: RpSpace.s2),
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: RpSpace.s2),
-            child: Row(children: [
-              Expanded(child: RpProgressBar(value: prog, colors: [p.primary, p.primary2], height: 6)),
-              const SizedBox(width: 8),
-              Text(next == null ? context.tr('سطح نهایی', 'Max') : '${context.n(pts.round())}/${context.n(next.minPoints)}', style: rpText(RpType.caption, weight: 600, color: p.muted)),
             ]),
           ),
           const SizedBox(height: RpSpace.s3),
@@ -194,7 +181,7 @@ class _HabitCardState extends State<_HabitCard> {
             child: open
                 ? Padding(
                     padding: const EdgeInsetsDirectional.only(top: RpSpace.s3, end: RpSpace.s2),
-                    child: _HabitDetails(habit: habit, cur: cur),
+                    child: _HabitDetails(habit: habit),
                   )
                 : const SizedBox(width: double.infinity),
           ),
@@ -356,11 +343,10 @@ class _InlineValueState extends State<_InlineValue> {
   }
 }
 
-/// بخشِ بازشدنیِ کارت: سطح‌ها، یادداشت (ذخیره‌ی خودکار) و عکس‌ها
+/// بخشِ بازشدنیِ کارت: یادداشت (ذخیره‌ی خودکار) و عکس‌ها
 class _HabitDetails extends StatefulWidget {
   final Map habit;
-  final LevelDef cur;
-  const _HabitDetails({required this.habit, required this.cur});
+  const _HabitDetails({required this.habit});
   @override
   State<_HabitDetails> createState() => _HabitDetailsState();
 }
@@ -395,8 +381,6 @@ class _HabitDetailsState extends State<_HabitDetails> {
   Widget build(BuildContext context) {
     final p = context.rp;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      _LevelStrip(state: store.state, habit: widget.habit, cur: widget.cur),
-      const SizedBox(height: RpSpace.s3),
       TextField(
         key: ValueKey('notes-$id'),
         controller: c,
@@ -557,10 +541,10 @@ class _EditorState extends State<_Editor> {
         RpCollapsible(
           key: const ValueKey('editor-more'),
           card: false,
-          title: fa ? 'پاداش، تنبیه و هدف هفتگی' : 'Reward, punishment & weekly goal',
+          title: fa ? 'اهمیت، پاداش و هدف هفتگی' : 'Importance, reward & weekly goal',
           icon: LucideIcons.gift,
           child: Column(children: [
-            TextFormField(initialValue: '${f.rewardPoints}', keyboardType: TextInputType.number, decoration: _dec(fa ? 'امتیاز پاداش (حداکثر ۵۰)' : 'Reward points (max 50)'), onChanged: (v) => f.rewardPoints = int.tryParse(v) ?? 10),
+            SwitchListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(fa ? 'عادتِ مهم یا دشوار' : 'Important or hard habit'), subtitle: Text(fa ? '۱۵ XP به‌جای ۱۰ XP برای هر بار انجام' : '15 XP instead of 10 per completion'), value: f.important, onChanged: (v) => setState(() => f.important = v)),
             const SizedBox(height: 8),
             TextFormField(initialValue: f.rewardText, decoration: _dec(fa ? 'پاداش' : 'Reward'), onChanged: (v) => f.rewardText = v),
             const SizedBox(height: 8),
@@ -581,48 +565,5 @@ class _EditorState extends State<_Editor> {
         ]),
       ]),
     );
-  }
-}
-
-/// buildLevelDisplay: پیپ‌های سطح‌های همین مرحله + پیپ سرآمد، با رنگ‌های قابل‌تنظیم
-class _LevelStrip extends StatelessWidget {
-  final Doc state;
-  final Map habit;
-  final LevelDef cur;
-  const _LevelStrip({required this.state, required this.habit, required this.cur});
-  @override
-  Widget build(BuildContext context) {
-    final p = context.rp;
-    final fa = context.isFa;
-    final dark = p.bg.computeLuminance() < .3;
-    final reachedCol = parseHex(state['levelReachedColor']) ?? (dark ? const Color(0xFF3BC2BA) : const Color(0xFF146B69));
-    final masteryCol = parseHex(state['masteryColor']) ?? (dark ? const Color(0xFFE3BE5D) : const Color(0xFFC79A2E));
-    final stage = habitCurrentStageThresholds(habit as Map<String, dynamic>?);
-    if (stage.isEmpty) return const SizedBox.shrink();
-    final capstone = stage.last;
-    final capReached = cur.num >= capstone.num;
-    Widget pip(String label, Color? fill, bool current, String tip, {bool glow = false}) => Tooltip(
-          message: tip,
-          child: Container(
-            width: 28,
-            height: 28,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: fill ?? p.surface2,
-              border: Border.all(color: current ? p.text : (fill ?? p.line), width: current ? 2 : 1),
-              boxShadow: glow ? [BoxShadow(color: fill!.withValues(alpha: .6), blurRadius: 12)] : null,
-            ),
-            child: Text(label, style: rpText(RpType.caption, weight: 800, color: fill != null ? Colors.white : p.muted)),
-          ),
-        );
-    return Wrap(spacing: 6, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-      Text(context.tr('پیشرفت:', 'Progress:'), style: rpText(RpType.label, weight: 600, color: p.muted)),
-      for (int i = 0; i < stage.length - 1; i++)
-        pip(context.n(i + 1), cur.num >= stage[i].num ? reachedCol : null, cur.num == stage[i].num,
-            '${fa ? stage[i].labelFa : stage[i].labelEn} (${context.n(stage[i].minPoints)} ${fa ? 'سکه' : 'coins'})'),
-      pip(capstone.icon.isNotEmpty ? capstone.icon : '🏆', capReached ? masteryCol : null, cur.num == capstone.num,
-          '${fa ? capstone.labelFa : capstone.labelEn} (${context.n(capstone.minPoints)} ${fa ? 'سکه' : 'coins'})', glow: capReached),
-    ]);
   }
 }

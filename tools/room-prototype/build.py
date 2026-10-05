@@ -2,7 +2,7 @@
 """ساخت dist/room.html (تک‌فایل). حیوان‌ها از همان PNGهای اپ (flutter_app/assets/avatar/pets) خوانده می‌شوند."""
 import json, base64, os, glob
 d = os.path.dirname(os.path.abspath(__file__))
-av = os.path.join(d, '../../flutter_app/assets')
+av = os.path.join(d, '../legacy-avatar-assets')
 data = json.load(open(f'{av}/avatar_data.json'))
 b64 = lambda p: 'data:image/png;base64,' + base64.b64encode(open(f'{av}/avatar/{p}', 'rb').read()).decode()
 pets = [{'id': i['id'], 'name': i['n'], 'img': b64(i['f']), 'sleep': b64(i['fs']) if i.get('fs') else None} for i in data['items'] if i['k'] == 'pet']

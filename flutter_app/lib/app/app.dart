@@ -8,7 +8,6 @@ import '../data/actions.dart';
 import '../data/app_store.dart';
 import '../ui/app_themes.dart';
 import '../ui/tokens.dart';
-import '../features/avatar/avatar_compose.dart';
 import '../data/billing.dart';
 import '../data/files_service.dart';
 import '../data/media_store.dart';
@@ -24,13 +23,12 @@ class RoutineApp extends StatelessWidget {
   final NavController nav;
   final ToastBus toasts;
   final AppActions actions;
-  final AvData? avData;
   final BillingService? billing;
   final Notifier? notifier;
   final FilesService? files;
   final MediaStore? media;
   final AppTexts? texts;
-  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.avData, this.billing, this.notifier, this.files, this.media, this.texts});
+  const RoutineApp({super.key, required this.store, required this.nav, required this.toasts, required this.actions, this.billing, this.notifier, this.files, this.media, this.texts});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +37,6 @@ class RoutineApp extends StatelessWidget {
         ChangeNotifierProvider<AppStore>.value(value: store),
         ChangeNotifierProvider<NavController>.value(value: nav),
         Provider<AppActions>.value(value: actions),
-        Provider<AvData?>.value(value: avData),
         Provider<Notifier>.value(value: notifier ?? NoopNotifier()),
         Provider<AppTexts?>.value(value: texts),
         Provider<MediaStore>.value(value: media ?? MediaStore('${Directory.systemTemp.path}/rp_media_fallback')),

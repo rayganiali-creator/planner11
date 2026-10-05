@@ -13,7 +13,6 @@ import 'data/local_notifier.dart';
 import 'data/media_store.dart';
 import 'data/native_api.dart';
 import 'data/pro_manager.dart';
-import 'features/avatar/avatar_compose.dart';
 import 'features/onboarding/onboarding.dart';
 
 Future<void> main() async {
@@ -23,7 +22,6 @@ Future<void> main() async {
   final store = AppStore('${dir.path}/state.json')..load();
   final toasts = ToastBus();
   final actions = AppActions(store, toasts)..renderAll(); // renderAll() اولیه‌ی نسخه‌ی HTML
-  final avData = await AvData.load();
   final texts = await AppTexts.load();
   final native = ChannelNativeApi();
   final media = MediaStore('${dir.path}/media');
@@ -38,7 +36,7 @@ Future<void> main() async {
   pro.restore();
   Timer.periodic(const Duration(minutes: 1), (_) => pro.checkProExpiry());
   WidgetsBinding.instance.addObserver(_Resume(pro, sync));
-  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, avData: avData, billing: pro, files: files, notifier: notifier, media: media, texts: texts));
+  runApp(RoutineApp(store: store, nav: NavController(), toasts: toasts, actions: actions, billing: pro, files: files, notifier: notifier, media: media, texts: texts));
 }
 
 class _Resume extends WidgetsBindingObserver {

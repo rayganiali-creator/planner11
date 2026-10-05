@@ -3,7 +3,7 @@ import json, sys, os, tempfile
 from PIL import Image, ImageChops
 g = sys.argv[1]
 here = os.path.dirname(os.path.abspath(__file__))
-app = f'{here}/../../../flutter_app/assets'
+app = f'{here}/../../legacy-avatar-assets'
 d = json.load(open(f'{app}/avatar_data.json'))
 combo = json.load(open(f'{tempfile.gettempdir()}/ad-{g}.json'))
 studio = Image.open(f'{tempfile.gettempdir()}/ad-{g}.png').convert('RGBA')

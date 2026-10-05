@@ -1,5 +1,6 @@
 // خروجی PDF (buildPdfReportElement در HTML): گزارش با خود Flutter رسم می‌شود (شکل‌دهی درست حروف فارسی با Vazirmatn)،
 // به تصویر درمی‌آید و صفحه‌به‌صفحه (A4) در PDF می‌نشیند — همان روشِ html2canvas + jsPDF.
+import '../../core/progress/engine.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -25,7 +26,7 @@ class PdfReport extends StatelessWidget {
     String num(Object n) => fa ? toPersianDigits(n) : '$n';
     final habits = ((state['habits'] as List?) ?? const []).whereType<Map<String, dynamic>>().toList();
     final todos = ((state['todos'] as List?) ?? const []).whereType<Map>().toList();
-    final scores = (state['scores'] is Map ? state['scores'] as Map : const {});
+    final snap = snapshotOf(state, DateTime.now());
     TextStyle ts(double size, {FontWeight w = FontWeight.w400, Color c = const Color(0xFF1D1A24)}) => TextStyle(fontFamily: 'Vazirmatn', fontSize: size, fontWeight: w, color: c, height: 1.7);
     final dateTxt = isJalali(state) ? dateNumeric(today, jalali: true, fa: fa) : (fa ? dateNumeric(today, jalali: false, fa: true) : dateToISO(today));
 
@@ -85,9 +86,10 @@ class PdfReport extends StatelessWidget {
           ),
           if ('${state['profileName'] ?? ''}'.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Text('${fa ? 'نام: ' : 'Name: '}${state['profileName']}', style: ts(14, w: FontWeight.w700))),
           Row(children: [
-            stat(fa ? 'سکه‌ها' : 'Coins', scores['coins'] ?? 0),
-            stat(fa ? 'سطح' : 'Level', scores['level'] ?? 0),
-            stat(fa ? 'روزهای متوالی' : 'Streak', scores['streak'] ?? 0),
+            stat('XP', snap.xp),
+            stat(fa ? 'سطح' : 'Level', snap.level),
+            stat(fa ? 'روزهای متوالی' : 'Streak', snap.streak),
+            stat(fa ? 'نشان‌ها' : 'Badges', snap.badgeCount),
             stat(fa ? 'عادت‌ها' : 'Habits', habits.length),
           ]),
           const SizedBox(height: 20),

@@ -3,7 +3,7 @@
 // اگر پشته خالی بود به خانه، و در خانه از برنامه خارج می‌شود.
 import 'package:flutter/foundation.dart';
 
-enum AppView { dashboard, habits, month, year, library, purchases, journal, pomodoro, todo, settings, analytics, smart }
+enum AppView { dashboard, habits, month, year, library, purchases, journal, pomodoro, todo, settings, analytics, smart, progress, badges }
 
 class NavController extends ChangeNotifier {
   static const AppView home = AppView.dashboard;

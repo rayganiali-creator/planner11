@@ -16,12 +16,12 @@ const Map<String, String> rpBackupSchema = {
   'habits': 'array', 'records': 'object', 'journal': 'array', 'todos': 'array', 'books': 'array',
   'challenges': 'array', 'scores': 'object', 'medals': 'array', 'pomodoro': 'object',
   'behaviorJournal': 'object', 'habitNotes': 'object', 'reasons': 'object', 'triggers': 'object',
-  'customUrgeSuggestions': 'array', 'urgeHiddenIds': 'array', 'avatar': 'object',
-  'levelToastSent': 'object', 'theme': 'string', 'lang': 'string', 'bgColor': 'string',
+  'customUrgeSuggestions': 'array', 'urgeHiddenIds': 'array', 'progress': 'object', 'todoLog': 'array',
+  'theme': 'string', 'lang': 'string', 'bgColor': 'string',
   'accentTheme': 'string', 'weekStart': 'number', 'showHolidays': 'boolean', 'calendarType': 'string',
   'fontSize': 'string', 'tileColors': 'object', 'bgPattern': 'string', 'tileShape': 'string',
   'tileEffect': 'string', 'bgPatternOpacity': 'number', 'themeIntensity': 'number',
-  'profileName': 'string', 'triggerType': 'string', 'levelReachedColor': 'string', 'masteryColor': 'string',
+  'profileName': 'string', 'triggerType': 'string',
 };
 
 /// `Array.isArray(v) ? 'array' : (v === null ? 'null' : typeof v)`
@@ -54,11 +54,6 @@ BackupValidation rpValidateBackup(Object? raw) {
     } else {
       skipped.add(e.key);
     }
-  }
-  final av = next['avatar'];
-  if (av is Map && (rpTypeOf(av['owned']) != 'object' || rpTypeOf(av['equipped']) != 'object')) {
-    next.remove('avatar');
-    skipped.add('avatar');
   }
   final ver = raw['version'];
   return (ok: true, next: next, skipped: skipped, version: jsTruthy(ver) ? jsString(ver) : '?');
@@ -109,12 +104,13 @@ Map<String, dynamic> createBackupMap(Doc s, {required DateTime exportedAtUtc, Ba
     'triggers': orDefault('triggers', {}),
     'customUrgeSuggestions': orDefault('customUrgeSuggestions', []),
     'urgeHiddenIds': orDefault('urgeHiddenIds', []),
-    'avatar': orDefault('avatar', null),
-    'levelToastSent': orDefault('levelToastSent', {}),
+    // سیستمِ پیشرفت: XP، رویدادها، سطح/رتبه (مشتق)، دستاوردها و پیشرفتشان، نشان‌ها، نقاط عطف، عنوان‌ها، نشان‌های ویژه، آمار (مشتق از داده)، فصل‌ها و تاریخچه‌ی فصل
+    'progress': orDefault('progress', null),
+    'todoLog': orDefault('todoLog', []),
   };
   for (final k in const [
     'theme', 'lang', 'bgColor', 'accentTheme', 'weekStart', 'showHolidays', 'calendarType', 'fontSize', 'tileColors', 'bgPattern',
-    'tileShape', 'tileEffect', 'bgPatternOpacity', 'themeIntensity', 'profileName', 'triggerType', 'levelReachedColor', 'masteryColor'
+    'tileShape', 'tileEffect', 'bgPatternOpacity', 'themeIntensity', 'profileName', 'triggerType'
   ]) {
     _pass(data, s, k);
   }

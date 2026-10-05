@@ -98,12 +98,20 @@ extension PomodoroOps on AppActions {
   (String, String) pomoFinish() {
     final p = pomoState();
     final done = '${p['phase']}';
+    if (done == 'focus') {
+      // جلسه‌ی تمرکزِ کاملِ ثبت‌شده (فقط با پایانِ واقعیِ زمان؛ Skip/Start-Stop جلسه نمی‌سازد)
+      final log = p['log'] is List ? p['log'] as List : (p['log'] = <dynamic>[]);
+      final now = _nowMs;
+      log.add({'id': 'pl_${now.toRadixString(36)}_${log.length}', 'at': now, 'minutes': pomoMinutes('focus')});
+      if (log.length > 5000) log.removeRange(0, log.length - 5000);
+    }
     final next = pomoNextPhase();
     p['running'] = false;
     p['endsAt'] = null;
     p['phase'] = next;
     p['remainingMs'] = pomoDurationMs(next);
     store.save();
+    afterChange();
     final fa = store.state['lang'] != 'en';
     toasts.show(
       fa ? '⏱️ ${pomoLabel[done]![0]} تمام شد — نوبت ${pomoLabel[next]![0]}' : '⏱️ ${pomoLabel[done]![1]} done — next: ${pomoLabel[next]![1]}',

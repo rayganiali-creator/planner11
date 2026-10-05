@@ -3,7 +3,6 @@ import 'dart:math';
 
 import '../core/calendar.dart';
 import '../core/gameplay.dart';
-import '../core/habits.dart';
 import '../core/js_compat.dart';
 import 'actions.dart';
 import 'media_store.dart';
@@ -21,7 +20,8 @@ class HabitForm {
   String name = '', createdAt = '';
   String priority = 'yellow', scheduleMode = 'daily', type = 'binary', direction = 'more';
   bool permanent = true, reminderEnabled = false;
-  int durationDays = 30, rewardPoints = 10;
+  int durationDays = 30;
+  bool important = false; // عادتِ مهم/دشوار: ۱۵ XP به‌جای ۱۰
   List<int> activeDays = [];
   num numericTarget = 1, timerTarget = 30;
   String numericUnit = 'بار', rewardText = '', punishmentText = '', reminderTime = '08:00';
@@ -47,7 +47,7 @@ class HabitForm {
     weeklyGoal = h['weeklyGoal'] is num ? (h['weeklyGoal'] as num).toInt() : null;
     rewardText = '${h['rewardText'] ?? ''}';
     punishmentText = '${h['punishmentText'] ?? ''}';
-    rewardPoints = h['rewardPoints'] is num && h['rewardPoints'] != 0 ? min(coinMaxPerOp, (h['rewardPoints'] as num).toInt()) : 10;
+    important = h['important'] == true || (h['important'] == null && h['rewardPoints'] is num && (h['rewardPoints'] as num) > 10);
     reminderEnabled = h['reminderEnabled'] == true;
     reminderTime = h['reminderTime'] is String && (h['reminderTime'] as String).isNotEmpty ? h['reminderTime'] : '08:00';
   }
@@ -65,7 +65,7 @@ class HabitForm {
       'direction': direction,
       'rewardText': rewardText.trim(),
       'punishmentText': punishmentText.trim(),
-      'rewardPoints': min(coinMaxPerOp, max(1, rewardPoints)),
+      'important': important,
       'reminderEnabled': reminderEnabled,
       'reminderTime': reminderTime.isEmpty ? '08:00' : reminderTime,
     };
