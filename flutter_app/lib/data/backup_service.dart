@@ -15,6 +15,7 @@ import '../core/backup.dart';
 import '../core/calendar.dart';
 import '../core/habits.dart';
 import '../core/js_compat.dart';
+import '../features/settings/pdf_report.dart';
 import 'actions.dart';
 import 'files_service.dart';
 import 'media_store.dart';
@@ -228,7 +229,15 @@ class BackupService implements FilesService {
 
   @override
   Future<void> exportPdf() async {
-    toasts.show(_fa ? 'خروجی PDF هنوز در این نسخه متصل نشده است.' : 'PDF export is not connected in this build yet.', ms: 3000);
+    final overlay = rpNavKey.currentState?.overlay;
+    if (overlay == null) return;
+    try {
+      final bytes = await buildPdfReport(actions.store.state, overlay);
+      final ok = await _save('RoutinePlanner-Report-${_stamp()}.pdf', 'application/pdf', bytes);
+      toasts.show(ok ? (_fa ? '✅ فایل ذخیره شد' : '✅ File saved') : (_fa ? '⚠️ ذخیره‌سازی ناموفق بود' : '⚠️ Saving failed'), ms: 3000);
+    } catch (_) {
+      toasts.show(_fa ? '⚠️ ساخت PDF ناموفق بود. دوباره تلاش کنید.' : '⚠️ Could not create the PDF. Please try again.', ms: 3500);
+    }
   }
 }
 
