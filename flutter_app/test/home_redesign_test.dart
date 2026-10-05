@@ -113,4 +113,21 @@ void main() {
       await drain(tester);
     });
   }
+
+  testWidgets('خانه: روزهای پیاپی برای عادتِ مدت‌دار (غیردائمی) هم کار می‌کند', (tester) async {
+    final (store, a, _) = await boot(tester);
+    store.state['habits'] = [
+      {'id': 'h9', 'name': 'Limited', 'type': 'binary', 'permanent': false, 'durationDays': 30, 'reward': 10, 'start': '2025-03-01', 'createdAt': DateTime(2025, 3, 1).millisecondsSinceEpoch},
+    ];
+    store.state['records'] = {
+      '2025-03-09': {'h9': 'success'},
+      '2025-03-10': {'h9': 'success'},
+    };
+    a.renderAll();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(((store.state['scores'] as Map)['streak'] as num).toInt(), 2);
+    expect(find.byKey(const ValueKey('hero-streak')), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('hero-streak'))).data, '۲');
+    await drain(tester);
+  });
 }

@@ -61,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final hp = computeAvatarHP(st, now);
     final cond = avConditionOf(hp, now.hour);
     final stats = dayStats(st, iso);
-    final streak = computePermanentStreak(st, now);
+    final streak = (scores['streak'] as num?)?.toInt() ?? computeStreak(st, now); // مثل «روزهای موفقیت متوالی» HTML (همه‌ی عادت‌ها، نه فقط دائمی)
     final pct = stats.total == 0 ? 0.0 : stats.success / stats.total;
     final habits = applicableHabitsForISO(st, iso);
 
