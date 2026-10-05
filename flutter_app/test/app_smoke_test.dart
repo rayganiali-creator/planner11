@@ -28,10 +28,10 @@ void main() {
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: actions));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('روتین پلنر'), findsWidgets);
-    expect(find.text('ورزش'), findsOneWidget);
+    expect(find.text('ورزش', findRichText: true, skipOffstage: false), findsWidgets);
 
     final iso = actions.todayISO;
-    await tester.ensureVisible(find.byIcon(LucideIcons.check));
+    await tester.scrollUntilVisible(find.byIcon(LucideIcons.check), 300, scrollable: find.byType(Scrollable).first);
     await tester.pump();
     await tester.tap(find.byIcon(LucideIcons.check));
     await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 3));

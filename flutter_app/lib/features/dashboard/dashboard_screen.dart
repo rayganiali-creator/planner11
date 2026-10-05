@@ -101,6 +101,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ]),
         ),
         const SizedBox(height: RpSpace.s3),
+        _HabitsProgress(state: st, now: now),
+        const SizedBox(height: RpSpace.s3),
         _ChallengesCard(state: st),
         const SizedBox(height: RpSpace.s4),
         SectionHeader(
@@ -275,16 +277,91 @@ class _ChallengesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.rp;
-    final active = ((state['challenges'] as List?) ?? const []).where((c) => c is Map && (c['status'] == 'active' || c['status'] == 'pending_review')).length;
+    final fa = context.isFa;
+    final active = ((state['challenges'] as List?) ?? const []).whereType<Map>().where((c) => c['status'] == 'active' || c['status'] == 'pending_review').toList()
+      ..sort((x, y) => ((y['createdAt'] as num?) ?? 0).compareTo((x['createdAt'] as num?) ?? 0));
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
     return AppCard(
       onTap: () => showChallenges(context, tab: 'active'),
-      child: Row(children: [
-        Icon(LucideIcons.trophy, color: p.goldInk),
-        const SizedBox(width: RpSpace.s3),
-        Expanded(child: Text(context.tr('چالش‌ها', 'Challenges'), style: rpText(RpType.bodyL, weight: 800, color: p.text))),
-        Text(active == 0 ? context.tr('چالش فعالی نیست', 'None active') : context.tr('${context.n(active)} فعال', '$active active'), style: rpText(RpType.label, weight: 600, color: p.muted)),
-        const SizedBox(width: 6),
-        Icon(LucideIcons.chevronLeft, size: 18, color: p.muted),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(LucideIcons.trophy, color: p.goldInk),
+          const SizedBox(width: RpSpace.s3),
+          Flexible(child: Text(context.tr('چالش‌ها', 'Challenges'), overflow: TextOverflow.ellipsis, style: rpText(RpType.bodyL, weight: 800, color: p.text))),
+          const Spacer(),
+          Flexible(child: Text(active.isEmpty ? context.tr('چالش فعالی نداری.', 'No active challenges.') : context.tr('${context.n(active.length)} فعال', '${active.length} active'), overflow: TextOverflow.ellipsis, style: rpText(RpType.label, weight: 600, color: p.muted))),
+          const SizedBox(width: 6),
+          Icon(LucideIcons.chevronLeft, size: 18, color: p.muted),
+        ]),
+        for (final c in active.take(5))
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Builder(builder: (_) {
+              double pct;
+              String meta;
+              final countish = c['kind'] == 'count' || c['kind'] == 'both';
+              if (countish) {
+                pct = (((c['progressCount'] as num?) ?? 0) / (c['targetCount'] as num)).clamp(0.0, 1.0).toDouble();
+                meta = fa ? '${toPersianDigits(c['progressCount'] ?? 0)} از ${toPersianDigits(c['targetCount'])} ${c['unit'] ?? ''}' : '${c['progressCount'] ?? 0} / ${c['targetCount']} ${c['unit'] ?? ''}';
+                if (c['kind'] == 'both' && c['deadlineAt'] is num) meta += ' · ${formatCountdown((c['deadlineAt'] as num).toInt() - nowMs, fa)}';
+              } else {
+                final remain = (c['deadlineAt'] as num).toInt() - nowMs;
+                final total = (c['deadlineAt'] as num).toInt() - (c['createdAt'] as num).toInt();
+                pct = total > 0 ? (1 - remain / total).clamp(0.0, 1.0).toDouble() : 0;
+                meta = formatCountdown(remain, fa);
+              }
+              return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [Expanded(child: Text('${c['icon']} ${c['name']}', style: rpText(RpType.body, weight: 700, color: p.text))), Text(meta, style: rpText(RpType.caption, weight: 600, color: p.muted))]),
+                const SizedBox(height: 4),
+                RpProgressBar(value: pct, colors: [p.gold, p.goldSoft]),
+              ]);
+            }),
+          ),
+      ]),
+    );
+  }
+}
+
+/// «پیشرفت عادت‌ها» و «چالش‌ها» روی خانه (renderDashboardExtras): درصد ۳۰ روز اخیر برای دائمی‌ها + استریکِ عادت
+class _HabitsProgress extends StatelessWidget {
+  final Doc state;
+  final DateTime now;
+  const _HabitsProgress({required this.state, required this.now});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    final habits = ((state['habits'] as List?) ?? const []).cast<Map>();
+    final fa = context.isFa;
+    return AppCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(context.tr('پیشرفت عادت‌ها', 'Habits progress'), style: rpText(RpType.bodyL, weight: 800, color: p.text)),
+        const SizedBox(height: RpSpace.s2),
+        if (habits.isEmpty)
+          Text(context.tr('هنوز عادتی اضافه نکردی.', "You haven't added any habits yet."), style: rpText(RpType.body, weight: 500, color: p.muted))
+        else
+          for (final h in habits)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Builder(builder: (_) {
+                final perm = h['permanent'] != false;
+                final pct = habitProgressPct(state, h, now);
+                final streak = perm ? computeHabitStreak(state, h, now) : 0;
+                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(children: [
+                    Expanded(
+                      child: Text.rich(TextSpan(children: [
+                        TextSpan(text: '${h['name']}', style: rpText(RpType.body, weight: 700, color: p.text)),
+                        if (perm) TextSpan(text: fa ? '  (۳۰ روز اخیر)' : '  (last 30 days)', style: rpText(RpType.caption, weight: 400, color: p.muted)),
+                      ])),
+                    ),
+                    Text('${context.n(pct)}%', style: rpText(RpType.label, weight: 800, color: p.text)),
+                    if (perm && streak > 0) Text('  🔥${context.n(streak)}', style: rpText(RpType.label, weight: 800, color: p.fire)),
+                  ]),
+                  const SizedBox(height: 4),
+                  RpProgressBar(value: pct / 100, colors: [p.primary, p.primary2]),
+                ]);
+              }),
+            ),
       ]),
     );
   }
