@@ -20,14 +20,11 @@ class BadgeCategory {
 
 const List<BadgeCategory> badgeCategories = [
   BadgeCategory('consistency', 'استمرار', 'Consistency'),
-  BadgeCategory('productivity', 'بهره‌وری', 'Productivity'),
   BadgeCategory('focus', 'تمرکز', 'Focus'),
+  BadgeCategory('productivity', 'بهره‌وری', 'Productivity'),
   BadgeCategory('reading', 'مطالعه', 'Reading'),
-  BadgeCategory('challenges', 'چالش‌ها', 'Challenges'),
-  BadgeCategory('discipline', 'انضباط', 'Discipline'),
+  BadgeCategory('discipline', 'انضباط و چالش', 'Discipline & Challenge'),
   BadgeCategory('mastery', 'تسلط', 'Mastery'),
-  BadgeCategory('reflection', 'مرور', 'Reflection'),
-  BadgeCategory('season', 'فصل', 'Season', pro: true),
 ];
 
 class AchDef {
@@ -39,60 +36,75 @@ class AchDef {
   const AchDef(this.id, this.cat, this.tier, this.metric, this.target, this.nameFa, this.nameEn, this.descFa, this.descEn, {this.titleId, this.pro = false});
   BadgeRarity get rarity => BadgeRarity.values[tier.index];
   /// واحدِ نمایشِ پیشرفت (مثلاً «روز»)
-  String unitFa() => switch (metric) { 'keptRun' || 'perfectRun' || 'journalDays' || 'deepFocusDays' => 'روز', 'level' => 'سطح', 'consistency30' || 'discipline90' => '٪', 'focusSessions' => 'جلسه', _ => '' };
-  String unitEn() => switch (metric) { 'keptRun' || 'perfectRun' || 'journalDays' || 'deepFocusDays' => 'days', 'level' => 'level', 'consistency30' || 'discipline90' => '%', 'focusSessions' => 'sessions', _ => '' };
+  String unitFa() => switch (metric) { 'keptRun' || 'perfectRun' || 'journalDays' || 'deepFocusDays' => 'روز', 'level' => 'سطح', 'consistency30' || 'discipline90' => '٪', 'focusSessions' => 'جلسه', 'focusMinutes' => 'دقیقه', 'badgeCount' => 'نشان', _ => '' };
+  String unitEn() => switch (metric) { 'keptRun' || 'perfectRun' || 'journalDays' || 'deepFocusDays' => 'days', 'level' => 'level', 'consistency30' || 'discipline90' => '%', 'focusSessions' => 'sessions', 'focusMinutes' => 'min', 'badgeCount' => 'badges', _ => '' };
 }
 
 const _b = BadgeTier.bronze, _s = BadgeTier.silver, _g = BadgeTier.gold, _p = BadgeTier.platinum, _l = BadgeTier.legendary;
 
+/// ترتیبِ این فهرست = ترتیبِ شیتِ ۴۸ نشان (۶ ردیف × ۸ ستون)؛ تصویرِ نشانِ iام = assets/badges/badge_ii.png
+/// نشانِ آخرِ هر ردیف «تاجِ ردیف» است (Legendary).
 const List<AchDef> achievementCatalog = [
-  // استمرار
+  // ردیف ۱ — استمرار
   AchDef('first_habit', 'consistency', _b, 'habitCompletions', 1, 'اولین عادت', 'First Habit', 'برای اولین بار یک عادتِ برنامه‌ریزی‌شده را انجام بده.', 'Complete a planned habit for the first time.'),
+  AchDef('cons_3', 'consistency', _b, 'keptRun', 3, 'استمرارِ ۳ روزه', '3-Day Consistency', '۳ روزِ متوالی برنامه‌ی عادت‌هایت را حفظ کن.', 'Keep your habit plan for 3 days in a row.'),
   AchDef('cons_7', 'consistency', _s, 'keptRun', 7, 'استمرارِ ۷ روزه', '7-Day Consistency', '۷ روزِ متوالی برنامه‌ی عادت‌هایت را حفظ کن.', 'Keep your habit plan for 7 days in a row.', titleId: 'routine_builder'),
+  AchDef('cons_14', 'consistency', _s, 'keptRun', 14, 'استمرارِ ۱۴ روزه', '14-Day Consistency', '۱۴ روزِ متوالی برنامه‌ی عادت‌هایت را حفظ کن.', 'Keep your habit plan for 14 days in a row.'),
   AchDef('cons_30', 'consistency', _g, 'keptRun', 30, 'استمرارِ ۳۰ روزه', '30-Day Consistency', '۳۰ روزِ متوالی برنامه‌ی عادت‌هایت را حفظ کن.', 'Keep your habit plan for 30 days in a row.', titleId: 'the_consistent'),
+  AchDef('cons_60', 'consistency', _g, 'keptRun', 60, 'استمرارِ ۶۰ روزه', '60-Day Consistency', '۶۰ روزِ متوالی برنامه‌ی عادت‌هایت را حفظ کن.', 'Keep your habit plan for 60 days in a row.'),
   AchDef('cons_100', 'consistency', _p, 'keptRun', 100, 'استمرارِ ۱۰۰ روزه', '100-Day Consistency', '۱۰۰ روزِ متوالی برنامه‌ی عادت‌هایت را حفظ کن.', 'Keep your habit plan for 100 days in a row.', titleId: 'veteran_100'),
   AchDef('cons_365', 'consistency', _l, 'keptRun', 365, 'استمرارِ ۳۶۵ روزه', '365-Day Consistency', 'یک سالِ کامل بدونِ وقفه در برنامه بمان.', 'Stay on plan for a full year.', titleId: 'master_consistency'),
-  // بهره‌وری
-  AchDef('task_1', 'productivity', _b, 'tasks', 1, 'اولین کار', 'First Task', 'اولین کارت را تمام کن.', 'Finish your first task.'),
-  AchDef('task_10', 'productivity', _s, 'tasks', 10, '۱۰ کار', '10 Tasks', '۱۰ کار را تمام کن.', 'Finish 10 tasks.'),
-  AchDef('task_100', 'productivity', _g, 'tasks', 100, '۱۰۰ کار', '100 Tasks', '۱۰۰ کار را تمام کن.', 'Finish 100 tasks.', titleId: 'the_finisher'),
-  AchDef('task_500', 'productivity', _p, 'tasks', 500, '۵۰۰ کار', '500 Tasks', '۵۰۰ کار را تمام کن.', 'Finish 500 tasks.'),
-  AchDef('task_1000', 'productivity', _l, 'tasks', 1000, '۱۰۰۰ کار', '1000 Tasks', '۱۰۰۰ کار را تمام کن.', 'Finish 1000 tasks.'),
-  // تمرکز
-  AchDef('focus_1', 'focus', _b, 'focusSessions', 1, 'اولین پومودورو', 'First Pomodoro', 'اولین جلسه‌ی تمرکز را کامل کن.', 'Complete your first focus session.'),
+  // ردیف ۲ — تمرکز
+  AchDef('focus_1', 'focus', _b, 'focusSessions', 1, 'اولین تمرکز', 'First Focus', 'اولین جلسه‌ی تمرکز را کامل کن.', 'Complete your first focus session.'),
+  AchDef('focus_5', 'focus', _b, 'focusSessions', 5, 'تمرکز', 'Focus', '۵ جلسه‌ی تمرکز را کامل کن.', 'Complete 5 focus sessions.'),
+  AchDef('deep_focus', 'focus', _s, 'deepFocusDays', 1, 'تمرکزِ عمیق', 'Deep Focus', 'در یک روز ۴ جلسه‌ی تمرکز و دست‌کم ۱۰۰ دقیقه تمرکز داشته باش.', 'In one day: 4 focus sessions and at least 100 focus minutes.', titleId: 'deep_focus'),
+  AchDef('flow_state', 'focus', _g, 'deepFocusDays', 5, 'حالتِ جریان', 'Flow State', 'در ۵ روزِ مختلف به «تمرکزِ عمیق» برس.', 'Reach “Deep Focus” on 5 different days.'),
+  AchDef('mindful_focus', 'focus', _s, 'focusMinutes', 1000, 'تمرکزِ آگاهانه', 'Mindful Focus', 'در مجموع ۱۰۰۰ دقیقه تمرکز کن.', 'Focus for 1000 minutes in total.'),
   AchDef('focus_10', 'focus', _s, 'focusSessions', 10, '۱۰ جلسه‌ی تمرکز', '10 Focus Sessions', '۱۰ جلسه‌ی تمرکز را کامل کن.', 'Complete 10 focus sessions.', titleId: 'focused_mind'),
   AchDef('focus_100', 'focus', _g, 'focusSessions', 100, '۱۰۰ جلسه‌ی تمرکز', '100 Focus Sessions', '۱۰۰ جلسه‌ی تمرکز را کامل کن.', 'Complete 100 focus sessions.'),
-  AchDef('deep_focus', 'focus', _p, 'deepFocusDays', 1, 'تمرکزِ عمیق', 'Deep Focus', 'در یک روز ۴ جلسه‌ی تمرکز و دست‌کم ۱۰۰ دقیقه تمرکز داشته باش.', 'In one day: 4 focus sessions and at least 100 focus minutes.', titleId: 'deep_focus'),
-  // مطالعه
+  AchDef('focus_master', 'focus', _l, 'focusSessions', 500, 'استادِ تمرکز', 'Focus Master', '۵۰۰ جلسه‌ی تمرکز را کامل کن.', 'Complete 500 focus sessions.'),
+  // ردیف ۳ — بهره‌وری
+  AchDef('task_1', 'productivity', _b, 'tasks', 1, 'اولین کار', 'First Task', 'اولین کارت را تمام کن.', 'Finish your first task.'),
+  AchDef('task_10', 'productivity', _b, 'tasks', 10, '۱۰ کار', '10 Tasks', '۱۰ کار را تمام کن.', 'Finish 10 tasks.'),
+  AchDef('task_50', 'productivity', _s, 'tasks', 50, '۵۰ کار', '50 Tasks', '۵۰ کار را تمام کن.', 'Finish 50 tasks.'),
+  AchDef('task_100', 'productivity', _s, 'tasks', 100, '۱۰۰ کار', '100 Tasks', '۱۰۰ کار را تمام کن.', 'Finish 100 tasks.', titleId: 'the_finisher'),
+  AchDef('task_500', 'productivity', _g, 'tasks', 500, '۵۰۰ کار', '500 Tasks', '۵۰۰ کار را تمام کن.', 'Finish 500 tasks.'),
+  AchDef('task_1000', 'productivity', _p, 'tasks', 1000, '۱۰۰۰ کار', '1000 Tasks', '۱۰۰۰ کار را تمام کن.', 'Finish 1000 tasks.'),
+  AchDef('task_finisher', 'productivity', _g, 'tasks', 250, 'تمام‌کننده', 'The Finisher', '۲۵۰ کار را تمام کن.', 'Finish 250 tasks.'),
+  AchDef('productivity_master', 'productivity', _l, 'tasks', 2000, 'استادِ بهره‌وری', 'Productivity Master', '۲۰۰۰ کار را تمام کن.', 'Finish 2000 tasks.'),
+  // ردیف ۴ — مطالعه
   AchDef('book_1', 'reading', _b, 'books', 1, 'اولین کتاب', 'First Book', 'اولین کتابت را تمام کن.', 'Finish your first book.'),
-  AchDef('book_5', 'reading', _s, 'books', 5, '۵ کتاب', '5 Books', '۵ کتاب را تمام کن.', 'Finish 5 books.', titleId: 'bookworm'),
-  AchDef('book_10', 'reading', _g, 'books', 10, '۱۰ کتاب', '10 Books', '۱۰ کتاب را تمام کن.', 'Finish 10 books.'),
-  AchDef('book_25', 'reading', _p, 'books', 25, '۲۵ کتاب', '25 Books', '۲۵ کتاب را تمام کن.', 'Finish 25 books.'),
-  AchDef('book_100', 'reading', _l, 'books', 100, '۱۰۰ کتاب', '100 Books', '۱۰۰ کتاب را تمام کن.', 'Finish 100 books.'),
-  // چالش‌ها
-  AchDef('chal_1', 'challenges', _b, 'challenges', 1, 'اولین چالش', 'First Challenge', 'اولین چالشت را با موفقیت تمام کن.', 'Succeed in your first challenge.'),
-  AchDef('chal_5', 'challenges', _s, 'challenges', 5, '۵ چالش', '5 Challenges', '۵ چالش را با موفقیت تمام کن.', 'Succeed in 5 challenges.'),
-  AchDef('chal_25', 'challenges', _g, 'challenges', 25, '۲۵ چالش', '25 Challenges', '۲۵ چالش را با موفقیت تمام کن.', 'Succeed in 25 challenges.'),
-  AchDef('chal_master', 'challenges', _p, 'challenges', 50, 'استادِ چالش', 'Challenge Master', '۵۰ چالش را با موفقیت تمام کن.', 'Succeed in 50 challenges.', titleId: 'challenge_master'),
-  // انضباط
+  AchDef('book_5', 'reading', _b, 'books', 5, '۵ کتاب', '5 Books', '۵ کتاب را تمام کن.', 'Finish 5 books.', titleId: 'bookworm'),
+  AchDef('book_10', 'reading', _s, 'books', 10, '۱۰ کتاب', '10 Books', '۱۰ کتاب را تمام کن.', 'Finish 10 books.'),
+  AchDef('book_25', 'reading', _g, 'books', 25, '۲۵ کتاب', '25 Books', '۲۵ کتاب را تمام کن.', 'Finish 25 books.'),
+  AchDef('book_50', 'reading', _g, 'books', 50, '۵۰ کتاب', '50 Books', '۵۰ کتاب را تمام کن.', 'Finish 50 books.'),
+  AchDef('book_100', 'reading', _p, 'books', 100, '۱۰۰ کتاب', '100 Books', '۱۰۰ کتاب را تمام کن.', 'Finish 100 books.'),
+  AchDef('bookworm', 'reading', _s, 'books', 15, 'کرمِ کتاب', 'Bookworm', '۱۵ کتاب را تمام کن.', 'Finish 15 books.'),
+  AchDef('reader', 'reading', _l, 'books', 200, 'کتاب‌خوانِ بزرگ', 'The Reader', '۲۰۰ کتاب را تمام کن.', 'Finish 200 books.'),
+  // ردیف ۵ — انضباط و چالش
+  AchDef('chal_1', 'discipline', _b, 'challenges', 1, 'اولین چالش', 'First Challenge', 'اولین چالشت را با موفقیت تمام کن.', 'Succeed in your first challenge.'),
+  AchDef('chal_complete', 'discipline', _s, 'challenges', 3, 'چالشِ تمام‌شده', 'Challenge Complete', '۳ چالش را با موفقیت تمام کن.', 'Succeed in 3 challenges.'),
+  AchDef('chal_master', 'discipline', _g, 'challenges', 25, 'استادِ چالش', 'Challenge Master', '۲۵ چالش را با موفقیت تمام کن.', 'Succeed in 25 challenges.', titleId: 'challenge_master'),
+  AchDef('high_consistency', 'discipline', _s, 'consistency30', 85, 'انضباط', 'Discipline', 'در ۳۰ روزِ اخیر دست‌کم ۸۵٪ برنامه‌ات را انجام بده.', 'Complete at least 85% of your plan over the last 30 days.', titleId: 'the_disciplined'),
   AchDef('perfect_week', 'discipline', _s, 'perfectRun', 7, 'هفته‌ی بی‌نقص', 'Perfect Week', '۷ روزِ متوالی همه‌ی عادت‌های سررسید را انجام بده.', 'Complete every due habit for 7 days in a row.'),
   AchDef('perfect_month', 'discipline', _g, 'perfectRun', 30, 'ماهِ بی‌نقص', 'Perfect Month', '۳۰ روزِ متوالی همه‌ی عادت‌های سررسید را انجام بده.', 'Complete every due habit for 30 days in a row.'),
-  AchDef('high_consistency', 'discipline', _g, 'consistency30', 85, 'استمرارِ بالا', 'High Consistency', 'در ۳۰ روزِ اخیر دست‌کم ۸۵٪ برنامه‌ات را انجام بده.', 'Complete at least 85% of your plan over the last 30 days.', titleId: 'the_disciplined'),
-  AchDef('long_discipline', 'discipline', _p, 'discipline90', 80, 'انضباطِ بلندمدت', 'Long-Term Discipline', 'امتیازِ انضباطِ ۹۰ روزه‌ات را به ۸۰ برسان.', 'Reach a 90-day discipline score of 80.'),
-  // تسلط
+  AchDef('unbreakable', 'discipline', _p, 'perfectRun', 100, 'شکست‌ناپذیر', 'Unbreakable', '۱۰۰ روزِ متوالی همه‌ی عادت‌های سررسید را انجام بده.', 'Complete every due habit for 100 days in a row.'),
+  AchDef('path_finisher', 'discipline', _l, 'challenges', 50, 'به مقصد رسیده', 'Path Finisher', '۵۰ چالش را با موفقیت تمام کن.', 'Succeed in 50 challenges.'),
+  // ردیف ۶ — تسلط
   AchDef('level_10', 'mastery', _b, 'level', 10, 'سطح ۱۰', 'Level 10', 'به سطح ۱۰ برس.', 'Reach level 10.'),
   AchDef('level_25', 'mastery', _s, 'level', 25, 'سطح ۲۵', 'Level 25', 'به سطح ۲۵ برس.', 'Reach level 25.'),
   AchDef('level_50', 'mastery', _g, 'level', 50, 'سطح ۵۰', 'Level 50', 'به سطح ۵۰ برس.', 'Reach level 50.'),
   AchDef('level_75', 'mastery', _p, 'level', 75, 'سطح ۷۵', 'Level 75', 'به سطح ۷۵ برس.', 'Reach level 75.'),
   AchDef('level_100', 'mastery', _l, 'level', 100, 'سطح ۱۰۰', 'Level 100', 'به سطح ۱۰۰ برس.', 'Reach level 100.'),
-  // مرور
-  AchDef('review_1', 'reflection', _b, 'journalDays', 1, 'اولین مرور', 'First Review', 'اولین مرورِ روزانه‌ات را بنویس.', 'Write your first daily review.'),
-  AchDef('review_7', 'reflection', _s, 'journalDays', 7, '۷ روز مرور', '7 Review Days', 'در ۷ روزِ مختلف مرورِ روزانه بنویس.', 'Write daily reviews on 7 different days.'),
-  AchDef('review_30', 'reflection', _g, 'journalDays', 30, '۳۰ روز مرور', '30 Review Days', 'در ۳۰ روزِ مختلف مرورِ روزانه بنویس.', 'Write daily reviews on 30 different days.'),
-  // فصل (پرو)
-  AchDef('season_1', 'season', _g, 'seasonsDone', 1, 'اولین فصل', 'First Season', 'یک فصلِ کامل را به پایان برسان.', 'Finish a full season.', pro: true),
-  AchDef('season_3', 'season', _p, 'seasonsDone', 3, 'سه فصل', 'Three Seasons', 'سه فصلِ کامل را به پایان برسان.', 'Finish three full seasons.', pro: true),
+  AchDef('master', 'mastery', _p, 'badgeCount', 20, 'استاد', 'Master', '۲۰ نشانِ دیگر را باز کن.', 'Unlock 20 other badges.'),
+  AchDef('grandmaster', 'mastery', _l, 'badgeCount', 35, 'استادِ بزرگ', 'Grandmaster', '۳۵ نشانِ دیگر را باز کن.', 'Unlock 35 other badges.'),
+  AchDef('legendary', 'mastery', _l, 'badgeCount', 45, 'افسانه‌ای', 'Legendary', 'همه‌ی نشان‌های دیگر را باز کن.', 'Unlock every other badge.'),
 ];
+
+/// شماره‌ی تصویرِ نشان (۱..۴۸) در شیت
+int badgeArt(AchDef d) => achievementCatalog.indexOf(d) + 1;
+/// نشان‌های «متا» که خودشان به تعدادِ نشان‌های دیگر بستگی دارند
+bool isMetaBadge(AchDef d) => d.metric == 'badgeCount';
 
 AchDef? achById(String id) {
   for (final a in achievementCatalog) {
@@ -174,6 +186,8 @@ class MetricCtx {
         return _ev('journal').length;
       case 'books':
         return (st['books'] is List ? st['books'] as List : const []).where((b) => b is Map && b['completed'] == true).length;
+      case 'focusMinutes':
+        return _ev('pomodoro').fold<num>(0, (a, e) => a + ((e['minutes'] ?? 0) as num));
       case 'level':
         return level;
       case 'keptRun':
@@ -219,13 +233,12 @@ class AchStatus {
 /// وضعیتِ همه‌ی دستاوردها (بدونِ نوشتن). unlockedمانده‌ها از state['progress']['unlocked'] خوانده می‌شوند.
 List<AchStatus> achievementStatuses(Doc st, MetricCtx ctx) {
   final un = progressOf(st)['unlocked'] as Map;
-  return [
-    for (final a in achievementCatalog)
-      () {
-        final rec = un[a.id];
-        final v = ctx.get(a.metric);
-        final isU = rec is Map || v >= a.target;
-        return AchStatus(a, v, isU, rec is Map ? (rec['at'] as num?)?.toInt() : null);
-      }()
-  ];
+  AchStatus mk(AchDef a, num v) {
+    final rec = un[a.id];
+    return AchStatus(a, v, rec is Map || v >= a.target, rec is Map ? (rec['at'] as num?)?.toInt() : null);
+  }
+
+  final base = <AchDef, AchStatus>{for (final a in achievementCatalog) if (!isMetaBadge(a)) a: mk(a, ctx.get(a.metric))};
+  final count = base.values.where((s) => s.unlocked).length;
+  return [for (final a in achievementCatalog) isMetaBadge(a) ? mk(a, count) : base[a]!];
 }

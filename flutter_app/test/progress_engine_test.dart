@@ -1,3 +1,4 @@
+import 'dart:io';
 // سیستمِ پیشرفتِ جدید: XP (بدونِ تقلب)، سطح، رتبه، دستاورد/نشان، استریک، فصل، مهاجرت.
 import 'dart:convert';
 
@@ -311,11 +312,17 @@ void main() {
       expect(c7.ratio, closeTo(5 / 7, 1e-9));
     });
 
-    test('کاتالوگ: شناسه‌ها یکتا، همه‌ی دسته‌های الزامی و ۳۲+ نشان', () {
+    test('کاتالوگ: شناسه‌ها یکتا، دقیقاً ۴۸ نشان (شیتِ ۶×۸) با تصویرِ متناظر', () {
       final ids = achievementCatalog.map((a) => a.id).toSet();
       expect(ids.length, achievementCatalog.length);
-      expect(achievementCatalog.length, greaterThanOrEqualTo(32));
-      for (final c in ['consistency', 'productivity', 'focus', 'reading', 'challenges', 'discipline', 'mastery']) {
+      expect(achievementCatalog.length, 48);
+      for (int i = 0; i < 48; i++) {
+        expect(badgeArt(achievementCatalog[i]), i + 1);
+        expect(File('assets/badges/badge_${(i + 1).toString().padLeft(2, '0')}.png').existsSync(), true, reason: 'badge_${i + 1}');
+        // آخرِ هر ردیف «تاج» (Legendary) است
+        if ((i + 1) % 8 == 0) expect(achievementCatalog[i].tier, BadgeTier.legendary);
+      }
+      for (final c in ['consistency', 'productivity', 'focus', 'reading', 'discipline', 'mastery']) {
         expect(achievementCatalog.any((a) => a.cat == c), true, reason: c);
       }
       for (final a in achievementCatalog) {

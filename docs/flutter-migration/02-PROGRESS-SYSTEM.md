@@ -17,7 +17,7 @@ Achievement → Milestone ، Achievement/Progress → Title
 | `ledger.dart` | دفتر XP در `state['progress']` (رویدادها، unlocked، عنوان، ویژه‌ها، فصل‌ها، announced) |
 | `sources.dart` | تبدیل داده‌ی واقعی به رویدادهای XP با **شناسه‌ی قطعی** |
 | `engine.dart` | `syncProgress` (idempotent)، سطح/رتبه، دستاوردها، فصل، Pending announcements |
-| `achievements.dart` | کاتالوگ داده‌محور (۳۴ دستاورد/نشان، ۱۰ عنوان، ۱۲ نقطه‌ی عطف) و متریک‌ها |
+| `achievements.dart` | کاتالوگ داده‌محور (۴۸ دستاورد/نشان (شیتِ ۶×۸؛ تصاویر در assets/badges، ساخته‌شده با tools/badge-sheet)، ۱۰ عنوان، ۱۲ نقطه‌ی عطف) و متریک‌ها |
 | `stats.dart` | آمار با فرمول‌های مرکزی (`statFormulas`) و null در نبودِ داده |
 | `features/progress/badge_emblem.dart` | نشانِ هندسیِ خطی (CustomPainter) با `BadgeTokens` وابسته به تم |
 
