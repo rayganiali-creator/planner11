@@ -9,22 +9,22 @@
  <radialGradient id="b13p" cx=".3" cy=".22" r="1.15"><stop offset="0" stop-color="#8A74D6"/><stop offset="1" stop-color="#40308E"/></radialGradient>
  <radialGradient id="b13g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#C9BBFF" stop-opacity=".95"/><stop offset="1" stop-color="#C9BBFF" stop-opacity=".55"/></radialGradient>
  <linearGradient id="b13s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
- <clipPath id="b13c"><path d="M-73,0A73,73 0 1 0 73,0A73,73 0 1 0 -73,0Z"/></clipPath>
+ <clipPath id="b13c"><path d="M-13.15,-68.33Q0,-75.92 13.15,-68.33L52.6,-45.55Q65.75,-37.96 65.75,-22.78L65.75,22.78Q65.75,37.96 52.6,45.55L13.15,68.33Q0,75.92 -13.15,68.33L-52.6,45.55Q-65.75,37.96 -65.75,22.78L-65.75,-22.78Q-65.75,-37.96 -52.6,-45.55Z"/></clipPath>
 </defs>
 
-<path d="M-86,0A86,86 0 1 0 86,0A86,86 0 1 0 -86,0Z" transform="translate(0 7)" fill="#000" opacity=".26" filter="url(#blur8)"/>
-<path d="M-86,0A86,86 0 1 0 86,0A86,86 0 1 0 -86,0Z" fill="url(#b13r)"/>
-<path d="M-86,0A86,86 0 1 0 86,0A86,86 0 1 0 -86,0Z" fill="none" stroke="#000" stroke-opacity=".38" stroke-width="1.1"/>
-<path d="M-79.5,0A79.5,79.5 0 1 0 79.5,0A79.5,79.5 0 1 0 -79.5,0Z" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".9"/>
-<path d="M-73,0A73,73 0 1 0 73,0A73,73 0 1 0 -73,0Z" fill="url(#b13p)"/>
+<path d="M-15.49,-80.5Q0,-89.44 15.49,-80.5L61.97,-53.66Q77.46,-44.72 77.46,-26.83L77.46,26.83Q77.46,44.72 61.97,53.66L15.49,80.5Q0,89.44 -15.49,80.5L-61.97,53.66Q-77.46,44.72 -77.46,26.83L-77.46,-26.83Q-77.46,-44.72 -61.97,-53.66Z" transform="translate(0 7)" fill="#000" opacity=".26" filter="url(#blur8)"/>
+<path d="M-15.49,-80.5Q0,-89.44 15.49,-80.5L61.97,-53.66Q77.46,-44.72 77.46,-26.83L77.46,26.83Q77.46,44.72 61.97,53.66L15.49,80.5Q0,89.44 -15.49,80.5L-61.97,53.66Q-77.46,44.72 -77.46,26.83L-77.46,-26.83Q-77.46,-44.72 -61.97,-53.66Z" fill="url(#b13r)"/>
+<path d="M-15.49,-80.5Q0,-89.44 15.49,-80.5L61.97,-53.66Q77.46,-44.72 77.46,-26.83L77.46,26.83Q77.46,44.72 61.97,53.66L15.49,80.5Q0,89.44 -15.49,80.5L-61.97,53.66Q-77.46,44.72 -77.46,26.83L-77.46,-26.83Q-77.46,-44.72 -61.97,-53.66Z" fill="none" stroke="#000" stroke-opacity=".38" stroke-width="1.1"/>
+<path d="M-14.32,-74.41Q0,-82.68 14.32,-74.41L57.28,-49.61Q71.6,-41.34 71.6,-24.8L71.6,24.8Q71.6,41.34 57.28,49.61L14.32,74.41Q0,82.68 -14.32,74.41L-57.28,49.61Q-71.6,41.34 -71.6,24.8L-71.6,-24.8Q-71.6,-41.34 -57.28,-49.61Z" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".9"/>
+<path d="M-13.15,-68.33Q0,-75.92 13.15,-68.33L52.6,-45.55Q65.75,-37.96 65.75,-22.78L65.75,22.78Q65.75,37.96 52.6,45.55L13.15,68.33Q0,75.92 -13.15,68.33L-52.6,45.55Q-65.75,37.96 -65.75,22.78L-65.75,-22.78Q-65.75,-37.96 -52.6,-45.55Z" fill="url(#b13p)"/>
 <g clip-path="url(#b13c)">
- <path d="M-73,0A73,73 0 1 0 73,0A73,73 0 1 0 -73,0Z" fill="none" stroke="#000" stroke-opacity=".42" stroke-width="12" filter="url(#blur3)"/>
- <path d="M-67.16,0A67.16,67.16 0 1 0 67.16,0A67.16,67.16 0 1 0 -67.16,0Z" fill="none" stroke="#fff" stroke-opacity=".10" stroke-width=".9"/><path d="M-61.32,0A61.32,61.32 0 1 0 61.32,0A61.32,61.32 0 1 0 -61.32,0Z" fill="none" stroke="#fff" stroke-opacity=".10" stroke-width=".9"/>
+ <path d="M-13.15,-68.33Q0,-75.92 13.15,-68.33L52.6,-45.55Q65.75,-37.96 65.75,-22.78L65.75,22.78Q65.75,37.96 52.6,45.55L13.15,68.33Q0,75.92 -13.15,68.33L-52.6,45.55Q-65.75,37.96 -65.75,22.78L-65.75,-22.78Q-65.75,-37.96 -52.6,-45.55Z" fill="none" stroke="#000" stroke-opacity=".42" stroke-width="12" filter="url(#blur3)"/>
+ <path d="M-12.1,-62.86Q0,-69.85 12.1,-62.86L48.39,-41.91Q60.49,-34.92 60.49,-20.95L60.49,20.95Q60.49,34.92 48.39,41.91L12.1,62.86Q0,69.85 -12.1,62.86L-48.39,41.91Q-60.49,34.92 -60.49,20.95L-60.49,-20.95Q-60.49,-34.92 -48.39,-41.91Z" fill="none" stroke="#fff" stroke-opacity=".10" stroke-width=".9"/><path d="M-11.05,-57.4Q0,-63.77 11.05,-57.4L44.18,-38.26Q55.23,-31.89 55.23,-19.13L55.23,19.13Q55.23,31.89 44.18,38.26L11.05,57.4Q0,63.77 -11.05,57.4L-44.18,38.26Q-55.23,31.89 -55.23,19.13L-55.23,-19.13Q-55.23,-31.89 -44.18,-38.26Z" fill="none" stroke="#fff" stroke-opacity=".10" stroke-width=".9"/>
  <ellipse cx="0" cy="-58" rx="92" ry="64" fill="url(#b13s)"/>
 </g>
-<path d="M-73,0A73,73 0 1 0 73,0A73,73 0 1 0 -73,0Z" fill="none" stroke="#F8FAFC" stroke-opacity=".6" stroke-width="1.2"/>
+<path d="M-13.15,-68.33Q0,-75.92 13.15,-68.33L52.6,-45.55Q65.75,-37.96 65.75,-22.78L65.75,22.78Q65.75,37.96 52.6,45.55L13.15,68.33Q0,75.92 -13.15,68.33L-52.6,45.55Q-65.75,37.96 -65.75,22.78L-65.75,-22.78Q-65.75,-37.96 -52.6,-45.55Z" fill="none" stroke="#F8FAFC" stroke-opacity=".6" stroke-width="1.2"/>
 <g filter="url(#emb)" fill="none" stroke="#F3EEFF" stroke-linecap="round" stroke-linejoin="round" class="mb13" transform="scale(1.16)">
- <circle cx="0" cy="-12" r="22" fill="none" stroke-width="3.04" opacity="1"/><circle cx="0" cy="12" r="22" fill="none" stroke-width="3.04" opacity="1"/><circle cx="0" cy="0" r="41" fill="none" stroke-width="1.28" opacity="0.5"/><circle cx="0" cy="0" r="3" class="fl" stroke="none" opacity="1"/>
+ <circle cx="0" cy="0" r="6" class="gl" stroke="none" opacity="1"/><circle cx="0" cy="0" r="16" fill="none" stroke-width="2.88" opacity="1"/><circle cx="0" cy="0" r="26" fill="none" stroke-width="2.56" opacity="0.85"/><line x1="0" y1="-31" x2="0" y2="-43" stroke-width="2.24" opacity="1"/><line x1="31" y1="0" x2="43" y2="0" stroke-width="2.24" opacity="1"/><line x1="0" y1="31" x2="0" y2="43" stroke-width="2.24" opacity="1"/><line x1="-31" y1="0" x2="-43" y2="0" stroke-width="2.24" opacity="1"/><circle cx="25.81" cy="-25.81" r="2" class="fl" stroke="none" opacity="1"/><circle cx="36.5" cy="0" r="2" class="fl" stroke="none" opacity="1"/><circle cx="25.81" cy="25.81" r="2" class="fl" stroke="none" opacity="1"/><circle cx="0" cy="36.5" r="2" class="fl" stroke="none" opacity="1"/><circle cx="-25.81" cy="25.81" r="2" class="fl" stroke="none" opacity="1"/><circle cx="-36.5" cy="0" r="2" class="fl" stroke="none" opacity="1"/><circle cx="-25.81" cy="-25.81" r="2" class="fl" stroke="none" opacity="1"/><circle cx="-0" cy="-36.5" r="2" class="fl" stroke="none" opacity="1"/><polygon points="16.26,-16.26 16.26,16.26 -16.26,16.26 -16.26,-16.26" class="nf" stroke-width="1.76" opacity="0.8"/>
 </g>
 
 </svg>

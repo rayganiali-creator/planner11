@@ -24,7 +24,7 @@
 </g>
 <path d="M-73,0A73,73 0 1 0 73,0A73,73 0 1 0 -73,0Z" fill="none" stroke="#FFEFB8" stroke-opacity=".6" stroke-width="1.2"/>
 <g filter="url(#emb)" fill="none" stroke="#F4EBD3" stroke-linecap="round" stroke-linejoin="round" class="mb6" transform="scale(1.16)">
- <circle cx="0" cy="0" r="10" fill="none" stroke-width="2.56" opacity="1"/><path d="M-8.21,-22.55A24,24 0 1 1 -22.55,8.21" fill="none" stroke-width="3.04" opacity="1"/><path d="M24.43,-29.11A38,38 0 1 1 -35.71,-13" fill="none" stroke-width="3.04" opacity="1"/><circle cx="0" cy="0" r="3" class="fl" stroke="none" opacity="1"/>
+ <line x1="-42" y1="34" x2="42" y2="34" stroke-width="2.24" opacity="0.9"/><rect x="-38" y="24" width="15.5" height="10" rx="1.5" class="sf" stroke-width="2.72" opacity="1"/><rect x="-22.5" y="14" width="15.5" height="20" rx="1.5" class="sf" stroke-width="2.72" opacity="1"/><rect x="-7" y="4" width="15.5" height="30" rx="1.5" class="sf" stroke-width="2.72" opacity="1"/><rect x="8.5" y="-6" width="15.5" height="40" rx="1.5" class="sf" stroke-width="2.72" opacity="1"/><rect x="24" y="-16" width="15.5" height="50" rx="1.5" class="sf" stroke-width="2.72" opacity="1"/><circle cx="-30" cy="18" r="2" class="fl" stroke="none" opacity="0.95"/><circle cx="-14.5" cy="8" r="2" class="fl" stroke="none" opacity="0.95"/><circle cx="1" cy="-2" r="2" class="fl" stroke="none" opacity="0.95"/><circle cx="16.5" cy="-12" r="2" class="fl" stroke="none" opacity="0.95"/><circle cx="32" cy="-22" r="2" class="fl" stroke="none" opacity="0.95"/><line x1="-30" y1="18" x2="32" y2="-22" stroke-width="1.12" opacity="0.6"/>
 </g>
 
 </svg>

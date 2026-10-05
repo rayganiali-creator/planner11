@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:routine_planner/core/progress/achievements.dart';
-import 'package:routine_planner/core/progress/engine.dart';
 
 import 'progress_ui_test.dart';
 

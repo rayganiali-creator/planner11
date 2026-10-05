@@ -24,7 +24,7 @@
 </g>
 <path d="M-73,0A73,73 0 1 0 73,0A73,73 0 1 0 -73,0Z" fill="none" stroke="#FFEFB8" stroke-opacity=".6" stroke-width="1.2"/>
 <g filter="url(#emb)" fill="none" stroke="#F8E7DD" stroke-linecap="round" stroke-linejoin="round" class="mb28" transform="scale(1.16)">
- <polygon points="0,3.4 -25.8,-1.76 -25.8,30.92 0,36.08" class="sf" stroke-width="3.2" opacity="1"/><polygon points="0,3.4 25.8,-1.76 25.8,30.92 0,36.08" class="sf" stroke-width="3.2" opacity="1"/><line x1="0" y1="3.4" x2="0" y2="36.08" stroke-width="2.56" opacity="1"/><path d="M-18.39,-15.43A24,24 0 0 1 18.39,-15.43" fill="none" stroke-width="1.6" opacity="0.9"/><path d="M-27.36,-18.45A33,33 0 0 1 27.36,-18.45" fill="none" stroke-width="1.28" opacity="0.65"/><path d="M-37.08,-19.72A42,42 0 0 1 37.08,-19.72" fill="none" stroke-width="1.12" opacity="0.45"/>
+ <polygon points="0,-2 -30,-8 -30,30 0,36" class="sf" stroke-width="3.2" opacity="1"/><polygon points="0,-2 30,-8 30,30 0,36" class="sf" stroke-width="3.2" opacity="1"/><line x1="0" y1="-2" x2="0" y2="36" stroke-width="2.56" opacity="1"/><line x1="-24" y1="-6" x2="-6" y2="-2" stroke-width="1.12" opacity="0.75"/><line x1="24" y1="-6" x2="6" y2="-2" stroke-width="1.12" opacity="0.75"/><line x1="-24" y1="2" x2="-6" y2="6" stroke-width="1.12" opacity="0.75"/><line x1="24" y1="2" x2="6" y2="6" stroke-width="1.12" opacity="0.75"/><line x1="-24" y1="10" x2="-6" y2="14" stroke-width="1.12" opacity="0.75"/><line x1="24" y1="10" x2="6" y2="14" stroke-width="1.12" opacity="0.75"/>
 </g>
 
 </svg>

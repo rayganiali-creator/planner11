@@ -24,7 +24,7 @@
 </g>
 <path d="M-13.15,-68.33Q0,-75.92 13.15,-68.33L52.6,-45.55Q65.75,-37.96 65.75,-22.78L65.75,22.78Q65.75,37.96 52.6,45.55L13.15,68.33Q0,75.92 -13.15,68.33L-52.6,45.55Q-65.75,37.96 -65.75,22.78L-65.75,-22.78Q-65.75,-37.96 -52.6,-45.55Z" fill="none" stroke="#F8FAFC" stroke-opacity=".6" stroke-width="1.2"/>
 <g filter="url(#emb)" fill="none" stroke="#1F2B4E" stroke-linecap="round" stroke-linejoin="round" class="mb34" transform="scale(1.16)">
- <polyline points="-32,24 -10,6 8,14 30,-18" class="nf" stroke-width="2.88" opacity="1"/><circle cx="-32" cy="24" r="4.4" class="fl" stroke="none" opacity="1"/><circle cx="-10" cy="6" r="3.5" class="fl" stroke="none" opacity="1"/><circle cx="8" cy="14" r="3.5" class="fl" stroke="none" opacity="1"/><polygon points="30,-30 40,-18 30,-6 20,-18" class="sf" stroke-width="2.08" opacity="1"/>
+ <polyline points="-4,30 14,19 -10,8" class="nf" stroke-width="3.36" opacity="1"/><circle cx="-4" cy="30" r="2.8" class="fl" stroke="none" opacity="1"/><circle cx="14" cy="19" r="2.8" class="fl" stroke="none" opacity="1"/><circle cx="-10" cy="8" r="2.8" class="fl" stroke="none" opacity="1"/>
 </g>
 
 </svg>

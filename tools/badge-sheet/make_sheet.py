@@ -232,12 +232,21 @@ def motif(i):
         g.disc(5, glow=True)
     return g
 
+try:
+    import os
+    if os.environ.get('CLASSIC') != '1':
+        import sys; sys.modules.setdefault('make_sheet', sys.modules[__name__])
+        import progressive; motif = progressive.motif
+        _PF = progressive.ROW_FRAMES
+except ImportError as e:
+    print('progressive not loaded', e)
 FRAMES = {1: 'circle', 2: 'circle', 3: 'circle', 4: 'circle', 5: 'circle', 6: 'circle', 7: 'hex', 8: 'circle',
           9: 'circle', 10: 'circle', 11: 'diamond', 12: 'circle', 13: 'circle', 14: 'circle', 15: 'hex', 16: 'circle',
           17: 'diamond', 18: 'square', 19: 'square', 20: 'square', 21: 'octagon', 22: 'diamond', 23: 'circle', 24: 'octagon',
           25: 'square', 26: 'square', 27: 'hex', 28: 'circle', 29: 'circle', 30: 'circle', 31: 'hex', 32: 'circle',
           33: 'hex', 34: 'hex', 35: 'diamond', 36: 'diamond', 37: 'circle', 38: 'square', 39: 'hex', 40: 'circle',
           41: 'circle', 42: 'octagon', 43: 'circle', 44: 'circle', 45: 'circle', 46: 'hex', 47: 'octagon', 48: 'circle'}
+if 'progressive' in globals(): FRAMES = {i: _PF[(i - 1) // 8] for i in range(1, 49)}
 TIERS = ('bronze bronze silver silver gold gold platinum legendary '
          'bronze bronze silver gold silver silver gold platinum '
          'bronze bronze silver silver gold platinum gold platinum '
