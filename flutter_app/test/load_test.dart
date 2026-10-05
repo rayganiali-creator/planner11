@@ -5,6 +5,10 @@ import 'package:routine_planner/core/state_model.dart';
 
 import 'golden_loader.dart';
 
+// تفاوتِ آگاهانه: آواتار/سطحِ عادت (levelToastSent, levelReachedColor, masteryColor) حذف و progress/todoLog اضافه شد.
+const _legacy = {'avatar', 'levelToastSent', 'levelReachedColor', 'masteryColor', 'progress', 'todoLog'};
+Object? _strip(Object? o) => o is Map ? {for (final e in o.entries) if (!_legacy.contains(e.key)) e.key: _strip(e.value)} : o;
+
 void main() {
   final rows = (loadGolden('load') as List).cast<Map<String, dynamic>>();
 
@@ -19,7 +23,7 @@ void main() {
       try {
         final l = loadStateFromRaw(r['raw'] as String?, nowMs: r['nowMs'] as num);
         got = {'state': l.state, 'repaired': l.repaired};
-        diff = firstDiff(got, want);
+        diff = firstDiff(_strip(got), _strip(want));
       } catch (e, st) {
         diff = 'EXCEPTION: $e\n$st';
       }

@@ -92,6 +92,11 @@ void main() {
     expect(((store.state['reasons'] as Map)[hid] as Map)[a.todayISO]['reason'], 'حالم خوب بود');
     expect(find.text('🎉 پاداش شما!'), findsOneWidget);
     expect(find.text('بستنی'), findsOneWidget);
+    // نشانِ «اولین عادت» (انیمیشنِ ظریف) بالای پنجره‌ی پاداش می‌آید؛ مثلِ کاربر می‌بندیم
+    for (int i = 0; i < 3 && find.byKey(const ValueKey('reveal-ok')).evaluate().isNotEmpty; i++) {
+      await tester.tap(find.byKey(const ValueKey('reveal-ok')).last);
+      await settle();
+    }
     await tester.tap(find.text('باشه'));
     await settle();
     await tester.tap(find.byIcon(LucideIcons.check)); // دوباره روی فعال: بی‌پرسش برمی‌دارد
@@ -110,8 +115,9 @@ void main() {
     await tester.pumpWidget(RoutineApp(store: store, nav: nav, toasts: toasts, actions: a));
     await tester.pump(const Duration(milliseconds: 500));
     // منوی + را مستقیم از دکمه‌ی وسط نوار باز می‌کنیم
-    await tester.tap(find.byIcon(LucideIcons.plus).first);
+    await tester.tap(find.byIcon(LucideIcons.plus).last);
     await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 3));
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.tap(find.text('لحظه‌ی وسوسه'));
     await tester.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 3));
     expect(find.text('⚡ لحظه‌ی وسوسه'), findsOneWidget);
