@@ -206,10 +206,11 @@ def motif(i):
         for k in range(10):
             a = k * 36; g.line(P(40, a), P(46, a), .45)
     elif i == 42:
-        g.poly(ngon(4, 36, 45), .85); g.poly(ngon(4, 36, 0), .85); g.ring(42, .4, .6); g.disc(4, glow=True)
+        g.ring(17, .9, 1, P(17, 90)); g.line((-26, -22), (-26, 22), .9); g.line((-26, -22), (-33, -15), .9)
+        g.ring(46, .35, .6); g.disc(3.4, P(46, 0), glow=True)
     elif i == 43:
-        g.ring(43, .5, .7); g.poly(ngon(4, 28, 45), .75); g.poly(ngon(4, 28, 0), .75); g.ring(15, .55)
-        g.dots(8, 35, 1.9, 22.5); g.poly([(0, -7), (7, 0), (0, 7), (-7, 0)], .5, 1, True, True)
+        for a in (90, 210, 330): g.ring(19, .7, .95, P(14, a))
+        g.disc(3.6, glow=True); g.ring(44, .4, .6); g.dots(6, 44, 1.6, 30)
     elif i == 44:
         for r, o in ((42, 1), (35, .85), (28, .7), (21, .6), (14, .5)): g.ring(r, .38, o)
         g.spark(9, .16, .45)
