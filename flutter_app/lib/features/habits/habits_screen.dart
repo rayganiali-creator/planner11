@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
+import '../../core/doc.dart';
 import '../../core/habits.dart';
+import '../../ui/custom_theme.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../data/habit_ops.dart';
@@ -123,6 +125,8 @@ class _HabitCard extends StatelessWidget {
               ],
             ),
           ]),
+          const SizedBox(height: RpSpace.s2),
+          _LevelStrip(state: st, habit: habit, cur: cur),
           const SizedBox(height: RpSpace.s2),
           RpProgressBar(value: prog, colors: [p.primary, p.primary2]),
           const SizedBox(height: 6),
@@ -359,4 +363,47 @@ void _notesSheet(BuildContext context, Map habit) {
       ]),
     ),
   );
+}
+
+/// buildLevelDisplay: پیپ‌های سطح‌های همین مرحله + پیپ سرآمد، با رنگ‌های قابل‌تنظیم
+class _LevelStrip extends StatelessWidget {
+  final Doc state;
+  final Map habit;
+  final LevelDef cur;
+  const _LevelStrip({required this.state, required this.habit, required this.cur});
+  @override
+  Widget build(BuildContext context) {
+    final p = context.rp;
+    final fa = context.isFa;
+    final dark = p.bg.computeLuminance() < .3;
+    final reachedCol = parseHex(state['levelReachedColor']) ?? (dark ? const Color(0xFF3BC2BA) : const Color(0xFF146B69));
+    final masteryCol = parseHex(state['masteryColor']) ?? (dark ? const Color(0xFFE3BE5D) : const Color(0xFFC79A2E));
+    final stage = habitCurrentStageThresholds(habit as Map<String, dynamic>?);
+    if (stage.isEmpty) return const SizedBox.shrink();
+    final capstone = stage.last;
+    final capReached = cur.num >= capstone.num;
+    Widget pip(String label, Color? fill, bool current, String tip, {bool glow = false}) => Tooltip(
+          message: tip,
+          child: Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: fill ?? p.surface2,
+              border: Border.all(color: current ? p.text : (fill ?? p.line), width: current ? 2 : 1),
+              boxShadow: glow ? [BoxShadow(color: fill!.withValues(alpha: .6), blurRadius: 12)] : null,
+            ),
+            child: Text(label, style: rpText(RpType.caption, weight: 800, color: fill != null ? Colors.white : p.muted)),
+          ),
+        );
+    return Wrap(spacing: 6, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+      Text(context.tr('پیشرفت:', 'Progress:'), style: rpText(RpType.label, weight: 600, color: p.muted)),
+      for (int i = 0; i < stage.length - 1; i++)
+        pip(context.n(i + 1), cur.num >= stage[i].num ? reachedCol : null, cur.num == stage[i].num,
+            '${fa ? stage[i].labelFa : stage[i].labelEn} (${context.n(stage[i].minPoints)} ${fa ? 'سکه' : 'coins'})'),
+      pip(capstone.icon.isNotEmpty ? capstone.icon : '🏆', capReached ? masteryCol : null, cur.num == capstone.num,
+          '${fa ? capstone.labelFa : capstone.labelEn} (${context.n(capstone.minPoints)} ${fa ? 'سکه' : 'coins'})', glow: capReached),
+    ]);
+  }
 }
