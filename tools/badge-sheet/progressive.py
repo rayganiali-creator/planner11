@@ -8,10 +8,11 @@ def tile(g, x, y, s, filled, glow=False, op=1):
 
 def row_stairs(g, k):  # استمرار: پله‌ها بالا می‌روند تا خورشید
     base = 34; n = min(k, 5)
-    g.line((-42, base), (42, base), .7, .9)
+    g.line((-40, base), (40, base), .7, .9) if k > 5 else g.line((-40, base), (-38 + 15.5 * n + 2, base), .7, .9)
     for j in range(n):
         x0 = -38 + j * 15.5; top = base - 10 * (j + 1)
-        g.rect(x0, top, 15.5, base - top, 1.5, .85, 1, True)
+        if j == n - 1 and k < 8: g.add(f'<rect x="{f(x0)}" y="{f(top)}" width="15.5" height="{f(base - top)}" rx="1.5" class="gl" stroke-width="2.7"/>')
+        else: g.rect(x0, top, 15.5, base - top, 1.5, .85, 1, True)
     if k >= 6:
         for j in range(5):
             g.disc(2, (-30 + j * 15.5, base - 10 * (j + 1) - 6), .95)
@@ -39,14 +40,14 @@ def row_focus(g, k):  # تمرکز: از یک نقطه تا ماندالای ک�
             x0, y0 = P(11, a + 22.5); cx, cy = P(30, a + 22.5 - 14); x1, y1 = P(40, a + 22.5)
             g.path(f'M{f(x0)},{f(y0)}Q{f(cx)},{f(cy)} {f(x1)},{f(y1)}Q{f(cx+ (P(30,a+22.5+14)[0]-cx))},{f(cy+(P(30,a+22.5+14)[1]-cy))} {f(x0)},{f(y0)}Z', .5, .9, False)
 
-CELLS = [(3, 1), (2, 2), (2, 0), (1, 3), (3, 2), (3, 0), (1, 2), (2, 1), (0, 3), (1, 1), (3, 3), (2, 3), (0, 2), (1, 0), (0, 1), (0, 0)]
+CELLS = [(2, 1), (2, 2), (3, 1), (3, 2), (1, 2), (1, 3), (2, 0), (2, 3), (3, 0), (3, 3), (1, 1), (1, 0), (0, 3), (0, 2), (0, 1), (0, 0)]
 CHECK = {(2, 0), (3, 1), (2, 2), (1, 3), (0, 3)}
 def row_tiles(g, k):  # بهره‌وری: موزائیکِ کارها که تیکِ بزرگ می‌شود
     cnt = [1, 2, 4, 6, 9, 12, 16, 16][k - 1]
     for (r, c) in CELLS[:cnt]:
         x, y = -38 + c * 20, -38 + r * 20
         if k == 8: tile(g, x, y, 16, (r, c) in CHECK, (r, c) in CHECK, 1 if (r, c) in CHECK else .5)
-        else: tile(g, x, y, 16, True)
+        else: tile(g, x, y, 16, True, (r, c) == CELLS[cnt - 1])
     if k == 8:
         g.poly([(-27, 2), (-10, 22), (28, -20)], 1.35, 1, False)
 
@@ -104,7 +105,38 @@ def row_master(g, k):  # تسلط: جواهرِ لایه‌لایه ← تاجِ
         g.arc(28, 240, 300, .6); g.arc(28, 60, 120, .6)
 
 ROWFN = [row_stairs, row_focus, row_tiles, row_book, row_path, row_master]
+
+def fit(r, k):
+    """(scale, cx, cy): بزرگ‌نماییِ مراحلِ اولِ کم‌جزئیات تا نشان پر و جذاب باشد"""
+    if r == 0 and k <= 5: return ([2.1, 1.8, 1.5, 1.3, 1.12][k - 1], -38 + 7.75 * k, 34 - 5 * k)
+    if r == 1: return ([2.3, 1.7, 1.05][k - 1], 0, 0) if k <= 3 else (1, 0, 0)
+    if r == 2:
+        cnt = [1, 2, 4, 6, 9, 12, 16, 16][k - 1]
+        xs = [-38 + c * 20 for _, c in CELLS[:cnt]]; ys = [-38 + rr * 20 for rr, _ in CELLS[:cnt]]
+        w = max(xs) + 16 - min(xs); h = max(ys) + 16 - min(ys)
+        return (min(2.4, 78 / max(w, h)), (max(xs) + 16 + min(xs)) / 2, (max(ys) + 16 + min(ys)) / 2)
+    if r == 3: return {1: (1.7, 0, -2), 2: (1.5, 0, -2), 3: (1.15, 0, 2)}.get(k, (1, 0, 0))
+    if r == 4 and k <= 3:
+        seg = {1: 2, 2: 3, 3: 4}[k]; xs = [p[0] for p in PATH[:seg]]; ys = [p[1] for p in PATH[:seg]]
+        return (min(2.2, 62 / max(max(xs) - min(xs), max(ys) - min(ys), 14)), (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2)
+    if r == 5: return ([1.6, 1.28, 1.06][k - 1], 0, 0) if k <= 3 else (1, 0, 0)
+    return (1, 0, 0)
+
+def base_layer(g, r, k):
+    """زمینه‌ی تزئینیِ مشترک: از همان نشانِ اول، نشان پُر و گران‌قیمت دیده شود"""
+    g.disc(34, (0, 0), .22, True)
+    g.ring(45.5, .28, .5)
+    g.dots(24, 45.5, 0.9, 0, .55)
+    g.dots(4, 45.5, 2.0, 0, .9)
+
 def motif(i):
-    g = G(); r, k = divmod(i - 1, 8); ROWFN[r](g, k + 1); return g
+    r, k = divmod(i - 1, 8); k += 1
+    inner = G(); ROWFN[r](inner, k)
+    s_, cx, cy = fit(r, k)
+    g = G(); base_layer(g, r, k)
+    if (s_, cx, cy) != (1, 0, 0):
+        g.add(f'<g transform="translate(0 0) scale({f(s_)}) translate({f(-cx)} {f(-cy)})">' + ''.join(inner.l) + '</g>')
+    else: g.l += inner.l
+    return g
 
 ROW_FRAMES = ['circle', 'hex', 'octagon', 'circle', 'hex', 'octagon']
