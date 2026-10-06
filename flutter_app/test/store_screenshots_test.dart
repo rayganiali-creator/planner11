@@ -72,7 +72,7 @@ void _seed(AppStore s, AppActions a) {
 void main() {
   final on = Platform.environment['STORE_SHOTS'] == '1';
   Future<void> shot(WidgetTester tester, String name, AppView v, {String theme = 'light', String accent = 'emerald', Future<void> Function(WidgetTester)? after}) async {
-    final (store, _, _) = await boot(tester, view: v, size: const Size(1080, 2160), prep: (s, a) {
+    final (_, _, _) = await boot(tester, view: v, size: const Size(1080, 2160), prep: (s, a) {
       s.state['theme'] = theme;
       s.state['accentTheme'] = accent;
       _seed(s, a);
