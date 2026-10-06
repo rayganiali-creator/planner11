@@ -56,12 +56,14 @@ for r, (ya, yb) in enumerate(rows):
             if best is None or iou > best[0]: best = (iou, kind, h, tm)
         print(n, best[1], round(best[0], 3))
         Sd = Image.fromarray((S * 255).astype(np.uint8), 'L').filter(ImageFilter.MaxFilter(7))
-        if best[0] > 0.94:
-            tmpl = Image.fromarray((best[3] * 255).astype(np.uint8), 'L').filter(ImageFilter.MinFilter(3))
+        if best[0] > (0.88 if best[1] == 'diamond' else 0.94):
+            tmpl = Image.fromarray((best[3] * 255).astype(np.uint8), 'L').filter(ImageFilter.MinFilter(int(os.environ.get('INSET', 9))))
+            if best[1] == 'diamond':  # گوشه‌های گرد
+                tmpl = tmpl.filter(ImageFilter.GaussianBlur(5)).point(lambda v: 255 if v > 120 else 0)
             SUBJ_N = Image.fromarray(np.minimum(np.asarray(tmpl), np.asarray(Sd)), 'L')
         else:
             clip = np.zeros((H, W), np.uint8); clip[int(y0):int(y0 + best[2]) + 1, int(x0):int(x1)] = 255
-            SUBJ_N = Image.fromarray(np.minimum(np.asarray(SUBJ.filter(ImageFilter.MinFilter(3))), clip), 'L')
+            SUBJ_N = Image.fromarray(np.minimum(np.asarray(SUBJ.filter(ImageFilter.MinFilter(int(os.environ.get('INSET', 9))))), clip), 'L')
         y1 = int(y0 + best[2])
         side = max(x1 - x0, y1 - y0); cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
         pad = side * 0.08
@@ -70,7 +72,7 @@ for r, (ya, yb) in enumerate(rows):
         al = Image.new('L', (W, H), 0)
         if SUBJ_N is not None: al = SUBJ_N
         else: al.paste(SUBJ.crop((xa, ya, xb, yb)), (xa, ya))
-        al = al.filter(ImageFilter.GaussianBlur(1.1))
+        al = al.filter(ImageFilter.GaussianBlur(0.9))
         # حذفِ رنگِ زمینه از لبه‌ها (defringe): c = (c - bg(1-a)) / a
         a_ = np.asarray(al).astype(float)[..., None] / 255
         rgb = np.asarray(im).astype(float)
