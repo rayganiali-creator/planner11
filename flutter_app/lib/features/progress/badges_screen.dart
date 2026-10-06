@@ -1,5 +1,6 @@
 // «نشان‌های من»: مجموعه‌ی کامل با فیلتر و مرتب‌سازی (همه‌ی فیلترها برای همه آزاد است).
 import 'package:flutter/material.dart';
+import '../onboarding/onboarding.dart';
 
 import '../../app/i18n.dart';
 import '../../core/progress/achievements.dart';
@@ -51,6 +52,7 @@ class _BadgesScreenState extends State<BadgesScreen> {
       children: [
         Row(children: [
           Expanded(child: Text(context.tr('نشان‌های من', 'My badges'), style: rpText(RpType.titleL, weight: 800, color: p.text))),
+          const HelpButton('badges'),
           Text('${context.n(d.snap.badgeCount)} / ${context.n(d.snap.totalBadges)}', key: const ValueKey('badge-count'), style: rpText(RpType.bodyL, weight: 700, color: p.primary)),
         ]),
         const SizedBox(height: RpSpace.s2),

@@ -103,3 +103,41 @@ class ProComparison extends StatelessWidget {
     );
   }
 }
+
+/// توضیحِ چندخطیِ «پرو چیست؟» برای کاربرِ رایگان؛ با فعال‌شدنِ پرو کاملاً حذف می‌شود.
+class ProPitch extends StatelessWidget {
+  const ProPitch({super.key});
+  @override
+  Widget build(BuildContext context) {
+    if (context.isPro) return const SizedBox.shrink();
+    final p = context.rp;
+    return Container(
+      key: const ValueKey('pro-pitch'),
+      padding: const EdgeInsets.all(RpSpace.s4),
+      decoration: BoxDecoration(color: p.goldSoft, borderRadius: BorderRadius.circular(RpRadius.lg)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(LucideIcons.sparkles, size: 18, color: p.goldInk),
+          const SizedBox(width: 8),
+          Expanded(child: Text(context.tr('پرو چه چیزی به تو می‌دهد؟', 'What does Pro give you?'), style: rpText(RpType.bodyL, weight: 800, color: p.goldInk))),
+        ]),
+        const SizedBox(height: 8),
+        Text(
+          context.tr('هسته‌ی برنامه (عادت‌ها، کارها، تمرکز، XP و نشان‌ها، تم‌ها، پشتیبان‌گیری) برای همیشه رایگان است. پرو محدودیت‌ها را برمی‌دارد و ابزارهای عمیق‌تری اضافه می‌کند:', 'The core app (habits, tasks, focus, XP and badges, themes, backup) is free forever. Pro lifts the limits and adds deeper tools:'),
+          style: rpText(RpType.body, weight: 500, color: p.text, height: 1.8),
+        ),
+        const SizedBox(height: 8),
+        for (final f in const [ProFeature.habits, ProFeature.books, ProFeature.subtasks, ProFeature.todoRepeatDays, ProFeature.pomodoroCustom, ProFeature.challengesCustom, ProFeature.smartAnalysis, ProFeature.advancedStats, ProFeature.seasons, ProFeature.voiceNotes])
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('•  ', style: rpText(RpType.body, weight: 800, color: p.goldInk)),
+              Expanded(child: Text('${context.tr(proInfos[f]!.titleFa, proInfos[f]!.titleEn)}: ${context.tr(proInfos[f]!.proFa, proInfos[f]!.proEn)}', style: rpText(RpType.label, weight: 500, color: p.text, height: 1.7))),
+            ]),
+          ),
+        const SizedBox(height: 6),
+        Text(context.tr('با خرید هر پلن، همه‌ی این امکانات از همان لحظه باز می‌شود و این توضیح از صفحه حذف می‌شود.', 'Any plan unlocks all of this instantly, and this note disappears.'), style: rpText(RpType.label, weight: 600, color: p.goldInk, height: 1.7)),
+      ]),
+    );
+  }
+}

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import '../onboarding/onboarding.dart';
 
 import '../../core/pro_features.dart';
 import '../../ui/pro_widgets.dart';
@@ -60,6 +61,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         children: [
           Row(children: [
             Expanded(child: Text(context.tr('کتابخانه', 'Library'), style: rpText(RpType.titleL, weight: 700, color: p.text))),
+            const HelpButton('library'),
             FilledButton.icon(
               key: const ValueKey('add-book'),
               style: FilledButton.styleFrom(visualDensity: VisualDensity.compact, minimumSize: const Size(0, 38), padding: const EdgeInsets.symmetric(horizontal: 12)),

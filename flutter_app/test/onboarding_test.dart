@@ -16,9 +16,14 @@ void main() {
   setUpAll(() async => texts = await AppTexts.load());
 
   test('متن‌های استخراج‌شده از HTML کامل‌اند', () {
-    expect(texts.onboarding.length, 15);
+    expect(texts.onboarding.length, 14);
     expect(texts.terms.length, 9);
-    expect(texts.help.keys, containsAll(['pomodoro', 'habits', 'challenge', 'calendar', 'progress']));
+    expect(texts.help.keys, containsAll(['pomodoro', 'habits', 'challenge', 'calendar', 'progress', 'home', 'library', 'purchases', 'journal', 'todo', 'settings', 'smart', 'xp', 'badges']));
+    // آواتار از آموزش اولیه حذف شده است
+    for (final s in texts.onboarding) {
+      expect('${s['titleFa']}${s['textFa']}', isNot(contains('آواتار')));
+      expect('${s['titleFa']}${s['textFa']}', isNot(contains('سکه')));
+    }
     expect(texts.onboarding.first['titleFa'], 'خوش آمدید');
     expect(texts.termsVersion, 5);
     expect(texts.onboardingVersion, 3);
@@ -28,7 +33,7 @@ void main() {
     expect(needsOnboarding({'onboardingDone': true, 'onboardingVersion': 3}, texts), isFalse);
   });
 
-  testWidgets('اولین اجرا: زبان ← قوانین (تأیید لازم) ← آموزش ۱۵ اسلاید', (tester) async {
+  testWidgets('اولین اجرا: زبان ← قوانین (تأیید لازم) ← آموزش ۱۴ اسلاید', (tester) async {
     tester.view.physicalSize = const Size(1080, 2600);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -57,7 +62,7 @@ void main() {
     expect(btn, findsNothing);
     // آموزش
     expect(find.text('Welcome'), findsOneWidget);
-    for (int i = 0; i < 14; i++) {
+    for (int i = 0; i < 13; i++) {
       await tester.tap(find.text('Next'));
       await tester.pump(const Duration(milliseconds: 50));
     }

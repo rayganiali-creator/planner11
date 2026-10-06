@@ -71,7 +71,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         Row(children: [
           _Tile(pct == null ? '—' : context.n('$pct%'), context.tr('تکمیل', 'Completion'), p.primary, p.primarySoft),
           const SizedBox(width: 8),
-          _Tile(context.n(computeStreak(st, now)), context.tr('استریک', 'Streak'), p.fire, p.goldSoft),
+          _Tile(context.n(computeStreak(st, now)), context.tr('زنجیره', 'Streak'), p.fire, p.goldSoft),
           const SizedBox(width: 8),
           _Tile(context.n(habits.length), context.tr('عادت‌ها', 'Habits'), p.blueInk, p.blueSoft),
         ]),

@@ -1,6 +1,7 @@
 // داشبورد: هدر، صحنه‌ی آواتار (روز/شب)، آمار، خلاصه‌ی امروز و عادت‌های امروز.
 // فقط نمایش است؛ هر ثبت از AppActions می‌گذرد (همان منطقِ نسخه‌ی HTML).
 import 'dart:async';
+import '../onboarding/onboarding.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -110,6 +111,7 @@ class _Header extends StatelessWidget {
           Text(text, style: rpText(RpType.label, weight: 500, color: p.muted)),
         ]),
       ),
+      const HelpButton('home'),
       IconButton(
         tooltip: context.tr('تم', 'Theme'),
         onPressed: () {

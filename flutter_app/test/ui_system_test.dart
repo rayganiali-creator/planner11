@@ -202,11 +202,13 @@ void main() {
 
     testWidgets('خریدها: جدولِ مقایسه فقط برای Free؛ برای Pro و نشانِ قفلِ کارت‌ها نیست', (tester) async {
       await boot(tester, pro: false, view: AppView.purchases);
+      expect(find.byKey(const ValueKey('pro-pitch')), findsOneWidget); // توضیحِ چندخطیِ پرو برای Free
       await tester.scrollUntilVisible(find.byKey(const ValueKey('pro-comparison')), 300, scrollable: find.byType(Scrollable).first);
       expect(find.byKey(const ValueKey('pro-comparison')), findsOneWidget);
       await drain(tester);
       await boot(tester, pro: true, view: AppView.purchases);
       expect(find.byKey(const ValueKey('pro-comparison')), findsNothing);
+      expect(find.byKey(const ValueKey('pro-pitch')), findsNothing); // با پرو حذف می‌شود
       expect(find.byIcon(Icons.lock), findsNothing);
       await drain(tester);
     });

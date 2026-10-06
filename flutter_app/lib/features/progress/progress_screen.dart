@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import '../onboarding/onboarding.dart';
 
 import '../../app/i18n.dart';
 import '../../app/nav.dart';
@@ -30,7 +31,7 @@ class ProgressScreen extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Text(context.tr('پیشرفت', 'Progress'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('پیشرفت', 'Progress'), style: rpText(RpType.titleL, weight: 800, color: p.text))), const HelpButton('xp')]),
         SizedBox(height: sp),
         // ۱) سطح و XP
         AppCard(
@@ -50,7 +51,7 @@ class ProgressScreen extends StatelessWidget {
         SizedBox(height: sp),
         // ۲) استمرار
         Row(children: [
-          Expanded(child: _MiniCard(icon: LucideIcons.flame, color: p.fire, value: context.tr('${context.n(s.streak)} روز', '${s.streak} days'), label: context.tr('استمرار', 'Streak'), vkey: 'progress-streak')),
+          Expanded(child: _MiniCard(icon: LucideIcons.flame, color: p.fire, value: context.tr('${context.n(s.streak)} روز', '${s.streak} days'), label: context.tr('زنجیره', 'Streak'), vkey: 'progress-streak')),
           const SizedBox(width: 10),
           Expanded(child: _MiniCard(icon: LucideIcons.award, color: p.goldInk, value: '${context.n(s.badgeCount)} / ${context.n(s.totalBadges)}', label: context.tr('نشان‌ها', 'Badges'), onTap: () => context.read<NavController>().go(AppView.badges))),
         ]),
@@ -385,7 +386,7 @@ class _Seasons extends StatelessWidget {
 // ---------------------------------------------------------------- تاریخچه‌ی XP (پرو)
 class _History extends StatelessWidget {
   const _History();
-  static const _names = {'habit': ('عادت', 'Habit'), 'daily': ('تکمیلِ روزانه', 'Daily completion'), 'todo': ('کار', 'Task'), 'pomodoro': ('تمرکز', 'Focus'), 'challenge': ('چالش', 'Challenge'), 'library': ('مطالعه', 'Reading'), 'journal': ('مرورِ روزانه', 'Daily review'), 'streak': ('استمرار', 'Streak bonus')};
+  static const _names = {'habit': ('عادت', 'Habit'), 'daily': ('تکمیلِ روزانه', 'Daily completion'), 'todo': ('کار', 'Task'), 'pomodoro': ('تمرکز', 'Focus'), 'challenge': ('چالش', 'Challenge'), 'library': ('مطالعه', 'Reading'), 'journal': ('مرورِ روزانه', 'Daily review'), 'streak': ('پاداشِ زنجیره', 'Streak bonus')};
   @override
   Widget build(BuildContext context) {
     final p = context.rp;

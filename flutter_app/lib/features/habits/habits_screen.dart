@@ -157,7 +157,7 @@ class _HabitCardState extends State<_HabitCard> {
             padding: const EdgeInsetsDirectional.only(end: RpSpace.s2),
             child: Wrap(spacing: 14, runSpacing: 4, children: [
               _stat(context, LucideIcons.sparkles, p.primary, context.n(xp), 'XP', context.tr('مجموع XP واقعیِ کسب‌شده از این عادت', 'Total real XP earned from this habit')),
-              _stat(context, LucideIcons.flame, p.fire, context.n(streak), context.tr('روز پیاپی', 'day streak'), context.tr('چند روزِ پشت‌سرهم این عادت را موفق انجام داده‌ای', 'Consecutive days you completed this habit')),
+              _stat(context, LucideIcons.flame, p.fire, context.n(streak), context.tr('روز زنجیره', 'day streak'), context.tr('چند روزِ پشت‌سرهم این عادت را موفق انجام داده‌ای', 'Consecutive days you completed this habit')),
               if (best != null) _stat(context, LucideIcons.trophy, p.goldInk, context.n(best), context.tr('رکورد', 'best'), context.tr('بلندترین رشته‌ی روزهای پیاپیِ موفقِ این عادت', 'Your longest streak of successful days for this habit')),
             ]),
           ),
@@ -168,7 +168,7 @@ class _HabitCardState extends State<_HabitCard> {
                 ? Text(context.tr('امروز سررسید ندارد', 'Not due today'), style: rpText(RpType.label, weight: 500, color: p.muted))
                 : type == 'binary'
                     ? Row(children: [
-                        Expanded(child: _BinaryBtn(icon: LucideIcons.x, label: context.tr('نشد', 'Missed'), on: ok == false && _hasRecord(st, iso, id), color: p.badInk, soft: p.badSoft, onTap: () => recordBinaryFlow(context, id, iso, 'fail', alreadyActive: ok == false && _hasRecord(st, iso, id)))),
+                        Expanded(child: _BinaryBtn(icon: LucideIcons.x, label: context.tr('انجام نشد', 'Missed'), on: ok == false && _hasRecord(st, iso, id), color: p.badInk, soft: p.badSoft, onTap: () => recordBinaryFlow(context, id, iso, 'fail', alreadyActive: ok == false && _hasRecord(st, iso, id)))),
                         const SizedBox(width: RpSpace.s2),
                         Expanded(child: _BinaryBtn(icon: LucideIcons.check, label: context.tr('انجام شد', 'Done'), on: ok == true, color: p.okInk, soft: p.okSoft, onTap: () => recordBinaryFlow(context, id, iso, 'success', alreadyActive: ok == true))),
                       ])

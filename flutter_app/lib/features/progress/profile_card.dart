@@ -120,7 +120,7 @@ class ProfileCard extends StatelessWidget {
             Row(children: [
               Icon(LucideIcons.flame, size: 16, color: p.fire),
               const SizedBox(width: 4),
-              Flexible(child: Text(context.tr('${context.n(s.streak)} روز استمرار', '${s.streak}-day streak'), key: const ValueKey('profile-streak'), maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.label, weight: 600, color: p.text))),
+              Flexible(child: Text(context.tr('زنجیره‌ی ${context.n(s.streak)} روزه', '${s.streak}-day streak'), key: const ValueKey('profile-streak'), maxLines: 1, overflow: TextOverflow.ellipsis, style: rpText(RpType.label, weight: 600, color: p.text))),
               const Spacer(),
               Icon(LucideIcons.award, size: 16, color: p.goldInk),
               const SizedBox(width: 4),

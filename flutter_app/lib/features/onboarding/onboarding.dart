@@ -1,4 +1,4 @@
-// اولین اجرا: ۱) زبان ۲) قوانین ۳) آموزش اولیه ۴) ساخت آواتار — همان ترتیب و متن‌های نسخه‌ی HTML
+// اولین اجرا: ۱) زبان ۲) قوانین ۳) آموزش اولیه ۴) (آواتار حذف شد) — همان ترتیب و متن‌های نسخه‌ی HTML
 // (متن‌ها عیناً با tool/extract_texts.js از www/index.html استخراج شده‌اند).
 import 'dart:convert';
 
@@ -223,6 +223,25 @@ class HelpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.read<AppTexts?>();
     if (t == null) return const SizedBox.shrink();
-    return IconButton(tooltip: context.tr('راهنما', 'Help'), icon: Icon(Icons.help_outline, color: context.rp.muted), onPressed: () => showHelp(context, t, helpKey));
+    final p = context.rp;
+    return Semantics(
+      button: true,
+      label: context.tr('راهنما', 'Help'),
+      child: InkResponse(
+        key: ValueKey('help-$helpKey'),
+        radius: 22,
+        onTap: () => showHelp(context, t, helpKey),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Container(
+            width: 22,
+            height: 22,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: p.muted.withValues(alpha: .6), width: 1.2)),
+            child: Text('?', style: rpText(RpType.label, weight: 700, color: p.muted, height: 1.1)),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import '../onboarding/onboarding.dart';
 
 import '../../core/pro_features.dart';
 import '../../ui/pro_widgets.dart';
@@ -82,7 +83,7 @@ class _TodoScreenState extends State<TodoScreen> {
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Text(context.tr('کارها', 'To-Do'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('کارها', 'To-Do'), style: rpText(RpType.titleL, weight: 800, color: p.text))), const HelpButton('todo')]),
         const SizedBox(height: RpSpace.s3),
         Row(children: [
           _Count(context.n(todos.length), context.tr('کل', 'Total'), p.blueInk, p.blueSoft),

@@ -2,6 +2,7 @@
 // (روند، روزهای هفته، رتبه‌ها، محرک/مشوق، علت‌ها، ژورنال رفتاری). محاسبه: core/smart.dart (با JS سنجیده شده) + core/smart_extras.dart.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../onboarding/onboarding.dart';
 
 import '../../app/i18n.dart';
 import '../../core/date_fmt.dart';
@@ -39,7 +40,7 @@ class _SmartScreenState extends State<SmartScreen> {
     final pct = fa ? '٪' : '%';
     if (st['isPremium'] != true) {
       return ListView(padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)), children: [
-        Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 800, color: p.text))), const HelpButton('smart')]),
         const SizedBox(height: RpSpace.s3),
         const ProNotice(ProFeature.smartAnalysis),
       ]);
@@ -186,7 +187,7 @@ class _SmartScreenState extends State<SmartScreen> {
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 700, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('تحلیل هوشمند', 'Smart Analysis'), style: rpText(RpType.titleL, weight: 700, color: p.text))), const HelpButton('smart')]),
         const SizedBox(height: RpSpace.s2),
         Wrap(spacing: 8, children: [
           for (final r in const [('week', '۷ روز اخیر', 'Last 7 days'), ('month', '۳۰ روز اخیر', 'Last 30 days'), ('year', '۳۶۵ روز اخیر', 'Last 365 days')])

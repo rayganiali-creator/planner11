@@ -45,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Text(context.tr('تنظیمات', 'Settings'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('تنظیمات', 'Settings'), style: rpText(RpType.titleL, weight: 800, color: p.text))), const HelpButton('settings')]),
         const SizedBox(height: RpSpace.s3),
         section(
           context.tr('🎨 ظاهر و تم', '🎨 Appearance & Theme'),

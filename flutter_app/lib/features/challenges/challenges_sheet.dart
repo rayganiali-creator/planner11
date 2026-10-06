@@ -89,6 +89,7 @@ class _SheetState extends State<_Sheet> {
   Timer? _t;
   final form = ChallengeForm();
   final name = TextEditingController(), rewardText = TextEditingController();
+  bool customOpen = false;
 
   @override
   void initState() {
@@ -115,14 +116,35 @@ class _SheetState extends State<_Sheet> {
       minChildSize: .4,
       builder: (ctx, sc) => Column(children: [
         Padding(
-          padding: const EdgeInsets.all(RpSpace.s3),
+          padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s2, RpSpace.s2, RpSpace.s2),
           child: Row(children: [
-            for (final t in const [('create', 'ساخت', 'Create'), ('active', 'فعال', 'Active'), ('history', 'تاریخچه', 'History')])
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ChoiceChip(label: Text(context.isFa ? t.$2 : t.$3), selected: tab == t.$1, onSelected: (_) => setState(() => tab = t.$1))),
-            const Spacer(),
+            Expanded(child: Text(context.tr('چالش‌ها', 'Challenges'), style: rpText(RpType.title, weight: 800, color: p.text))),
             const HelpButton('challenge'),
             IconButton(key: const ValueKey('sheet-close'), visualDensity: VisualDensity.compact, iconSize: 20, onPressed: () => Navigator.maybePop(context), icon: Icon(Icons.close_rounded, color: p.muted)),
           ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(RpSpace.s4, 0, RpSpace.s4, RpSpace.s3),
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(color: p.surface2, borderRadius: BorderRadius.circular(RpRadius.md)),
+            child: Row(children: [
+              for (final t in const [('create', 'ساخت', 'Create'), ('active', 'فعال', 'Active'), ('history', 'تاریخچه', 'History')])
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => setState(() => tab = t.$1),
+                    child: AnimatedContainer(
+                      duration: RpMotion.base,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(color: tab == t.$1 ? p.surface : Colors.transparent, borderRadius: BorderRadius.circular(RpRadius.md - 3)),
+                      child: Text(context.isFa ? t.$2 : t.$3, style: rpText(RpType.label, weight: tab == t.$1 ? 800 : 600, color: tab == t.$1 ? p.text : p.muted)),
+                    ),
+                  ),
+                ),
+            ]),
+          ),
         ),
         Expanded(
           child: ListView(controller: sc, padding: const EdgeInsets.fromLTRB(RpSpace.s4, 0, RpSpace.s4, RpSpace.s6), children: [
@@ -142,47 +164,55 @@ class _SheetState extends State<_Sheet> {
     final fa = context.isFa;
     final pro = a.store.state['isPremium'] == true;
     return [
-      Text(context.tr('چالش‌های آماده', 'Ready-made challenges'), style: rpText(RpType.body, weight: 800, color: p.text)),
-      const SizedBox(height: 8),
+      Text(context.tr('چالش‌های آماده', 'Ready-made'), style: rpText(RpType.label, weight: 700, color: p.muted)),
+      const SizedBox(height: 4),
       for (final pr in challengePresets)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: AppCard(
-            child: Row(children: [
-              Text(pr.icon, style: const TextStyle(fontSize: 28)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(fa ? pr.nameFa : pr.nameEn, style: rpText(RpType.body, weight: 800, color: p.text)),
-                  Text(
-                    pr.kind == 'timed' ? (fa ? '${toPersianDigits(pr.days)} روز' : '${pr.days} days') : (fa ? '${toPersianDigits(pr.target)} بار' : '${pr.target} times'),
-                    style: rpText(RpType.label, weight: 500, color: p.muted),
-                  ),
-                ]),
-              ),
-              RpButton(
-                a.presetRunning(pr.id) ? context.tr('در حال انجام', 'Joined') : context.tr('شرکت', 'Join'),
-                small: true,
-                onTap: a.presetRunning(pr.id)
-                    ? null
-                    : () {
-                        final ch = a.joinPreset(pr.id, notifier: n);
-                        if (ch != null) {
-                          a.toasts.show(fa ? '🔥 به چالش «${ch['name']}» پیوستی!' : '🔥 Challenge joined!', ms: 2600);
-                          setState(() => tab = 'active');
-                        }
-                      },
-              ),
-            ]),
-          ),
+        _Flat(
+          child: Row(children: [
+            Text(pr.icon, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(fa ? pr.nameFa : pr.nameEn, style: rpText(RpType.body, weight: 700, color: p.text)),
+                Text(
+                  pr.kind == 'timed' ? (fa ? '${toPersianDigits(pr.days)} روز' : '${pr.days} days') : (fa ? '${toPersianDigits(pr.target)} بار' : '${pr.target} times'),
+                  style: rpText(RpType.caption, weight: 500, color: p.muted),
+                ),
+              ]),
+            ),
+            TextButton(
+              onPressed: a.presetRunning(pr.id)
+                  ? null
+                  : () {
+                      final ch = a.joinPreset(pr.id, notifier: n);
+                      if (ch != null) {
+                        a.toasts.show(fa ? '🔥 به چالش «${ch['name']}» پیوستی!' : '🔥 Challenge joined!', ms: 2600);
+                        setState(() => tab = 'active');
+                      }
+                    },
+              child: Text(a.presetRunning(pr.id) ? context.tr('در حال انجام', 'Joined') : context.tr('شرکت', 'Join')),
+            ),
+          ]),
         ),
       const SizedBox(height: 12),
       if (!pro)
         const ProNotice(ProFeature.challengesCustom)
-      else
-        AppCard(
+      else ...[
+        _Flat(
+          child: InkWell(
+            key: const ValueKey('custom-toggle'),
+            onTap: () => setState(() => customOpen = !customOpen),
+            child: Row(children: [
+              Icon(customOpen ? LucideIcons.minus : LucideIcons.plus, size: 18, color: p.primary),
+              const SizedBox(width: 10),
+              Expanded(child: Text(context.tr('چالش شخصی', 'Custom challenge'), style: rpText(RpType.body, weight: 700, color: p.primary))),
+            ]),
+          ),
+        ),
+        if (customOpen)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(context.tr('چالش شخصی', 'Custom challenge'), style: rpText(RpType.body, weight: 800, color: p.text)),
             TextField(controller: name, decoration: InputDecoration(labelText: context.tr('اسم چالش', 'Name')), onChanged: (v) => form.name = v),
             const SizedBox(height: 8),
             Wrap(spacing: 6, runSpacing: 6, children: [
@@ -241,6 +271,7 @@ class _SheetState extends State<_Sheet> {
             }),
           ]),
         ),
+      ],
     ];
   }
 
@@ -269,8 +300,8 @@ class _SheetState extends State<_Sheet> {
     return [
       for (final c in items)
         Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: AppCard(
+          padding: EdgeInsets.zero,
+          child: _Flat(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
                 Text('${c['icon']}', style: const TextStyle(fontSize: 26)),
@@ -329,8 +360,8 @@ class _SheetState extends State<_Sheet> {
       else
         for (final c in items)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: AppCard(
+            padding: EdgeInsets.zero,
+            child: _Flat(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [Text('${c['icon']}', style: const TextStyle(fontSize: 24)), const SizedBox(width: 10), Expanded(child: Text('${c['name']}', style: rpText(RpType.body, weight: 800, color: p.text))), _badge(context, '${c['status']}')]),
                 if (c['completedAt'] is num) Text(_date((c['completedAt'] as num).toInt(), fa), style: rpText(RpType.label, weight: 500, color: p.muted)),
@@ -342,4 +373,16 @@ class _SheetState extends State<_Sheet> {
   }
 
   String _date(int ms, bool fa) => dateNumeric(DateTime.fromMillisecondsSinceEpoch(ms), jalali: isJalali(context.read<AppStore>().state), fa: fa);
+}
+
+/// ردیفِ تخت و مینیمال با خطِ جداکننده‌ی نازک (به‌جای کارت)
+class _Flat extends StatelessWidget {
+  final Widget child;
+  const _Flat({required this.child});
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: context.rp.line.withValues(alpha: .7)))),
+        child: child,
+      );
 }

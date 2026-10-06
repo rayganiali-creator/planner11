@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import '../onboarding/onboarding.dart';
 
 import '../../app/i18n.dart';
 import '../../core/date_fmt.dart';
@@ -91,7 +92,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
               setState(() => _adminOpen = true);
             }
           },
-          child: Text(context.tr('خریدها', 'Purchases'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+          child: Row(children: [Expanded(child: Text(context.tr('خریدها', 'Purchases'), style: rpText(RpType.titleL, weight: 800, color: p.text))), const HelpButton('purchases')]),
         ),
         const SizedBox(height: RpSpace.s3),
         if (_adminOpen) ...[
@@ -111,6 +112,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
           const SizedBox(height: RpSpace.s3),
         ],
         hero,
+        if (!premium) ...[const SizedBox(height: RpSpace.s3), const ProPitch()],
         if (!lifetime && (!premium || timed)) ...[
           const SizedBox(height: RpSpace.s4),
           AppCard(

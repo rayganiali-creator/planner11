@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import '../onboarding/onboarding.dart';
 
 import '../../core/pro_features.dart';
 import '../../ui/pro_widgets.dart';
@@ -126,7 +127,7 @@ class _JournalScreenState extends State<JournalScreen> {
     return ListView(
       padding: EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, rpBottomPad(context)),
       children: [
-        Text(context.tr('ژورنال', 'Journal'), style: rpText(RpType.titleL, weight: 800, color: p.text)),
+        Row(children: [Expanded(child: Text(context.tr('ژورنال', 'Journal'), style: rpText(RpType.titleL, weight: 800, color: p.text))), const HelpButton('journal')]),
         const SizedBox(height: RpSpace.s3),
         AppCard(
           child: Column(children: [

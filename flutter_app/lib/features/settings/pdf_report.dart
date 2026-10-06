@@ -88,7 +88,7 @@ class PdfReport extends StatelessWidget {
           Row(children: [
             stat('XP', snap.xp),
             stat(fa ? 'سطح' : 'Level', snap.level),
-            stat(fa ? 'روزهای متوالی' : 'Streak', snap.streak),
+            stat(fa ? 'زنجیره (روز)' : 'Streak', snap.streak),
             stat(fa ? 'نشان‌ها' : 'Badges', snap.badgeCount),
             stat(fa ? 'عادت‌ها' : 'Habits', habits.length),
           ]),
