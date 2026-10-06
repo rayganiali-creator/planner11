@@ -21,6 +21,7 @@ class LocalNotifier implements Notifier {
     channelDescription: 'یادآوری عادت‌ها، کارها، پومودورو و چالش‌ها',
     importance: Importance.high,
     priority: Priority.high,
+    visibility: NotificationVisibility.private, // نامِ عادت‌ها روی صفحه‌ی قفل دیده نشود (حریم خصوصی)
   );
 
   Future<void> init() async {

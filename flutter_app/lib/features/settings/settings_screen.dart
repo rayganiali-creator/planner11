@@ -137,6 +137,8 @@ class SettingsScreen extends StatelessWidget {
               final t = context.read<AppTexts?>();
               if (t != null) showTerms(context, t, viewOnly: true);
             }),
+            const SizedBox(height: 8),
+            RpButton(context.tr('📦 مجوزهای متن‌باز', '📦 Open-source licenses'), kind: BtnKind.tonal, onTap: () => showLicensePage(context: context, applicationName: context.tr('روتین پلنر', 'Routine Planner'), applicationVersion: '${AppVersion.name} (${AppVersion.code})')),
           ]),
         ),
         section(
@@ -165,8 +167,8 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class AppVersion {
-  static const name = '2.0.0';
-  static const code = 100;
+  static const name = '2.6.0'; // باید با pubspec.yaml یکی باشد (تست می‌کند)
+  static const code = 125;
 }
 
 /// ردیفِ رنگ‌های آماده (بدون انتخابگرِ آزادِ رنگ)

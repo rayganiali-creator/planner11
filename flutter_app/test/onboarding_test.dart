@@ -17,7 +17,7 @@ void main() {
 
   test('متن‌های استخراج‌شده از HTML کامل‌اند', () {
     expect(texts.onboarding.length, 14);
-    expect(texts.terms.length, 9);
+    expect(texts.terms.length, 12);
     expect(texts.help.keys, containsAll(['pomodoro', 'habits', 'challenge', 'calendar', 'progress', 'home', 'library', 'purchases', 'journal', 'todo', 'settings', 'smart', 'xp', 'badges']));
     // آواتار از آموزش اولیه حذف شده است
     for (final s in texts.onboarding) {
@@ -25,10 +25,10 @@ void main() {
       expect('${s['titleFa']}${s['textFa']}', isNot(contains('سکه')));
     }
     expect(texts.onboarding.first['titleFa'], 'خوش آمدید');
-    expect(texts.termsVersion, 5);
+    expect(texts.termsVersion, 6);
     expect(texts.onboardingVersion, 3);
-    expect(needsTerms({'termsAcceptedVersion': 4}, texts), isTrue);
-    expect(needsTerms({'termsAcceptedVersion': 5}, texts), isFalse);
+    expect(needsTerms({'termsAcceptedVersion': 5}, texts), isTrue);
+    expect(needsTerms({'termsAcceptedVersion': 6}, texts), isFalse);
     expect(needsOnboarding({'onboardingDone': true, 'onboardingVersion': 2}, texts), isTrue);
     expect(needsOnboarding({'onboardingDone': true, 'onboardingVersion': 3}, texts), isFalse);
   });
@@ -58,7 +58,7 @@ void main() {
     await settle();
     await tester.tap(find.text('I accept the terms'));
     await settle();
-    expect(store.state['termsAcceptedVersion'], 5);
+    expect(store.state['termsAcceptedVersion'], 6);
     expect(btn, findsNothing);
     // آموزش
     expect(find.text('Welcome'), findsOneWidget);

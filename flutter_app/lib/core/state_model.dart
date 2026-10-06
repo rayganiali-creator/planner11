@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'js_compat.dart';
 import 'pro.dart';
+import 'progress/ledger.dart' show sanitizeProgress, sanitizeProgressInputs;
 
 
 /// literalهای تو در تو در Dart نوعِ دقیق می‌گیرند (مثلاً `Map<String,int?>`)؛ برای رفتارِ JS باید همه dynamic باشند.
@@ -84,6 +85,8 @@ bool rpNormalizeState(Doc state) {
   if (state['progress'] != null && state['progress'] is! Map) {
     state['progress'] = null;
     fixed = true;
+  } else if (state['progress'] is Map && sanitizeProgress(state['progress'] as Map)) {
+    fixed = true;
   }
   // عادت/کار/کتاب/چالشِ بی‌شناسه قابل استفاده نیست
   bool hasId(Object? e) => e is Map && jsTruthy(e['id']);
@@ -111,7 +114,38 @@ bool rpNormalizeState(Doc state) {
       fixed = true;
     }
   }
+  if (sanitizeProgressInputs(state)) fixed = true;
+  if (_clampHugeNumbers(state, 0)) fixed = true;
   return fixed;
+}
+
+/// عددِ بیرون از بازه‌ی زمانِ معتبر (|v| > ۸٫۶۴e۱۵) یا نامتناهی ساختگی/خراب است؛ DateTime و بقیه‌ی محاسبه‌ها را می‌اندازد → صفر.
+bool _clampHugeNumbers(Object? node, int depth) {
+  if (depth > 40) return false;
+  bool ch = false;
+  bool bad(Object? v) => v is num && (!v.isFinite || v.abs() > 8.64e15);
+  if (node is Map) {
+    for (final k in node.keys.toList()) {
+      final v = node[k];
+      if (bad(v)) {
+        node[k] = 0;
+        ch = true;
+      } else if (v is Map || v is List) {
+        if (_clampHugeNumbers(v, depth + 1)) ch = true;
+      }
+    }
+  } else if (node is List) {
+    for (int i = 0; i < node.length; i++) {
+      final v = node[i];
+      if (bad(v)) {
+        node[i] = 0;
+        ch = true;
+      } else if (v is Map || v is List) {
+        if (_clampHugeNumbers(v, depth + 1)) ch = true;
+      }
+    }
+  }
+  return ch;
 }
 
 /// اعداد کامل را int نگه می‌دارد تا JSON مثل JS («5» نه «5.0») خروجی بدهد.

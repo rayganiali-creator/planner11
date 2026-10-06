@@ -23,6 +23,9 @@ import 'native_api.dart';
 
 typedef PasswordChoice = ({bool plain, String pass});
 
+/// سقفِ حجمِ فایلِ پشتیبانِ ورودی (حفاظت در برابر فایلِ غول‌آسای مخرب)
+const int maxBackupBytes = 200 * 1024 * 1024;
+
 class BackupService implements FilesService {
   final AppActions actions;
   final MediaStore media;
@@ -118,6 +121,10 @@ class BackupService implements FilesService {
     final pick = await FilePicker.pickFiles();
     final path = pick.firstOrNull?.path;
     if (path == null) return;
+    if (File(path).lengthSync() > maxBackupBytes) {
+      toasts.show(_fa ? '❌ حجم فایل بیش از حد مجاز است.' : '❌ The file is too large.', ms: 4000);
+      return;
+    }
     await importFromText(utf8.decode(File(path).readAsBytesSync(), allowMalformed: true));
   }
 
@@ -166,7 +173,7 @@ class BackupService implements FilesService {
   /// (پاک نمی‌شود: اگر مشکلی پیش آمد هنوز یک نسخه‌ی کامل از داده‌ها هست).
   Future<bool> importHandoff(String dirPath) async {
     final f = File('$dirPath/rp_handoff.json');
-    if (!f.existsSync()) return false;
+    if (!f.existsSync() || f.lengthSync() > maxBackupBytes) return false;
     final text = utf8.decode(f.readAsBytesSync(), allowMalformed: true);
     final ok = await importFromText(text, quiet: true);
     if (ok) {
