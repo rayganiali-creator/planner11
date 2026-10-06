@@ -4,7 +4,8 @@ import '../app/toast.dart';
 
 abstract class BillingService {
   Future<void> purchase(String productId);
-  Future<void> restore();
+  /// [announce] = true فقط برای دکمه‌ی دستیِ «بازیابی خریدها»؛ بازیابیِ خودکارِ هنگام باز شدنِ برنامه بی‌صدا می‌ماند.
+  Future<void> restore({bool announce = false});
 }
 
 class UnavailableBilling implements BillingService {
@@ -15,5 +16,5 @@ class UnavailableBilling implements BillingService {
   @override
   Future<void> purchase(String productId) async => _msg();
   @override
-  Future<void> restore() async => _msg();
+  Future<void> restore({bool announce = false}) async => _msg();
 }

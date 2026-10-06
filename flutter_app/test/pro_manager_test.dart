@@ -64,7 +64,10 @@ void main() {
     nat = FakeNative();
     toasts = ToastBus();
     shown = [];
-    toasts.addListener(() {});
+    toasts.addListener(() {
+      final t = toasts.current?.text;
+      if (t != null) shown.add(t);
+    });
     notif = Rec();
     pm = ProManager(store, nat, toasts, notif);
   });
@@ -119,6 +122,26 @@ void main() {
     store.state['__rpOwnerMark'] = rpOwnerMarkValue;
     await pm.restore();
     expect(store.state['isPremium'], isTrue);
+  });
+
+  test('دکمه‌ی دستیِ بازیابی پیام می‌دهد؛ بازیابیِ خودکار بی‌صدا است', () async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    shown.clear();
+    await pm.restore(); // خودکار، بدون خرید
+    expect(shown, isEmpty);
+    await pm.restore(announce: true); // دستی، بدون خرید
+    expect(shown.single, contains('پیدا نشد'));
+    shown.clear();
+    nat.owned.add({'productId': 'rp_pro_3m', 'purchaseToken': 't3', 'purchaseTime': now - 1000});
+    await pm.restore(announce: true);
+    expect(shown.single, contains('بازیابی شد'));
+    shown.clear();
+    nat.failWith = NativeError('connection_failed');
+    await pm.restore(announce: true); // آفلاین
+    expect(shown.single, contains('کافه‌بازار'));
+    shown.clear();
+    await pm.restore(); // خودکار + آفلاین: همچنان بی‌صدا
+    expect(shown, isEmpty);
   });
 
   test('پایانِ دوره: پرو خاموش، پنجره‌ی پایان یک‌بار، خریدها مصرف', () async {

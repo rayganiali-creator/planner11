@@ -111,7 +111,11 @@ class ProManager implements BillingService {
   }
 
   @override
-  Future<void> restore() async {
+  Future<void> restore({bool announce = false}) async {
+    void say(String fa, String en) {
+      if (announce) toasts.show(_fa ? fa : en, ms: 3600);
+    }
+
     try {
       await native.connect();
       final res = await native.getPurchasedProducts();
@@ -120,6 +124,11 @@ class ProManager implements BillingService {
       if (owned.isNotEmpty) {
         setProFromPurchases([for (final p in owned) {'productId': p['productId'], 'purchaseToken': p['purchaseToken'], 'purchaseTime': p['purchaseTime'] ?? 0}], 'restore');
         await checkProExpiry();
+        if (store.state['isPremium'] == true) {
+          say('✅ خریدت بازیابی شد و پرو فعال است.', '✅ Your purchase was restored and Pro is active.');
+        } else {
+          say('پلن‌های قبلی‌ات پیدا شد ولی مدتشان تمام شده است.', 'Your earlier plans were found but they have ended.');
+        }
       } else {
         final pc = store.state['proCache'];
         if (pc is Map && pc['purchases'] is List && (pc['purchases'] as List).isNotEmpty) {
@@ -128,9 +137,15 @@ class ProManager implements BillingService {
           recomputeTrustedPremiumFlag(store.state, store.rpNow());
           store.save();
         }
+        if (store.state['isPremium'] == true) {
+          say('پرو فعال است.', 'Pro is active.');
+        } else {
+          say('خرید فعالی در حساب کافه‌بازارِ این گوشی پیدا نشد.', 'No active purchase was found on this Cafe Bazaar account.');
+        }
       }
-    } catch (_) {
+    } catch (e) {
       await checkProExpiry(); // آفلاین: کشِ معتبر + ساعتِ مطمئن
+      say('بازیابی انجام نشد. مطمئن شو برنامه‌ی کافه‌بازار نصب است، وارد حساب شده‌ای و اینترنت داری.', 'Restore failed. Make sure Cafe Bazaar is installed, you are signed in, and you are online.');
     }
   }
 }

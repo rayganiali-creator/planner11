@@ -156,7 +156,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
         const ProComparison(),
         const SizedBox(height: RpSpace.s3),
         RpButton(context.tr('بازیابی خریدها', 'Restore purchases'), icon: LucideIcons.refreshCw, kind: BtnKind.tonal, onTap: () async {
-          await billing.restore();
+          await billing.restore(announce: true);
         }),
         const SizedBox(height: RpSpace.s4),
         SectionHeader(context.tr('تاریخچه‌ی خریدها', 'Purchase history')),
