@@ -381,7 +381,7 @@ void main() {
       expect((progressOf(st)['unlocked'] as Map).containsKey('first_habit'), true);
     });
 
-    test('عنوان و نشان‌های ویژه (حداکثر ۳، فقط باز‌شده‌ها)', () {
+    test('عنوان و نشان‌های ویژه (یکی از هر دسته، فقط باز‌شده‌ها)', () {
       final st = fresh();
       done(st, 0, 'h0');
       syncProgress(st, now);
@@ -389,17 +389,24 @@ void main() {
       expect(toggleFeatured(st, 'cons_7'), false);
       expect(toggleFeatured(st, 'first_habit'), true);
       final un = progressOf(st)['unlocked'] as Map;
-      for (final id in ['level_10', 'task_1', 'focus_1']) {
+      for (final id in ['level_10', 'task_1', 'focus_1', 'book_1', 'chal_1', 'cons_3']) {
         un[id] = {'at': 1, 'date': iso(0)};
       }
-      expect(toggleFeatured(st, 'task_1'), true);
-      expect(toggleFeatured(st, 'focus_1'), true);
-      expect(toggleFeatured(st, 'level_10'), false, reason: 'سقفِ ۳');
+      for (final id in ['task_1', 'focus_1', 'book_1', 'chal_1', 'level_10']) {
+        expect(toggleFeatured(st, id), true, reason: id);
+      }
+      expect(snapshotOf(st, now).featured.length, 6, reason: '۶ دسته = ۶ جایگاه');
+      // نشانِ هم‌دسته جایگزین می‌شود (سقفِ یکی برای هر دسته)
+      expect(toggleFeatured(st, 'cons_3'), true);
+      final f = snapshotOf(st, now).featured;
+      expect(f.length, 6);
+      expect(f.contains('cons_3'), true);
+      expect(f.contains('first_habit'), false);
       un['cons_7'] = {'at': 1, 'date': iso(0)};
       expect(setActiveTitle(st, 'routine_builder'), true);
       expect(snapshotOf(st, now).title!.id, 'routine_builder');
-      expect(toggleFeatured(st, 'first_habit'), true); // برداشتن
-      expect(snapshotOf(st, now).featured.length, 2);
+      expect(toggleFeatured(st, 'cons_3'), true); // برداشتن
+      expect(snapshotOf(st, now).featured.length, 5);
     });
   });
 

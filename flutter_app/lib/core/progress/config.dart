@@ -103,4 +103,4 @@ class StatConfig {
   static const int minFocusSessions = 3, minReadingDays = 2;
 }
 
-const int maxFeaturedBadges = 3;
+const int maxFeaturedBadges = 6; // یک نشانِ ویژه برای هر دسته (۶ دسته)

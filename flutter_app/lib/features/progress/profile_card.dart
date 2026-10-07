@@ -36,7 +36,9 @@ class XpBar extends StatelessWidget {
 
 String rankName(BuildContext c, RankDef r) => c.tr(r.nameFa, r.nameEn);
 
-/// سه نشانِ ویژه؛ جای خالی = دعوت به انتخاب
+const _catIcons = {'consistency': LucideIcons.flame, 'focus': LucideIcons.target, 'productivity': LucideIcons.squareCheck, 'reading': LucideIcons.bookOpen, 'discipline': LucideIcons.shield, 'mastery': LucideIcons.crown};
+
+/// شش جایگاهِ نشانِ ویژه؛ هر جایگاه مخصوصِ یک دسته. جای خالی = دعوت به انتخابِ نشان از همان دسته.
 class FeaturedRow extends StatelessWidget {
   final ProgressData d;
   final double size;
@@ -45,27 +47,40 @@ class FeaturedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.rp;
     final pro = context.isPro0;
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      for (int i = 0; i < maxFeaturedBadges; i++)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: i < d.snap.featured.length
-              ? GestureDetector(
-                  key: ValueKey('featured-$i'),
-                  onTap: () => showBadgeSheet(context, d.snap.featured[i]),
-                  child: BadgeEmblem(def: d.byId(d.snap.featured[i])!.def, state: AchState.unlocked, size: size, premium: pro))
-              : GestureDetector(
-                  key: ValueKey('featured-empty-$i'),
-                  onTap: () => showFeaturedPicker(context),
-                  child: Container(
-                    width: size,
-                    height: size,
-                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: p.line, width: 1.2)),
-                    child: Icon(LucideIcons.plus, size: 18, color: p.muted),
+    return LayoutBuilder(builder: (context, c) {
+      final slot = c.maxWidth.isFinite ? c.maxWidth / badgeCategories.length : size + 8;
+      final sz = (slot - 6).clamp(30.0, size);
+      return Row(children: [
+        for (final cat in badgeCategories)
+          Expanded(
+            child: Center(
+              child: () {
+                final id = d.snap.featured.where((x) => d.byId(x)?.def.cat == cat.id).firstOrNull;
+                if (id != null) {
+                  return GestureDetector(
+                    key: ValueKey('featured-${cat.id}'),
+                    onTap: () => showBadgeSheet(context, id),
+                    child: BadgeEmblem(def: d.byId(id)!.def, state: AchState.unlocked, size: sz, premium: pro),
+                  );
+                }
+                return GestureDetector(
+                  key: ValueKey('featured-empty-${cat.id}'),
+                  onTap: () => showFeaturedPicker(context, cat: cat.id),
+                  child: Tooltip(
+                    message: context.tr(cat.nameFa, cat.nameEn),
+                    child: Container(
+                      width: sz,
+                      height: sz,
+                      decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: p.line, width: 1.2)),
+                      child: Icon(_catIcons[cat.id] ?? LucideIcons.plus, size: sz * 0.42, color: p.muted.withValues(alpha: .7)),
+                    ),
                   ),
-                ),
-        ),
-    ]);
+                );
+              }(),
+            ),
+          ),
+      ]);
+    });
   }
 }
 

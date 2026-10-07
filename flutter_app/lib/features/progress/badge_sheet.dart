@@ -72,7 +72,7 @@ class BadgeSheet extends StatelessWidget {
             RpButton(featured ? context.tr('برداشتن از نشان‌های ویژه', 'Remove from featured') : context.tr('افزودن به نشان‌های ویژه', 'Add to featured'), kind: featured ? BtnKind.ghost : BtnKind.primary, icon: LucideIcons.star, onTap: () {
               final a = context.read<AppActions>();
               if (!toggleFeatured(a.store.state, def.id)) {
-                a.toasts.show(context.tr('حداکثر ۳ نشان ویژه می‌توانی داشته باشی', 'You can feature up to 3 badges'));
+                a.toasts.show(context.tr('فقط نشانِ بازشده را می‌شود ویژه کرد', 'Only unlocked badges can be featured'));
                 return;
               }
               a.store.save();
@@ -91,22 +91,24 @@ class BadgeSheet extends StatelessWidget {
 }
 
 /// انتخابِ حداکثر ۳ نشانِ ویژه از میانِ نشان‌های بازشده
-Future<void> showFeaturedPicker(BuildContext context) {
-  return showRpSheet<void>(context: context, builder: (_) => const _FeaturedPicker());
+Future<void> showFeaturedPicker(BuildContext context, {String? cat}) {
+  return showRpSheet<void>(context: context, builder: (_) => _FeaturedPicker(cat: cat));
 }
 
 class _FeaturedPicker extends StatelessWidget {
-  const _FeaturedPicker();
+  final String? cat;
+  const _FeaturedPicker({this.cat});
   @override
   Widget build(BuildContext context) {
     final p = context.rp;
     final d = progressDataOf(context);
-    final list = d.unlockedList;
+    final list = cat == null ? d.unlockedList : d.unlockedList.where((s) => s.def.cat == cat).toList();
+    final cname = cat == null ? null : badgeCategories.firstWhere((c) => c.id == cat);
     return SafeArea(
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Padding(padding: const EdgeInsets.fromLTRB(RpSpace.s4, 0, RpSpace.s4, 0), child: RpSheetHeader(context.tr('نشان‌های ویژه (حداکثر ۳)', 'Featured badges (max 3)'))),
+        Padding(padding: const EdgeInsets.fromLTRB(RpSpace.s4, 0, RpSpace.s4, 0), child: RpSheetHeader(cname == null ? context.tr('نشان‌های ویژه (یکی از هر دسته)', 'Featured badges (one per category)') : context.tr('نشانِ ویژه‌ی «${cname.nameFa}»', 'Featured: ${cname.nameEn}'))),
         if (list.isEmpty)
-          Padding(padding: const EdgeInsets.all(RpSpace.s5), child: Text(context.tr('هنوز نشانی نگرفته‌ای. با انجامِ واقعیِ کارها اولین نشانت را بگیر.', 'No badges yet. Earn your first by doing real work.'), textAlign: TextAlign.center, style: rpText(RpType.body, weight: 500, color: p.muted)))
+          Padding(padding: const EdgeInsets.all(RpSpace.s5), child: Text(cat == null ? context.tr('هنوز نشانی نگرفته‌ای. با انجامِ واقعیِ کارها اولین نشانت را بگیر.', 'No badges yet. Earn your first by doing real work.') : context.tr('هنوز نشانی از این دسته نگرفته‌ای.', 'No badges in this category yet.'), textAlign: TextAlign.center, style: rpText(RpType.body, weight: 500, color: p.muted)))
         else
           Flexible(
             child: GridView.builder(
@@ -121,8 +123,9 @@ class _FeaturedPicker extends StatelessWidget {
                   key: ValueKey('pick-${s.def.id}'),
                   onTap: () {
                     final a = context.read<AppActions>();
-                    if (!toggleFeatured(a.store.state, s.def.id)) a.toasts.show(context.tr('حداکثر ۳ نشان ویژه', 'Up to 3 featured badges'));
+                    if (!toggleFeatured(a.store.state, s.def.id)) a.toasts.show(context.tr('فقط نشانِ بازشده را می‌شود ویژه کرد', 'Only unlocked badges can be featured'));
                     a.store.save();
+                    if (cat != null) Navigator.of(context).maybePop();
                   },
                   child: Column(children: [
                     Container(

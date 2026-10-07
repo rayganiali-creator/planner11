@@ -210,14 +210,16 @@ bool setActiveTitle(Doc st, String? id) {
   return true;
 }
 
-/// حداکثر ۳ نشانِ ویژه؛ فقط نشانِ بازشده. false اگر نامعتبر/پر باشد.
+/// نشانِ ویژه: یک نشان برای هر دسته (۶ جایگاهِ صفحه‌ی خانه)؛ فقط نشانِ بازشده. نشانِ تازه جای نشانِ هم‌دسته را می‌گیرد.
 bool toggleFeatured(Doc st, String achId) {
   final p = progressOf(st);
   final f = (p['featured'] as List).map((e) => '$e').toList();
   if (f.contains(achId)) {
     f.remove(achId);
   } else {
-    if (f.length >= maxFeaturedBadges || !(p['unlocked'] as Map).containsKey(achId)) return false;
+    final a = achById(achId);
+    if (a == null || !(p['unlocked'] as Map).containsKey(achId)) return false;
+    f.removeWhere((x) => achById(x)?.cat == a.cat);
     f.add(achId);
   }
   p['featured'] = f;

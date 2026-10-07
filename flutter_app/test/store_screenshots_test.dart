@@ -63,7 +63,7 @@ void _seed(AppStore s, AppActions a) {
   (st['todos'] as List).add({'id': 'dn1', 'title': 'گزارش پروژه را بفرست', 'done': true, 'createdAt': bms - 86400000, 'dueAt': null, 'repeatMode': 'none', 'repeatDays': <int>[], 'notified': false});
   a.joinPreset('preset_workout10', notifier: null);
   a.renderAll();
-  for (final id in ['cons_14', 'focus_100', 'task_50']) {
+  for (final id in ['cons_14', 'focus_10', 'task_50', 'book_5', 'chal_1', 'level_10']) {
     toggleFeatured(st, id);
   }
   s.save();
