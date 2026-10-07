@@ -21,6 +21,7 @@ import '../../core/smart_extras.dart';
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../ui/tokens.dart';
+import '../../ui/priority_dot.dart';
 import '../../ui/widgets.dart';
 import '../challenges/challenges_sheet.dart';
 import '../progress/profile_card.dart';
@@ -205,6 +206,7 @@ class _HabitsProgress extends StatelessWidget {
                   Row(children: [
                     Expanded(
                       child: Text.rich(TextSpan(children: [
+                        WidgetSpan(alignment: PlaceholderAlignment.middle, child: Padding(padding: const EdgeInsetsDirectional.only(end: 8), child: PriorityDot(habitPriorityOf(h['priority']), size: 9))),
                         TextSpan(text: '${h['name']}', style: rpText(RpType.body, weight: 700, color: p.text)),
                         if (perm) TextSpan(text: fa ? '  (۳۰ روز اخیر)' : '  (last 30 days)', style: rpText(RpType.caption, weight: 400, color: p.muted)),
                       ])),

@@ -1,5 +1,6 @@
 // ایجاد/ویرایش/حذف/جابه‌جایی عادت — همان قواعدِ کنترل‌کننده‌های نسخه‌ی HTML.
 import 'dart:math';
+import '../ui/priority_dot.dart';
 
 import '../core/calendar.dart';
 import '../core/gameplay.dart';
@@ -18,7 +19,7 @@ String newHabitId([int? nowMs, Random? rnd]) {
 
 class HabitForm {
   String name = '', createdAt = '';
-  String priority = 'yellow', scheduleMode = 'daily', type = 'binary', direction = 'more';
+  String priority = 'silver', scheduleMode = 'daily', type = 'binary', direction = 'more';
   bool permanent = true, reminderEnabled = false;
   int durationDays = 30;
   bool important = false; // عادتِ مهم/دشوار: ۱۵ XP به‌جای ۱۰
@@ -32,7 +33,7 @@ class HabitForm {
   HabitForm.from(Map h) {
     name = '${h['name'] ?? ''}';
     createdAt = '${h['createdAt']}';
-    priority = '${h['priority'] ?? 'yellow'}';
+    priority = habitPriorityOf(h['priority']).name;
     scheduleMode = '${h['scheduleMode'] ?? 'daily'}';
     activeDays = [for (final d in (h['activeDays'] is List ? h['activeDays'] as List : const [])) (d as num).toInt()];
     direction = '${h['direction'] ?? 'more'}';
@@ -85,6 +86,18 @@ extension HabitOps on AppActions {
   bool canCreateHabit() => store.state['isPremium'] == true || _habits.length < freeHabitLimit;
 
   /// برمی‌گرداند: شناسه‌ی عادتِ ذخیره‌شده (یا null اگر نام خالی/روز انتخاب نشده)
+  /// جابه‌جایی با کشیدن (onReorderItem: [newIndex] برای لیستِ بعد از برداشتنِ آیتم تنظیم شده). true = ترتیب عوض شد.
+  bool reorderHabit(int oldIndex, int newIndex) {
+    final list = store.state['habits'];
+    if (list is! List || oldIndex < 0 || oldIndex >= list.length) return false;
+    newIndex = newIndex.clamp(0, list.length - 1);
+    if (newIndex == oldIndex) return false;
+    final h = list.removeAt(oldIndex);
+    list.insert(newIndex, h);
+    store.save();
+    return true;
+  }
+
   String? saveHabit(HabitForm f, {String? editingId}) {
     if (f.name.trim().isEmpty) return null;
     if (f.scheduleMode == 'custom' && f.activeDays.isEmpty) return null;

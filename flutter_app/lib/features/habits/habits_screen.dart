@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +19,7 @@ import '../../data/app_store.dart';
 import '../../data/habit_ops.dart';
 import '../../ui/tokens.dart';
 import '../onboarding/onboarding.dart';
+import '../../ui/priority_dot.dart';
 import '../../ui/widgets.dart';
 import '../record_flow.dart';
 import 'habit_charts_sheet.dart';
@@ -58,7 +60,23 @@ class HabitsScreen extends StatelessWidget {
         ]),
         const SizedBox(height: RpSpace.s3),
         if (habits.isEmpty) AppCard(child: Text(context.tr('هنوز عادتی ندارید. با «عادت جدید» یکی بسازید.', 'No habits yet. Create one with “New habit”.'), style: rpText(RpType.body, weight: 500, color: p.muted))),
-        for (int i = 0; i < habits.length; i++) _HabitCard(key: ValueKey('hc-${habits[i]['id']}'), habit: habits[i], index: i, iso: iso, now: now),
+        if (habits.length > 1)
+          Padding(
+            padding: const EdgeInsets.only(bottom: RpSpace.s2),
+            child: Text(context.tr('برای جابه‌جایی، دستگیره‌ی کنار هر عادت را بگیر و بالا یا پایین ببر.', 'To reorder, hold the handle beside a habit and drag it up or down.'), style: rpText(RpType.caption, weight: 500, color: p.muted)),
+          ),
+        ReorderableListView.builder(
+          key: const ValueKey('habit-list'),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          itemCount: habits.length,
+          proxyDecorator: (child, i, anim) => Material(color: Colors.transparent, elevation: 6, shadowColor: Colors.black38, borderRadius: BorderRadius.circular(RpRadius.lg), child: child),
+          onReorderItem: (a, b) {
+            if (actions.reorderHabit(a, b)) HapticFeedback.selectionClick();
+          },
+          itemBuilder: (_, i) => _HabitCard(key: ValueKey('hc-${habits[i]['id']}'), habit: habits[i], index: i, iso: iso, now: now),
+        ),
       ],
     );
   }
@@ -113,6 +131,13 @@ class _HabitCardState extends State<_HabitCard> {
         padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s2, RpSpace.s3),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [
+            if ((st['habits'] as List).length > 1)
+              ReorderableDragStartListener(
+                key: ValueKey('drag-$id'),
+                index: widget.index,
+                child: Padding(padding: const EdgeInsetsDirectional.only(end: 6), child: Icon(LucideIcons.gripVertical, size: 18, color: p.muted)),
+              ),
+            Padding(padding: const EdgeInsetsDirectional.only(end: 9), child: PriorityDot(habitPriorityOf(habit['priority']), size: 11)),
             Expanded(child: Text('${habit['name'] ?? ''}', style: rpText(RpType.bodyL, weight: 800, color: p.text))),
             if (habit['important'] == true) RpChip(context.tr('مهم', 'Important')),
             IconButton(
@@ -466,7 +491,6 @@ class _EditorState extends State<_Editor> {
     final p = context.rp;
     final fa = context.isFa;
     final days = fa ? ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const prio = [('gold', Color(0xFFE0B13E)), ('green', Color(0xFF3FA35A)), ('yellow', Color(0xFFE6C84A)), ('red', Color(0xFFD9534F))];
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: ListView(padding: const EdgeInsets.fromLTRB(RpSpace.s4, RpSpace.s3, RpSpace.s4, RpSpace.s4), shrinkWrap: true, children: [
@@ -506,16 +530,31 @@ class _EditorState extends State<_Editor> {
         SwitchListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(fa ? 'دائمی' : 'Permanent'), value: f.permanent, onChanged: (v) => setState(() => f.permanent = v)),
         if (!f.permanent) TextFormField(initialValue: '${f.durationDays}', keyboardType: TextInputType.number, decoration: _dec(fa ? 'تعداد روز' : 'Days'), onChanged: (v) => f.durationDays = int.tryParse(v) ?? 1),
         _label(fa ? 'اولویت' : 'Priority'),
-        Row(children: [
-          for (final pr in prio)
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 12),
-              child: GestureDetector(
-                onTap: () => setState(() => f.priority = pr.$1),
-                child: AnimatedContainer(duration: RpMotion.fast, width: 34, height: 34, decoration: BoxDecoration(color: pr.$2, shape: BoxShape.circle, border: Border.all(color: f.priority == pr.$1 ? p.text : Colors.transparent, width: 3))),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final pr in HabitPriority.values)
+            GestureDetector(
+              key: ValueKey('prio-pick-${pr.name}'),
+              onTap: () => setState(() => f.priority = pr.name),
+              child: AnimatedContainer(
+                duration: RpMotion.fast,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(RpRadius.pill),
+                  color: habitPriorityOf(f.priority) == pr ? p.primarySoft : Colors.transparent,
+                  border: Border.all(color: habitPriorityOf(f.priority) == pr ? p.primary : p.line, width: habitPriorityOf(f.priority) == pr ? 1.4 : 1),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  PriorityDot(pr, size: 11),
+                  const SizedBox(width: 7),
+                  Text(fa ? habitPriorityNameFa(pr) : habitPriorityNameEn(pr), style: rpText(RpType.label, weight: 700, color: p.text)),
+                ]),
               ),
             ),
         ]),
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(fa ? habitPriorityHintFa(habitPriorityOf(f.priority)) : habitPriorityHintEn(habitPriorityOf(f.priority)), style: rpText(RpType.caption, weight: 500, color: p.muted)),
+        ),
         const SizedBox(height: RpSpace.s2),
         SwitchListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(fa ? 'یادآوری روزانه' : 'Daily reminder'), value: f.reminderEnabled, onChanged: (v) => setState(() => f.reminderEnabled = v)),
         if (f.reminderEnabled)
