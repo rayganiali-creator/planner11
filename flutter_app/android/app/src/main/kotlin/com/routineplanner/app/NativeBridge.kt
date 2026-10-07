@@ -29,7 +29,7 @@ class NativeBridge(private val activity: ComponentActivity, messenger: BinaryMes
 
     companion object {
         // کلید «عمومی» RSA پنل کافه‌بازار (همان نسخه‌ی Capacitor). افشای آن خطری ندارد.
-        private const val BAZAAR_RSA_KEY = "MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwCu77+2kO1tvCGhLwngUzNmUs2sE1Cp8VfREHeSXVAjbOEXciNqB7r8wXMF+qdudOV/fuVzENcvcvhTmdIAYpaLJhZ1BzNWn8tZ1Ydv7yaiP0SVY9ZNo+14aBkStR62RQ3TDFvfj8/QkXGd7zqIbpej22SBSdIN71T07GbhaduSvqfSIQ3sLznUn6HH7Vuh5n06PkmeAMowmYXwza4b2BDOqPPNnBzu/I2ri3fiszsCAwEAAQ=="
+        private const val BAZAAR_RSA_KEY = "MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwCPqJVjr5X6oT/7td1K8ighUDXlJ0DW5a33kxudgx4hNSFWAb3rw7Ss05XNevcCP3LkzL8zMsJV1+bPeFlrV2XamXOfgy/d3ooe2tkuM49CTZvhCvsStGiLudQEQ+NUODX2sCJYwH5QU3PYpRfFiDXqoJ+clIGu8c7tMpSng7hKhv43gvbRQOC+6fX3Eu9VmCUWzX0zDQmS+EqnLdaJOApb/oBm9oCAdMPDWss6lKMCAwEAAQ=="
     }
 
     private val channel = MethodChannel(messenger, "rp/native")
