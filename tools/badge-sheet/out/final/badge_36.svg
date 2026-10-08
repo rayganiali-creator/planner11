@@ -43,7 +43,7 @@
 <radialGradient id="glw"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".5"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><filter id="bev" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="1.7" result="b"/>
 <feSpecularLighting in="b" surfaceScale="3.2" specularConstant="1" specularExponent="18" lighting-color="#ffffff" result="s"><fePointLight x="-30" y="-70" z="80"/></feSpecularLighting>
 <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/><feComposite in="SourceGraphic" in2="s2" operator="arithmetic" k1="0" k2="1" k3=".9" k4="0" result="m"/>
-<feDropShadow in="m" dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000" flood-opacity=".5"/></filter></defs><g filter="url(#bev)"><g transform="scale(1.12)"><path d="M-14,-8 V-18 C-14,-34 14,-34 14,-18 V-8" stroke="#FFF1B8" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M-24,-8 H24 V34 C24,37 22,38 20,38 H-20 C-22,38 -24,37 -24,34Z" fill="url(#gld)" stroke="#4A2A14" stroke-opacity="0" stroke-width="1.6" stroke-linejoin="round" /><circle cx="0" cy="10" r="5" fill="#4A2A14"/><path d="M-2,12 L-3,24 H3 L2,12Z" fill="#4A2A14"/><path d="M-20,-4 H-14 V32 H-20Z" fill="#fff" fill-opacity="0.45"/></g></g>
+<feDropShadow in="m" dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000" flood-opacity=".5"/></filter></defs><g filter="url(#bev)"><g transform="scale(1.12)"><path d="M-46,36 L-4,-30 L46,36Z" fill="url(#gld)" stroke="#4A2A14" stroke-opacity="0" stroke-width="1.6" stroke-linejoin="round" /><path d="M-4,-30 L-16,-12 L-8,-16 L-2,-8 L6,-16 L14,-12Z" fill="#fff"  fill-opacity=".92"/><path d="M-4,-30 L16,36 H-46Z" fill="#4A2A14"  fill-opacity=".12"/></g></g>
 </g>
 
 </svg>

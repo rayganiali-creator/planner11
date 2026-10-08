@@ -2,16 +2,16 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); os.environ['MOTIFS'] = 'none'
 import make_sheet as m
-import illustrated as i1, illustrated2 as i2, illustrated3 as i3
+import illustrated as i1, illustrated2 as i2, illustrated3 as i3, illustrated4 as i4
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'premium3d.py')).read().split("def render")[0])  # mat, EXTRA
 
-A = {**{'candle': i1.candle, 'lantern': i1.lantern, 'owl': i1.owl}, **i2.ICONS2, **i3.ICONS3}
-ORDER = ['pot', 'candle', 'lantern', 'lamp', 'lighthouse', 'jar', 'sunrise', 'tree',
-         'bee', 'fox', 'whale', 'koi', 'frog', 'tomato', 'tomato_timer', 'owl',
-         'ant', 'acorn', 'wheat', 'apples', 'honey', 'hive', 'turtle', 'queen',
-         'book_ribbon', 'books_tea', 'glasses', 'shelf', 'quill', 'lamp_read', 'worm', 'book_sprout',
-         'ladder', 'medal', 'podium', 'padlock', 'calendar', 'full_moon', 'gem', 'summit',
-         'egg', 'chick', 'robin', 'lion', 'crown', 'star_ribbon', 'wcrown', 'phoenix']
+A = {**{'candle': i1.candle, 'lantern': i1.lantern, 'owl': i1.owl}, **i2.ICONS2, **i3.ICONS3, **i4.ICONS4, 'campfire': i1.campfire, 'sun': i1.sun, 'trophy': i1.trophy}
+ORDER = ['g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'tree',
+         'match', 'candle', 'lantern', 'campfire', 'torch', 'lamp', 'lighthouse', 'sun',
+         'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8',
+         'r1', 'book_ribbon', 'r3', 'r4', 'r5', 'shelf', 'r7', 'r8',
+         'm1', 'm2', 'm3', 'm4', 'm5', 'm6', 'summit', 'summit_glory',
+         'stone', 'gem', 'medal', 'podium', 'trophy', 'crown', 'wcrown', 'laurel']
 ROWD = ['#13295E', '#3A2A82', '#0F5A43', '#5C1830', '#4A2A14', '#1C1E55']
 m.ROWS[4] = ('#9A6A40', '#4A2A14', '#FFD36A', '#FFE9A8')
 m.TIERS = list(m.TIERS)
