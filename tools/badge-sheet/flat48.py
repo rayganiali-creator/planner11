@@ -49,20 +49,21 @@ def f(n, D):
     if n == 8: out += star(-36, -30, 9, Y) + star(38, -34, 6.5, Y) + star(0, -50, 7.5, W)
     return out
 
-# ردیف ۳: کلیپ‌بورد و کارهای تیک‌خورده
+# ردیف ۳: پله‌ها (هر نشان یک پله‌ی بیشتر + آدمکِ بالای پله)
 def b(n, D):
-    o = f'<rect x="-28" y="-32" width="56" height="76" rx="6" fill="{W}"/><rect x="-11" y="-40" width="22" height="12" rx="4" fill="{Y if n >= 6 else D}" stroke="{W}" stroke-width="3"/>'
-    ticked = min(max(n - 1, 0), 4)
-    for k in range(4):
-        y = -14 + k * 17
-        if k < ticked:
-            o += f'<rect x="-20" y="{y-6}" width="12" height="12" rx="2.4" fill="{D}"/><path d="M-17.6,{y} l3,3.2 l5,-6" stroke="{W}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
-        else:
-            o += f'<rect x="-19" y="{y-5}" width="10" height="10" rx="2.2" fill="none" stroke="{D}" stroke-width="2"/>'
-        o += f'<rect x="-3" y="{y-2}" width="21" height="4.4" rx="2.2" fill="{D}" opacity="{.9 if k < ticked else .35}"/>'
-    if n >= 7:
-        o += f'<g transform="translate(24 38)"><path d="M-8,6 L-12,22 L-4,18 L0,24 L2,8Z M8,6 L12,22 L4,18 L0,24 L-2,8Z" fill="{Y}"/><circle r="12" fill="{Y}" stroke="{W}" stroke-width="2.6"/><path d="M-5,0 l3.6,4 l6,-7.4" stroke="{W}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>'
-    if n == 8: o += star(-38, -34, 8, Y) + star(38, -22, 6, Y) + star(-42, 4, 4.5, W)
+    sw, sh, x0, base = 10, 8.5, -40, 32
+    o = ''
+    for k in range(1, 9):
+        x = x0 + (k - 1) * sw; hh = k * sh
+        if k <= n: o += f'<rect x="{x}" y="{base-hh}" width="{sw}" height="{hh}" fill="{W}" stroke="{D}" stroke-width="1.8"/>'
+        else: o += f'<rect x="{x}" y="{base-hh}" width="{sw}" height="{hh}" fill="{W}" opacity=".22"/>'
+    cx = x0 + (n - 1) * sw + sw / 2; top = base - n * sh
+    if n < 8:
+        o += f'<circle cx="{cx}" cy="{top-13}" r="5.4" fill="{Y}"/><path d="M{cx},{top-6} V{top-1}" stroke="{Y}" stroke-width="4.6" stroke-linecap="round"/>'
+    else:
+        o += f'<path d="M{cx},{top} V{top-17}" stroke="{Y}" stroke-width="3" stroke-linecap="round"/><path d="M{cx},{top-17} L{cx+12},{top-13} L{cx},{top-9}Z" fill="{Y}"/>'
+    if n >= 7: o += star(-28, -30, 7, Y)
+    if n == 8: o += star(-10, -40, 5, W) + star(-38, -12, 4.5, W)
     return o
 
 # ردیف ۴: قفسه‌ی کتاب
@@ -113,7 +114,7 @@ def s(n, D):
     if n == 8: o += star(-40, -30, 6, Y) + star(40, -30, 6, Y)
     return o
 
-SC = [1.5, 1.35, 1.5, 1.4, 1.25, 1.3]; SH = [8, -4, 4, 2, 0, -2]
+SC = [1.5, 1.35, 1.2, 1.4, 1.25, 1.3]; SH = [8, -4, 4, 2, 0, -2]
 FN = [g, f, b, r, m, s]
 def badge(i, idprefix=''):
     row, col = divmod(i - 1, 8); D, DK, _ = ROWS[row]; rim = RIMS[col]
