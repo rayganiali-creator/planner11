@@ -51,7 +51,7 @@ void main() {
     expect(find.text('ورزش'), findsOneWidget);
     await tester.tap(find.text('عادت جدید'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('ذخیره'), findsOneWidget);
+    expect(find.text('ذخیره', skipOffstage: false), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }
