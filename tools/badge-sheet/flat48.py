@@ -34,106 +34,129 @@ def g(n, D):
     if n == 7: return base + flower(0, -32, 10) + side(1)
     return base + flower(0, -32, 10) + side(1) + side(-1) + star(0, -52, 7)
 
-# ردیف ۲: بذر ← درخت تنومند
-def circ(x, y, r, fill=W): return f'<circle cx="{x}" cy="{y}" r="{r}" fill="{fill}"/>'
-def f(n, D):
-    o = f'<path d="M-42,40 Q0,26 42,40Z" fill="{W}"/>'
-    def stem(top, w): return f'<path d="M0,34 V{top}" stroke="{W}" stroke-width="{w}" stroke-linecap="round"/>'
-    if n == 1: return o + f'<ellipse cx="0" cy="25" rx="10" ry="6.5" fill="{W}" transform="rotate(-18 0 25)"/><path d="M-3,22 Q1,25 4,23" stroke="{D}" stroke-width="2" fill="none" stroke-linecap="round"/>' + star(0, 4, 5, Y)
-    if n == 2: return o + stem(10, 4) + leaf(0, 12, -35, .85) + leaf(0, 12, 215, .85)
-    if n == 3: return o + stem(-8, 4.6) + leaf(0, 16, -30, .85) + leaf(0, 16, 210, .85) + leaf(0, 3, -35, .95) + leaf(0, 3, 215, .95) + leaf(0, -8, -60, .8) + leaf(0, -8, 240, .8)
-    crown = {4: [(0, -16, 15), (-12, -6, 11), (12, -6, 11)],
-             5: [(0, -26, 18), (-17, -12, 14), (17, -12, 14), (0, -8, 14)],
-             6: [(0, -34, 21), (-24, -18, 17), (24, -18, 17), (-10, -8, 14), (10, -8, 14), (-33, -4, 9), (33, -4, 9)],
-             7: [(0, -36, 22), (-25, -19, 18), (25, -19, 18), (-10, -8, 15), (10, -8, 15), (-34, -3, 10), (34, -3, 10)],
-             8: [(0, -38, 23), (-26, -20, 18), (26, -20, 18), (-12, -8, 15), (12, -8, 15), (-30, -2, 11), (30, -2, 11)]}[n]
-    c = ''.join(circ(*k) for k in crown)
-    if n == 8: c = circ(0, -18, 50, Y).replace('fill="%s"' % Y, f'fill="{Y}" opacity=".25"') + c
-    if n == 4: trunk = f'<path d="M0,34 V-4" stroke="{W}" stroke-width="9" stroke-linecap="round"/>'
-    elif n == 5: trunk = f'<path d="M-9,38 C-6,18 -5,6 -6,-8 L6,-8 C5,6 6,18 9,38Z" fill="{W}"/>'
-    else:
-        wd = 14 if n >= 7 else 12
-        trunk = f'<path d="M-{wd+6},40 C-{wd-2},24 -{wd//2},8 -{wd//2+1},-10 L{wd//2+1},-10 C{wd//2},8 {wd-2},24 {wd+6},40Z" fill="{W}"/>'
-    det = ''
-    if n >= 6:
-        det = f'<path d="M0,-4 L-14,-18 M0,-4 L14,-18 M0,-14 V-30" stroke="{D}" stroke-width="2.2" stroke-opacity=".4" fill="none" stroke-linecap="round"/>'
-    fr = ''
-    if n >= 7:
-        pts = [(-14, -24), (10, -30), (20, -14), (-24, -12), (2, -14)] + ([(-6, -44), (28, -26), (-32, -2)] if n == 8 else [])
-        fr = ''.join(circ(x, y, 3.6, Y) for x, y in pts)
-    roots = ''
-    if n >= 7:
-        roots = f'<path d="M-5,40 C-8,46 -14,48 -20,52 M5,40 C8,46 14,48 20,52 M0,40 V54" stroke="{W}" stroke-width="3.4" fill="none" stroke-linecap="round"/>'
-    out = o + roots + c + trunk + det + fr
-    if n == 8: out += star(-40, -42, 6.5, Y) + star(42, -40, 5, W)
-    return out
+# ---- ردیف‌های ۲ تا ۴: سبکِ «نشان‌واره»ی باوقار، فرمِ سفید + برش‌های منفی (رنگِ صفحه) + تکیه‌ی زرد ----
+def circ(x, y, r, fill=W, op=None): return f'<circle cx="{x}" cy="{y}" r="{r}" fill="{fill}"' + (f' opacity="{op}"' if op else '') + '/>'
+def ln(x1, y1, x2, y2, w, c=W, op=None): return f'<path d="M{x1:.1f},{y1:.1f} L{x2:.1f},{y2:.1f}" stroke="{c}" stroke-width="{w:.1f}" stroke-linecap="round"' + (f' stroke-opacity="{op}"' if op else '') + '/>'
+def rec(x, y, ang, L, w, depth, spread, shrink, out, tips):
+    x2 = x + L * math.sin(ang); y2 = y - L * math.cos(ang)
+    out.append((x, y, x2, y2, w))
+    if depth == 0: tips.append((x2, y2)); return
+    rec(x2, y2, ang - spread, L * shrink, w * .68, depth - 1, spread, shrink, out, tips)
+    rec(x2, y2, ang + spread, L * shrink, w * .68, depth - 1, spread, shrink, out, tips)
 
-# ردیف ۳: بچه‌شیر ← شیرِ افسانه‌ای
-def spikes(N, Ro, Ri, fill, rot=0, cy=0):
-    pts = ' '.join(f'{(Ro if k % 2 == 0 else Ri) * math.cos(rot + k * math.pi / N):.1f},{cy + (Ro if k % 2 == 0 else Ri) * math.sin(rot + k * math.pi / N):.1f}' for k in range(2 * N))
-    return f'<polygon points="{pts}" fill="{fill}" stroke-linejoin="round" stroke="{fill}" stroke-width="3"/>'
-def b(n, D):
-    R = 20; cy = 4
-    o = ''
-    if n == 8: o += circ(0, cy, 52, Y).replace(f'fill="{Y}"', f'fill="{Y}" opacity=".22"')
-    if n >= 8: o += spikes(16, R + 31, R + 21, '#FF9A1F', math.pi / 16, cy)
-    if n >= 6: o += spikes(14, R + 25, R + 16, '#FFB020', 0, cy)
-    if n >= 2: o += spikes({2: 12, 3: 10, 4: 12, 5: 12}.get(n, 12), R + {2: 7, 3: 11, 4: 15, 5: 19}.get(n, 18), R + {2: 2, 3: 4, 4: 7, 5: 9}.get(n, 10), Y, math.pi / 12, cy)
-    ex = R * .78
-    o += circ(-ex, cy - R * .74, R * .3) + circ(ex, cy - R * .74, R * .3) + circ(-ex, cy - R * .74, R * .15, D).replace('/>', ' opacity=".45"/>') + circ(ex, cy - R * .74, R * .15, D).replace('/>', ' opacity=".45"/>')
-    o += circ(0, cy, R)
-    er = R * (.2 if n <= 2 else .15)
-    o += circ(-R * .4, cy - R * .08, er, D) + circ(R * .4, cy - R * .08, er, D) + circ(-R * .4 + er * .35, cy - R * .08 - er * .35, er * .35) + circ(R * .4 + er * .35, cy - R * .08 - er * .35, er * .35)
-    o += f'<ellipse cx="0" cy="{cy + R * .4}" rx="{R * .46}" ry="{R * .32}" fill="#F4E4B8"/><path d="M{-R*.14},{cy+R*.2} h{R*.28} l{-R*.14},{R*.15}Z" fill="{D}"/><path d="M0,{cy+R*.35} v{R*.1} M0,{cy+R*.45} q{-R*.14},{R*.14} {-R*.26},{R*.02} M0,{cy+R*.45} q{R*.14},{R*.14} {R*.26},{R*.02}" stroke="{D}" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
-    o += f'<path d="M0,{cy-R*.35} V{cy+R*.2}" stroke="{D}" stroke-width="2" stroke-opacity=".35" stroke-linecap="round"/>'
-    if n == 1: o += f'<path d="M-5,{cy-R-1} q-2,-9 4,-11 M0,{cy-R-1} q1,-11 8,-10 M4,{cy-R} q6,-6 10,-1" stroke="{Y}" stroke-width="3.4" fill="none" stroke-linecap="round"/>'
+# ردیف ۲: بذر ← درختِ تنومند (درختِ زندگی)
+def f(n, D):
+    gy = 30
+    ground = f'<path d="M-40,{gy} H40" stroke="{W}" stroke-width="3.4" stroke-linecap="round"/>'
+    if n == 1:
+        return ground + f'<path d="M0,{gy-3} C-10,{gy-10} -8,{gy-24} 0,{gy-30} C8,{gy-24} 10,{gy-10} 0,{gy-3}Z" fill="{W}"/><path d="M0,{gy-6} V{gy-24}" stroke="{D}" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".5"/>' + star(26, -22, 5, Y)
+    if n == 2:
+        lf = lambda sg: f'<path d="M0,{gy-18} C{sg*4},{gy-36} {sg*20},{gy-40} {sg*26},{gy-30} C{sg*18},{gy-20} {sg*8},{gy-16} 0,{gy-18}Z" fill="{W}"/>'
+        return ground + f'<path d="M0,{gy} V{gy-22}" stroke="{W}" stroke-width="4" stroke-linecap="round"/>' + lf(-1) + lf(1)
+    out, tips = [], []
+    depth = {3: 2, 4: 3, 5: 4, 6: 4, 7: 4, 8: 4}[n]
+    L0 = {3: 20, 4: 19, 5: 16, 6: 15, 7: 15, 8: 15}[n]
+    tw = {3: 4.5, 4: 6, 5: 8, 6: 11, 7: 12, 8: 13}[n]
+    rec(0, gy, 0, L0 + 8, tw, depth, .55 if n < 6 else .5, .76, out, tips)
+    o = ground
+    if n == 8: o = circ(0, -6, 54, Y, .2) + f'<circle cx="0" cy="-4" r="57" fill="none" stroke="{W}" stroke-width="2.2" stroke-dasharray="1 5" stroke-linecap="round"/>' + o
+    if n >= 5:
+        rx, ry, cy = {5: (22, 18, -20), 6: (32, 25, -22), 7: (35, 27, -23), 8: (38, 30, -25)}[n]
+        cl = [(0, cy, ry * .9)]
+        for k in range(14):
+            a_ = k * 2 * math.pi / 14
+            cl.append((rx * .82 * math.cos(a_), cy + ry * .78 * math.sin(a_), ry * .42))
+        o += ''.join(circ(x, y, r_) for x, y, r_ in cl)
+        o += ''.join(ln(x1, y1, x2, y2, w * .5, D, .5) for x1, y1, x2, y2, w in out if w < tw * .9 and y1 < 0 + 8)
+        o += ''.join(ln(x1, y1, x2, y2, w) for x1, y1, x2, y2, w in out if w >= tw * .9)
+        o += f'<path d="M{-tw*.9},{gy} C{-tw*.45},{gy-14} {-tw*.4},{gy-24} {-tw*.4},{gy-30} L{tw*.4},{gy-30} C{tw*.4},{gy-24} {tw*.45},{gy-14} {tw*.9},{gy}Z" fill="{W}"/>'
+    else:
+        lr = 4.6 + (n - 3) * 1.4
+        o += ''.join(circ(x, y, lr) for x, y in tips) + ''.join(ln(x1, y1, x2, y2, w) for x1, y1, x2, y2, w in out)
     if n >= 7:
-        ty = cy - R - 6
-        o += f'<g transform="translate(0 {ty})"><path d="M-13,6 L-15,-9 L-7,-3 L0,-13 L7,-3 L15,-9 L13,6Z" fill="{W}" stroke="{D}" stroke-width="1.8" stroke-linejoin="round"/><circle cx="0" cy="-1" r="2.4" fill="{Y}"/><circle cx="-8" cy="1" r="1.8" fill="{Y}"/><circle cx="8" cy="1" r="1.8" fill="{Y}"/></g>'
-    if n == 8: o += star(-48, -34, 7, Y) + star(48, -30, 6, W) + star(46, 36, 5, Y)
+        ro, rt = [], []
+        rec(0, gy, math.pi, 12, 6.5, 3, .55, .78, ro, rt)
+        o += ''.join(ln(x1, y1, x2, y2, w) for x1, y1, x2, y2, w in ro)
+        fr = [(-18, cy - 8), (14, cy - 16), (22, cy + 4), (-26, cy + 6), (0, cy + 2), (-6, cy - 20)] + ([(30, cy - 6), (-34, cy - 8), (8, cy + 14)] if n == 8 else [])
+        o += ''.join(circ(x, y, 3.4, Y) for x, y in fr)
+    if n == 8: o += star(-46, -42, 6, Y) + star(46, -40, 5, W)
+    return o
+
+# ردیف ۳: شیر
+def petals(N, ln_, w, fill, rot, r0):
+    o = ''
+    for k in range(N):
+        a = rot + k * 360 / N
+        o += f'<path d="M{-w},0 Q{-w*.5},{-ln_*.6} 0,{-ln_} Q{w*.5},{-ln_*.6} {w},0Z" fill="{fill}" transform="rotate({a:.1f}) translate(0 {-r0})"/>'
+    return o
+def b(n, D):
+    cy = 6; k = .86 if n == 1 else 1.0
+    o = ''
+    if n == 8: o += circ(0, cy - 4, 56, Y, .18)
+    if n >= 8: o += petals(18, 36, 11, '#FF8A1F', 10, 20)
+    if n >= 6: o += petals(16, {6: 34, 7: 34, 8: 30}[n], 11, '#FFB020', 0, 20)
+    if n >= 5: o += petals(14, {5: 30}.get(n, 25), 10.5, Y, 360/28, 20)
+    if n == 4: o += petals(12, 22, 10, Y, 0, 20)
+    if n == 3: o += petals(12, 15, 9, Y, 0, 20)
+    if n == 2: o += petals(10, 8, 8, Y, 0, 20)
+    g = f'<g transform="translate(0 {cy}) scale({k})">'
+    o = o.replace('<path', f'<path transform-origin="0 0"', 0)
+    o = f'<g transform="translate(0 {cy})">{o}</g>'
+    ears = f'<path d="M-22,-16 L-26,-34 L-8,-24Z M22,-16 L26,-34 L8,-24Z" fill="{W}"/>'
+    head = f'<path d="M0,-26 C15,-26 25,-15 25,0 C25,15 14,28 0,34 C-14,28 -25,15 -25,0 C-25,-15 -15,-26 0,-26Z" fill="{W}"/>'
+    feat = (f'<path d="M-21,-12 L-6,-4 M21,-12 L6,-4" stroke="{D}" stroke-width="3.6" stroke-linecap="round"/>'
+            f'<path d="M-18,-3 Q-11,-8 -4,-1 Q-11,2 -18,-3Z M18,-3 Q11,-8 4,-1 Q11,2 18,-3Z" fill="{D}"/>'
+            f'<path d="M-4,-2 L4,-2 L6,12 L-6,12Z" fill="{D}" fill-opacity=".18"/>'
+            f'<path d="M-7,8 H7 L0,17Z" fill="{D}"/>'
+            f'<path d="M0,17 V22 M-11,22 Q-5,28 0,22 Q5,28 11,22" stroke="{D}" stroke-width="2.6" fill="none" stroke-linecap="round"/>')
+    if n == 1:
+        feat += f'<path d="M-6,-30 Q0,-40 6,-30 M-12,-27 Q-12,-38 -5,-36" stroke="{D}" stroke-width="0" fill="none"/>'
+    o += f'<g transform="translate(0 {cy}) scale({k})">{ears}{head}{feat}</g>'
+    if n >= 7:
+        o += f'<g transform="translate(0 {cy-47})"><path d="M-14,8 L-17,-10 L-8,-3 L0,-16 L8,-3 L17,-10 L14,8Z" fill="{W}" stroke="{D}" stroke-width="2" stroke-linejoin="round"/><circle cy="0" r="2.6" fill="{Y}"/><circle cx="-8" cy="3" r="1.8" fill="{Y}"/><circle cx="8" cy="3" r="1.8" fill="{Y}"/></g>'
+    if n == 8: o += star(-50, -34, 6, Y) + star(50, -30, 5, W) + star(48, 40, 4.5, Y)
     return o
 
 # ردیف ۴: تخم ← جغدِ افسانه‌ای
 def r(n, D):
-    def eye(x, y, rr, rim=D, fill=W, pupil=D):
-        return f'<circle cx="{x}" cy="{y}" r="{rr}" fill="{fill}" stroke="{rim}" stroke-width="2.4"/><circle cx="{x}" cy="{y+rr*.1}" r="{rr*.5}" fill="{pupil}"/><circle cx="{x+rr*.2}" cy="{y-rr*.15}" r="{rr*.17}" fill="{W}"/>'
-    def beak(x, y, s=1): return f'<path d="M{x-4*s},{y} L{x+4*s},{y} L{x},{y+7*s}Z" fill="{Y}"/>'
-    def feet(y, s=1): return f'<path d="M-9,{y} v6 M-12,{y+6} h6 M9,{y} v6 M6,{y+6} h6" stroke="{Y}" stroke-width="3" stroke-linecap="round" fill="none"/>'
-    def belly(cy, w, h):
-        return ''.join(f'<path d="M{x-5},{y} q5,6 10,0" stroke="{D}" stroke-width="2" stroke-opacity=".38" fill="none" stroke-linecap="round"/>' for y in (cy, cy + 9, cy + 18) for x in ((-w / 2, w / 2) if False else (-10, 0, 10)))
+    def eye(x, y, rr, lid=False):
+        e = f'<circle cx="{x}" cy="{y}" r="{rr}" fill="{D}"/><circle cx="{x}" cy="{y}" r="{rr*.66}" fill="{Y}"/><circle cx="{x}" cy="{y}" r="{rr*.34}" fill="{D}"/><circle cx="{x+rr*.2}" cy="{y-rr*.2}" r="{rr*.13}" fill="{W}"/>'
+        if lid: e += f'<path d="M{x-rr-1},{y-rr*.1} Q{x},{y-rr*1.5} {x+rr+1},{y-rr*.1}Z" fill="{W}"/>'
+        return e
+    def beak(y, s=1): return f'<path d="M-4.5,{y} L4.5,{y} L0,{y+8*s}Z" fill="{Y}"/>'
+    def feet(y): return f'<path d="M-9,{y} v7 M-13,{y+7} l4,-1 M-5,{y+7} l-4,-1 M9,{y} v7 M13,{y+7} l-4,-1 M5,{y+7} l4,-1" stroke="{Y}" stroke-width="2.8" stroke-linecap="round" fill="none"/>'
+    def chev(y0, rows, w=8):
+        return ''.join(f'<path d="M{x-w/2},{y} l{w/2},{w*.6} l{w/2},{-w*.6}" stroke="{D}" stroke-width="2.2" stroke-opacity=".42" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' for i in range(rows) for y in [y0 + i * 9] for x in (-9, 0, 9) if abs(x) <= 9 - i * 0)
+    body = lambda rx, ry, cy: f'<path d="M0,{cy-ry} C{rx*.7},{cy-ry} {rx},{cy-ry*.5} {rx},{cy} C{rx},{cy+ry*.7} {rx*.6},{cy+ry} 0,{cy+ry} C{-rx*.6},{cy+ry} {-rx},{cy+ry*.7} {-rx},{cy} C{-rx},{cy-ry*.5} {-rx*.7},{cy-ry} 0,{cy-ry}Z" fill="{W}"/>'
     if n == 1:
-        return f'<ellipse cx="0" cy="6" rx="23" ry="30" fill="{W}"/>' + ''.join(f'<ellipse cx="{x}" cy="{y}" rx="3.2" ry="2.4" fill="{D}" fill-opacity=".3"/>' for x, y in ((-9, 0), (8, 14), (-4, 20), (10, -8))) + f'<path d="M-14,-10 Q-12,-20 -4,-24" stroke="{D}" stroke-opacity=".25" stroke-width="3" fill="none" stroke-linecap="round"/>'
+        return f'<path d="M0,-34 C17,-34 25,-12 25,6 C25,24 14,36 0,36 C-14,36 -25,24 -25,6 C-25,-12 -17,-34 0,-34Z" fill="{W}"/>' + f'<path d="M-25,8 Q-12,2 0,8 T25,8" stroke="{D}" stroke-width="2.4" stroke-opacity=".28" fill="none"/><path d="M-20,-8 Q-10,-14 0,-10 T20,-8" stroke="{D}" stroke-width="2.4" stroke-opacity=".28" fill="none"/>' + f'<path d="M-14,-18 Q-12,-27 -5,-30" stroke="{D}" stroke-opacity=".22" stroke-width="3" fill="none" stroke-linecap="round"/>'
     if n == 2:
-        return (f'<g transform="translate(-1 -5) rotate(-7 0 -8)"><path d="M-22,-4 C-22,-22 -10,-36 0,-36 C10,-36 22,-22 22,-4 L13,-12 L6,-3 L-2,-13 L-9,-4Z" fill="{W}"/></g>'
-                + f'<path d="M-22,0 L-13,-8 L-6,1 L2,-9 L9,0 L13,-8 L22,0 C22,18 12,36 0,36 C-12,36 -22,18 -22,0Z" fill="{W}"/>'
-                + f'<circle cx="0" cy="0" r="1.2" fill="{D}"/>' + star(24, -30, 5, Y) + star(-26, -26, 4, Y))
+        return (f'<g transform="translate(-2 -6) rotate(-9 0 0)"><path d="M-25,2 C-25,-18 -14,-34 0,-34 C14,-34 25,-18 25,2 L15,-6 L7,5 L-1,-7 L-9,4Z" fill="{W}"/></g>'
+                f'<path d="M-25,4 L-15,-4 L-7,7 L1,-5 L9,5 L15,-4 L25,4 C25,24 14,36 0,36 C-14,36 -25,24 -25,4Z" fill="{W}"/><path d="M-6,22 Q0,26 6,22" stroke="{D}" stroke-opacity=".3" stroke-width="2.2" fill="none"/>' + star(28, -30, 5, Y) + star(-30, -28, 4, Y))
     if n == 3:
-        return (f'<path d="M-26,10 L-17,2 L-9,12 L0,2 L9,12 L17,2 L26,10 C26,28 14,40 0,40 C-14,40 -26,28 -26,10Z" fill="{W}"/>'
-                + f'<circle cx="0" cy="-6" r="19" fill="{W}"/><path d="M-12,-22 L-9,-30 L-3,-24Z M12,-22 L9,-30 L3,-24Z" fill="{W}"/>' + eye(-8, -6, 7.2) + eye(8, -6, 7.2) + beak(0, 3, .9)
-                + f'<path d="M-22,22 L-14,16 L-6,24 L2,16" stroke="{D}" stroke-opacity=".35" stroke-width="2" fill="none"/>')
+        return (f'<path d="M-27,12 L-19,4 L-10,14 L0,4 L10,14 L19,4 L27,12 C27,30 15,40 0,40 C-15,40 -27,30 -27,12Z" fill="{W}"/>'
+                f'<path d="M0,-30 C14,-30 20,-18 20,-6 C20,6 12,14 0,14 C-12,14 -20,6 -20,-6 C-20,-18 -14,-30 0,-30Z" fill="{W}"/><path d="M-15,-24 L-19,-34 L-8,-28Z M15,-24 L19,-34 L8,-28Z" fill="{W}"/>' + eye(-8, -8, 7, True) + eye(8, -8, 7, True) + beak(0, .9))
+    cy = 6
     if n == 4:
-        return (f'<ellipse cx="0" cy="8" rx="25" ry="27" fill="{W}"/><path d="M-17,-14 L-14,-26 L-6,-17Z M17,-14 L14,-26 L6,-17Z" fill="{W}"/>' + eye(-10, -2, 9) + eye(10, -2, 9) + beak(0, 8, 1)
-                + belly(18, 20, 10) + feet(33, .9))
+        o = body(25, 30, cy) + f'<path d="M-17,-18 L-21,-33 L-7,-24Z M17,-18 L21,-33 L7,-24Z" fill="{W}"/>' + eye(-10, -6, 9.4) + eye(10, -6, 9.4) + beak(5, 1) + chev(14, 3, 8) + feet(33)
+        return o
+    wing = f'<path d="M-25,0 C-33,14 -29,32 -16,36 L-14,-6Z M25,0 C33,14 29,32 16,36 L14,-6Z" fill="{W}" stroke="{D}" stroke-width="1.8" stroke-opacity=".55"/>'
     if n == 5:
-        return (f'<path d="M-24,10 C-30,24 -22,34 -12,34 L-12,-4 C-20,0 -26,4 -24,10Z M24,10 C30,24 22,34 12,34 L12,-4 C20,0 26,4 24,10Z" fill="{W}" stroke="{D}" stroke-width="1.8" stroke-opacity=".5"/>'
-                + f'<ellipse cx="0" cy="6" rx="23" ry="30" fill="{W}"/><path d="M-20,-18 L-22,-34 L-9,-24Z M20,-18 L22,-34 L9,-24Z" fill="{W}"/>' + eye(-10, -8, 9.4) + eye(10, -8, 9.4) + beak(0, 3, 1.05)
-                + belly(14, 20, 10) + feet(33, 1))
-    # ۶-۸: جغدِ بالغ روی شاخه
+        return wing + body(24, 32, cy) + f'<path d="M-19,-20 L-24,-38 L-7,-27Z M19,-20 L24,-38 L7,-27Z" fill="{W}"/>' + f'<path d="M-24,-14 L-5,-6 M24,-14 L5,-6" stroke="{D}" stroke-width="3" stroke-linecap="round"/>' + eye(-10, -6, 9) + eye(10, -6, 9) + beak(6, 1.05) + chev(16, 3, 8) + feet(34)
     o = ''
     if n == 8:
-        o += circ(0, -2, 52, Y).replace(f'fill="{Y}"', f'fill="{Y}" opacity=".22"')
+        o += circ(0, -2, 55, Y, .2)
         for sg in (-1, 1):
-            o += ''.join(f'<path d="M{sg*20},{8-i*0} C{sg*(34+i*5)},{-4+i*13} {sg*(46)},{4+i*12} {sg*(50-i*4)},{22+i*7}" stroke="{W}" stroke-width="7" stroke-linecap="round" fill="none"/>' for i in range(3))
-    wings = f'<path d="M-24,2 C-32,18 -26,36 -13,38 L-12,-8 C-20,-6 -24,-2 -24,2Z M24,2 C32,18 26,36 13,38 L12,-8 C20,-6 24,-2 24,2Z" fill="{W}" stroke="{D}" stroke-width="2" stroke-opacity=".5"/>' if n < 8 else ''
-    o += wings + f'<ellipse cx="0" cy="4" rx="24" ry="32" fill="{W}"/><path d="M-21,-20 L-24,-38 L-9,-27Z M21,-20 L24,-38 L9,-27Z" fill="{W}"/>'
-    ec = Y if n == 8 else D
-    o += eye(-10, -8, 10.4, ec) + eye(10, -8, 10.4, ec) + beak(0, 3, 1.1) + belly(14, 20, 10)
-    o += f'<path d="M-30,38 H30" stroke="{W}" stroke-width="4.6" stroke-linecap="round"/>' + feet(33, 1)
-    if n >= 7:
-        o += f'<path d="M30,-34 a14,14 0 1 0 12,-12 a10,10 0 1 1 -12,12Z" fill="{Y}"/>' if n == 7 else ''
-        if n == 7: o += star(-38, -30, 6, Y) + star(-32, -8, 4, W)
-    if n == 8:
-        o += f'<g transform="translate(0 -40)"><path d="M-13,6 L-15,-9 L-7,-3 L0,-13 L7,-3 L15,-9 L13,6Z" fill="{Y}" stroke="{D}" stroke-width="1.8" stroke-linejoin="round"/></g>' + star(-46, -34, 7, Y) + star(46, -32, 6, W) + star(-44, 14, 4.5, W)
+            for i in range(5):
+                a = sg * (62 + i * 14); L = 38 - i * 3
+                o += f'<g transform="translate({sg*18} -4) rotate({a} 0 0)"><rect x="-4" y="{-L}" width="8" height="{L}" rx="4" fill="{W}"/></g>'
+    elif n >= 6: o += wing
+    o += body(24, 33, cy) + f'<path d="M-19,-22 L-25,-41 L-7,-29Z M19,-22 L25,-41 L7,-29Z" fill="{W}"/>' + f'<path d="M-25,-15 L-5,-6 M25,-15 L5,-6" stroke="{D}" stroke-width="3.2" stroke-linecap="round"/>'
+    o += eye(-10, -6, 10) + eye(10, -6, 10) + beak(6, 1.1) + chev(17, 3, 8)
+    o += f'<path d="M-32,40 H32" stroke="{W}" stroke-width="4" stroke-linecap="round"/>' + feet(35)
+    if n == 7:
+        o += f'<path d="M30,-30 a15,15 0 1 0 14,-14 a11,11 0 1 1 -14,14Z" fill="{Y}"/>' + star(-38, -30, 6, Y) + star(-34, -10, 4, W)
+    if n == 8: o += f'<path d="M-12,-44 L-15,-56 L-6,-50 L0,-60 L6,-50 L15,-56 L12,-44Z" fill="{Y}"/>' + star(-50, -30, 6, Y) + star(50, -30, 5, W)
     return o
 
 # ردیف ۵: کوه و مسیر زیگزاگ
@@ -168,7 +191,7 @@ def s(n, D):
     if n == 8: o += star(-40, -30, 6, Y) + star(40, -30, 6, Y)
     return o
 
-SC = [1.5, 1.4, 1.35, 1.3, 1.25, 1.3]; SH = [8, 4, 0, 2, 0, -2]
+SC = [1.5, 1.2, 1.25, 1.2, 1.25, 1.3]; SH = [8, 4, 0, 2, 0, -2]
 FN = [g, f, b, r, m, s]
 def badge(i, idprefix=''):
     row, col = divmod(i - 1, 8); D, DK, _ = ROWS[row]; rim = RIMS[col]
