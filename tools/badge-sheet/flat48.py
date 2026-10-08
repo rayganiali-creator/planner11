@@ -19,7 +19,7 @@ def g(n, D):
     def stem(top): return f'<path d="M0,10 V{top}" stroke="{W}" stroke-width="4.4" stroke-linecap="round"/>'
     def pair(y, s, up=-28):
         return leaf(0, y, up, s) + leaf(0, y, 180 - up, s)
-    if n == 1: return o + f'<ellipse cx="0" cy="3" rx="6" ry="4" fill="{W}"/>'
+    if n == 1: return o + f'<ellipse cx="0" cy="-4" rx="11" ry="7.5" fill="{W}" transform="rotate(-18 0 -4)"/><path d="M-6,-6 Q0,-11 7,-8" stroke="{D}" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
     if n == 2: return o + stem(-4) + pair(-3, .55, -30)
     if n == 3: return o + stem(-14) + pair(-12, .85, -28)
     if n == 4: return o + stem(-24) + pair(-6, .85, -22) + pair(-22, .9, -32)
@@ -29,9 +29,10 @@ def g(n, D):
         return p + f'<circle cx="{cx}" cy="{cy}" r="{r*.5}" fill="{Y}"/>'
     base = o + stem(-22) + pair(-2, .85, -22) + pair(-14, .8, -28)
     if n == 6: return base + flower(0, -32, 10)
-    s7 = base + flower(0, -32, 10) + f'<path d="M0,2 C14,0 22,-4 24,-14" stroke="{W}" stroke-width="3.6" fill="none" stroke-linecap="round"/>' + flower(24, -20, 6.5)
-    if n == 7: return s7
-    return s7 + star(-30, -34, 7)
+    def side(sg, r=7):
+        return f'<path d="M0,10 C{sg*4},-2 {sg*18},0 {sg*22},-14" stroke="{W}" stroke-width="3.6" fill="none" stroke-linecap="round"/>' + flower(sg * 22, -22, r)
+    if n == 7: return base + flower(0, -32, 10) + side(1)
+    return base + flower(0, -32, 10) + side(1) + side(-1) + star(0, -52, 7)
 
 # ردیف ۲: خورشید و افق
 def f(n, D):
@@ -42,20 +43,26 @@ def f(n, D):
     if n >= 5:
         L = 31 if n == 5 else 36
         rays = ''.join(f'<path d="M0,-25 V-{L}" stroke="{Y}" stroke-width="4.4" stroke-linecap="round" transform="translate(0 {cy}) rotate({a})"/>' for a in range(-90, 91, 30)) if False else ''.join(f'<path d="M0,-25 V-{L}" stroke="{Y}" stroke-width="4.4" stroke-linecap="round" transform="translate(0 {cy}) rotate({a})"/>' for a in range(0, 360, 30))
-    ring = f'<circle cx="0" cy="{cy}" r="43" fill="none" stroke="{W}" stroke-width="3"/>' if n >= 7 else ''
+    ring = f'<circle cx="0" cy="{cy}" r="43" fill="none" stroke="{W}" stroke-width="3"/>' if n == 7 else (f'<circle cx="0" cy="{cy}" r="42" fill="none" stroke="{W}" stroke-width="3"/><circle cx="0" cy="{cy}" r="49" fill="none" stroke="{W}" stroke-width="2" stroke-dasharray="1 6" stroke-linecap="round"/>' if n == 8 else '')
     cid = 'hz'
     out = f'<clipPath id="{cid}"><rect x="-60" y="-60" width="120" height="{60+hor}"/></clipPath><g clip-path="url(#{cid})">{ring}{rays}{sun}</g><path d="M-44,{hor+2} H44" stroke="{W}" stroke-width="4.4" stroke-linecap="round"/><path d="M-30,{hor+12} H30 M-16,{hor+22} H16" stroke="{W}" stroke-width="3" stroke-linecap="round" opacity=".7"/>'
-    if n == 8: out += star(-34, -34, 7, W) + star(36, -22, 5, W)
+    if n == 8: out += star(-36, -30, 9, Y) + star(38, -34, 6.5, Y) + star(0, -50, 7.5, W)
     return out
 
-# ردیف ۳: برجِ بلوک‌ها
+# ردیف ۳: کلیپ‌بورد و کارهای تیک‌خورده
 def b(n, D):
-    o = ''; h = 9.4; y = 44
-    for k in range(n):
-        w = 46 - k * 3
-        y -= h
-        o += f'<rect x="{-w/2}" y="{y}" width="{w}" height="{h}" rx="1.6" fill="{W}" stroke="{D}" stroke-width="2"/>'
-    if n == 8: o += f'<path d="M0,{y} V{y-17}" stroke="{W}" stroke-width="3" stroke-linecap="round"/><path d="M0,{y-17} L15,{y-12} L0,{y-7}Z" fill="{Y}"/>'
+    o = f'<rect x="-28" y="-32" width="56" height="76" rx="6" fill="{W}"/><rect x="-11" y="-40" width="22" height="12" rx="4" fill="{Y if n >= 6 else D}" stroke="{W}" stroke-width="3"/>'
+    ticked = min(max(n - 1, 0), 4)
+    for k in range(4):
+        y = -14 + k * 17
+        if k < ticked:
+            o += f'<rect x="-20" y="{y-6}" width="12" height="12" rx="2.4" fill="{D}"/><path d="M-17.6,{y} l3,3.2 l5,-6" stroke="{W}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+        else:
+            o += f'<rect x="-19" y="{y-5}" width="10" height="10" rx="2.2" fill="none" stroke="{D}" stroke-width="2"/>'
+        o += f'<rect x="-3" y="{y-2}" width="21" height="4.4" rx="2.2" fill="{D}" opacity="{.9 if k < ticked else .35}"/>'
+    if n >= 7:
+        o += f'<g transform="translate(24 38)"><path d="M-8,6 L-12,22 L-4,18 L0,24 L2,8Z M8,6 L12,22 L4,18 L0,24 L-2,8Z" fill="{Y}"/><circle r="12" fill="{Y}" stroke="{W}" stroke-width="2.6"/><path d="M-5,0 l3.6,4 l6,-7.4" stroke="{W}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>'
+    if n == 8: o += star(-38, -34, 8, Y) + star(38, -22, 6, Y) + star(-42, 4, 4.5, W)
     return o
 
 # ردیف ۴: قفسه‌ی کتاب
@@ -92,7 +99,7 @@ def s(n, D):
     if n >= 5:
         for sg in (-1, 1):
             o += ''.join(f'<path d="M{sg*28},{cy+4-i*6} C{sg*36},{cy+2-i*6-4} {sg*44},{cy-i*6-10} {sg*46},{cy-i*6-16}" stroke="{W}" stroke-width="4" fill="none" stroke-linecap="round"/>' for i in range(3))
-    o += f'<circle cx="{cx}" cy="{cy}" r="22" fill="{W}"/>'
+    o += (f'<circle cx="{cx}" cy="{cy}" r="19" fill="none" stroke="{W}" stroke-width="5"/>' if n == 1 else f'<circle cx="{cx}" cy="{cy}" r="22" fill="{W}"/>')
     if n >= 3:
         o += ''.join(f'<ellipse cx="{sg*(27)*math.cos(math.radians(a))}" cy="{cy+27*math.sin(math.radians(a))}" rx="5" ry="2.6" fill="{W}" transform="rotate({sg*(a+90)*1 if sg==1 else -(a+90)+180} {sg*(27)*math.cos(math.radians(a))} {cy+27*math.sin(math.radians(a))})"/>' for sg in (-1, 1) for a in (60, 20, -20, -60)) if False else ''
     if n >= 3:
