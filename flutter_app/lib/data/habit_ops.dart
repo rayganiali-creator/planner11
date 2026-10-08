@@ -18,7 +18,7 @@ String newHabitId([int? nowMs, Random? rnd]) {
 }
 
 class HabitForm {
-  String name = '', createdAt = '';
+  String name = '', createdAt = '', startTime = ''; // startTime: «HH:mm» اختیاری (ساعتِ شروعِ عادت)
   String priority = 'silver', scheduleMode = 'daily', type = 'binary', direction = 'more';
   bool permanent = true, reminderEnabled = false;
   int durationDays = 30;
@@ -33,6 +33,7 @@ class HabitForm {
   HabitForm.from(Map h) {
     name = '${h['name'] ?? ''}';
     createdAt = '${h['createdAt']}';
+    startTime = h['startTime'] is String && RegExp(r'^\d{2}:\d{2}$').hasMatch(h['startTime'] as String) ? h['startTime'] as String : '';
     priority = habitPriorityOf(h['priority']).name;
     scheduleMode = '${h['scheduleMode'] ?? 'daily'}';
     activeDays = [for (final d in (h['activeDays'] is List ? h['activeDays'] as List : const [])) (d as num).toInt()];
@@ -57,6 +58,7 @@ class HabitForm {
     final d = <String, dynamic>{
       'name': name.trim(),
       'createdAt': createdAt,
+      'startTime': startTime,
       'priority': priority,
       'permanent': permanent,
       'endDate': permanent ? null : isoAddDays(createdAt, max(1, durationDays) - 1),

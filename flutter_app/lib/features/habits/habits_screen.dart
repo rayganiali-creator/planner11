@@ -14,6 +14,8 @@ import '../../core/calendar.dart';
 import '../../core/doc.dart';
 import '../../core/habits.dart';
 import '../../core/progress/ledger.dart';
+import '../../core/date_fmt.dart';
+import '../todo/todo_screen.dart' show pickDateTime;
 import '../../data/actions.dart';
 import '../../data/app_store.dart';
 import '../../data/habit_ops.dart';
@@ -497,6 +499,32 @@ class _EditorState extends State<_Editor> {
         RpSheetHeader(widget.editingId == null ? (fa ? 'عادت جدید' : 'New Habit') : (fa ? 'ویرایش عادت' : 'Edit Habit')),
         const SizedBox(height: RpSpace.s3),
         TextField(controller: name, style: rpText(RpType.bodyL, weight: 700, color: p.text), decoration: _dec(fa ? 'نام عادت' : 'Habit name'), onChanged: (v) => f.name = v),
+        _label(fa ? 'شروع عادت' : 'Habit start'),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final cur = isoToDate(f.createdAt);
+            final tp = f.startTime.split(':');
+            final init = DateTime(cur.year, cur.month, cur.day, tp.length == 2 ? (int.tryParse(tp[0]) ?? 8) : 8, tp.length == 2 ? (int.tryParse(tp[1]) ?? 0) : 0);
+            final v = await pickDateTime(context, init.millisecondsSinceEpoch);
+            if (v == null) return;
+            final d = DateTime.fromMillisecondsSinceEpoch(v);
+            setState(() {
+              f.createdAt = dateToISO(d);
+              f.startTime = '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+            });
+          },
+          icon: const Icon(LucideIcons.calendarClock, size: 16),
+          label: Text(() {
+            final d = isoToDate(f.createdAt);
+            final jl = isJalali(context.read<AppStore>().state);
+            final day = dateLabel(d, jalali: jl, fa: fa);
+            return f.startTime.isEmpty ? day : '$day — ${fa ? toPersianDigits(f.startTime) : f.startTime}';
+          }()),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(fa ? 'اگر عادت را چند روز پیش شروع کرده‌ای، تاریخ را عقب ببر؛ بعد می‌توانی روزهای گذشته را در تقویم ثبت کنی.' : 'Started earlier? Move the date back, then log past days from the calendar.', style: rpText(RpType.caption, color: p.muted)),
+        ),
         _label(fa ? 'نوع' : 'Type'),
         _segRow<String>([(fa ? 'انجام / نشد' : 'Yes / No', 'binary'), (fa ? 'عددی' : 'Number', 'numeric'), (fa ? 'زمانی' : 'Timer', 'timer')], f.type, (v) => f.type = v),
         if (f.type == 'numeric') ...[
