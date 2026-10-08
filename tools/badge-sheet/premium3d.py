@@ -3,12 +3,13 @@ import make_sheet as m, illustrated as il
 ROWD={0:'#13295E',1:'#3A2A82',2:'#0F5A43'}
 EXTRA='''<defs><linearGradient id="cham" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFBEF"/><stop offset=".55" stop-color="#F1DDB0"/><stop offset="1" stop-color="#C9A765"/></linearGradient>
 <linearGradient id="gld" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFEFA0"/><stop offset=".5" stop-color="#F4BE3C"/><stop offset="1" stop-color="#B8780C"/></linearGradient>
-<filter id="bev" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="1.7" result="b"/>
+<radialGradient id="glw"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".5"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient><filter id="bev" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="1.7" result="b"/>
 <feSpecularLighting in="b" surfaceScale="3.2" specularConstant="1" specularExponent="18" lighting-color="#ffffff" result="s"><fePointLight x="-30" y="-70" z="80"/></feSpecularLighting>
 <feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/><feComposite in="SourceGraphic" in2="s2" operator="arithmetic" k1="0" k2="1" k3=".9" k4="0" result="m"/>
 <feDropShadow in="m" dx="0" dy="2.2" stdDeviation="1.6" flood-color="#000" flood-opacity=".5"/></filter></defs>'''
 def mat(svg,D):
-    mp={'url(#iPaper)':'url(#cham)','url(#iWax)':'url(#cham)','url(#iSteel)':'url(#cham)','url(#iGold)':'url(#gld)','url(#iSand)':'url(#gld)','url(#iFire)':'url(#gld)','url(#iFire2)':'#FFF6D0','url(#iRed)':'url(#gld)','url(#iBlue)':D,'url(#iBrown)':'url(#cham)','url(#iWood)':'url(#cham)','url(#iGlass)':D,'url(#iGlow)':'none','#14264E':D,'#1b2a49':D,'#5a3a2a':D,'#B97C0A':D,'#C98A0C':'url(#gld)','#D9A21B':'url(#gld)','#6B4126':D,'#E8C79A':'url(#gld)','#F6C443':'url(#gld)','#9aa6c4':D,'#c9d2e8':'#E6D9B8','#8fa0c8':D,'#2EA06A':D,'#E0A33A':'url(#gld)','#EEF1FA':'url(#cham)','#FFF8E6':'url(#cham)','#FFFDF4':'url(#cham)','#FFE9A0':'#FFF4C6','#1a1030':D}
+    mp={'url(#iPaper)':'url(#cham)','url(#iWax)':'url(#cham)','url(#iSteel)':'url(#cham)','url(#iGold)':'url(#gld)','url(#iSand)':'url(#gld)','url(#iFire)':'url(#gld)','url(#iFire2)':'#FFF6D0','url(#iRed)':'url(#gld)','url(#iBlue)':D,'url(#iBrown)':'url(#cham)','url(#iWood)':'url(#cham)','url(#iGlass)':D,'#14264E':D,'#1b2a49':D,'#5a3a2a':D,'#B97C0A':D,'#C98A0C':'url(#gld)','#D9A21B':'url(#gld)','#6B4126':D,'#E8C79A':'url(#gld)','#F6C443':'url(#gld)','#9aa6c4':D,'#c9d2e8':'#E6D9B8','#8fa0c8':D,'#2EA06A':D,'#E0A33A':'url(#gld)','#EEF1FA':'url(#cham)','#FFF8E6':'url(#cham)','#FFFDF4':'url(#cham)','#FFE9A0':'#FFF4C6','#1a1030':D}
+    svg=svg.replace('fill="url(#iGlow)"','fill="url(#glw)" stroke="none"')
     for k,v in mp.items(): svg=svg.replace(k,v)
     svg=svg.replace('stroke-opacity=".38"','stroke-opacity="0"')
     # stroke="url(#..)" ممنوع → رنگ ساده
