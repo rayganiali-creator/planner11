@@ -122,7 +122,9 @@ class ProManager implements BillingService {
       final allIds = {legacyLifetimeProductId, ...proPlans.map((p) => p.id)};
       final owned = res.where((p) => allIds.contains(p['productId'])).toList();
       if (owned.isNotEmpty) {
-        setProFromPurchases([for (final p in owned) {'productId': p['productId'], 'purchaseToken': p['purchaseToken'], 'purchaseTime': p['purchaseTime'] ?? 0}], 'restore');
+        final prevPc = store.state['proCache'];
+        final prev = prevPc is Map && prevPc['purchases'] is List ? prevPc['purchases'] as List : const [];
+        setProFromPurchases(stabilizePurchaseTimes(owned, prev, store.rpNow()), 'restore');
         await checkProExpiry();
         if (store.state['isPremium'] == true) {
           say('✅ خریدت بازیابی شد و پرو فعال است.', '✅ Your purchase was restored and Pro is active.');

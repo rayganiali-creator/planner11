@@ -53,6 +53,30 @@ List<Map> _sortedByTime(List purchases) {
   return [for (final e in idx) e.value];
 }
 
+/// زمانِ خریدِ هر رسید را پایدار می‌کند: بازیابی هرگز تاریخِ خرید را «جلو» نمی‌برد.
+/// - اگر همان رسید (purchaseToken) قبلاً روی گوشی ثبت شده، زمانِ کوچک‌تر (قدیمی‌تر) می‌ماند.
+/// - زمانِ نامعتبر/صفر ← «اولین باری که دیده شد» (الان)، و از آن به بعد ثابت می‌ماند.
+/// - زمانِ آینده به «الان» محدود می‌شود.
+List<Map> stabilizePurchaseTimes(List<Map> restored, List prev, num now) {
+  final known = <String, num>{};
+  for (final p in prev) {
+    if (p is! Map) continue;
+    final t = _time(p['purchaseTime']);
+    final k = '${p['purchaseToken']}';
+    if (t > 0 && p['purchaseToken'] != null) known[k] = known.containsKey(k) && known[k]! < t ? known[k]! : t;
+  }
+  return [
+    for (final p in restored)
+      () {
+        num t = _time(p['purchaseTime']);
+        if (t <= 0 || t > now) t = now;
+        final old = known['${p['purchaseToken']}'];
+        if (old != null && old < t) t = old;
+        return {'productId': p['productId'], 'purchaseToken': p['purchaseToken'], 'purchaseTime': t};
+      }()
+  ];
+}
+
 typedef ProWindow = ({bool lifetime, num? expiresAt, List<Map> list});
 
 /// هر پلنِ تازه از «انتهای پلنِ قبلی» شروع می‌شود، نه از امروز.
