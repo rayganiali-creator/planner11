@@ -105,16 +105,32 @@ extension HabitOps on AppActions {
     if (f.scheduleMode == 'custom' && f.activeDays.isEmpty) return null;
     final d = f.toMap();
     String id;
+    final today = todayISO;
     if (editingId == null) {
       id = newHabitId();
-      (store.state['habits'] as List).add({'id': id, ...d});
+      final nh = <String, dynamic>{'id': id, ...d};
+      // شروعِ گذشته: روزهای از «شروع» تا «دیروز» برای زنجیره انجام‌شده فرض می‌شود
+      if (f.createdAt.compareTo(today) < 0) nh['assumedTo'] = isoAddDays(today, -1);
+      (store.state['habits'] as List).add(nh);
     } else {
       id = editingId;
       final h = _habits.where((x) => x['id'] == id).firstOrNull;
       if (h != null) {
         freezeHabitRecordTargets(store.state, h); // هدفِ قدیمی روی رکوردهای گذشته قفل می‌شود
         if (!d.containsKey('weeklyGoal')) h.remove('weeklyGoal');
+        final oldStart = '${h['createdAt']}';
         h.addAll(d);
+        // شروع را به گذشته‌تر برده: بازه‌ی تازه (تا یک روز پیش از شروعِ قبلی) هم انجام‌شده فرض می‌شود
+        // عادتِ بدونِ هیچ رکورد که شروعش در گذشته است (مثلاً با نسخه‌ی قدیمی ثبت شده): همین قاعده
+        final recs = store.state['records'];
+        final hasRecords = recs is Map && recs.values.any((day) => day is Map && day.containsKey(id));
+        if (!h.containsKey('assumedTo') && !hasRecords && f.createdAt.compareTo(today) < 0) {
+          h['assumedTo'] = isoAddDays(today, -1);
+        } else if (f.createdAt.compareTo(oldStart) < 0) {
+          final gapEnd = isoAddDays(oldStart, -1);
+          final prev = h['assumedTo'];
+          h['assumedTo'] = (prev is String && prev.compareTo(gapEnd) > 0) ? prev : gapEnd;
+        }
       }
     }
     store.save();

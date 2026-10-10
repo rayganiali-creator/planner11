@@ -123,7 +123,8 @@ class _HabitCardState extends State<_HabitCard> {
     final id = habit['id'] as String;
     final xp = validEvents(st, type: 'habit').where((e) => e['sourceId'] == id).fold<int>(0, (a, e) => a + (e['amount'] as int));
     final streak = computeHabitStreak(st, habit, now);
-    final best = computeHabitBestRecord(st, habit);
+    final bestRaw = computeHabitBestRecord(st, habit);
+    final best = (habit['type'] == null || habit['type'] == 'binary') && bestRaw != null ? (bestRaw > streak ? bestRaw : streak) : bestRaw;
     final applies = habitAppliesOnISO(habit, iso);
     final ok = habitSuccessOnISO(st, habit, iso);
     final type = habit['type'];

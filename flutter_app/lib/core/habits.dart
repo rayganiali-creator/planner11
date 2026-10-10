@@ -194,6 +194,14 @@ int computeHabitStreak(Doc state, Map h, DateTime today) {
       d = addDays(d, -1);
       continue;
     }
+    // عادتی که با تاریخِ شروعِ گذشته ثبت شده: روزهای بی‌رکوردِ بین «شروع» و «روزِ ثبت» انجام‌شده حساب می‌شوند
+    // (فقط برای زنجیره‌ی همین عادت؛ XP و آمارِ کلی از رکوردهای واقعی می‌آیند). رکوردِ «نشد» همچنان زنجیره را می‌شکند.
+    final assumedTo = h['assumedTo'];
+    if (r == null && assumedTo is String && iso.compareTo(assumedTo) <= 0) {
+      streak++;
+      d = addDays(d, -1);
+      continue;
+    }
     if (r == null && iso == todayISO) {
       d = addDays(d, -1);
       continue;
