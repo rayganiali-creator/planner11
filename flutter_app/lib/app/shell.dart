@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +22,7 @@ import '../features/journal/journal_screen.dart';
 import '../features/progress/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/progress/reveal.dart';
+import '../features/rating/rate_prompt.dart';
 import '../features/library/library_screen.dart';
 import '../features/pomodoro/pomodoro_screen.dart';
 import '../features/purchases/purchases_screen.dart';
@@ -113,7 +113,7 @@ class _ShellState extends State<Shell> {
       canPop: false, // Back اندروید را خودمان با همان ترتیبِ نسخه‌ی HTML مدیریت می‌کنیم
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        if (!nav.handleBack()) SystemNavigator.pop();
+        if (!nav.handleBack()) askReviewOrExit(context);
       },
       child: Scaffold(
         // نوار ناوبری محتوا را نمی‌پوشاند: بدنه بالای آن تمام می‌شود و آخرِ هر صفحه همیشه دیده می‌شود

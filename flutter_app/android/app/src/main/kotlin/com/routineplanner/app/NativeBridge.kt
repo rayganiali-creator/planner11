@@ -55,7 +55,26 @@ class NativeBridge(private val activity: ComponentActivity, messenger: BinaryMes
             "consume" -> consume(call, result)
             "getPurchasedProducts" -> getPurchased(result)
             "saveToDownloads" -> saveToDownloads(call, result)
+            "openReview" -> openReview(result)
             else -> result.notImplemented()
+        }
+    }
+
+    // صفحه‌ی ثبتِ نظرِ همین برنامه در کافه‌بازار (بدونِ مجوزِ اضافه)؛ اگر بازار نبود، صفحه‌ی وب
+    private fun openReview(result: MethodChannel.Result) {
+        val pkg = activity.packageName
+        try {
+            val i = android.content.Intent(android.content.Intent.ACTION_EDIT, android.net.Uri.parse("bazaar://details?id=$pkg"))
+            i.setPackage("com.farsitel.bazaar")
+            activity.startActivity(i)
+            result.success(mapOf("opened" to true))
+        } catch (e: Exception) {
+            try {
+                activity.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://cafebazaar.ir/app/$pkg")))
+                result.success(mapOf("opened" to true))
+            } catch (e2: Exception) {
+                result.error("no_bazaar", "کافه‌بازار باز نشد", null)
+            }
         }
     }
 
