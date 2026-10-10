@@ -167,8 +167,8 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class AppVersion {
-  static const name = '2.6.6'; // باید با pubspec.yaml یکی باشد (تست می‌کند)
-  static const code = 131;
+  static const name = '2.6.7'; // باید با pubspec.yaml یکی باشد (تست می‌کند)
+  static const code = 132;
 }
 
 /// ردیفِ رنگ‌های آماده (بدون انتخابگرِ آزادِ رنگ)
