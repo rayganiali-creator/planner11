@@ -9,13 +9,19 @@ import 'package:provider/provider.dart';
 import '../../app/i18n.dart';
 import '../../core/calendar.dart';
 import '../../data/app_store.dart';
+import '../../data/store_info.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 
 class AppTexts {
   final Map raw;
   AppTexts(this.raw);
-  static Future<AppTexts> load() async => AppTexts(jsonDecode(await rootBundle.loadString('assets/texts.json')) as Map);
+  static Future<AppTexts> load() async {
+    var raw = await rootBundle.loadString('assets/texts.json');
+    // نسخه‌ی مایکت: نامِ فروشگاه در قوانین/راهنما «مایکت» شود
+    if (isMyket) raw = raw.replaceAll('کافه‌بازار', 'مایکت').replaceAll('Cafe Bazaar', 'Myket');
+    return AppTexts(jsonDecode(raw) as Map);
+  }
   List<Map> get onboarding => (raw['onboarding'] as List).cast<Map>();
   List<Map> get terms => (raw['terms'] as List).cast<Map>();
   Map get help => raw['help'] as Map;

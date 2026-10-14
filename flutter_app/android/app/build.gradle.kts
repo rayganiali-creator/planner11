@@ -30,6 +30,19 @@ android {
         versionName = flutter.versionName
     }
 
+    // دو فروشگاه، دو APK: bazaar (Poolakey) و myket (myket-billing-client). بستهٔ نرم‌افزار و کلیدِ امضا یکی است.
+    flavorDimensions += "store"
+    productFlavors {
+        create("bazaar") { dimension = "store" }
+        create("myket") {
+            dimension = "store"
+            // جای‌نگهدارهای مانیفستِ کتابخانه‌ی مایکت
+            manifestPlaceholders["marketApplicationId"] = "ir.mservices.market"
+            manifestPlaceholders["marketBindAddress"] = "ir.mservices.market.InAppBillingService.BIND"
+            manifestPlaceholders["marketPermission"] = "ir.mservices.market.BILLING"
+        }
+    }
+
     // ===== امضای نسخه‌ی نهایی =====
     // همان کلید و همان متغیرهای محیطی (GitHub Secrets) نسخه‌ی Capacitor؛ بدون این،
     // بازار آپدیت را روی نسخه‌ی نصب‌شده نمی‌پذیرد. رمز و کلید هرگز داخل کد نیست.
@@ -64,8 +77,9 @@ kotlin {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
-    // پرداخت کافه‌بازار (همان نسخه‌ی Capacitor)
-    implementation("com.github.cafebazaar.Poolakey:poolakey:2.2.0")
+    // پرداخت: هر فروشگاه فقط کتابخانه‌ی خودش را در APK دارد
+    "bazaarImplementation"("com.github.cafebazaar.Poolakey:poolakey:2.2.0")
+    "myketImplementation"("com.github.myketstore:myket-billing-client:1.19")
 }
 
 flutter {

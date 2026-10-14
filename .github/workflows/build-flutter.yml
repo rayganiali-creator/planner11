@@ -47,18 +47,32 @@ jobs:
         env:
           TZ: Europe/Berlin
 
-      - name: Build APK (آزمایشی، امضای debug)
+      # دو فروشگاه، دو APK (فلیور): bazaar و myket
+      - name: Build APK (آزمایشی، امضای debug) — بازار
         if: ${{ !inputs.release }}
-        run: flutter build apk --debug
+        run: flutter build apk --debug --flavor bazaar
+
+      - name: Build APK (آزمایشی، امضای debug) — مایکت
+        if: ${{ !inputs.release }}
+        run: flutter build apk --debug --flavor myket
 
       - name: Restore keystore (فقط release)
         if: ${{ inputs.release }}
         working-directory: flutter_app/android/app
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > routineplanner.jks
 
-      - name: Build APK (release، امضای واقعی)
+      - name: Build APK (release، امضای واقعی) — بازار
         if: ${{ inputs.release }}
-        run: flutter build apk --release
+        run: flutter build apk --release --flavor bazaar
+        env:
+          RP_STORE_FILE: routineplanner.jks
+          RP_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RP_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RP_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Build APK (release، امضای واقعی) — مایکت
+        if: ${{ inputs.release }}
+        run: flutter build apk --release --flavor myket
         env:
           RP_STORE_FILE: routineplanner.jks
           RP_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -69,12 +83,21 @@ jobs:
         if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-PREVIEW-debug-apk-NOT-FOR-STORE
-          path: flutter_app/build/app/outputs/flutter-apk/app-debug.apk
+          name: flutter-PREVIEW-debug-apks-NOT-FOR-STORE
+          path: |
+            flutter_app/build/app/outputs/flutter-apk/app-bazaar-debug.apk
+            flutter_app/build/app/outputs/flutter-apk/app-myket-debug.apk
 
-      - name: Upload (release)
+      - name: Upload (release) — بازار
         if: ${{ inputs.release }}
         uses: actions/upload-artifact@v4
         with:
           name: flutter-release-apk
-          path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-bazaar-release.apk
+
+      - name: Upload (release) — مایکت
+        if: ${{ inputs.release }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-release-apk-myket
+          path: flutter_app/build/app/outputs/flutter-apk/app-myket-release.apk

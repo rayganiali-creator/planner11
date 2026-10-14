@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/i18n.dart';
 import '../../data/app_store.dart';
+import '../../data/store_info.dart';
 import '../../ui/tokens.dart';
 
 const _channel = MethodChannel('rp/native');
@@ -43,7 +44,7 @@ Future<void> askReviewOrExit(BuildContext context, {Future<bool> Function()? ope
       ]),
       title: Text(context.tr('از روتین پلنر راضی بودی؟', 'Enjoying Routine Planner?'), textAlign: TextAlign.center, style: rpText(RpType.titleL, weight: 800, color: p.text)),
       content: Text(
-        context.tr('اگه این برنامه به منظم‌تر شدن روزهات کمک کرده، یه نظر و ۵ ستاره توی کافه‌بازار بزرگ‌ترین هدیه‌ایه که می‌تونی به ما بدی؛ فقط چند ثانیه وقت می‌گیره و به ما انگیزه می‌ده بهترش کنیم. 💛', 'If it helped you keep your days in order, a 5-star review on Cafe Bazaar is the best gift you can give us. It takes just a few seconds.'),
+        context.tr('اگه این برنامه به منظم‌تر شدن روزهات کمک کرده، یه نظر و ۵ ستاره توی $storeFa بزرگ‌ترین هدیه‌ایه که می‌تونی به ما بدی؛ فقط چند ثانیه وقت می‌گیره و به ما انگیزه می‌ده بهترش کنیم. 💛', 'If it helped you keep your days in order, a 5-star review on $storeEn is the best gift you can give us. It takes just a few seconds.'),
         textAlign: TextAlign.center,
         style: rpText(RpType.body, weight: 500, color: p.muted),
       ),

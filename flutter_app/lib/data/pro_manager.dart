@@ -7,6 +7,7 @@ import '../core/pro.dart';
 import 'app_store.dart';
 import 'billing.dart';
 import 'native_api.dart';
+import 'store_info.dart';
 import 'notifier.dart';
 
 String purchaseErrorMessage(Object e, bool fa) {
@@ -14,11 +15,11 @@ String purchaseErrorMessage(Object e, bool fa) {
   if (code == 'cancelled') return fa ? 'خرید لغو شد.' : 'Purchase cancelled.';
   if (code == 'connection_failed' || code == 'not_connected') {
     return fa
-        ? 'اتصال به کافه‌بازار برقرار نشد. مطمئن شوید برنامه‌ی کافه‌بازار روی گوشی نصب است، وارد حساب شده‌اید و اینترنت دارید.'
-        : 'Could not connect to Cafe Bazaar. Make sure the Bazaar app is installed, you are signed in, and you are online.';
+        ? 'اتصال به $storeFa برقرار نشد. مطمئن شوید برنامه‌ی $storeFa روی گوشی نصب است، وارد حساب شده‌اید و اینترنت دارید.'
+        : 'Could not connect to $storeEn. Make sure the $storeEn app is installed, you are signed in, and you are online.';
   }
-  if (code == 'failed_to_begin') return fa ? 'صفحه‌ی پرداخت کافه‌بازار باز نشد. کمی بعد دوباره امتحان کنید.' : "Cafe Bazaar's payment page could not be opened. Please try again shortly.";
-  if (RegExp(r'not.?found|sku|product|item', caseSensitive: false).hasMatch(code)) return fa ? 'این پلن هنوز در کافه‌بازار فعال نشده است.' : 'This plan is not available on Cafe Bazaar yet.';
+  if (code == 'failed_to_begin') return fa ? 'صفحه‌ی پرداخت $storeFa باز نشد. کمی بعد دوباره امتحان کنید.' : "$storeEn's payment page could not be opened. Please try again shortly.";
+  if (RegExp(r'not.?found|sku|product|item', caseSensitive: false).hasMatch(code)) return fa ? 'این پلن هنوز در $storeFa فعال نشده است.' : 'This plan is not available on $storeEn yet.';
   return fa ? 'خرید انجام نشد. لطفاً دوباره تلاش کنید.' : 'Purchase failed. Please try again.';
 }
 
@@ -142,12 +143,12 @@ class ProManager implements BillingService {
         if (store.state['isPremium'] == true) {
           say('پرو فعال است.', 'Pro is active.');
         } else {
-          say('خرید فعالی در حساب کافه‌بازارِ این گوشی پیدا نشد.', 'No active purchase was found on this Cafe Bazaar account.');
+          say('خرید فعالی در حساب $storeFaِ این گوشی پیدا نشد.', 'No active purchase was found on this $storeEn account.');
         }
       }
     } catch (e) {
       await checkProExpiry(); // آفلاین: کشِ معتبر + ساعتِ مطمئن
-      say('بازیابی انجام نشد. مطمئن شو برنامه‌ی کافه‌بازار نصب است، وارد حساب شده‌ای و اینترنت داری.', 'Restore failed. Make sure Cafe Bazaar is installed, you are signed in, and you are online.');
+      say('بازیابی انجام نشد. مطمئن شو برنامه‌ی $storeFa نصب است، وارد حساب شده‌ای و اینترنت داری.', 'Restore failed. Make sure $storeEn is installed, you are signed in, and you are online.');
     }
   }
 }
