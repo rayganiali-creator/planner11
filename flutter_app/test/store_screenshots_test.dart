@@ -72,11 +72,15 @@ void _seed(AppStore s, AppActions a) {
 void main() {
   final on = Platform.environment['STORE_SHOTS'] == '1';
   Future<void> shot(WidgetTester tester, String name, AppView v, {String theme = 'light', String accent = 'emerald', Future<void> Function(WidgetTester)? after}) async {
-    final (_, _, _) = await boot(tester, view: v, size: const Size(1080, 2160), prep: (s, a) {
+    final (_, _, _) = await boot(tester, view: v, size: const Size(1080, 1920), prep: (s, a) {
       s.state['theme'] = theme;
       s.state['accentTheme'] = accent;
       _seed(s, a);
     });
+    // ۱۶:۹ (طرحِ ۳۶۰×۶۴۰) با تراکمِ ۴٫۶ ← ۱۶۵۶×۲۹۴۴ پیکسل (کمتر از ۳۰۰۰)
+    tester.view.devicePixelRatio = 4.6;
+    tester.view.physicalSize = const Size(1656, 2944);
+    await tester.pump(const Duration(milliseconds: 200));
     for (int i = 0; i < 3; i++) {
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
       await tester.pump(const Duration(milliseconds: 150));
