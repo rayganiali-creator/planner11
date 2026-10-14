@@ -11,7 +11,7 @@ import ir.myket.billingclient.util.Purchase
 class StoreBillingImpl(private val activity: ComponentActivity) : StoreBilling {
     companion object {
         // کلید «عمومی» RSA پنل مایکت (بخش «پرداخت درون‌برنامه‌ای» ← کلید RSA). افشای آن خطری ندارد.
-        private const val MYKET_RSA_KEY = ""
+        private const val MYKET_RSA_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCNYKVozyadfP1pkRDcvvhZ1E5LSjuwhm40+ExlAEH2jT+HSYg00H4c0ghPglXBNMivgkp3Z8CwoFtoxD4xqCnctNwW5y+/AIdm0HReKK/MhVZJ3UcAd5JSf+Sh9jGZDQ1n54Hv8Oxm2Fv25gVEXKXN1tIh95mxHcyoVmablW08kQIDAQAB"
         private const val MYKET_PACKAGE = "ir.mservices.market"
     }
 
