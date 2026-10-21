@@ -6,6 +6,7 @@ import '../onboarding/onboarding.dart';
 
 import '../../app/i18n.dart';
 import '../../core/date_fmt.dart';
+import '../../core/calendar.dart' show toPersianDigits;
 import '../../core/pro.dart';
 import '../../data/app_store.dart';
 import '../../app/toast.dart';
@@ -14,6 +15,7 @@ import '../../data/owner_unlock.dart';
 import '../../ui/tokens.dart';
 import '../../ui/pro_widgets.dart';
 import '../../ui/widgets.dart';
+import '../../data/store_info.dart';
 
 String purDateLabel(num? ts, {required bool fa, required bool jalali, bool withTime = false}) {
   if (ts == null || ts == 0) return '—';
@@ -36,6 +38,15 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
   OwnerUnlock? _owner;
 
   String? busy;
+
+  @override
+  void initState() {
+    super.initState();
+    // قیمتِ پلن‌ها از خودِ فروشگاه (مایکت) تا با درگاهِ پرداخت یکی باشد
+    refreshStorePrices([for (final p in proPlans) p.id]).then((_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +245,7 @@ class _PlanRow extends StatelessWidget {
               Text(fa ? plan.labelFa : plan.labelEn, style: rpText(RpType.bodyL, weight: 800, color: p.text)),
               if (best) RpChip(context.tr('به‌صرفه‌ترین', 'Best value'), tone: ChipTone.gold),
             ]),
-            Text(fa ? plan.priceFa : plan.priceEn, style: rpText(RpType.body, weight: 700, color: p.primary)),
+            Text(planPriceText(plan, fa), style: rpText(RpType.body, weight: 700, color: p.primary)),
             Text('+ ${context.n(dd)} ${context.tr('روز', 'days')}', style: rpText(RpType.label, weight: 600, color: p.muted)),
             Text(owned ? context.tr('همین حالا در پلن توست', 'already in your plan') : '${context.tr('تا ', 'until ')}$until', style: rpText(RpType.label, weight: 500, color: p.muted)),
           ]),
@@ -279,7 +290,7 @@ class _HistoryItem extends StatelessWidget {
       col = p.blueInk;
     }
     final name = x.plan != null ? (fa ? x.plan!.labelFa : x.plan!.labelEn) : x.lifetime ? context.tr('نسخه‌ی همیشگی', 'Lifetime unlock') : '${x.p['productId'] ?? '—'}';
-    final price = x.plan != null ? ' · ${fa ? x.plan!.priceFa : x.plan!.priceEn}' : '';
+    final price = x.plan != null ? ' · ${planPriceText(x.plan!, fa)}' : '';
     final tok = '${x.p['purchaseToken'] ?? ''}';
     return Padding(
       padding: const EdgeInsets.only(bottom: RpSpace.s2),
@@ -302,4 +313,11 @@ class _HistoryItem extends StatelessWidget {
       ),
     );
   }
+}
+
+/// قیمتِ نمایشیِ پلن: اگر فروشگاه قیمت داده همان، وگرنه قیمتِ ثبت‌شده در برنامه.
+String planPriceText(ProPlan plan, bool fa) {
+  final v = storePrices[plan.id];
+  if (v == null || v.isEmpty) return fa ? plan.priceFa : plan.priceEn;
+  return fa ? toPersianDigits(v) : v;
 }

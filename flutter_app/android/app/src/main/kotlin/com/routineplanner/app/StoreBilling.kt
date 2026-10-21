@@ -11,5 +11,7 @@ interface StoreBilling {
     fun consume(token: String, result: MethodChannel.Result)
     fun getPurchased(result: MethodChannel.Result)
     fun openReview(result: MethodChannel.Result)
+    // قیمتِ محصولات از خودِ فروشگاه (تا قیمتِ داخلِ برنامه همیشه با درگاهِ پرداخت یکی باشد)
+    fun getPrices(skus: List<String>, result: MethodChannel.Result)
     fun dispose()
 }

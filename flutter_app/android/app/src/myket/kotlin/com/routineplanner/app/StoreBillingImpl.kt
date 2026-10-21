@@ -105,6 +105,18 @@ class StoreBillingImpl(private val activity: ComponentActivity) : StoreBilling {
         }
     }
 
+    // قیمتِ هر محصول از خودِ مایکت (همان رقمی که در درگاه پرداخت دیده می‌شود)
+    override fun getPrices(skus: List<String>, result: MethodChannel.Result) {
+        val h = helper
+        if (h == null || !ready) { result.error("not_connected", "ابتدا باید connect صدا زده شود", null); return }
+        h.queryInventoryAsync(true, skus) { qr, inv ->
+            if (!qr.isSuccess) { result.error("query_failed", qr.message, null); return@queryInventoryAsync }
+            val out = HashMap<String, String>()
+            for (sku in skus) { val d = inv?.getSkuDetails(sku); if (d != null) out[sku] = d.price }
+            result.success(out)
+        }
+    }
+
     // صفحه‌ی ثبتِ نظرِ همین برنامه در مایکت؛ اگر نشد، صفحه‌ی وب
     override fun openReview(result: MethodChannel.Result) {
         val pkg = activity.packageName

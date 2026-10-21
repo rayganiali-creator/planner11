@@ -24,11 +24,16 @@ void main() {
 
 Future<void> _main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await loadStoreId(); // فروشگاهِ این بیلد (برای مجوزها و متن‌ها)
   LicenseRegistry.addLicense(() async* {
     yield const LicenseEntryWithLineBreaks(['Vazirmatn font'], 'Copyright 2015-2024 The Vazirmatn Project Authors (https://github.com/rastikerdar/vazirmatn). Licensed under the SIL Open Font License, Version 1.1 (https://openfontlicense.org).');
     yield const LicenseEntryWithLineBreaks(['Lucide icons'], 'Lucide is licensed under the ISC License (https://lucide.dev/license).');
-    yield const LicenseEntryWithLineBreaks(['Cafe Bazaar Poolakey'], 'Licensed under the Apache License, Version 2.0 (https://github.com/cafebazaar/Poolakey).');
-    yield const LicenseEntryWithLineBreaks(['Myket Billing Client'], 'Myket in-app billing client (https://github.com/MyketStore/myket-billing-client).');
+    // فقط کتابخانه‌ی فروشگاهِ همین بیلد (در نسخه‌ی مایکت نامی از بازار نیست)
+    if (isMyket) {
+      yield const LicenseEntryWithLineBreaks(['Myket Billing Client'], 'Myket in-app billing client (https://github.com/MyketStore/myket-billing-client).');
+    } else {
+      yield const LicenseEntryWithLineBreaks(['Cafe Bazaar Poolakey'], 'Licensed under the Apache License, Version 2.0 (https://github.com/cafebazaar/Poolakey).');
+    }
   });
   final prevOnError = FlutterError.onError;
   FlutterError.onError = (d) {
@@ -46,7 +51,6 @@ Future<void> _main() async {
   } catch (e) {
     debugPrint('initial render failed: $e'); // داده‌ی خراب نباید جلوی بالا آمدنِ برنامه را بگیرد
   }
-  await loadStoreId();
   final texts = await AppTexts.load();
   final native = ChannelNativeApi();
   final media = MediaStore('${dir.path}/media');

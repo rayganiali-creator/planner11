@@ -43,6 +43,7 @@ class NativeBridge(private val activity: ComponentActivity, messenger: BinaryMes
             "getPurchasedProducts" -> billing.getPurchased(result)
             "saveToDownloads" -> saveToDownloads(call, result)
             "openReview" -> billing.openReview(result)
+            "getPrices" -> billing.getPrices(call.argument<List<String>>("skus") ?: emptyList(), result)
             else -> result.notImplemented()
         }
     }

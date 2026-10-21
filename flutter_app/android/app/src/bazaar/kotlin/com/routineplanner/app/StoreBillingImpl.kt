@@ -97,4 +97,9 @@ class StoreBillingImpl(private val activity: ComponentActivity) : StoreBilling {
             queryFailed { t -> result.error("query_failed", t.message ?: "query failed", null) }
         }
     }
+
+    // نسخه‌ی بازار قیمت را از مقدارهای ثبت‌شده‌ی برنامه نشان می‌دهد (باید با پنل بازار یکی باشد)
+    override fun getPrices(skus: List<String>, result: MethodChannel.Result) {
+        result.error("unsupported", "prices not queried on this store", null)
+    }
 }
