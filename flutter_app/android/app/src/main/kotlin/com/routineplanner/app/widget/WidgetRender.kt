@@ -168,7 +168,7 @@ object WidgetRender {
         // درخششِ ملایمِ رنگِ تم در گوشه‌ی شروع
         val gx = if (rtl) w.toFloat() else 0f
         val glow = paint()
-        glow.shader = RadialGradient(gx, 0f, w * 0.75f, Color.argb(46, Color.red(pal.accent2), Color.green(pal.accent2), Color.blue(pal.accent2)), Color.TRANSPARENT)
+        glow.shader = RadialGradient(gx, 0f, w * 0.75f, Color.argb(46, Color.red(pal.accent2), Color.green(pal.accent2), Color.blue(pal.accent2)), Color.TRANSPARENT, Shader.TileMode.CLAMP)
         cv.save()
         val clip = Path().apply { addRoundRect(rect, radius, radius, Path.Direction.CW) }
         cv.clipPath(clip)
