@@ -28,6 +28,9 @@ class AppStore extends ChangeNotifier {
   bool recoveredFromBackup = false;
   String? quarantinedCorruptFile;
 
+  /// قلابِ بعد از هر بارگذاری/ذخیره (در main ست می‌شود: تازه‌سازیِ ویجت صفحه‌ی اصلی).
+  void Function()? onSaved;
+
   AppStore(String path, {NowMs? nowMs})
       : _file = AtomicFile(path),
         _now = nowMs ?? (() => DateTime.now().millisecondsSinceEpoch);
@@ -59,6 +62,7 @@ class AppStore extends ChangeNotifier {
     // همان کاری که JS می‌کند: اگر نرمال‌سازی چیزی را تعمیر کرد، همان‌جا بنویس تا دفعه‌ی بعد سالم بالا بیاید
     if (loaded.repaired && r.text != null) _file.write(jsonStringify(state));
     notifyListeners();
+    onSaved?.call();
   }
 
   /// معادلِ saveState(): false یعنی روی دیسک ننشست (مثلاً حافظه پر است).
@@ -73,6 +77,7 @@ class AppStore extends ChangeNotifier {
     final ok = _file.write(jsonStringify(state));
     lastSaveFailed = !ok;
     notifyListeners();
+    onSaved?.call();
     return ok;
   }
 
