@@ -44,6 +44,15 @@ class NativeBridge(private val activity: ComponentActivity, messenger: BinaryMes
             "saveToDownloads" -> saveToDownloads(call, result)
             "openReview" -> billing.openReview(result)
             "getPrices" -> billing.getPrices(call.argument<List<String>>("skus") ?: emptyList(), result)
+            "updateWidget" -> {
+                // اسنپ‌شاتِ ویجت از Dart می‌رسد (lib/data/widget_sync.dart)؛ ذخیره و تازه‌سازیِ ویجت‌ها.
+                val json = call.argument<String>("json")
+                if (json != null) {
+                    com.routineplanner.app.widget.WidgetStore.save(activity, json)
+                    com.routineplanner.app.widget.WidgetRender.updateAll(activity)
+                }
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }

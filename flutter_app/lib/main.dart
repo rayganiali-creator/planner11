@@ -15,6 +15,7 @@ import 'data/media_store.dart';
 import 'data/native_api.dart';
 import 'data/pro_manager.dart';
 import 'data/store_info.dart';
+import 'data/widget_sync.dart';
 import 'features/onboarding/onboarding.dart';
 
 void main() {
@@ -44,6 +45,9 @@ Future<void> _main() async {
   // پوشه‌ی خصوصیِ برنامه (همان `files/` اندروید): از برنامه‌های دیگر قابل خواندن نیست.
   final dir = await getApplicationSupportDirectory();
   final store = AppStore('${dir.path}/state.json')..load();
+  // ویجت صفحه‌ی اصلی با هر ذخیره تازه می‌شود (+ همین حالا یک بار برای شروع).
+  store.onSaved = () => WidgetSync.push(store);
+  WidgetSync.push(store);
   final toasts = ToastBus();
   final actions = AppActions(store, toasts);
   try {

@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">روتین پلنر</string>
+    <string name="widget_medium_desc">عادت‌های امروز، ساعت هر کدام و پیشرفت روز — با رنگِ تمِ برنامه</string>
+    <string name="widget_small_desc">حلقه‌ی پیشرفتِ امروز و روزهای پیاپی</string>
 </resources>
