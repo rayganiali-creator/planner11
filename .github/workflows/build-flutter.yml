@@ -1,0 +1,103 @@
+name: Build Flutter (migration)
+
+# نسخه‌ی Flutter هنوز در حال Migration است و با نسخه‌ی منتشرشده (build-android.yml) کاری ندارد.
+# - هر push روی flutter_app/** : تحلیل + تست + APK «آزمایشی» (امضای debug؛ برای فروشگاه نیست).
+# - اجرای دستی با release=true یا پوش کامیتی با ‎[release-apk]‎ در پیام: APK امضاشده با کلید واقعی (بازار و مایکت).
+on:
+  push:
+    paths:
+      - 'flutter_app/**'
+      - '.github/workflows/build-flutter.yml'
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'APK امضاشده با کلید واقعی (برای بازار) بساز؟'
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.5'
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      # منطقه‌ی زمانی با DST: همان‌جایی که خروجی‌های طلایی‌ی JS ساخته شده‌اند
+      - name: Test (تفاضلی با JS)
+        run: flutter test
+        env:
+          TZ: Europe/Berlin
+
+      # دو فروشگاه، دو APK (فلیور): bazaar و myket
+      - name: Build APK (آزمایشی، امضای debug) — بازار
+        if: ${{ !inputs.release && !contains(github.event.head_commit.message, '[release-apk]') }}
+        run: flutter build apk --debug --flavor bazaar
+
+      - name: Build APK (آزمایشی، امضای debug) — مایکت
+        if: ${{ !inputs.release && !contains(github.event.head_commit.message, '[release-apk]') }}
+        run: flutter build apk --debug --flavor myket
+
+      - name: Restore keystore (فقط release)
+        if: ${{ inputs.release || contains(github.event.head_commit.message, '[release-apk]') }}
+        working-directory: flutter_app/android/app
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > routineplanner.jks
+
+      - name: Build APK (release، امضای واقعی) — بازار
+        if: ${{ inputs.release || contains(github.event.head_commit.message, '[release-apk]') }}
+        run: flutter build apk --release --flavor bazaar
+        env:
+          RP_STORE_FILE: routineplanner.jks
+          RP_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RP_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RP_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Build APK (release، امضای واقعی) — مایکت
+        if: ${{ inputs.release || contains(github.event.head_commit.message, '[release-apk]') }}
+        run: flutter build apk --release --flavor myket
+        env:
+          RP_STORE_FILE: routineplanner.jks
+          RP_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          RP_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          RP_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Upload (آزمایشی)
+        if: ${{ !inputs.release && !contains(github.event.head_commit.message, '[release-apk]') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-PREVIEW-debug-apks-NOT-FOR-STORE
+          path: |
+            flutter_app/build/app/outputs/flutter-apk/app-bazaar-debug.apk
+            flutter_app/build/app/outputs/flutter-apk/app-myket-debug.apk
+
+      - name: Upload (release) — بازار
+        if: ${{ inputs.release || contains(github.event.head_commit.message, '[release-apk]') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-release-apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-bazaar-release.apk
+
+      - name: Upload (release) — مایکت
+        if: ${{ inputs.release || contains(github.event.head_commit.message, '[release-apk]') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-release-apk-myket
+          path: flutter_app/build/app/outputs/flutter-apk/app-myket-release.apk
